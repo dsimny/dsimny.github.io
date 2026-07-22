@@ -4,17 +4,19 @@
    "date": "2026-07-22",
    "mode": "pick",
    "result": "posted",
-   "http_status": 204,
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
    "detail": "",
-   "at_utc": "2026-07-22T18:35:00Z"
+   "at_utc": "2026-07-22T18:48:37Z"
   },
   {
    "date": "2026-07-22",
    "mode": "board",
    "result": "posted",
-   "http_status": 204,
+   "http_status": 200,
+   "channel_id": "1529354298436354048",
    "detail": "",
-   "at_utc": "2026-07-22T18:35:00Z"
+   "at_utc": "2026-07-22T18:48:38Z"
   }
  ]
 }

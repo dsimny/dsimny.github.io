@@ -260,8 +260,8 @@ def scratch_card(s):
 # "join" button. Deliberately makes no promise about record or profit.
 join_block = f'''
     <div class="join">
-      <p class="joinlead">The held plays go out in the Discord before first pitch.</p>
-      <p class="joinsub">Every one of them lands on the public ledger afterwards either way, win or lose. The ledger is the pitch; go read it before you decide we are worth following.</p>
+      <p class="joinlead">The free pick lands in Discord every morning before first pitch.</p>
+      <p class="joinsub">Every graded result follows it, win or lose. A members channel for the rest of the board opens once the ledger has a record worth charging for; join now and you will be there when it does. The ledger is the pitch, so go read it before you decide we are worth following.</p>
       <a class="joinbtn" href="{DISCORD_INVITE}" rel="noopener">Join the Discord</a>
     </div>''' if DISCORD_INVITE else ""
 

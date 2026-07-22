@@ -33,6 +33,11 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
           SITE_URL: ${{ vars.SITE_URL }}                            # optional
         run: python scripts/post_discord.py pick
+      - name: Post held plays to the members channel
+        env:
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # optional
+          SITE_URL: ${{ vars.SITE_URL }}                                            # optional
+        run: python scripts/post_discord.py board
       - name: Commit board and site
         run: |
           git config user.name "openledger-bot"

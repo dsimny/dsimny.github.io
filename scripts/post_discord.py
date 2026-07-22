@@ -229,7 +229,7 @@ STATUS_PATH = os.path.join(ROOT, "data", "post_status.json")
 STATUS_KEEP = 30   # roughly a fortnight of three posts a day
 
 
-def record(mode, date, result, status=None, detail=""):
+def record(mode, date, result, status=None, detail="", channel_id=""):
     """Write the outcome of a Discord post into the repo.
 
     A failed post must never fail the run, which also meant nothing surfaced a
@@ -249,7 +249,7 @@ def record(mode, date, result, status=None, detail=""):
                         if not (p["date"] == date and p["mode"] == mode)]
         log["posts"].append({
             "date": date, "mode": mode, "result": result,
-            "http_status": status, "detail": detail[:200],
+            "http_status": status, "channel_id": channel_id, "detail": detail[:200],
             "at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         })
         log["posts"] = sorted(log["posts"], key=lambda p: p["at_utc"])[-STATUS_KEEP:]
@@ -289,8 +289,13 @@ def main():
         record(mode, date, "no_webhook", detail=f"{env_name} is not set")
         return
     import requests
+    # ?wait=true makes Discord return the created message instead of an empty
+    # 204, which tells us which channel it actually landed in. Worth having:
+    # a webhook pointed at the wrong channel still reports a perfectly healthy
+    # 204, and that is exactly how the free pick ended up in members-only.
+    url = webhook + ("&" if "?" in webhook else "?") + "wait=true"
     try:
-        r = requests.post(webhook, json=payload, timeout=30)
+        r = requests.post(url, json=payload, timeout=30)
     except Exception as exc:
         print(f"WARNING: Discord post failed to send: {exc}")
         record(mode, date, "failed", detail=str(exc))
@@ -299,9 +304,15 @@ def main():
         # Never fail the pipeline over a chat post: log, record, move on.
         print(f"WARNING: Discord post failed ({r.status_code}): {r.text[:300]}")
         record(mode, date, "failed", status=r.status_code, detail=r.text)
-    else:
-        print(f"Posted {mode} for {date} to Discord.")
-        record(mode, date, "posted", status=r.status_code)
+        return
+    channel = ""
+    try:
+        channel = str(r.json().get("channel_id", ""))
+    except Exception:
+        pass
+    print(f"Posted {mode} for {date} to Discord"
+          + (f" (channel {channel})." if channel else "."))
+    record(mode, date, "posted", status=r.status_code, channel_id=channel)
 
 if __name__ == "__main__":
     main()

@@ -13,6 +13,8 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
 
+import crypto_box
+
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 SEASON = int(DATE[:4])
@@ -37,6 +39,14 @@ def get(url, **params):
     return r.json()
 
 def main():
+    # The board runs on several cron windows because GitHub's scheduler is
+    # unreliable. Whichever fires first wins; later ones must not re-fetch,
+    # since overwriting the snapshot would break the hash already published in
+    # that day's commitment.
+    if crypto_box.already_published(ROOT, DATE) and "--force" not in sys.argv:
+        print(f"Board for {DATE} is already published. Nothing to fetch.")
+        return
+
     # ---- Schedule + probable pitchers ----
     sched = get(f"{MLB}/schedule", sportId=1, date=DATE, hydrate="probablePitcher")
     games_raw = sched["dates"][0]["games"] if sched.get("dates") else []
@@ -150,10 +160,12 @@ def main():
         "games": games,
     }
     os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
-    out = os.path.join(ROOT, "data", f"snapshot_{DATE}.json")
-    with open(out, "w", encoding="utf-8") as f:
-        json.dump(snapshot, f, indent=1)
-    print(f"Wrote {out}: {len(games)} games, {len(pitchers)} pitchers, odds for {len(odds)} games")
+    # Encrypted when a key is present. The snapshot is withheld alongside the
+    # board because the engine is public and deterministic: publish the inputs
+    # and anyone can re-derive the picks exactly.
+    out, _sha, enc = crypto_box.save_dataset(ROOT, "snapshot", DATE, snapshot)
+    print(f"Wrote {out}{' (encrypted)' if enc else ''}: {len(games)} games, "
+          f"{len(pitchers)} pitchers, odds for {len(odds)} games")
 
 if __name__ == "__main__":
     main()

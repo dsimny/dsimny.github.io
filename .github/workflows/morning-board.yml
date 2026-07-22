@@ -1,9 +1,18 @@
 name: Morning board
-# Runs daily at 15:10 UTC (11:10 AM ET in summer) — after probable pitchers
-# and morning lines are posted, well before the earliest first pitch.
+# Target is 15:10 UTC (11:10 AM ET in summer): after probable pitchers and
+# morning lines are posted, well before the earliest first pitch.
+#
+# Three windows, not one. GitHub's cron is best-effort and ran the grading job
+# five hours late on 2026-07-22; a delay like that would push the board past
+# first pitch. Whichever window fires first builds the board, and the rest exit
+# immediately because a commitment already exists for the date. The engine also
+# refuses to publish any game that has already started, so a very late run
+# produces a short board or none at all rather than a dishonest one.
 on:
   schedule:
-    - cron: "10 15 * * *"
+    - cron: "10 13 * * *"   # 9:10 AM ET
+    - cron: "10 14 * * *"   # 10:10 AM ET
+    - cron: "10 15 * * *"   # 11:10 AM ET, the intended time
   workflow_dispatch: {}   # manual "run now" button in the Actions tab
 
 permissions:
@@ -12,6 +21,10 @@ permissions:
 jobs:
   board:
     runs-on: ubuntu-latest
+    # Every step here either writes or reads the encrypted board, so the key is
+    # set once for the job rather than repeated five times.
+    env:
+      BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

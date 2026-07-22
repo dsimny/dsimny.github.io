@@ -11,6 +11,8 @@ import json, os, sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+import crypto_box
+
 ET = ZoneInfo("America/New_York")
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ET).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
@@ -20,8 +22,10 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 # the site simply renders without them, never with a dead link.
 DISCORD_INVITE = os.environ.get("DISCORD_INVITE_URL", "").strip()
 
-with open(os.path.join(ROOT, "data", f"board_{DATE}.json"), encoding="utf-8") as f:
-    B = json.load(f)
+B = crypto_box.load_dataset(ROOT, "board", DATE)
+if B is None:
+    raise SystemExit(f"No board for {DATE}. Run engine.py first.")
+COMMITMENT = crypto_box.commitment_for(ROOT, DATE)
 ledger = {"entries": [], "aggregates": None}
 lp = os.path.join(ROOT, "data", "ledger.json")
 if os.path.exists(lp):
@@ -255,6 +259,19 @@ def scratch_card(s):
       <p class="scratchreason"><strong>{s["rule"]}.</strong> {s["reason"]}</p>
     </article>'''
 
+# Only rendered once a board is actually being committed encrypted. Without a
+# commitment there is nothing to verify, and claiming otherwise would be the
+# exact sort of unearned assurance this site exists to argue against.
+commit_block = f'''
+    <div class="commit">
+      <p class="commitlead">This board was fingerprinted before first pitch.</p>
+      <p class="commitsub">SHA-256 of the full board, published {COMMITMENT["committed_utc"]},
+      while the picks themselves were still encrypted:</p>
+      <code class="commithash">{COMMITMENT["board_sha256"]}</code>
+      <p class="commitsub">{"The board has since been revealed: hash it yourself and compare." if COMMITMENT["revealed"] else "The board publishes in full after grading. Hash it then and compare against the fingerprint above."}
+      If the two match, nothing was altered once the games were underway. That is the whole guarantee, and you do not have to take our word for any of it.</p>
+    </div>''' if COMMITMENT else ""
+
 # ---------------- free pick section ----------------
 # Renders only when DISCORD_INVITE_URL is set, so the site never ships a dead
 # "join" button. Deliberately makes no promise about record or profit.
@@ -355,14 +372,22 @@ graded_rows = "".join(f'''
     <td class="num">{e["pnl"]:+.2f}u</td>
     <td>{res_chip.get(e["result"], e["result"])}</td>
   </tr>''' for e in graded_entries)
-pending_rows = "".join(f'''
+# A pending row for a held play must not print the side, the price, the edge or
+# the size: between them they give the whole pick away, and this table was
+# quietly doing exactly that while the board tab held the same plays back.
+# Rows stay listed so the count is honest; the contents fill in once graded.
+def pending_row(b):
+    held = b is not free
+    return f'''
   <tr>
-    <td>{DATE}</td><td>{b["abbr"]}</td><td>{b["pick"]}</td>
-    <td class="num">{(b["edge"]*100 if b["edge"] is not None else 0):+.1f}</td>
-    <td class="num">{b["units"]:g}u</td>
+    <td>{DATE}</td><td>{b["abbr"]}</td>
+    <td>{"<em>held until graded</em>" if held else b["pick"]}</td>
+    <td class="num">{"n/a" if held else f'{(b["edge"]*100 if b["edge"] is not None else 0):+.1f}'}</td>
+    <td class="num">{"n/a" if held else f'{b["units"]:g}u'}</td>
     <td class="num">n/a</td>
     <td><span class="pend">● Pending</span></td>
-  </tr>''' for b in plays)
+  </tr>'''
+pending_rows = "".join(pending_row(b) for b in plays)
 if agg:
     tiles = f'''
       <div class="tile"><span class="tl">Record</span><span class="tv">{agg["record"]}</span><span class="td">graded picks</span></div>
@@ -448,6 +473,10 @@ html = f'''<!DOCTYPE html>
   .flag-lock {{ color:var(--s1); }}
   .card-locked {{ border-style:dashed; }}
   .lockedval {{ color:var(--ink2); font-style:italic; }}
+  .commit {{ margin:16px 0 4px; padding:14px 16px; border:1px solid var(--ring); border-radius:12px; background:var(--surface); }}
+  .commitlead {{ font-weight:700; font-size:0.92rem; }}
+  .commitsub {{ margin-top:6px; font-size:0.8rem; color:var(--ink2); line-height:1.5; max-width:70ch; }}
+  .commithash {{ display:block; margin:10px 0; padding:8px 10px; border-radius:8px; background:var(--page); border:1px solid var(--grid); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:0.72rem; color:var(--s1); word-break:break-all; }}
   .join {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-radius:14px; background:var(--surface); }}
   .joinlead {{ font-weight:700; font-size:0.98rem; }}
   .joinsub {{ margin-top:6px; font-size:0.83rem; color:var(--ink2); line-height:1.55; max-width:60ch; }}
@@ -549,6 +578,7 @@ html = f'''<!DOCTYPE html>
         <div><b>{B["published_units"]:g}u</b> exposure (cap 10u)</div>
       </div>
     </div>
+    {commit_block}
     <h2 class="sect">Published plays: {B["published_units"]:g}u total exposure</h2>
     <p class="sectsub">The free pick is shown in full. The rest are held until they are graded. Then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
     <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today. Nothing cleared the gates. Passing is a position.</p>"}</div>

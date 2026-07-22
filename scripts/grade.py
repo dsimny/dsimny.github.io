@@ -21,6 +21,8 @@ import json, os, sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import crypto_box
+
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 LEDGER = os.path.join(ROOT, "data", "ledger.json")
 
@@ -52,12 +54,16 @@ def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     date = args[0] if args else (datetime.now(ZoneInfo("America/New_York")) - timedelta(days=1)).strftime("%Y-%m-%d")
 
-    board_path = os.path.join(ROOT, "data", f"board_{date}.json")
-    if not os.path.exists(board_path):
-        print(f"No board for {date} — nothing to grade.")
+    B = crypto_box.load_dataset(ROOT, "board", date)
+    if B is None:
+        print(f"No board for {date}: nothing to grade.")
         return
-    with open(board_path, encoding="utf-8") as f:
-        B = json.load(f)
+
+    # Check the board against its morning fingerprint BEFORE anything reaches
+    # the ledger. The ledger is append-only, so a mismatched board that gets
+    # graded first is recorded permanently, and the ledger is the one thing
+    # here that has to stay trustworthy.
+    verify_commitment(date, B)
 
     if "--scores-file" in sys.argv:
         with open(sys.argv[sys.argv.index("--scores-file") + 1], encoding="utf-8") as f:
@@ -125,6 +131,48 @@ def main():
         json.dump(ledger, f, indent=1)
     print(f"Graded {graded} picks for {date}. Ledger: {ledger['aggregates']['record']}, "
           f"{units_net:+.2f}u net, ROI {ledger['aggregates']['roi_pct']}%")
+
+    reveal(date, B)
+
+def verify_commitment(date, board):
+    """Stop the run if the board no longer matches what we published.
+
+    A board with no commitment is fine: those predate the commit-and-reveal
+    work. A board WITH a commitment that does not match is not fine, and
+    nothing further should happen until a human has looked at it.
+    """
+    committed = crypto_box.commitment_for(ROOT, date)
+    if committed is None:
+        return
+    actual = crypto_box.sha256_of(board)
+    if actual != committed["board_sha256"]:
+        raise SystemExit(
+            f"REFUSING to grade {date}: the board does not match the fingerprint "
+            f"published that morning.\n  committed {committed['board_sha256']}\n"
+            f"  actual    {actual}\nNothing has been written to the ledger. "
+            f"Investigate before running this again.")
+
+def reveal(date, board):
+    """Publish the plaintext board and snapshot now that the games are over.
+
+    The morning published a fingerprint; this publishes the thing it
+    fingerprints. verify_commitment has already run, so by here the two are
+    known to agree.
+    """
+    if crypto_box.commitment_for(ROOT, date) is None:
+        return
+    for kind in ("board", "snapshot"):
+        obj = crypto_box.load_dataset(ROOT, kind, date)
+        if obj is None:
+            continue
+        plain_path, enc_path = crypto_box.paths_for(ROOT, kind, date)
+        with open(plain_path, "w", encoding="utf-8") as f:
+            json.dump(obj, f, indent=1)
+        if os.path.exists(enc_path):
+            os.remove(enc_path)
+    crypto_box.mark_revealed(ROOT, date)
+    print(f"Revealed {date}: fingerprint matches the morning commitment "
+          f"({crypto_box.sha256_of(board)[:16]}...). Board and snapshot are now public.")
 
 if __name__ == "__main__":
     main()

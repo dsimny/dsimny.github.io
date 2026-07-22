@@ -24,7 +24,7 @@ So the display gate shipped on 2026-07-22 is cosmetic. Charging for picks that
 anyone can read would be the exact behaviour this site exists to call out.
 Option 1 (commit–reveal) is the mechanism that makes option 4 real.
 
-## Phase 1 — stop the leak (blocks everything else)
+## Phase 1 — stop the leak — BUILT AND TESTED 2026-07-22, NOT YET PUSHED
 
 Morning run:
 - fetch → engine → build site (free pick only) → post to Discord
@@ -42,13 +42,20 @@ Net effect: everything becomes public eventually, on the same append-only
 terms as now. Only the pre-game reveal is withheld. Anyone can verify after
 the fact that the revealed board matches the morning's hash.
 
-Watch out for:
-- `grade.py` currently reads `data/board_<date>.json` directly — it will need
-  to read the encrypted blob instead.
-- The encryption key lives in a repo secret. If it is ever lost, that day's
-  board cannot be graded. Keep a copy somewhere safe.
-- House rule 1 still applies: the ledger stays append-only. Nothing about
-  this phase may make a loss easier to drop.
+Implemented in `scripts/crypto_box.py` with Fernet. Tested against nine
+scenarios including a deliberately tampered board, a wrong key, a missing key
+in CI, and a board with no commitment at all (backwards compatibility).
+
+One real bug found by that testing: the first version graded and THEN checked
+the fingerprint, so a tampered board's results reached the append-only ledger
+before the mismatch surfaced. Verification now runs before anything is written.
+Worth remembering as the general lesson: on an append-only store, validate
+before you write, never after.
+
+Still to watch:
+- BOARD_ENCRYPTION_KEY has no recovery path. Daniel's backup is the only copy.
+- Pushing this requires the secret to be set FIRST, or the CI guard correctly
+  refuses to publish and there is no board that day.
 
 ## Phase 2 — deliver the premium plays — DONE 2026-07-22
 

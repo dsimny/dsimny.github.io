@@ -4,3 +4,5 @@ requests>=2.31
 # timezone database system-wide, Windows does not — this makes the scripts
 # behave identically everywhere instead of relying on the host OS.
 tzdata>=2024.1
+# Fernet, for encrypting the board between publication and grading.
+cryptography>=42.0

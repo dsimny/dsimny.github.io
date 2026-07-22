@@ -30,7 +30,10 @@ claimed. NRFI rules are N/A (no NRFI market in v0.1).
 """
 
 import json, math, os, sys
+from datetime import datetime, timezone
 import numpy as np
+
+import crypto_box
 
 DATE = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("BOARD_DATE", "")
 if not DATE:
@@ -84,9 +87,26 @@ def nb_draws(rng, mean, n):
     lam = rng.gamma(shape=DISPERSION, scale=mean / DISPERSION, size=n)
     return rng.poisson(lam)
 
+def first_pitch_passed(utc_str, now_utc):
+    """Has this game already started? Unparseable times count as started.
+
+    Erring toward "started" means the worst case is a missed pick, not a
+    published one we cannot honestly claim to have made in advance.
+    """
+    try:
+        start = datetime.fromisoformat(utc_str.replace("Z", "+00:00"))
+    except (ValueError, AttributeError):
+        return True
+    return start <= now_utc
+
 def main():
-    with open(os.path.join(ROOT, "data", f"snapshot_{DATE}.json"), encoding="utf-8") as f:
-        data = json.load(f)
+    if crypto_box.already_published(ROOT, DATE) and "--force" not in sys.argv:
+        print(f"Board for {DATE} is already published. Nothing to do.")
+        return
+
+    data = crypto_box.load_dataset(ROOT, "snapshot", DATE)
+    if data is None:
+        raise SystemExit(f"No snapshot for {DATE}. Run fetch_data.py first.")
 
     teams = {int(k): v for k, v in data["teams"].items()}
     pitchers = {int(k): v for k, v in data["pitchers"].items()}
@@ -100,12 +120,32 @@ def main():
     rng = np.random.default_rng(SEED)
     board, scratches = [], []
 
+    now_utc = datetime.now(timezone.utc)
+
     for g in data["games"]:
         away, home = teams[g["away"]], teams[g["home"]]
         a_sp = pitchers.get(g["awaySP"]) if g["awaySP"] else None
         h_sp = pitchers.get(g["homeSP"]) if g["homeSP"] else None
         park = parks.get(g["venue"], 1.00)
         checks = []
+
+        # ---- Late publication guard ----
+        # GitHub's cron is best-effort and has already run five hours late once.
+        # The site promises every pick is committed before first pitch, so a game
+        # that has already started cannot be published no matter how good it
+        # looks. Structurally impossible beats carefully avoided.
+        if first_pitch_passed(g["utc"], now_utc):
+            scratches.append({
+                "gamePk": g["gamePk"],
+                "matchup": f'{away["name"]} @ {home["name"]}',
+                "abbr": f'{away["abbr"]} @ {home["abbr"]}',
+                "utc": g["utc"], "venue": g["venue"],
+                "rule": "Late publication guard",
+                "reason": ("First pitch had already passed when this board was built, so no "
+                           "position was taken. We only publish picks we committed to before "
+                           "the game started.")
+            })
+            continue
 
         # ---- Rule 7: Late-Line Circuit Breaker (TBD starter => scratch) ----
         if a_sp is None or h_sp is None:
@@ -298,8 +338,18 @@ def main():
         "published_units": exposure,
         "n_published": len(published),
     }
-    with open(os.path.join(ROOT, "data", f"board_{DATE}.json"), "w", encoding="utf-8") as f:
-        json.dump(out, f, indent=1)
+    board_path, board_sha, enc = crypto_box.save_dataset(ROOT, "board", DATE, out)
+    if enc:
+        # The fingerprint goes public in the clear while the board itself does
+        # not. Anyone can re-hash the revealed board after grading and check it
+        # against what we published this morning.
+        snap = crypto_box.load_dataset(ROOT, "snapshot", DATE)
+        _, recorded = crypto_box.record_commitment(
+            ROOT, DATE, board_sha, crypto_box.sha256_of(snap),
+            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        print(f"Board encrypted to {os.path.basename(board_path)}")
+        print(f"Commitment {'recorded' if recorded else 'already present, left alone'}: "
+              f"sha256 {board_sha[:16]}...")
 
     print(f"League run rate: {league_rate:.3f} r/g | League RA9: {league_era:.2f}")
     print(f"[{DATE}] Simulated {len(board)} games x {N_SIMS:,} sims | {len(scratches)} scratched (Rule 7)")

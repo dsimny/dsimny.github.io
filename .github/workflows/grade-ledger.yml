@@ -13,6 +13,9 @@ permissions:
 jobs:
   grade:
     runs-on: ubuntu-latest
+    # Needed to decrypt yesterday's board for grading, and to reveal it after.
+    env:
+      BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,7 +29,10 @@ jobs:
           DISCORD_INVITE_URL: ${{ vars.DISCORD_INVITE_URL }}   # optional — join prompt is omitted when unset
         run: |
           # Rebuild against the most recent board so the ledger tab refreshes.
-          LATEST=$(ls data/board_*.json 2>/dev/null | sort | tail -1 | sed -E 's/.*board_(.*)\.json/\1/')
+          # Matches .enc as well as .json: today's board is still encrypted at
+          # this hour, and only yesterday's has been revealed.
+          LATEST=$(ls data/board_*.json data/board_*.enc 2>/dev/null \
+                   | sed -E 's#.*board_(.*)\.(json|enc)$#\1#' | sort -u | tail -1)
           if [ -n "$LATEST" ]; then python scripts/build_site.py "$LATEST"; fi
       - name: Post results recap to Discord
         env:

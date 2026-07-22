@@ -24,6 +24,8 @@ import json, os, sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import crypto_box
+
 ET = ZoneInfo("America/New_York")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL", "")
@@ -61,7 +63,10 @@ def pick_free(plays):
                 plays[len(plays) // 2])
 
 def build_pick_payload(date):
-    B = load(f"board_{date}.json")
+    # Must go through crypto_box: from 2026-07-23 the board is encrypted
+    # until grading, and a plain file read would silently find nothing and
+    # post no picks at all while the workflow still went green.
+    B = crypto_box.load_dataset(ROOT, "board", date)
     if B is None:
         print(f"No board for {date} — nothing to post.")
         return None
@@ -101,16 +106,21 @@ def build_pick_payload(date):
 
     others = [b for b in plays if b is not free]
     if others:
-        teaser = " · ".join(f'{b["abbr"]} ({b["units"]:g}u)' for b in others)
-        fields.append({"name": f"Rest of the board ({B['published_units']:g}u total exposure)",
-                       "value": (teaser + (f". Full cards: {SITE}/#board" if SITE else ""))[:1024]})
+        # Matchups only. This embed goes to the PUBLIC channel, so printing unit
+        # sizes here would hand out the premium board's shape for free, and the
+        # site stopped showing them when the board was gated.
+        teaser = " · ".join(b["abbr"] for b in others)
+        tail = ". Premium members get these in full before first pitch."
+        fields.append({"name": f"Also on today's board ({len(others)} premium)",
+                       "value": (teaser + tail)[:1024]})
 
     embed = {
         "title": f'★ Free Pick of the Day: {nice}',
         "description": (f'**{free["matchup"]}** · {et_time(free["utc"])} · {free["venue"]}\n'
                         f'{a_sp["name"]} ({a_sp["era"]:.2f} ERA) vs {h_sp["name"]} ({h_sp["era"]:.2f} ERA)\n'
-                        f'*Mid-board by design; the headliners live on the board. '
-                        f'Committed to the public record before first pitch, graded on the ledger after.*'),
+                        f'*A strong play, but not our Play of the Day: the top-confidence plays go '
+                        f'to premium members. Committed to the public record before first pitch, '
+                        f'graded on the ledger after.*'),
         "color": TIER_COLOR.get(free["risk_tier"], BLUE),
         "fields": fields,
         "footer": {"text": FOOTER},
@@ -126,7 +136,10 @@ def build_board_payload(date):
     pick_free must stay mirrored with build_site.py so the two never disagree
     about which play is the giveaway.
     """
-    B = load(f"board_{date}.json")
+    # Must go through crypto_box: from 2026-07-23 the board is encrypted
+    # until grading, and a plain file read would silently find nothing and
+    # post no picks at all while the workflow still went green.
+    B = crypto_box.load_dataset(ROOT, "board", date)
     if B is None:
         print(f"No board for {date}: nothing to post.")
         return None

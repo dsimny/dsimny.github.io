@@ -63,7 +63,7 @@ def build_pick_payload(date):
 
     if not plays:
         embed = {
-            "title": f"No qualifying plays today — {nice}",
+            "title": f"No qualifying plays today: {nice}",
             "description": ("The engine ran the full slate and nothing cleared the circuit breakers "
                             "and the edge gate at an allocatable price. We don't manufacture a pick to "
                             "fill the slot. **Passing is a position too.**"),
@@ -87,7 +87,7 @@ def build_pick_payload(date):
         fields.append({"name": "Edge vs price",
                        "value": f'{free["edge"]*100:+.1f} pts · EV {free["ev_per_unit"]*100:+.1f}%', "inline": True})
     else:
-        fields.append({"name": "Market", "value": "no feed this run — compare at your book", "inline": True})
+        fields.append({"name": "Market", "value": "no feed this run; compare at your book", "inline": True})
     fields.append({"name": "Circuit breakers",
                    "value": "\n".join(f"• {c}" for c in free["checks"])[:1024]})
 
@@ -95,13 +95,13 @@ def build_pick_payload(date):
     if others:
         teaser = " · ".join(f'{b["abbr"]} ({b["units"]:g}u)' for b in others)
         fields.append({"name": f"Rest of the board ({B['published_units']:g}u total exposure)",
-                       "value": (teaser + (f" — full cards: {SITE}/#board" if SITE else ""))[:1024]})
+                       "value": (teaser + (f". Full cards: {SITE}/#board" if SITE else ""))[:1024]})
 
     embed = {
-        "title": f'★ Free Pick of the Day — {nice}',
+        "title": f'★ Free Pick of the Day: {nice}',
         "description": (f'**{free["matchup"]}** · {et_time(free["utc"])} · {free["venue"]}\n'
                         f'{a_sp["name"]} ({a_sp["era"]:.2f} ERA) vs {h_sp["name"]} ({h_sp["era"]:.2f} ERA)\n'
-                        f'*Mid-board by design — the headliners live on the board. '
+                        f'*Mid-board by design; the headliners live on the board. '
                         f'Committed to the public record before first pitch, graded on the ledger after.*'),
         "color": TIER_COLOR.get(free["risk_tier"], BLUE),
         "fields": fields,
@@ -121,11 +121,11 @@ def build_recap_payload(date):
     nice = f"{_d:%A, %B} {_d.day}"
     chip = {"WIN": "✅", "LOSS": "❌", "VOID": "⚪"}
     day_pnl = sum(e["pnl"] for e in entries)
-    lines = [f'{chip.get(e["result"], "•")} {e["pick"]} — {e.get("final_score", "void")} '
+    lines = [f'{chip.get(e["result"], "•")} {e["pick"]}: {e.get("final_score", "void")} '
              f'({e["pnl"]:+.2f}u)' for e in entries]
     agg = L["aggregates"]
     embed = {
-        "title": f"Results — {nice}: {day_pnl:+.2f}u",
+        "title": f"Results for {nice}: {day_pnl:+.2f}u",
         "description": "\n".join(lines)[:4000],
         "color": GREEN if day_pnl > 0 else (RED if day_pnl < 0 else GRAY),
         "fields": [

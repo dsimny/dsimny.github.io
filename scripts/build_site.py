@@ -72,7 +72,7 @@ def gen_analysis(b):
         p1 = (f'<p><strong>The mound tilts this game.</strong> {psp["name"]} brings a {psp["era"]:.2f} ERA and '
               f'{psp["whip"]:.2f} WHIP over {psp["ip"]:g} innings against {osp["name"]} at {osp["era"]:.2f} '
               f'({osp["whip"]:.2f} WHIP). A {era_gap:.1f}-run ERA gap, weighted over the ~5.5 innings a starter '
-              f'covers, moves real win probability before anyone swings. Baserunners are kindling — '
+              f'covers, moves real win probability before anyone swings. Baserunners are kindling: '
               f'the {psp["whip"]:.2f}-vs-{osp["whip"]:.2f} WHIP spread decides whose innings stay quiet.</p>')
     elif era_gap <= -0.5:
         p1 = (f'<p><strong>The pick survives a starter disadvantage.</strong> {osp["name"]} ({osp["era"]:.2f} ERA, '
@@ -82,7 +82,7 @@ def gen_analysis(b):
     else:
         p1 = (f'<p><strong>The starters roughly cancel.</strong> {psp["name"]} ({psp["era"]:.2f} ERA, {psp["whip"]:.2f} '
               f'WHIP over {psp["ip"]:g} IP) against {osp["name"]} ({osp["era"]:.2f}, {osp["whip"]:.2f}) is close to a '
-              f'push on season numbers — which hands the game to the team-level gap below.</p>')
+              f'push on season numbers, which hands the game to the team-level gap below.</p>')
 
     # P2 — clubs, park, simulation result
     pf = b["park_factor"]
@@ -92,18 +92,18 @@ def gen_analysis(b):
     p2 = (f'<p><strong>The clubs, the park, the count.</strong> {pick_name} ({p_rec}) score {p_rpg:g} and allow '
           f'{p_rapg:g} runs a game; {opp_name} ({o_rec}) score {o_rpg:g} and allow {o_rapg:g}. In {park_note}, '
           f'{B["n_sims"]:,} simulations land on a {proj} average score, with {pick_name} winning '
-          f'<strong>{conf*100:.1f}%</strong> of them — a fair price of <strong>{fair:+d}</strong>.</p>')
+          f'<strong>{conf*100:.1f}%</strong> of them, a fair price of <strong>{fair:+d}</strong>.</p>')
 
     # P3 — market (or its absence)
     if b["mkt_odds"] is not None:
         p3 = (f'<p><strong>The market price is the point.</strong> The consensus line is <strong>{b["mkt_odds"]:+d}</strong> '
-              f'against our {fair:+d} fair — a <strong>{b["edge"]*100:+.1f}-point edge</strong> and '
+              f'against our {fair:+d} fair, a <strong>{b["edge"]*100:+.1f}-point edge</strong> and '
               f'<strong>{b["ev_per_unit"]*100:+.1f}% EV per unit</strong> at the listed price. Rule 8 checked the '
-              f'disagreement with the de-vigged market: {abs(b["divergence"])*100:.1f} points, inside the 12-point cap — '
+              f'disagreement with the de-vigged market: {abs(b["divergence"])*100:.1f} points, inside the 12-point cap: '
               f'a disagreement, not a delusion. Quarter-Kelly would size this at {b["kelly_pct"]:.1f}% of bankroll; '
               f'the tier framework governs it to <strong>{b["units"]:g}u</strong>. The governor beats the gas pedal.</p>')
     else:
-        p3 = (f'<p><strong>No market feed today</strong> — the {fair:+d} shown is our model fair line, not a sportsbook '
+        p3 = (f'<p><strong>No market feed today.</strong> The {fair:+d} shown is our model fair line, not a sportsbook '
               f'price. The edge only exists if your book beats that number; compare before betting anything.</p>')
 
     # P4 — breaker summary + bottom line
@@ -111,14 +111,14 @@ def gen_analysis(b):
     if b["rule4_flag"]: flags.append("Rule 4 cut the allocation over a limited-workload starter")
     if b["rule2_pivot"]: flags.append("Rule 2 pivoted the play off a capped moneyline")
     flag_txt = ("; ".join(flags) + ".") if flags else \
-        "Every automated breaker passed at full size — the full check log is printed below, including the passes."
+        "Every automated breaker passed at full size. The full check log is printed below, including the passes."
     if b["mkt_odds"] is not None:
         bl = (f'{pick_name} at {b["mkt_odds"]:+d} carries a {b["edge"]*100:.1f}-point model edge at {b["units"]:g}u. '
-              f'If the line steams past our {fair:+d} fair before first pitch, the edge is gone — pass without regret. '
+              f'If the line steams past our {fair:+d} fair before first pitch, the edge is gone; pass without regret. '
               f'Passing is a position too.')
     else:
         bl = (f'{pick_name} is a {b["units"]:g}u play only at prices better than our {fair:+d} fair line. '
-              f'Worse than that, pass without regret — passing is a position too.')
+              f'Worse than that, pass without regret; passing is a position too.')
     p4 = f'<p><strong>Breaker sheet:</strong> {flag_txt}</p><p><strong>Bottom line:</strong> {bl}</p>'
     return p1 + p2 + p3 + p4
 
@@ -138,7 +138,7 @@ def prob_bar(b, h=14):
 
 def market_cells(b):
     if b["mkt_odds"] is None:
-        return '<div><span class="stlab">Market</span><span class="stval">—</span></div>'
+        return '<div><span class="stlab">Market</span><span class="stval">n/a</span></div>'
     edge_cls = "edge-pos" if b["edge"] >= 0.02 else ("edge-neg" if b["edge"] < 0 else "")
     return f'''
         <div><span class="stlab">Market line</span><span class="stval">{b["mkt_odds"]:+d} <em>consensus</em></span></div>
@@ -173,11 +173,11 @@ def card(b, published):
     if published:
         units_str = f'{b["units"]:g}u ({b["units"]:g}% bankroll)'
     elif b.get("rule8_flag"):
-        units_str = "0u — held by Rule 8"
+        units_str = "0u, held by Rule 8"
     elif b.get("no_edge"):
-        units_str = "0u — no edge at market price"
+        units_str = "0u, no edge at market price"
     else:
-        units_str = "0u — logged as lean only"
+        units_str = "0u, logged as lean only"
     tier_short = b["risk_tier"].split("(")[-1].rstrip(")") if "(" in b["risk_tier"] else b["risk_tier"]
     return f'''
     <article class="card {'card-lean' if not published else ''}">
@@ -233,8 +233,8 @@ def locked_card(b):
         <div><span class="playlab">Breaker checks</span><span class="playval">{len(b["checks"])} run</span></div>
       </div>
       <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
-      timestamped in the public repository ahead of the game and publishes in full — with its
-      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
+      timestamped in the public repository ahead of the game and publishes in full, with its
+      complete breaker log, on the ledger once graded. We hold the position, never the result.</p>
     </article>'''
 
 def scratch_card(s):
@@ -264,19 +264,21 @@ if free is not None:
         ff = '<span class="flag flag-ok">✓ ALL BREAKERS CLEAR</span>'
     tier_cls, tier_icon = TIER_META[free["risk_tier"]]
     if free["rule4_flag"]:
-        bet_note = " — downgraded by Rule 4"
+        bet_note = ", downgraded by Rule 4"
     elif free.get("kelly_pct") is not None:
-        bet_note = f' — quarter-Kelly suggests {free["kelly_pct"]:.1f}% of bankroll; the tier cap governs it down to {free["units"]:g}u'
+        bet_note = f', quarter-Kelly suggests {free["kelly_pct"]:.1f}% of bankroll; the tier cap governs it down to {free["units"]:g}u'
     else:
         bet_note = ""
     edge_row = (f'<div><span class="k">Edge</span><span class="v edge-pos">{free["edge"]*100:+.1f} pts vs the '
                 f'{free["mkt_odds"]:+d} consensus price</span></div>') if free["mkt_odds"] is not None else ""
     free_section = f'''
     <div class="hero">
+      <img class="herologo" src="assets/logo.jpg" width="440" height="440"
+           alt="Open Ledger Sports: transparency, performance, results">
       <span class="kicker">★ Free Pick of the Day</span>
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>{f_away} <span class="at">@</span> {f_home}</h1>
-      <p class="sub">Every day, one pick free and in full — complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices — committed to the public record before first pitch, graded on the ledger after.</p>
+      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
     </div>
     <article class="card freecard">
       <header class="cardhead">
@@ -305,22 +307,24 @@ if free is not None:
       </div>
       <div class="analysis"><h3>Analysis</h3>{gen_analysis(free)}</div>
       <details class="breakers" open>
-        <summary>Circuit-breaker log — every check, including the ones that passed</summary>
+        <summary>Circuit-breaker log: every check, including the ones that passed</summary>
         <ul>{"".join(f"<li>{c}</li>" for c in free["checks"])}</ul>
       </details>
     </article>
     <h2 class="sect">The rest of today's board</h2>
-    <p class="sectsub">{max(len(plays)-1,0)} more plays and {len(scratches)} scratches, free during launch — full cards, analysis, and breaker logs one click away.</p>
+    <p class="sectsub">{max(len(plays)-1,0)} more plays and {len(scratches)} scratches on today's board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
     <div class="boardteasers">{teasers}</div>
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>
-    <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a> — the whole tank is behind glass.</p>'''
+    <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a>. The whole tank is behind glass.</p>'''
 else:
     free_section = f'''
     <div class="hero">
+      <img class="herologo" src="assets/logo.jpg" width="440" height="440"
+           alt="Open Ledger Sports: transparency, performance, results">
       <span class="kicker">Free Pick of the Day</span>
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>No qualifying plays today.</h1>
-      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot — <strong>passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.</p>
+      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.</p>
       <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See today's board →</button></div>
     </div>'''
 
@@ -342,21 +346,21 @@ pending_rows = "".join(f'''
     <td>{DATE}</td><td>{b["abbr"]}</td><td>{b["pick"]}</td>
     <td class="num">{(b["edge"]*100 if b["edge"] is not None else 0):+.1f}</td>
     <td class="num">{b["units"]:g}u</td>
-    <td class="num">—</td>
+    <td class="num">n/a</td>
     <td><span class="pend">● Pending</span></td>
   </tr>''' for b in plays)
 if agg:
     tiles = f'''
       <div class="tile"><span class="tl">Record</span><span class="tv">{agg["record"]}</span><span class="td">graded picks</span></div>
       <div class="tile"><span class="tl">Units</span><span class="tv">{agg["units_net"]:+.2f}</span><span class="td">net P&amp;L</span></div>
-      <div class="tile"><span class="tl">ROI</span><span class="tv">{f"{agg['roi_pct']:+.1f}%" if agg["roi_pct"] is not None else "—"}</span><span class="td">on {agg["units_risked"]:g}u risked</span></div>
+      <div class="tile"><span class="tl">ROI</span><span class="tv">{f"{agg['roi_pct']:+.1f}%" if agg["roi_pct"] is not None else "n/a"}</span><span class="td">on {agg["units_risked"]:g}u risked</span></div>
       <div class="tile"><span class="tl">Pending</span><span class="tv">{len(plays)}</span><span class="td">{B["published_units"]:g}u at risk today</span></div>'''
     strip = f'Ledger: <b>{agg["record"]}</b> · <b>{agg["units_net"]:+.2f}u</b> · opened Jul 22, 2026'
 else:
     tiles = f'''
       <div class="tile"><span class="tl">Record</span><span class="tv">0–0</span><span class="td">graded picks</span></div>
       <div class="tile"><span class="tl">Units</span><span class="tv">+0.00</span><span class="td">net P&amp;L</span></div>
-      <div class="tile"><span class="tl">ROI</span><span class="tv">—</span><span class="td">needs graded picks</span></div>
+      <div class="tile"><span class="tl">ROI</span><span class="tv">n/a</span><span class="td">needs graded picks</span></div>
       <div class="tile"><span class="tl">Pending</span><span class="tv">{len(plays)}</span><span class="td">{B["published_units"]:g}u at risk today</span></div>'''
     strip = 'Ledger: <b>0–0</b> · <b>+0.00u</b> · opened Jul 22, 2026'
 
@@ -367,7 +371,10 @@ html = f'''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Open Ledger Sports — Every pick on the record</title>
+<title>Open Ledger Sports: Every pick on the record</title>
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
 <style>
   :root {{
     color-scheme: dark;
@@ -396,9 +403,12 @@ html = f'''<!DOCTYPE html>
   section.tab.active {{ display:block; }}
   h2.sect {{ font-size:1.02rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:26px 0 12px; }}
   .sectsub {{ color:var(--muted); font-size:0.82rem; margin:-6px 0 12px; }}
-  /* Deliberately larger than body text — this is the banner line of the page.
+  /* Deliberately larger than body text: this is the banner line of the page.
      The date sits below it at small size so the headline never wraps on a phone. */
   .kicker {{ display:inline-block; font-size:1.05rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:8px 16px; border-radius:99px; margin-bottom:6px; }}
+  /* Circular crop trims the logo's square corners so the gold ring sits flush
+     against the page instead of floating in a navy box. */
+  .herologo {{ display:block; width:min(220px,58vw); height:auto; aspect-ratio:1; border-radius:50%; margin:0 0 18px; box-shadow:0 6px 26px rgba(0,0,0,0.45); }}
   .kickerdate {{ display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:14px; }}
   .hero {{ padding:28px 0 6px; }}
   .hero h1 {{ font-size:1.7rem; line-height:1.18; letter-spacing:-0.01em; }}
@@ -507,7 +517,7 @@ html = f'''<!DOCTYPE html>
 
   <section class="tab" id="tab-board">
     <div class="hero">
-      <h1>MLB Board — {NICE_DATE}</h1>
+      <h1>MLB Board: {NICE_DATE}</h1>
       <p class="sub">Every game on today's slate simulated <strong>{B["n_sims"]:,} times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why.</p>
       <div class="slateline">
         <div><b>{B.get("n_slate", len(B["board"]) + len(scratches))}</b> games on slate</div>
@@ -518,10 +528,10 @@ html = f'''<!DOCTYPE html>
         <div><b>{B["published_units"]:g}u</b> exposure (cap 10u)</div>
       </div>
     </div>
-    <h2 class="sect">Published plays — {B["published_units"]:g}u total exposure</h2>
-    <p class="sectsub">The free pick is shown in full. The rest are held until they are graded — then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
-    <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today — nothing cleared the gates. Passing is a position.</p>"}</div>
-    <h2 class="sect">Model leans — no allocation, logged for transparency</h2>
+    <h2 class="sect">Published plays: {B["published_units"]:g}u total exposure</h2>
+    <p class="sectsub">The free pick is shown in full. The rest are held until they are graded. Then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
+    <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today. Nothing cleared the gates. Passing is a position.</p>"}</div>
+    <h2 class="sect">Model leans: no allocation, logged for transparency</h2>
     <p class="sectsub">{n_r8} held by the Rule 8 Divergence Governor, {n_noedge} benched by the edge gate, and the rest below the confidence floor.</p>
     <div class="cards">{"".join(card(b, False) for b in leans)}</div>
     <h2 class="sect">Scratched by circuit breaker</h2>
@@ -538,7 +548,7 @@ html = f'''<!DOCTYPE html>
       <tbody>{pending_rows}{graded_rows}</tbody>
     </table>
     </div>
-    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks — anything we say about ROI before then is weather, not climate.</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks; anything we say about ROI before then is weather, not climate.</p>
   </section>
 
   <section class="tab" id="tab-method">
@@ -547,43 +557,43 @@ html = f'''<!DOCTYPE html>
       <p>Think of the engine as a <strong>flight simulator for tonight's games</strong>. Instead of predicting one outcome, it plays each game {B["n_sims"]:,} times and counts what happens. A team that wins 6,110 of 10,000 simulations is a 61.1% team, and the fair line falls straight out of the count. No gut feelings, no vibes; arithmetic.</p>
       <h3>What each simulation knows</h3>
       <ul>
-        <li><strong>Team run rates</strong> — runs scored and allowed per game for both clubs, live from the MLB Stats API, normalized to the league average.</li>
-        <li><strong>Starting pitchers</strong> — each starter's ERA vs league, weighted over the ~5.5 innings starters actually cover; the bullpen inherits the team's overall run prevention.</li>
-        <li><strong>Park factors</strong> — Coors Field is a hot-air balloon (1.24); T-Mobile Park is a walk-in freezer (0.92). Static season approximations, refreshed manually.</li>
-        <li><strong>Home-field advantage</strong> — an evidence-sized bump (~54% for an even matchup), not the folk-wisdom 60%.</li>
-        <li><strong>Fat-tailed scoring</strong> — runs come in bunches, so scores are drawn from a negative binomial distribution that allows crooked innings and blowouts, not a tidy bell curve.</li>
+        <li><strong>Team run rates:</strong> runs scored and allowed per game for both clubs, live from the MLB Stats API, normalized to the league average.</li>
+        <li><strong>Starting pitchers:</strong> each starter's ERA vs league, weighted over the ~5.5 innings starters actually cover; the bullpen inherits the team's overall run prevention.</li>
+        <li><strong>Park factors:</strong> Coors Field is a hot-air balloon (1.24); T-Mobile Park is a walk-in freezer (0.92). Static season approximations, refreshed manually.</li>
+        <li><strong>Home-field advantage:</strong> an evidence-sized bump (~54% for an even matchup), not the folk-wisdom 60%.</li>
+        <li><strong>Fat-tailed scoring:</strong> runs come in bunches, so scores are drawn from a negative binomial distribution that allows crooked innings and blowouts, not a tidy bell curve.</li>
       </ul>
       <h3>The market is on the card</h3>
-      <p>A probability alone isn't a bet — a bet is a probability <em>versus a price</em>. Each game carries the market line and three numbers computed from it: <strong>Edge</strong> (our win probability minus the probability implied by the offered price), <strong>EV per unit</strong>, and a <strong>quarter-Kelly</strong> stake suggestion, always capped by the risk-tier framework — the governor beats the gas pedal. Two hard gates follow: the <strong>edge gate</strong> (no allocation under a 2-point edge — a good side at a bad price is a bad bet) and <strong>Rule 8, the Divergence Governor</strong>: when our model and the de-vigged market disagree by more than 12 points, we assume the market knows something our inputs don't — lineups, injury news, form — and the play is held for manual review instead of bet harder. A model that never doubts itself is a tout with extra steps.</p>
+      <p>A probability alone isn't a bet; a bet is a probability <em>versus a price</em>. Each game carries the market line and three numbers computed from it: <strong>Edge</strong> (our win probability minus the probability implied by the offered price), <strong>EV per unit</strong>, and a <strong>quarter-Kelly</strong> stake suggestion, always capped by the risk-tier framework. The governor beats the gas pedal. Two hard gates follow: the <strong>edge gate</strong> (no allocation under a 2-point edge; a good side at a bad price is a bad bet) and <strong>Rule 8, the Divergence Governor</strong>: when our model and the de-vigged market disagree by more than 12 points, we assume the market knows something our inputs don't (lineups, injury news, form), and the play is held for manual review instead of bet harder. A model that never doubts itself is a tout with extra steps.</p>
       <h3>Then the circuit breakers get a veto</h3>
-      <p>The model proposes; eight risk rules dispose. Games with TBD starters are scratched, limited-workload starters trigger downgrades, capped juice forces run-line pivots, and every check — passed or failed — is printed on every card. That's the product.</p>
-      <h3>What this engine does <em>not</em> do — read this before betting</h3>
+      <p>The model proposes; eight risk rules dispose. Games with TBD starters are scratched, limited-workload starters trigger downgrades, capped juice forces run-line pivots, and every check, passed or failed, is printed on every card. That's the product.</p>
+      <h3>What this engine does <em>not</em> do: read this before betting</h3>
       <ul>
-        <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed — lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
-        <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet — they're flagged for human review, never silently claimed.</li>
+        <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed. Lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
+        <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet; they're flagged for human review, never silently claimed.</li>
         <li><strong>Not modeled:</strong> lineups, rest, umpires, weather. Park factors are static season approximations.</li>
       </ul>
-      <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium — the whole tank is behind glass, down to the per-date random seed ({B["seed"]}) that makes every day's board reproducible.</div>
+      <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium; the whole tank is behind glass, down to the per-date random seed ({B["seed"]}) that makes every day's board reproducible.</div>
     </div>
   </section>
 
   <section class="tab" id="tab-rules">
     <h2 class="sect">The eight circuit breakers</h2>
     <div class="prose"><p>Bankroll rules work like the breaker panel in your house: any single circuit can fail without burning the place down. These run on every pick, every day.</p></div>
-    <div class="rulecard"><h3>Rule 2 — High-Juice Favorite Cap <span class="badge b-auto">Automated · market lines</span></h3><p>No straight moneylines on road favorites at −180 or heavier, or home favorites past −220 — evaluated against the actual market price. The play pivots to the −1.5 run line or passes. Laying heavy juice is renting a favorite at luxury prices — the wins are small and the losses are structural.</p></div>
-    <div class="rulecard"><h3>Rule 4 — Injury Return Protocol <span class="badge b-auto">Automated (heuristic)</span></h3><p>Mandatory volume freeze on pitchers fresh off the IL or on restricted workloads. Heuristic: a starter far under the expected innings load this deep in the season triggers the freeze and a one-tier confidence downgrade.</p></div>
-    <div class="rulecard"><h3>Rule 5 — Trailing Telemetry Deviation Penalty <span class="badge b-man">Manual review</span></h3><p>Sharp velocity, spin, or efficiency drops over a starter's trailing three outings trigger a downgrade or fade. Requires a Statcast feed — flagged for human review for now.</p></div>
-    <div class="rulecard"><h3>Rule 6 — Road wOBA Suppression Multiplier <span class="badge b-man">Manual review</span></h3><p>A 12% projected-scoring tax on visitors whose rolling 3-game road wOBA trails league baseline by .035+. Requires rolling splits — manual for now.</p></div>
-    <div class="rulecard"><h3>Rule 7 — Late-Line Circuit Breaker <span class="badge b-auto">Automated</span></h3><p>Any game with a TBD starter inside the pre-game window is scratched automatically. No named starter, no position — you don't board a flight with an unnamed pilot.</p></div>
-    <div class="rulecard"><h3>Rule 8 — Divergence Governor <span class="badge b-auto">Automated</span></h3><p>If the model's win probability and the de-vigged market disagree by more than 12 points, the play is held for manual review — no allocation, no matter how juicy the "edge" looks. A huge gap isn't a gift; it's a warning that the market has priced in something our inputs haven't seen. The best defense against a model's blind spots is respecting the one opponent that never sleeps.</p></div>
+    <div class="rulecard"><h3>Rule 2: High-Juice Favorite Cap <span class="badge b-auto">Automated · market lines</span></h3><p>No straight moneylines on road favorites at −180 or heavier, or home favorites past −220, evaluated against the actual market price. The play pivots to the −1.5 run line or passes. Laying heavy juice is renting a favorite at luxury prices: the wins are small and the losses are structural.</p></div>
+    <div class="rulecard"><h3>Rule 4: Injury Return Protocol <span class="badge b-auto">Automated (heuristic)</span></h3><p>Mandatory volume freeze on pitchers fresh off the IL or on restricted workloads. Heuristic: a starter far under the expected innings load this deep in the season triggers the freeze and a one-tier confidence downgrade.</p></div>
+    <div class="rulecard"><h3>Rule 5: Trailing Telemetry Deviation Penalty <span class="badge b-man">Manual review</span></h3><p>Sharp velocity, spin, or efficiency drops over a starter's trailing three outings trigger a downgrade or fade. Requires a Statcast feed, so it is flagged for human review for now.</p></div>
+    <div class="rulecard"><h3>Rule 6: Road wOBA Suppression Multiplier <span class="badge b-man">Manual review</span></h3><p>A 12% projected-scoring tax on visitors whose rolling 3-game road wOBA trails league baseline by .035+. Requires rolling splits, so it is manual for now.</p></div>
+    <div class="rulecard"><h3>Rule 7: Late-Line Circuit Breaker <span class="badge b-auto">Automated</span></h3><p>Any game with a TBD starter inside the pre-game window is scratched automatically. No named starter, no position: you don't board a flight with an unnamed pilot.</p></div>
+    <div class="rulecard"><h3>Rule 8: Divergence Governor <span class="badge b-auto">Automated</span></h3><p>If the model's win probability and the de-vigged market disagree by more than 12 points, the play is held for manual review, with no allocation, no matter how juicy the "edge" looks. A huge gap isn't a gift; it's a warning that the market has priced in something our inputs haven't seen. The best defense against a model's blind spots is respecting the one opponent that never sleeps.</p></div>
     <div class="rulecard"><h3>Rookie Ambush Overhaul &amp; Two-Out NRFI Override <span class="badge b-na">Dormant</span></h3><p>NRFI/early-under governors (rookie launch-angle variance; #2–3 slot ISO vs high-ride fastballs). Open Ledger doesn't publish NRFI positions yet, so these breakers are dormant until that market ships.</p></div>
     <div class="rulecard"><h3>Edge Gate &amp; Bankroll Governor <span class="badge b-auto">Automated</span></h3><p>No allocation under a 2-point edge versus the offered price. Sizing is the lesser of the confidence tier (3u / 2u / 1u) and a quarter-Kelly stake, with one-tier downgrades on flags and a hard daily ceiling of 10% of bankroll across all published plays.</p></div>
   </section>
 
   <footer class="legal">
-    <p><strong>Open Ledger Sports is an analytics publication, not a sportsbook.</strong> We do not accept, place, or facilitate wagers of any kind. All content is for informational and entertainment purposes only and is not betting advice. No outcome is guaranteed — anyone promising you a lock is selling you one.</p>
+    <p><strong>Open Ledger Sports is an analytics publication, not a sportsbook.</strong> We do not accept, place, or facilitate wagers of any kind. All content is for informational and entertainment purposes only and is not betting advice. No outcome is guaranteed. Anyone promising you a lock is selling you one.</p>
     <p><strong>21+ only.</strong> If you or someone you know has a gambling problem, help is available: call or text <strong>1-800-GAMBLER</strong>. Please check the laws in your jurisdiction before wagering.</p>
-    <p>Data: MLB Stats API, snapshot {B["generated_utc"]}. Market lines: {odds_note} — lines move; verify prices at your sportsbook. Not affiliated with or endorsed by Major League Baseball. Engine {B["n_sims"]:,} simulations per game · seed {B["seed"]} (reproducible).</p>
+    <p>Data: MLB Stats API, snapshot {B["generated_utc"]}. Market lines: {odds_note}. Lines move; verify prices at your sportsbook. Not affiliated with or endorsed by Major League Baseball. Engine {B["n_sims"]:,} simulations per game · seed {B["seed"]} (reproducible).</p>
   </footer>
 </div>
 

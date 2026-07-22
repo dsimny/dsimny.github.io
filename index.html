@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Open Ledger Sports — Every pick on the record</title>
+<title>Open Ledger Sports: Every pick on the record</title>
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
 <style>
   :root {
     color-scheme: dark;
@@ -32,9 +35,12 @@
   section.tab.active { display:block; }
   h2.sect { font-size:1.02rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:26px 0 12px; }
   .sectsub { color:var(--muted); font-size:0.82rem; margin:-6px 0 12px; }
-  /* Deliberately larger than body text — this is the banner line of the page.
+  /* Deliberately larger than body text: this is the banner line of the page.
      The date sits below it at small size so the headline never wraps on a phone. */
   .kicker { display:inline-block; font-size:1.05rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:8px 16px; border-radius:99px; margin-bottom:6px; }
+  /* Circular crop trims the logo's square corners so the gold ring sits flush
+     against the page instead of floating in a navy box. */
+  .herologo { display:block; width:min(220px,58vw); height:auto; aspect-ratio:1; border-radius:50%; margin:0 0 18px; box-shadow:0 6px 26px rgba(0,0,0,0.45); }
   .kickerdate { display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:14px; }
   .hero { padding:28px 0 6px; }
   .hero h1 { font-size:1.7rem; line-height:1.18; letter-spacing:-0.01em; }
@@ -141,10 +147,12 @@
 <div class="wrap">
   <section class="tab active" id="tab-free">
     <div class="hero">
+      <img class="herologo" src="assets/logo.jpg" width="440" height="440"
+           alt="Open Ledger Sports: transparency, performance, results">
       <span class="kicker">★ Free Pick of the Day</span>
       <span class="kickerdate">Wednesday, July 22, 2026</span>
       <h1>St. Louis Cardinals <span class="at">@</span> Los Angeles Angels</h1>
-      <p class="sub">Every day, one pick free and in full — complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same 10,000 simulations, measured against real market prices — committed to the public record before first pitch, graded on the ledger after.</p>
+      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same 10,000 simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
     </div>
     <article class="card freecard">
       <header class="cardhead">
@@ -187,23 +195,23 @@
         <div><span class="k">Confidence</span><span class="v">61.1%</span></div>
         <div><span class="k">Edge</span><span class="v edge-pos">+8.3 pts vs the -112 consensus price</span></div>
         <div><span class="k">Risk level</span><span class="v tier-long">🔴 High Risk (Longshot)</span></div>
-        <div><span class="k">Suggested bet</span><span class="v">1 unit (1% bankroll) — quarter-Kelly suggests 4.4% of bankroll; the tier cap governs it down to 1u</span></div>
+        <div><span class="k">Suggested bet</span><span class="v">1 unit (1% bankroll), quarter-Kelly suggests 4.4% of bankroll; the tier cap governs it down to 1u</span></div>
       </div>
-      <div class="analysis"><h3>Analysis</h3><p><strong>The mound tilts this game.</strong> Michael McGreevy brings a 2.92 ERA and 1.10 WHIP over 108 innings against Reid Detmers at 4.16 (1.12 WHIP). A 1.2-run ERA gap, weighted over the ~5.5 innings a starter covers, moves real win probability before anyone swings. Baserunners are kindling — the 1.10-vs-1.12 WHIP spread decides whose innings stay quiet.</p><p><strong>The clubs, the park, the count.</strong> St. Louis Cardinals (42-34) score 4.63 and allow 4.57 runs a game; Los Angeles Angels (32-48) score 4.53 and allow 5.04. In a neutral park (factor 1.00), 10,000 simulations land on a 5–3.8 average score, with St. Louis Cardinals winning <strong>61.1%</strong> of them — a fair price of <strong>-157</strong>.</p><p><strong>The market price is the point.</strong> The consensus line is <strong>-112</strong> against our -157 fair — a <strong>+8.3-point edge</strong> and <strong>+15.7% EV per unit</strong> at the listed price. Rule 8 checked the disagreement with the de-vigged market: 9.6 points, inside the 12-point cap — a disagreement, not a delusion. Quarter-Kelly would size this at 4.4% of bankroll; the tier framework governs it to <strong>1u</strong>. The governor beats the gas pedal.</p><p><strong>Breaker sheet:</strong> Every automated breaker passed at full size — the full check log is printed below, including the passes.</p><p><strong>Bottom line:</strong> St. Louis Cardinals at -112 carries a 8.3-point model edge at 1u. If the line steams past our -157 fair before first pitch, the edge is gone — pass without regret. Passing is a position too.</p></div>
+      <div class="analysis"><h3>Analysis</h3><p><strong>The mound tilts this game.</strong> Michael McGreevy brings a 2.92 ERA and 1.10 WHIP over 108 innings against Reid Detmers at 4.16 (1.12 WHIP). A 1.2-run ERA gap, weighted over the ~5.5 innings a starter covers, moves real win probability before anyone swings. Baserunners are kindling: the 1.10-vs-1.12 WHIP spread decides whose innings stay quiet.</p><p><strong>The clubs, the park, the count.</strong> St. Louis Cardinals (42-34) score 4.63 and allow 4.57 runs a game; Los Angeles Angels (32-48) score 4.53 and allow 5.04. In a neutral park (factor 1.00), 10,000 simulations land on a 5–3.8 average score, with St. Louis Cardinals winning <strong>61.1%</strong> of them, a fair price of <strong>-157</strong>.</p><p><strong>The market price is the point.</strong> The consensus line is <strong>-112</strong> against our -157 fair, a <strong>+8.3-point edge</strong> and <strong>+15.7% EV per unit</strong> at the listed price. Rule 8 checked the disagreement with the de-vigged market: 9.6 points, inside the 12-point cap: a disagreement, not a delusion. Quarter-Kelly would size this at 4.4% of bankroll; the tier framework governs it to <strong>1u</strong>. The governor beats the gas pedal.</p><p><strong>Breaker sheet:</strong> Every automated breaker passed at full size. The full check log is printed below, including the passes.</p><p><strong>Bottom line:</strong> St. Louis Cardinals at -112 carries a 8.3-point model edge at 1u. If the line steams past our -157 fair before first pitch, the edge is gone; pass without regret. Passing is a position too.</p></div>
       <details class="breakers" open>
-        <summary>Circuit-breaker log — every check, including the ones that passed</summary>
-        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 61.1% vs de-vigged market 51.5% — 9.6-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <summary>Circuit-breaker log: every check, including the ones that passed</summary>
+        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 61.1% vs de-vigged market 51.5%: 9.6-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article>
     <h2 class="sect">The rest of today's board</h2>
-    <p class="sectsub">3 more plays and 4 scratches, free during launch — full cards, analysis, and breaker logs one click away.</p>
+    <p class="sectsub">3 more plays and 4 scratches on today's board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
     <div class="boardteasers"><div class="tease"><span>PIT @ NYY</span><span class="tval">67% · edge +6.7 · 0.5u</span></div><div class="tease"><span>NYM @ MIL</span><span class="tval">66% · edge +8.1 · 0.5u</span></div><div class="tease"><span>BAL @ BOS</span><span class="tval">62% · edge +4.8 · 0.5u</span></div></div>
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>
-    <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a> — the whole tank is behind glass.</p></section>
+    <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a>. The whole tank is behind glass.</p></section>
 
   <section class="tab" id="tab-board">
     <div class="hero">
-      <h1>MLB Board — Wednesday, July 22, 2026</h1>
+      <h1>MLB Board: Wednesday, July 22, 2026</h1>
       <p class="sub">Every game on today's slate simulated <strong>10,000 times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why.</p>
       <div class="slateline">
         <div><b>15</b> games on slate</div>
@@ -214,8 +222,8 @@
         <div><b>2.5u</b> exposure (cap 10u)</div>
       </div>
     </div>
-    <h2 class="sect">Published plays — 2.5u total exposure</h2>
-    <p class="sectsub">The free pick is shown in full. The rest are held until they are graded — then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
+    <h2 class="sect">Published plays: 2.5u total exposure</h2>
+    <p class="sectsub">The free pick is shown in full. The rest are held until they are graded. Then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
     <div class="cards">
     <article class="card card-locked">
       <header class="cardhead">
@@ -231,8 +239,8 @@
         <div><span class="playlab">Breaker checks</span><span class="playval">4 run</span></div>
       </div>
       <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
-      timestamped in the public repository ahead of the game and publishes in full — with its
-      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
+      timestamped in the public repository ahead of the game and publishes in full, with its
+      complete breaker log, on the ledger once graded. We hold the position, never the result.</p>
     </article>
     <article class="card card-locked">
       <header class="cardhead">
@@ -248,8 +256,8 @@
         <div><span class="playlab">Breaker checks</span><span class="playval">4 run</span></div>
       </div>
       <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
-      timestamped in the public repository ahead of the game and publishes in full — with its
-      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
+      timestamped in the public repository ahead of the game and publishes in full, with its
+      complete breaker log, on the ledger once graded. We hold the position, never the result.</p>
     </article>
     <article class="card card-locked">
       <header class="cardhead">
@@ -265,8 +273,8 @@
         <div><span class="playlab">Breaker checks</span><span class="playval">4 run</span></div>
       </div>
       <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
-      timestamped in the public repository ahead of the game and publishes in full — with its
-      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
+      timestamped in the public repository ahead of the game and publishes in full, with its
+      complete breaker log, on the ledger once graded. We hold the position, never the result.</p>
     </article>
     <article class="card ">
       <header class="cardhead">
@@ -309,10 +317,10 @@
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 61.1% vs de-vigged market 51.5% — 9.6-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 61.1% vs de-vigged market 51.5%: 9.6-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article></div>
-    <h2 class="sect">Model leans — no allocation, logged for transparency</h2>
+    <h2 class="sect">Model leans: no allocation, logged for transparency</h2>
     <p class="sectsub">2 held by the Rule 8 Divergence Governor, 3 benched by the edge gate, and the rest below the confidence floor.</p>
     <div class="cards">
     <article class="card card-lean">
@@ -352,11 +360,11 @@
         <div><span class="playlab">Play</span><span class="playval">Los Angeles Dodgers ML (+120)</span></div>
         <div><span class="playlab">Confidence</span><span class="playval">76.7%</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0u — held by Rule 8</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u, held by Rule 8</span></div>
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line +120 within juice caps (road -180, home -220).</li><li>Rule 8 fired: model sees 76.7%, de-vigged market says 44.3% — a 32.4-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line +120 within juice caps (road -180, home -220).</li><li>Rule 8 fired: model sees 76.7%, de-vigged market says 44.3%: a 32.4-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article>
     <article class="card card-lean">
@@ -396,11 +404,11 @@
         <div><span class="playlab">Play</span><span class="playval">Seattle Mariners ML (-112)</span></div>
         <div><span class="playlab">Confidence</span><span class="playval">64.3%</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0u — held by Rule 8</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u, held by Rule 8</span></div>
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 fired: model sees 64.3%, de-vigged market says 51.6% — a 12.7-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 fired: model sees 64.3%, de-vigged market says 51.6%: a 12.7-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article>
     <article class="card card-lean">
@@ -440,11 +448,11 @@
         <div><span class="playlab">Play</span><span class="playval">Detroit Tigers ML (+105)</span></div>
         <div><span class="playlab">Confidence</span><span class="playval">54.5%</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0u — logged as lean only</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u, logged as lean only</span></div>
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line +105 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 54.5% vs de-vigged market 47.6% — 6.9-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line +105 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 54.5% vs de-vigged market 47.6%: 6.9-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article>
     <article class="card card-lean">
@@ -484,11 +492,11 @@
         <div><span class="playlab">Play</span><span class="playval">Athletics ML (+123)</span></div>
         <div><span class="playlab">Confidence</span><span class="playval">53.9%</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0u — logged as lean only</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u, logged as lean only</span></div>
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line +123 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 53.9% vs de-vigged market 43.7% — 10.2-point divergence within the 12-point cap.</li><li>Rule 4 flag: Gage Jump under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line +123 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 53.9% vs de-vigged market 43.7%: 10.2-point divergence within the 12-point cap.</li><li>Rule 4 flag: Gage Jump under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze: confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article>
     <article class="card card-lean">
@@ -528,11 +536,11 @@
         <div><span class="playlab">Play</span><span class="playval">Houston Astros ML (-130)</span></div>
         <div><span class="playlab">Confidence</span><span class="playval">52.2%</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0u — no edge at market price</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u, no edge at market price</span></div>
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (5 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -130 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 52.2% vs de-vigged market 55.2% — 3.0-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -4.3 pts (minimum 2). No allocation — a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line -130 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 52.2% vs de-vigged market 55.2%: 3.0-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -4.3 pts (minimum 2). No allocation; a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article>
     <article class="card card-lean">
@@ -572,11 +580,11 @@
         <div><span class="playlab">Play</span><span class="playval">San Francisco Giants ML (-103)</span></div>
         <div><span class="playlab">Confidence</span><span class="playval">50.4%</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0u — no edge at market price</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u, no edge at market price</span></div>
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (5 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -103 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 50.4% vs de-vigged market 49.5% — 0.9-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -0.3 pts (minimum 2). No allocation — a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line -103 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 50.4% vs de-vigged market 49.5%: 0.9-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -0.3 pts (minimum 2). No allocation; a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article>
     <article class="card card-lean">
@@ -616,11 +624,11 @@
         <div><span class="playlab">Play</span><span class="playval">Cleveland Guardians ML (-141)</span></div>
         <div><span class="playlab">Confidence</span><span class="playval">50.4%</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0u — no edge at market price</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u, no edge at market price</span></div>
       </div>
       <details class="breakers">
         <summary>Circuit-breaker log (5 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -141 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 50.4% vs de-vigged market 57.0% — 6.6-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -8.1 pts (minimum 2). No allocation — a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+        <ul><li>Rule 2 check passed: market line -141 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 50.4% vs de-vigged market 57.0%: 6.6-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -8.1 pts (minimum 2). No allocation; a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.</li></ul>
       </details>
     </article></div>
     <h2 class="sect">Scratched by circuit breaker</h2>
@@ -633,7 +641,7 @@
         </div>
         <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
       </header>
-      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for COL inside the pre-game window. Automatic scratch — no position.</p>
+      <p class="scratchreason"><strong>Rule 7: Late-Line Circuit Breaker.</strong> Starter TBD for COL inside the pre-game window. Automatic scratch, no position.</p>
     </article>
     <article class="card card-scratch">
       <header class="cardhead">
@@ -643,7 +651,7 @@
         </div>
         <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
       </header>
-      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for TOR inside the pre-game window. Automatic scratch — no position.</p>
+      <p class="scratchreason"><strong>Rule 7: Late-Line Circuit Breaker.</strong> Starter TBD for TOR inside the pre-game window. Automatic scratch, no position.</p>
     </article>
     <article class="card card-scratch">
       <header class="cardhead">
@@ -653,7 +661,7 @@
         </div>
         <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
       </header>
-      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for ATL inside the pre-game window. Automatic scratch — no position.</p>
+      <p class="scratchreason"><strong>Rule 7: Late-Line Circuit Breaker.</strong> Starter TBD for ATL inside the pre-game window. Automatic scratch, no position.</p>
     </article>
     <article class="card card-scratch">
       <header class="cardhead">
@@ -663,7 +671,7 @@
         </div>
         <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
       </header>
-      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for CWS, TEX inside the pre-game window. Automatic scratch — no position.</p>
+      <p class="scratchreason"><strong>Rule 7: Late-Line Circuit Breaker.</strong> Starter TBD for CWS, TEX inside the pre-game window. Automatic scratch, no position.</p>
     </article></div>
   </section>
 
@@ -673,7 +681,7 @@
     <div class="tiles">
       <div class="tile"><span class="tl">Record</span><span class="tv">0–0</span><span class="td">graded picks</span></div>
       <div class="tile"><span class="tl">Units</span><span class="tv">+0.00</span><span class="td">net P&amp;L</span></div>
-      <div class="tile"><span class="tl">ROI</span><span class="tv">—</span><span class="td">needs graded picks</span></div>
+      <div class="tile"><span class="tl">ROI</span><span class="tv">n/a</span><span class="td">needs graded picks</span></div>
       <div class="tile"><span class="tl">Pending</span><span class="tv">4</span><span class="td">2.5u at risk today</span></div></div>
     <div class="tablewrap">
     <table class="ledger">
@@ -683,33 +691,33 @@
     <td>2026-07-22</td><td>PIT @ NYY</td><td>New York Yankees ML (-149)</td>
     <td class="num">+6.7</td>
     <td class="num">0.5u</td>
-    <td class="num">—</td>
+    <td class="num">n/a</td>
     <td><span class="pend">● Pending</span></td>
   </tr>
   <tr>
     <td>2026-07-22</td><td>NYM @ MIL</td><td>Milwaukee Brewers ML (-140)</td>
     <td class="num">+8.1</td>
     <td class="num">0.5u</td>
-    <td class="num">—</td>
+    <td class="num">n/a</td>
     <td><span class="pend">● Pending</span></td>
   </tr>
   <tr>
     <td>2026-07-22</td><td>BAL @ BOS</td><td>Boston Red Sox ML (-136)</td>
     <td class="num">+4.8</td>
     <td class="num">0.5u</td>
-    <td class="num">—</td>
+    <td class="num">n/a</td>
     <td><span class="pend">● Pending</span></td>
   </tr>
   <tr>
     <td>2026-07-22</td><td>STL @ LAA</td><td>St. Louis Cardinals ML (-112)</td>
     <td class="num">+8.3</td>
     <td class="num">1u</td>
-    <td class="num">—</td>
+    <td class="num">n/a</td>
     <td><span class="pend">● Pending</span></td>
   </tr></tbody>
     </table>
     </div>
-    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks — anything we say about ROI before then is weather, not climate.</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks; anything we say about ROI before then is weather, not climate.</p>
   </section>
 
   <section class="tab" id="tab-method">
@@ -718,43 +726,43 @@
       <p>Think of the engine as a <strong>flight simulator for tonight's games</strong>. Instead of predicting one outcome, it plays each game 10,000 times and counts what happens. A team that wins 6,110 of 10,000 simulations is a 61.1% team, and the fair line falls straight out of the count. No gut feelings, no vibes; arithmetic.</p>
       <h3>What each simulation knows</h3>
       <ul>
-        <li><strong>Team run rates</strong> — runs scored and allowed per game for both clubs, live from the MLB Stats API, normalized to the league average.</li>
-        <li><strong>Starting pitchers</strong> — each starter's ERA vs league, weighted over the ~5.5 innings starters actually cover; the bullpen inherits the team's overall run prevention.</li>
-        <li><strong>Park factors</strong> — Coors Field is a hot-air balloon (1.24); T-Mobile Park is a walk-in freezer (0.92). Static season approximations, refreshed manually.</li>
-        <li><strong>Home-field advantage</strong> — an evidence-sized bump (~54% for an even matchup), not the folk-wisdom 60%.</li>
-        <li><strong>Fat-tailed scoring</strong> — runs come in bunches, so scores are drawn from a negative binomial distribution that allows crooked innings and blowouts, not a tidy bell curve.</li>
+        <li><strong>Team run rates:</strong> runs scored and allowed per game for both clubs, live from the MLB Stats API, normalized to the league average.</li>
+        <li><strong>Starting pitchers:</strong> each starter's ERA vs league, weighted over the ~5.5 innings starters actually cover; the bullpen inherits the team's overall run prevention.</li>
+        <li><strong>Park factors:</strong> Coors Field is a hot-air balloon (1.24); T-Mobile Park is a walk-in freezer (0.92). Static season approximations, refreshed manually.</li>
+        <li><strong>Home-field advantage:</strong> an evidence-sized bump (~54% for an even matchup), not the folk-wisdom 60%.</li>
+        <li><strong>Fat-tailed scoring:</strong> runs come in bunches, so scores are drawn from a negative binomial distribution that allows crooked innings and blowouts, not a tidy bell curve.</li>
       </ul>
       <h3>The market is on the card</h3>
-      <p>A probability alone isn't a bet — a bet is a probability <em>versus a price</em>. Each game carries the market line and three numbers computed from it: <strong>Edge</strong> (our win probability minus the probability implied by the offered price), <strong>EV per unit</strong>, and a <strong>quarter-Kelly</strong> stake suggestion, always capped by the risk-tier framework — the governor beats the gas pedal. Two hard gates follow: the <strong>edge gate</strong> (no allocation under a 2-point edge — a good side at a bad price is a bad bet) and <strong>Rule 8, the Divergence Governor</strong>: when our model and the de-vigged market disagree by more than 12 points, we assume the market knows something our inputs don't — lineups, injury news, form — and the play is held for manual review instead of bet harder. A model that never doubts itself is a tout with extra steps.</p>
+      <p>A probability alone isn't a bet; a bet is a probability <em>versus a price</em>. Each game carries the market line and three numbers computed from it: <strong>Edge</strong> (our win probability minus the probability implied by the offered price), <strong>EV per unit</strong>, and a <strong>quarter-Kelly</strong> stake suggestion, always capped by the risk-tier framework. The governor beats the gas pedal. Two hard gates follow: the <strong>edge gate</strong> (no allocation under a 2-point edge; a good side at a bad price is a bad bet) and <strong>Rule 8, the Divergence Governor</strong>: when our model and the de-vigged market disagree by more than 12 points, we assume the market knows something our inputs don't (lineups, injury news, form), and the play is held for manual review instead of bet harder. A model that never doubts itself is a tout with extra steps.</p>
       <h3>Then the circuit breakers get a veto</h3>
-      <p>The model proposes; eight risk rules dispose. Games with TBD starters are scratched, limited-workload starters trigger downgrades, capped juice forces run-line pivots, and every check — passed or failed — is printed on every card. That's the product.</p>
-      <h3>What this engine does <em>not</em> do — read this before betting</h3>
+      <p>The model proposes; eight risk rules dispose. Games with TBD starters are scratched, limited-workload starters trigger downgrades, capped juice forces run-line pivots, and every check, passed or failed, is printed on every card. That's the product.</p>
+      <h3>What this engine does <em>not</em> do: read this before betting</h3>
       <ul>
-        <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed — lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
-        <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet — they're flagged for human review, never silently claimed.</li>
+        <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed. Lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
+        <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet; they're flagged for human review, never silently claimed.</li>
         <li><strong>Not modeled:</strong> lineups, rest, umpires, weather. Park factors are static season approximations.</li>
       </ul>
-      <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium — the whole tank is behind glass, down to the per-date random seed (20260722) that makes every day's board reproducible.</div>
+      <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium; the whole tank is behind glass, down to the per-date random seed (20260722) that makes every day's board reproducible.</div>
     </div>
   </section>
 
   <section class="tab" id="tab-rules">
     <h2 class="sect">The eight circuit breakers</h2>
     <div class="prose"><p>Bankroll rules work like the breaker panel in your house: any single circuit can fail without burning the place down. These run on every pick, every day.</p></div>
-    <div class="rulecard"><h3>Rule 2 — High-Juice Favorite Cap <span class="badge b-auto">Automated · market lines</span></h3><p>No straight moneylines on road favorites at −180 or heavier, or home favorites past −220 — evaluated against the actual market price. The play pivots to the −1.5 run line or passes. Laying heavy juice is renting a favorite at luxury prices — the wins are small and the losses are structural.</p></div>
-    <div class="rulecard"><h3>Rule 4 — Injury Return Protocol <span class="badge b-auto">Automated (heuristic)</span></h3><p>Mandatory volume freeze on pitchers fresh off the IL or on restricted workloads. Heuristic: a starter far under the expected innings load this deep in the season triggers the freeze and a one-tier confidence downgrade.</p></div>
-    <div class="rulecard"><h3>Rule 5 — Trailing Telemetry Deviation Penalty <span class="badge b-man">Manual review</span></h3><p>Sharp velocity, spin, or efficiency drops over a starter's trailing three outings trigger a downgrade or fade. Requires a Statcast feed — flagged for human review for now.</p></div>
-    <div class="rulecard"><h3>Rule 6 — Road wOBA Suppression Multiplier <span class="badge b-man">Manual review</span></h3><p>A 12% projected-scoring tax on visitors whose rolling 3-game road wOBA trails league baseline by .035+. Requires rolling splits — manual for now.</p></div>
-    <div class="rulecard"><h3>Rule 7 — Late-Line Circuit Breaker <span class="badge b-auto">Automated</span></h3><p>Any game with a TBD starter inside the pre-game window is scratched automatically. No named starter, no position — you don't board a flight with an unnamed pilot.</p></div>
-    <div class="rulecard"><h3>Rule 8 — Divergence Governor <span class="badge b-auto">Automated</span></h3><p>If the model's win probability and the de-vigged market disagree by more than 12 points, the play is held for manual review — no allocation, no matter how juicy the "edge" looks. A huge gap isn't a gift; it's a warning that the market has priced in something our inputs haven't seen. The best defense against a model's blind spots is respecting the one opponent that never sleeps.</p></div>
+    <div class="rulecard"><h3>Rule 2: High-Juice Favorite Cap <span class="badge b-auto">Automated · market lines</span></h3><p>No straight moneylines on road favorites at −180 or heavier, or home favorites past −220, evaluated against the actual market price. The play pivots to the −1.5 run line or passes. Laying heavy juice is renting a favorite at luxury prices: the wins are small and the losses are structural.</p></div>
+    <div class="rulecard"><h3>Rule 4: Injury Return Protocol <span class="badge b-auto">Automated (heuristic)</span></h3><p>Mandatory volume freeze on pitchers fresh off the IL or on restricted workloads. Heuristic: a starter far under the expected innings load this deep in the season triggers the freeze and a one-tier confidence downgrade.</p></div>
+    <div class="rulecard"><h3>Rule 5: Trailing Telemetry Deviation Penalty <span class="badge b-man">Manual review</span></h3><p>Sharp velocity, spin, or efficiency drops over a starter's trailing three outings trigger a downgrade or fade. Requires a Statcast feed, so it is flagged for human review for now.</p></div>
+    <div class="rulecard"><h3>Rule 6: Road wOBA Suppression Multiplier <span class="badge b-man">Manual review</span></h3><p>A 12% projected-scoring tax on visitors whose rolling 3-game road wOBA trails league baseline by .035+. Requires rolling splits, so it is manual for now.</p></div>
+    <div class="rulecard"><h3>Rule 7: Late-Line Circuit Breaker <span class="badge b-auto">Automated</span></h3><p>Any game with a TBD starter inside the pre-game window is scratched automatically. No named starter, no position: you don't board a flight with an unnamed pilot.</p></div>
+    <div class="rulecard"><h3>Rule 8: Divergence Governor <span class="badge b-auto">Automated</span></h3><p>If the model's win probability and the de-vigged market disagree by more than 12 points, the play is held for manual review, with no allocation, no matter how juicy the "edge" looks. A huge gap isn't a gift; it's a warning that the market has priced in something our inputs haven't seen. The best defense against a model's blind spots is respecting the one opponent that never sleeps.</p></div>
     <div class="rulecard"><h3>Rookie Ambush Overhaul &amp; Two-Out NRFI Override <span class="badge b-na">Dormant</span></h3><p>NRFI/early-under governors (rookie launch-angle variance; #2–3 slot ISO vs high-ride fastballs). Open Ledger doesn't publish NRFI positions yet, so these breakers are dormant until that market ships.</p></div>
     <div class="rulecard"><h3>Edge Gate &amp; Bankroll Governor <span class="badge b-auto">Automated</span></h3><p>No allocation under a 2-point edge versus the offered price. Sizing is the lesser of the confidence tier (3u / 2u / 1u) and a quarter-Kelly stake, with one-tier downgrades on flags and a hard daily ceiling of 10% of bankroll across all published plays.</p></div>
   </section>
 
   <footer class="legal">
-    <p><strong>Open Ledger Sports is an analytics publication, not a sportsbook.</strong> We do not accept, place, or facilitate wagers of any kind. All content is for informational and entertainment purposes only and is not betting advice. No outcome is guaranteed — anyone promising you a lock is selling you one.</p>
+    <p><strong>Open Ledger Sports is an analytics publication, not a sportsbook.</strong> We do not accept, place, or facilitate wagers of any kind. All content is for informational and entertainment purposes only and is not betting advice. No outcome is guaranteed. Anyone promising you a lock is selling you one.</p>
     <p><strong>21+ only.</strong> If you or someone you know has a gambling problem, help is available: call or text <strong>1-800-GAMBLER</strong>. Please check the laws in your jurisdiction before wagering.</p>
-    <p>Data: MLB Stats API, snapshot 2026-07-22T15:30:00Z. Market lines: Covers.com MLB odds board (consensus lines), fetched 2026-07-22 ~16:00 UTC — lines move; verify prices at your sportsbook. Not affiliated with or endorsed by Major League Baseball. Engine 10,000 simulations per game · seed 20260722 (reproducible).</p>
+    <p>Data: MLB Stats API, snapshot 2026-07-22T15:30:00Z. Market lines: Covers.com MLB odds board (consensus lines), fetched 2026-07-22 ~16:00 UTC. Lines move; verify prices at your sportsbook. Not affiliated with or endorsed by Major League Baseball. Engine 10,000 simulations per game · seed 20260722 (reproducible).</p>
   </footer>
 </div>
 

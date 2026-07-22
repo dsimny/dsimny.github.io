@@ -66,9 +66,9 @@
    "divergence": 0.0812,
    "checks": [
     "Rule 2 check passed: market line -149 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 66.6% vs de-vigged market 58.4% \u2014 8.1-point divergence within the 12-point cap.",
-    "Rule 4 flag: Gerrit Cole under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze \u2014 confidence downgraded one tier.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rule 8 check passed: model 66.6% vs de-vigged market 58.4%: 8.1-point divergence within the 12-point cap.",
+    "Rule 4 flag: Gerrit Cole under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze: confidence downgraded one tier.",
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000,
    "published": true
@@ -131,10 +131,10 @@
    "divergence": 0.009,
    "checks": [
     "Rule 2 check passed: market line -103 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 50.4% vs de-vigged market 49.5% \u2014 0.9-point divergence within the 12-point cap.",
-    "Edge gate: model edge vs offered price is -0.3 pts (minimum 2). No allocation \u2014 a good side at a bad price is a bad bet.",
+    "Rule 8 check passed: model 50.4% vs de-vigged market 49.5%: 0.9-point divergence within the 12-point cap.",
+    "Edge gate: model edge vs offered price is -0.3 pts (minimum 2). No allocation; a good side at a bad price is a bad bet.",
     "Rule 4 check passed: both starters carry full-season workloads.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000
   },
@@ -196,9 +196,9 @@
    "divergence": 0.096,
    "checks": [
     "Rule 2 check passed: market line -140 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 66.5% vs de-vigged market 56.9% \u2014 9.6-point divergence within the 12-point cap.",
-    "Rule 4 flag: Christian Scott, Logan Henderson under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze \u2014 confidence downgraded one tier.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rule 8 check passed: model 66.5% vs de-vigged market 56.9%: 9.6-point divergence within the 12-point cap.",
+    "Rule 4 flag: Christian Scott, Logan Henderson under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze: confidence downgraded one tier.",
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000,
    "published": true
@@ -261,9 +261,9 @@
    "divergence": 0.1023,
    "checks": [
     "Rule 2 check passed: market line +123 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 53.9% vs de-vigged market 43.7% \u2014 10.2-point divergence within the 12-point cap.",
-    "Rule 4 flag: Gage Jump under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze \u2014 confidence downgraded one tier.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rule 8 check passed: model 53.9% vs de-vigged market 43.7%: 10.2-point divergence within the 12-point cap.",
+    "Rule 4 flag: Gage Jump under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze: confidence downgraded one tier.",
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000
   },
@@ -325,9 +325,9 @@
    "divergence": 0.1267,
    "checks": [
     "Rule 2 check passed: market line -112 within juice caps (road -180, home -220).",
-    "Rule 8 fired: model sees 64.3%, de-vigged market says 51.6% \u2014 a 12.7-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.",
+    "Rule 8 fired: model sees 64.3%, de-vigged market says 51.6%: a 12.7-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.",
     "Rule 4 check passed: both starters carry full-season workloads.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000
   },
@@ -389,9 +389,9 @@
    "divergence": 0.096,
    "checks": [
     "Rule 2 check passed: market line -112 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 61.1% vs de-vigged market 51.5% \u2014 9.6-point divergence within the 12-point cap.",
+    "Rule 8 check passed: model 61.1% vs de-vigged market 51.5%: 9.6-point divergence within the 12-point cap.",
     "Rule 4 check passed: both starters carry full-season workloads.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000,
    "published": true
@@ -454,10 +454,10 @@
    "divergence": -0.0663,
    "checks": [
     "Rule 2 check passed: market line -141 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 50.4% vs de-vigged market 57.0% \u2014 6.6-point divergence within the 12-point cap.",
-    "Edge gate: model edge vs offered price is -8.1 pts (minimum 2). No allocation \u2014 a good side at a bad price is a bad bet.",
+    "Rule 8 check passed: model 50.4% vs de-vigged market 57.0%: 6.6-point divergence within the 12-point cap.",
+    "Edge gate: model edge vs offered price is -8.1 pts (minimum 2). No allocation; a good side at a bad price is a bad bet.",
     "Rule 4 check passed: both starters carry full-season workloads.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000
   },
@@ -519,9 +519,9 @@
    "divergence": 0.3239,
    "checks": [
     "Rule 2 check passed: market line +120 within juice caps (road -180, home -220).",
-    "Rule 8 fired: model sees 76.7%, de-vigged market says 44.3% \u2014 a 32.4-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.",
+    "Rule 8 fired: model sees 76.7%, de-vigged market says 44.3%: a 32.4-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.",
     "Rule 4 check passed: both starters carry full-season workloads.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000
   },
@@ -583,9 +583,9 @@
    "divergence": 0.0616,
    "checks": [
     "Rule 2 check passed: market line -136 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 62.4% vs de-vigged market 56.2% \u2014 6.2-point divergence within the 12-point cap.",
-    "Rule 4 flag: Dean Kremer, Jake Bennett under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze \u2014 confidence downgraded one tier.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rule 8 check passed: model 62.4% vs de-vigged market 56.2%: 6.2-point divergence within the 12-point cap.",
+    "Rule 4 flag: Dean Kremer, Jake Bennett under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze: confidence downgraded one tier.",
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000,
    "published": true
@@ -648,9 +648,9 @@
    "divergence": 0.0687,
    "checks": [
     "Rule 2 check passed: market line +105 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 54.5% vs de-vigged market 47.6% \u2014 6.9-point divergence within the 12-point cap.",
+    "Rule 8 check passed: model 54.5% vs de-vigged market 47.6%: 6.9-point divergence within the 12-point cap.",
     "Rule 4 check passed: both starters carry full-season workloads.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000
   },
@@ -712,10 +712,10 @@
    "divergence": -0.0301,
    "checks": [
     "Rule 2 check passed: market line -130 within juice caps (road -180, home -220).",
-    "Rule 8 check passed: model 52.2% vs de-vigged market 55.2% \u2014 3.0-point divergence within the 12-point cap.",
-    "Edge gate: model edge vs offered price is -4.3 pts (minimum 2). No allocation \u2014 a good side at a bad price is a bad bet.",
+    "Rule 8 check passed: model 52.2% vs de-vigged market 55.2%: 3.0-point divergence within the 12-point cap.",
+    "Edge gate: model edge vs offered price is -4.3 pts (minimum 2). No allocation; a good side at a bad price is a bad bet.",
     "Rule 4 check passed: both starters carry full-season workloads.",
-    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required \u2014 Statcast feed not wired in v0.1."
+    "Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1."
    ],
    "n_sims": 10000
   }
@@ -727,8 +727,8 @@
    "abbr": "WSH @ COL",
    "utc": "2026-07-22T19:10:00Z",
    "venue": "Coors Field",
-   "rule": "Rule 7 \u2014 Late-Line Circuit Breaker",
-   "reason": "Starter TBD for COL inside the pre-game window. Automatic scratch \u2014 no position."
+   "rule": "Rule 7: Late-Line Circuit Breaker",
+   "reason": "Starter TBD for COL inside the pre-game window. Automatic scratch, no position."
   },
   {
    "gamePk": 822784,
@@ -736,8 +736,8 @@
    "abbr": "TB @ TOR",
    "utc": "2026-07-22T23:07:00Z",
    "venue": "Rogers Centre",
-   "rule": "Rule 7 \u2014 Late-Line Circuit Breaker",
-   "reason": "Starter TBD for TOR inside the pre-game window. Automatic scratch \u2014 no position."
+   "rule": "Rule 7: Late-Line Circuit Breaker",
+   "reason": "Starter TBD for TOR inside the pre-game window. Automatic scratch, no position."
   },
   {
    "gamePk": 824896,
@@ -745,8 +745,8 @@
    "abbr": "SD @ ATL",
    "utc": "2026-07-22T23:15:00Z",
    "venue": "Truist Park",
-   "rule": "Rule 7 \u2014 Late-Line Circuit Breaker",
-   "reason": "Starter TBD for ATL inside the pre-game window. Automatic scratch \u2014 no position."
+   "rule": "Rule 7: Late-Line Circuit Breaker",
+   "reason": "Starter TBD for ATL inside the pre-game window. Automatic scratch, no position."
   },
   {
    "gamePk": 822873,
@@ -754,8 +754,8 @@
    "abbr": "CWS @ TEX",
    "utc": "2026-07-23T00:05:00Z",
    "venue": "Globe Life Field",
-   "rule": "Rule 7 \u2014 Late-Line Circuit Breaker",
-   "reason": "Starter TBD for CWS, TEX inside the pre-game window. Automatic scratch \u2014 no position."
+   "rule": "Rule 7: Late-Line Circuit Breaker",
+   "reason": "Starter TBD for CWS, TEX inside the pre-game window. Automatic scratch, no position."
   }
  ],
  "published_units": 2.5,

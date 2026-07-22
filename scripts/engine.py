@@ -117,8 +117,8 @@ def main():
                 "matchup": f'{away["name"]} @ {home["name"]}',
                 "abbr": f'{away["abbr"]} @ {home["abbr"]}',
                 "utc": g["utc"], "venue": g["venue"],
-                "rule": "Rule 7 — Late-Line Circuit Breaker",
-                "reason": f'Starter TBD for {", ".join(side)} inside the pre-game window. Automatic scratch — no position.'
+                "rule": "Rule 7: Late-Line Circuit Breaker",
+                "reason": f'Starter TBD for {", ".join(side)} inside the pre-game window. Automatic scratch, no position.'
             })
             continue
 
@@ -202,7 +202,7 @@ def main():
         if (not pick_home and cap_line <= ROAD_FAV_CAP) or (pick_home and cap_line <= HOME_FAV_CAP):
             rule2 = True
             rl_prob = rl_home_m15 if pick_home else float(((a_runs - h_runs) > 1.5).mean())
-            checks.append(f'Rule 2 fired: {cap_src} line {cap_line:+d} exceeds juice cap — pivoted off the moneyline to {pick_team["abbr"]} -1.5 (covers {rl_prob:.1%} of sims).')
+            checks.append(f'Rule 2 fired: {cap_src} line {cap_line:+d} exceeds juice cap: pivoted off the moneyline to {pick_team["abbr"]} -1.5 (covers {rl_prob:.1%} of sims).')
             pick_label = f'{pick_team["name"]} -1.5 run line'
             pick_prob = rl_prob
         else:
@@ -213,27 +213,27 @@ def main():
         if divergence is not None:
             if abs(divergence) > DIVERGENCE_CAP:
                 rule8 = True
-                checks.append(f'Rule 8 fired: model sees {pick_prob:.1%}, de-vigged market says {p_mkt_devig:.1%} — a {abs(divergence)*100:.1f}-point divergence (cap {DIVERGENCE_CAP*100:.0f}). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.')
+                checks.append(f'Rule 8 fired: model sees {pick_prob:.1%}, de-vigged market says {p_mkt_devig:.1%}: a {abs(divergence)*100:.1f}-point divergence (cap {DIVERGENCE_CAP*100:.0f}). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.')
             else:
-                checks.append(f'Rule 8 check passed: model {pick_prob:.1%} vs de-vigged market {p_mkt_devig:.1%} — {abs(divergence)*100:.1f}-point divergence within the {DIVERGENCE_CAP*100:.0f}-point cap.')
+                checks.append(f'Rule 8 check passed: model {pick_prob:.1%} vs de-vigged market {p_mkt_devig:.1%}: {abs(divergence)*100:.1f}-point divergence within the {DIVERGENCE_CAP*100:.0f}-point cap.')
 
         # ---- Edge gate (v0.2) ----
         no_edge = False
         if edge is not None and edge < MIN_EDGE and not rule8:
             no_edge = True
-            checks.append(f'Edge gate: model edge vs offered price is {edge*100:+.1f} pts (minimum {MIN_EDGE*100:.0f}). No allocation — a good side at a bad price is a bad bet.')
+            checks.append(f'Edge gate: model edge vs offered price is {edge*100:+.1f} pts (minimum {MIN_EDGE*100:.0f}). No allocation; a good side at a bad price is a bad bet.')
 
         # ---- Rule 4 heuristic: limited-workload starters ----
         flags4 = [sp["name"] for sp in (a_sp, h_sp) if sp["ip"] < LOW_IP_THRESHOLD]
         downgraded = False
         if flags4:
             downgraded = True
-            checks.append(f'Rule 4 flag: {", ".join(flags4)} under {LOW_IP_THRESHOLD:.0f} IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.')
+            checks.append(f'Rule 4 flag: {", ".join(flags4)} under {LOW_IP_THRESHOLD:.0f} IP this deep in the season (limited workload / possible IL return). Volume freeze: confidence downgraded one tier.')
         else:
             checks.append('Rule 4 check passed: both starters carry full-season workloads.')
 
         # ---- Rules 3/5/6: not automated in v0.1 — say so ----
-        checks.append('Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.')
+        checks.append('Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.')
 
         tier, units = risk_tier(pick_prob)
         if downgraded and units > 0:
@@ -286,7 +286,7 @@ def main():
             exposure += b["units"]; b["published"] = True; published.append(b)
         else:
             b["published"] = False
-            b["checks"].append("Daily exposure cap: 10% bankroll ceiling reached — logged as model lean only, no allocation.")
+            b["checks"].append("Daily exposure cap: 10% bankroll ceiling reached; logged as model lean only, no allocation.")
 
     out = {
         "date": DATE,

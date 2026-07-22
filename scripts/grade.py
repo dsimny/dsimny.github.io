@@ -87,7 +87,7 @@ def main():
         }
         if sc is None or not sc.get("final") or sc.get("away") is None:
             entry.update(result="VOID", pnl=0.0,
-                         note="Game not final (postponed/suspended) — stake returned.")
+                         note="Game not final (postponed/suspended); stake returned.")
         else:
             a_ab, h_ab = b["abbr"].split(" @ ")
             pick_is_home = b["pick_team_abbr"] == h_ab
@@ -96,7 +96,7 @@ def main():
             odds = b.get("mkt_odds")
             if odds is None:
                 odds = fair_pick_odds(b)
-                entry["note"] = "No market odds logged — graded at model fair line."
+                entry["note"] = "No market odds logged; graded at model fair line."
             entry["final_score"] = f'{sc["away"]}-{sc["home"]}'
             if won:
                 entry.update(result="WIN", pnl=round(b["units"] * american_to_b(odds), 3))

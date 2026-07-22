@@ -4,6 +4,9 @@ MLB picks site with a real Monte Carlo engine and an append-only public ledger.
 Brand thesis: radical transparency ("the aquarium, not the magic show") — the
 site publishes its record, its rules, its limitations, and its losses.
 Live repo: github.com/dsimny/dsimny.github.io (GitHub Pages serves index.html).
+Live site: https://openledgersports.com (custom domain; www and the
+dsimny.github.io URL both 301 to the apex). Local working copy lives at
+claude-code-projects/openledger-sports.
 
 ## Architecture (daily pipeline, runs via GitHub Actions)
 
@@ -74,13 +77,30 @@ Deps: `pip install -r requirements.txt` (numpy, requests).
 
 ## Current deploy status (as of 2026-07-22)
 
-Files pushed incl. both workflows (added manually — browser upload drops
-`.github/`). Remaining first-time setup: rename repo to dsimny.github.io if not
-done; enable Pages; set workflow permissions read/write; add secrets/variable;
-manually run "Morning board" once and check the Actions log. fetch_data.py is
-the ONE untested-live component (built against real API responses from
-2026-07-22 but never executed with network) — debug its first run before
-touching anything else.
+DEPLOYED AND VERIFIED. The earlier note that files were "pushed incl. both
+workflows" was wrong — the repo held only a stub README; the browser upload
+never landed. Everything was re-pushed via git (which does not drop
+`.github/`). Setup complete: repo renamed, Pages live, custom domain with
+HTTPS, ODDS_API_KEY and SITE_URL set.
+
+fetch_data.py is no longer untested — the first live run pulled 15 real games
+from the MLB Stats API and the full pipeline (fetch → engine → build → commit)
+went green.
+
+Known-good local test: the engine reproduces a committed board byte-for-byte
+from the per-date seed, and grade.py refuses to double-grade a date.
+
+The 2026-07-22 board/snapshot that shipped with the deploy kit are SAMPLE
+data — they credit "Covers.com" and carry a future timestamp, neither of
+which the code produces (fetch_data.py calls api.the-odds-api.com). The first
+real morning run overwrites both. If the site ever shows Covers.com as the
+odds source again, it is serving sample data and the run did not happen.
+
+Gotcha worth remembering: the scripts date everything by US Eastern, so
+triggering "Morning board" late at night builds a board for a slate that has
+already been played. The 2026-07-21 board created that way was removed before
+grading so the ledger would not open with picks that were never live before
+first pitch. Only run it manually between midnight ET and first pitch.
 
 ## Roadmap (in trust-building order)
 

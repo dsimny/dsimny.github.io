@@ -74,10 +74,27 @@ Built and tested 2026-07-22. Server, both channels, both webhooks and the
 invite are all live. Remaining prerequisite: Whop (or equivalent) for payments
 and members-channel access, when the record justifies charging.
 
-Phase 1 is still the blocker for actual exclusivity. Until the board is
-committed encrypted, these same picks stay readable in data/board_*.json
-before first pitch, so members are getting convenience and presentation
-rather than information nobody else can reach.
+Phase 1 shipped later the same day, so from the 2026-07-23 board onward the
+premium picks really are exclusive rather than merely presented differently.
+
+## Whop, as of 2026-07-22
+
+- Product "Open Ledger Sports Member", $30/month, NO trial. A three day trial
+  hands over three full days of a product whose whole value is daily, and the
+  public ledger already serves as the free evidence.
+- Checkout link: https://whop.com/checkout/plan_KIbsXvPUXlf3X (live, public,
+  unlisted only because nothing points at it).
+- Discord app connected: grants the "Members" role, removes it on cancel.
+- "Assign this role after past due bill" left EMPTY on purpose. It was briefly
+  set to "Members", which would have granted premium access to people whose
+  payment had just failed. Nothing would have errored.
+- Event log goes to the private #ols-log channel, so grants and revokes are
+  visible rather than silent.
+- Outstanding: identity verification for payouts, and proving that a real
+  purchase actually produces the role.
+
+To go live on the site, set the repo variable WHOP_CHECKOUT_URL to the
+checkout link. The upgrade button appears on the next build, and not before.
 
 ## Phase 3 — site changes
 

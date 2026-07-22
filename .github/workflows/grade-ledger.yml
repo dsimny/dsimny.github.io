@@ -1,0 +1,40 @@
+name: Grade ledger
+# Runs daily at 08:10 UTC (4:10 AM ET) — after the last West Coast game ends.
+# Grades yesterday's published picks against final scores and updates the
+# append-only ledger, then rebuilds the site so the record is live by morning.
+on:
+  schedule:
+    - cron: "10 8 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Grade yesterday's picks
+        run: python scripts/grade.py
+      - name: Rebuild site with updated ledger
+        run: |
+          # Rebuild against the most recent board so the ledger tab refreshes.
+          LATEST=$(ls data/board_*.json 2>/dev/null | sort | tail -1 | sed -E 's/.*board_(.*)\.json/\1/')
+          if [ -n "$LATEST" ]; then python scripts/build_site.py "$LATEST"; fi
+      - name: Post results recap to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
+          SITE_URL: ${{ vars.SITE_URL }}                            # optional
+        run: python scripts/post_discord.py recap
+      - name: Commit ledger and site
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/ index.html
+          git diff --cached --quiet || git commit -m "Grade $(date -u -d yesterday +%F)"
+          git push

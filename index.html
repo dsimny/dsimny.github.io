@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Ledger Sports — Every pick on the record</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --surface2:#222220;
+    --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --ring:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926;
+    --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+  }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--page); color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.55; }
+  a { color:var(--s1); }
+  .wrap { max-width:1060px; margin:0 auto; padding:0 20px; }
+  header.site { position:sticky; top:0; z-index:10; background:rgba(13,13,13,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--grid); }
+  .sitebar { display:flex; align-items:center; gap:24px; padding:14px 0 4px; flex-wrap:wrap; }
+  .wordmark { font-weight:800; letter-spacing:0.04em; font-size:1.05rem; }
+  .wordmark .open { color:var(--s1); }
+  .wordmark small { display:block; font-weight:500; font-size:0.62rem; letter-spacing:0.14em; color:var(--muted); text-transform:uppercase; }
+  nav.tabs { display:flex; gap:4px; margin-left:auto; flex-wrap:wrap; }
+  nav.tabs button { background:none; border:none; color:var(--ink2); font:inherit; font-size:0.86rem; padding:7px 13px; border-radius:8px; cursor:pointer; }
+  nav.tabs button:hover { background:var(--surface2); }
+  nav.tabs button.active { background:var(--surface2); color:var(--ink); font-weight:650; }
+  .ledgerstrip { font-size:0.76rem; color:var(--muted); width:100%; padding-bottom:10px; }
+  .ledgerstrip b { color:var(--ink); }
+  section.tab { display:none; padding:10px 0 40px; }
+  section.tab.active { display:block; }
+  h2.sect { font-size:1.02rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:26px 0 12px; }
+  .sectsub { color:var(--muted); font-size:0.82rem; margin:-6px 0 12px; }
+  .kicker { display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:5px 12px; border-radius:99px; margin-bottom:14px; }
+  .hero { padding:28px 0 6px; }
+  .hero h1 { font-size:1.7rem; line-height:1.18; letter-spacing:-0.01em; }
+  .hero p.sub { color:var(--ink2); margin-top:8px; max-width:64ch; }
+  .slateline { display:flex; gap:26px; flex-wrap:wrap; margin:18px 0 6px; padding:14px 18px; background:var(--surface); border:1px solid var(--ring); border-radius:12px; }
+  .slateline div { font-size:0.85rem; color:var(--muted); }
+  .slateline b { display:block; font-size:1.15rem; color:var(--ink); font-weight:700; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(460px,1fr)); gap:14px; }
+  @media (max-width:520px) { .cards { grid-template-columns:1fr; } }
+  .card { background:var(--surface); border:1px solid var(--ring); border-radius:14px; padding:18px 18px 14px; }
+  .card-lean { opacity:0.82; }
+  .card-scratch { border-style:dashed; }
+  .freecard { border-color:rgba(57,135,229,0.45); box-shadow:0 0 0 1px rgba(57,135,229,0.18); padding:22px; margin:16px 0; }
+  .cardhead { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; flex-wrap:wrap; }
+  .cardhead h3 { font-size:1.0rem; }
+  .freecard .cardhead h2 { font-size:1.25rem; }
+  .at { color:var(--muted); font-weight:400; }
+  .meta { color:var(--muted); font-size:0.78rem; margin-top:2px; }
+  .flags { display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; }
+  .flag { font-size:0.66rem; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:99px; background:var(--surface2); border:1px solid var(--ring); color:var(--warn); }
+  .flag-scr { color:var(--crit); } .flag-ok { color:var(--good); } .flag-free { color:var(--s1); }
+  .pitchers { display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }
+  .pitchers em { color:var(--muted); font-style:normal; font-size:0.75rem; }
+  .vs { color:var(--muted); font-size:0.7rem; }
+  .probrow { display:flex; align-items:center; gap:10px; margin:10px 0 2px; }
+  .problab { font-size:0.75rem; color:var(--ink2); min-width:74px; font-variant-numeric:tabular-nums; }
+  .problab:last-child { text-align:right; }
+  .probbar { flex:1; display:flex; gap:2px; }
+  .seg { border-radius:4px; } .segA { background:var(--s1); } .segH { background:var(--s2); }
+  .statrow { display:grid; grid-template-columns:repeat(3,1fr); gap:8px 10px; margin-top:12px; }
+  .playrow { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
+  @media (max-width:560px) { .statrow, .playrow { grid-template-columns:repeat(2,1fr); } }
+  .edge-pos { color:var(--good); } .edge-neg { color:var(--crit); }
+  .stlab, .playlab { display:block; font-size:0.64rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted); }
+  .stval, .playval { font-size:0.9rem; font-weight:650; font-variant-numeric:tabular-nums; }
+  .stval em { font-style:normal; font-weight:400; color:var(--muted); font-size:0.76rem; }
+  .playrow { background:var(--surface2); border-radius:10px; padding:10px 12px; }
+  .tierchip { font-size:0.8rem; }
+  .tier-safe { color:var(--good); } .tier-value { color:var(--warn); } .tier-long { color:var(--serious); } .tier-pass { color:var(--muted); }
+  details.breakers { margin-top:12px; border-top:1px solid var(--grid); padding-top:8px; }
+  details.breakers summary { font-size:0.78rem; color:var(--ink2); cursor:pointer; }
+  details.breakers ul { margin:8px 0 2px 18px; font-size:0.78rem; color:var(--ink2); }
+  details.breakers li { margin-bottom:5px; }
+  .scratchreason { font-size:0.84rem; color:var(--ink2); margin-top:10px; }
+  .schema { background:var(--surface2); border-radius:12px; padding:16px 18px; margin-top:16px; font-size:0.92rem; }
+  .schema div { display:flex; gap:10px; padding:4px 0; }
+  .schema .k { min-width:118px; color:var(--muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.07em; padding-top:2px; }
+  .schema .v { font-weight:600; }
+  .analysis { margin-top:16px; }
+  .analysis h3 { font-size:0.78rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:8px; }
+  .analysis p { color:var(--ink2); font-size:0.93rem; margin-bottom:10px; }
+  .analysis strong { color:var(--ink); }
+  .boardteasers { display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 6px; }
+  .tease { background:var(--surface); border:1px solid var(--ring); border-radius:10px; padding:10px 14px; font-size:0.8rem; color:var(--ink2); display:flex; flex-direction:column; gap:2px; }
+  .tease .tval { color:var(--muted); font-size:0.72rem; }
+  .boardcta { display:inline-block; margin:10px 0 0; background:var(--s1); color:#fff; border:none; font:inherit; font-weight:700; font-size:0.9rem; padding:11px 20px; border-radius:10px; cursor:pointer; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:20px; }
+  .tile { background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:16px; }
+  .tile .tl { display:block; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted); }
+  .tile .tv { display:block; font-size:1.7rem; font-weight:750; margin-top:2px; }
+  .tile .td { display:block; font-size:0.74rem; color:var(--muted); }
+  table.ledger { width:100%; border-collapse:collapse; font-size:0.84rem; background:var(--surface); border:1px solid var(--ring); border-radius:12px; overflow:hidden; }
+  table.ledger th { text-align:left; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); padding:10px 12px; border-bottom:1px solid var(--grid); }
+  table.ledger td { padding:9px 12px; border-bottom:1px solid var(--grid); }
+  table.ledger tr:last-child td { border-bottom:none; }
+  td.num { font-variant-numeric:tabular-nums; }
+  .pend { color:var(--warn); font-size:0.78rem; }
+  .res-w { color:var(--good); font-size:0.78rem; } .res-l { color:var(--crit); font-size:0.78rem; } .res-v { color:var(--muted); font-size:0.78rem; }
+  .tablewrap { overflow-x:auto; }
+  .prose { max-width:74ch; }
+  .prose h3 { margin:24px 0 8px; font-size:1.02rem; }
+  .prose p { margin-bottom:12px; color:var(--ink2); }
+  .prose p strong, .prose li strong { color:var(--ink); }
+  .prose ul { margin:0 0 12px 20px; color:var(--ink2); }
+  .prose li { margin-bottom:6px; }
+  .callout { background:var(--surface); border:1px solid var(--ring); border-left:3px solid var(--s1); border-radius:10px; padding:14px 16px; margin:16px 0; color:var(--ink2); font-size:0.9rem; }
+  .rulecard { background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:16px 18px; margin-bottom:12px; }
+  .rulecard h3 { font-size:0.95rem; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .rulecard p { color:var(--ink2); font-size:0.87rem; margin-top:6px; }
+  .badge { font-size:0.62rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:3px 9px; border-radius:99px; border:1px solid var(--ring); }
+  .b-auto { color:var(--good); } .b-man { color:var(--warn); } .b-na { color:var(--muted); }
+  footer.legal { border-top:1px solid var(--grid); padding:26px 0 40px; margin-top:20px; }
+  footer.legal p { font-size:0.76rem; color:var(--muted); max-width:90ch; margin-bottom:8px; }
+  footer.legal strong { color:var(--ink2); }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap sitebar">
+  <div class="wordmark"><span class="open">OPEN LEDGER</span> SPORTS<small>Every pick on the record. Every rule in public.</small></div>
+  <nav class="tabs" role="tablist">
+    <button class="active" data-tab="free">Free Pick</button>
+    <button data-tab="board">Today's Board</button>
+    <button data-tab="ledger">The Ledger</button>
+    <button data-tab="method">Methodology</button>
+    <button data-tab="rules">The Rules</button>
+  </nav>
+  <div class="ledgerstrip">Ledger: <b>0–0</b> · <b>+0.00u</b> · opened Jul 22, 2026 · today: <b>4</b> plays, <b>2.5u</b> exposure</div>
+</div></header>
+
+<div class="wrap">
+  <section class="tab active" id="tab-free">
+    <div class="hero">
+      <span class="kicker">★ Free Pick of the Day — Wednesday, July 22, 2026</span>
+      <h1>St. Louis Cardinals <span class="at">@</span> Los Angeles Angels</h1>
+      <p class="sub">Every day, one pick free and in full — complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same 10,000 simulations, measured against real market prices — and logged on the public ledger before first pitch.</p>
+    </div>
+    <article class="card freecard">
+      <header class="cardhead">
+        <div>
+          <h2>St. Louis Cardinals <span class="at">@</span> Los Angeles Angels</h2>
+          <p class="meta">4:07 PM ET · Angel Stadium · park factor 1.00</p>
+        </div>
+        <div class="flags"><span class="flag flag-ok">✓ ALL BREAKERS CLEAR</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Michael McGreevy <em>2.92 ERA · 1.10 WHIP · 108 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Reid Detmers <em>4.16 ERA · 1.12 WHIP · 114.2 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">STL 61.1%</span>
+        <div class="probbar" style="height:16px" role="img" aria-label="Win probability: STL 61.1 percent, LAA 38.9 percent">
+          <div class="seg segA" style="width:61.1%"></div>
+          <div class="seg segH" style="width:38.9%"></div>
+        </div>
+        <span class="problab">LAA 38.9%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">5–3.8</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">-157 / +157</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-112 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+8.3 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+15.7%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">8.8 <em>(38% over 9)</em></span></div>
+        <div><span class="stlab">Simulations</span><span class="stval">10,000</span></div>
+      </div>
+      <div class="schema">
+        <div><span class="k">🗓️ Date</span><span class="v">Wednesday, July 22, 2026</span></div>
+        <div><span class="k">⚾ League</span><span class="v">MLB</span></div>
+        <div><span class="k">Game</span><span class="v">St. Louis Cardinals vs. Los Angeles Angels</span></div>
+        <div><span class="k">Play</span><span class="v">St. Louis Cardinals ML (-112)</span></div>
+        <div><span class="k">Confidence</span><span class="v">61.1%</span></div>
+        <div><span class="k">Edge</span><span class="v edge-pos">+8.3 pts vs the -112 consensus price</span></div>
+        <div><span class="k">Risk level</span><span class="v tier-long">🔴 High Risk (Longshot)</span></div>
+        <div><span class="k">Suggested bet</span><span class="v">1 unit (1% bankroll) — quarter-Kelly suggests 4.4% of bankroll; the tier cap governs it down to 1u</span></div>
+      </div>
+      <div class="analysis"><h3>Analysis</h3><p><strong>The mound tilts this game.</strong> Michael McGreevy brings a 2.92 ERA and 1.10 WHIP over 108 innings against Reid Detmers at 4.16 (1.12 WHIP). A 1.2-run ERA gap, weighted over the ~5.5 innings a starter covers, moves real win probability before anyone swings. Baserunners are kindling — the 1.10-vs-1.12 WHIP spread decides whose innings stay quiet.</p><p><strong>The clubs, the park, the count.</strong> St. Louis Cardinals (42-34) score 4.63 and allow 4.57 runs a game; Los Angeles Angels (32-48) score 4.53 and allow 5.04. In a neutral park (factor 1.00), 10,000 simulations land on a 5–3.8 average score, with St. Louis Cardinals winning <strong>61.1%</strong> of them — a fair price of <strong>-157</strong>.</p><p><strong>The market price is the point.</strong> The consensus line is <strong>-112</strong> against our -157 fair — a <strong>+8.3-point edge</strong> and <strong>+15.7% EV per unit</strong> at the listed price. Rule 8 checked the disagreement with the de-vigged market: 9.6 points, inside the 12-point cap — a disagreement, not a delusion. Quarter-Kelly would size this at 4.4% of bankroll; the tier framework governs it to <strong>1u</strong>. The governor beats the gas pedal.</p><p><strong>Breaker sheet:</strong> Every automated breaker passed at full size — the full check log is printed below, including the passes.</p><p><strong>Bottom line:</strong> St. Louis Cardinals at -112 carries a 8.3-point model edge at 1u. If the line steams past our -157 fair before first pitch, the edge is gone — pass without regret. Passing is a position too.</p></div>
+      <details class="breakers" open>
+        <summary>Circuit-breaker log — every check, including the ones that passed</summary>
+        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 61.1% vs de-vigged market 51.5% — 9.6-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <h2 class="sect">The rest of today's board</h2>
+    <p class="sectsub">3 more plays and 4 scratches, free during launch — full cards, analysis, and breaker logs one click away.</p>
+    <div class="boardteasers"><div class="tease"><span>PIT @ NYY</span><span class="tval">67% · edge +6.7 · 0.5u</span></div><div class="tease"><span>NYM @ MIL</span><span class="tval">66% · edge +8.1 · 0.5u</span></div><div class="tease"><span>BAL @ BOS</span><span class="tval">62% · edge +4.8 · 0.5u</span></div></div>
+    <div><button class="boardcta" data-goto="board">See the full board →</button></div>
+    <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a> — the whole tank is behind glass.</p></section>
+
+  <section class="tab" id="tab-board">
+    <div class="hero">
+      <h1>MLB Board — Wednesday, July 22, 2026</h1>
+      <p class="sub">Every game on today's slate simulated <strong>10,000 times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why.</p>
+      <div class="slateline">
+        <div><b>15</b> games on slate</div>
+        <div><b>11</b> simulated (10,000× each)</div>
+        <div><b>4</b> scratched (Rule 7)</div>
+        <div><b>2</b> held by Rule 8</div>
+        <div><b>4</b> plays published</div>
+        <div><b>2.5u</b> exposure (cap 10u)</div>
+      </div>
+    </div>
+    <h2 class="sect">Published plays — 2.5u total exposure</h2>
+    <div class="cards">
+    <article class="card ">
+      <header class="cardhead">
+        <div>
+          <h3>Pittsburgh Pirates <span class="at">@</span> New York Yankees</h3>
+          <p class="meta">1:35 PM ET · Yankee Stadium · park factor 1.03</p>
+        </div>
+        <div class="flags"><span class="flag">R4 FLAG</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Mitch Keller <em>5.14 ERA · 103.1 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Gerrit Cole <em>3.93 ERA · 55 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">PIT 33.4%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: PIT 33.4 percent, NYY 66.6 percent">
+          <div class="seg segA" style="width:33.4%"></div>
+          <div class="seg segH" style="width:66.6%"></div>
+        </div>
+        <span class="problab">NYY 66.6%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">4–6.4</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">+199 / -199</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-149 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+6.7 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+11.2%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">10.4 <em>(50% over 9)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">New York Yankees ML (-149)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">66.6%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-long">🔴 Longshot</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0.5u (0.5% bankroll)</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -149 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 66.6% vs de-vigged market 58.4% — 8.1-point divergence within the 12-point cap.</li><li>Rule 4 flag: Gerrit Cole under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card ">
+      <header class="cardhead">
+        <div>
+          <h3>New York Mets <span class="at">@</span> Milwaukee Brewers</h3>
+          <p class="meta">2:10 PM ET · American Family Field · park factor 0.99</p>
+        </div>
+        <div class="flags"><span class="flag">R4 FLAG</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Christian Scott <em>2.87 ERA · 59.2 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Logan Henderson <em>2.97 ERA · 33.1 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">NYM 33.5%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: NYM 33.5 percent, MIL 66.5 percent">
+          <div class="seg segA" style="width:33.5%"></div>
+          <div class="seg segH" style="width:66.5%"></div>
+        </div>
+        <span class="problab">MIL 66.5%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">2.6–4.2</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">+198 / -198</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-140 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+8.1 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+14.0%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">6.9 <em>(22% over 9)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Milwaukee Brewers ML (-140)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">66.5%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-long">🔴 Longshot</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0.5u (0.5% bankroll)</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -140 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 66.5% vs de-vigged market 56.9% — 9.6-point divergence within the 12-point cap.</li><li>Rule 4 flag: Christian Scott, Logan Henderson under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card ">
+      <header class="cardhead">
+        <div>
+          <h3>Baltimore Orioles <span class="at">@</span> Boston Red Sox</h3>
+          <p class="meta">7:10 PM ET · Fenway Park · park factor 1.06</p>
+        </div>
+        <div class="flags"><span class="flag">R4 FLAG</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Dean Kremer <em>4.15 ERA · 26 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Jake Bennett <em>2.35 ERA · 53.2 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">BAL 37.6%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: BAL 37.6 percent, BOS 62.4 percent">
+          <div class="seg segA" style="width:37.6%"></div>
+          <div class="seg segH" style="width:62.4%"></div>
+        </div>
+        <span class="problab">BOS 62.4%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">3.2–4.5</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">+166 / -166</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-136 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+4.8 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+8.3%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">7.7 <em>(37% over 8)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Boston Red Sox ML (-136)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">62.4%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-long">🔴 Longshot</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0.5u (0.5% bankroll)</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -136 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 62.4% vs de-vigged market 56.2% — 6.2-point divergence within the 12-point cap.</li><li>Rule 4 flag: Dean Kremer, Jake Bennett under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card ">
+      <header class="cardhead">
+        <div>
+          <h3>St. Louis Cardinals <span class="at">@</span> Los Angeles Angels</h3>
+          <p class="meta">4:07 PM ET · Angel Stadium · park factor 1.00</p>
+        </div>
+        <div class="flags"><span class="flag flag-free">★ FREE PICK</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Michael McGreevy <em>2.92 ERA · 108 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Reid Detmers <em>4.16 ERA · 114.2 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">STL 61.1%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: STL 61.1 percent, LAA 38.9 percent">
+          <div class="seg segA" style="width:61.1%"></div>
+          <div class="seg segH" style="width:38.9%"></div>
+        </div>
+        <span class="problab">LAA 38.9%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">5–3.8</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">-157 / +157</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-112 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+8.3 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+15.7%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">8.8 <em>(38% over 9)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">St. Louis Cardinals ML (-112)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">61.1%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-long">🔴 Longshot</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">1u (1% bankroll)</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 61.1% vs de-vigged market 51.5% — 9.6-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article></div>
+    <h2 class="sect">Model leans — no allocation, logged for transparency</h2>
+    <p class="sectsub">2 held by the Rule 8 Divergence Governor, 3 benched by the edge gate, and the rest below the confidence floor.</p>
+    <div class="cards">
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>Los Angeles Dodgers <span class="at">@</span> Philadelphia Phillies</h3>
+          <p class="meta">6:40 PM ET · Citizens Bank Park · park factor 1.01</p>
+        </div>
+        <div class="flags"><span class="flag flag-scr">R8 DIVERGENCE</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Justin Wrobleski <em>2.62 ERA · 106.1 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Aaron Nola <em>5.68 ERA · 103 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">LAD 76.7%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: LAD 76.7 percent, PHI 23.3 percent">
+          <div class="seg segA" style="width:76.7%"></div>
+          <div class="seg segH" style="width:23.3%"></div>
+        </div>
+        <span class="problab">PHI 23.3%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">5.9–2.6</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">-330 / +330</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">+120 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+31.3 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+68.8%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">8.5 <em>(43% over 8.5)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Los Angeles Dodgers ML (+120)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">76.7%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u — held by Rule 8</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line +120 within juice caps (road -180, home -220).</li><li>Rule 8 fired: model sees 76.7%, de-vigged market says 44.3% — a 32.4-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>Cincinnati Reds <span class="at">@</span> Seattle Mariners</h3>
+          <p class="meta">3:40 PM ET · T-Mobile Park · park factor 0.92</p>
+        </div>
+        <div class="flags"><span class="flag flag-scr">R8 DIVERGENCE</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Brady Singer <em>4.56 ERA · 96.2 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Emerson Hancock <em>3.17 ERA · 99.1 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">CIN 35.7%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: CIN 35.7 percent, SEA 64.3 percent">
+          <div class="seg segA" style="width:35.7%"></div>
+          <div class="seg segH" style="width:64.3%"></div>
+        </div>
+        <span class="problab">SEA 64.3%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">2.9–4.3</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">+180 / -180</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-112 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+11.5 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+21.7%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">7.2 <em>(40% over 7.5)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Seattle Mariners ML (-112)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">64.3%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u — held by Rule 8</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -112 within juice caps (road -180, home -220).</li><li>Rule 8 fired: model sees 64.3%, de-vigged market says 51.6% — a 12.7-point divergence (cap 12). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>Detroit Tigers <span class="at">@</span> Chicago Cubs</h3>
+          <p class="meta">8:10 PM ET · Wrigley Field · park factor 1.02</p>
+        </div>
+        <div class="flags"></div>
+      </header>
+      <div class="pitchers">
+        <span>Keider Montero <em>3.22 ERA · 100.2 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Colin Rea <em>4.74 ERA · 100.2 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">DET 54.5%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: DET 54.5 percent, CHC 45.5 percent">
+          <div class="seg segA" style="width:54.5%"></div>
+          <div class="seg segH" style="width:45.5%"></div>
+        </div>
+        <span class="problab">CHC 45.5%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">4.4–3.9</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">-120 / +120</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">+105 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+5.7 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+11.7%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">8.2 <em>(42% over 8.5)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Detroit Tigers ML (+105)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">54.5%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u — logged as lean only</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line +105 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 54.5% vs de-vigged market 47.6% — 6.9-point divergence within the 12-point cap.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>Athletics <span class="at">@</span> Arizona Diamondbacks</h3>
+          <p class="meta">3:40 PM ET · Chase Field · park factor 1.05</p>
+        </div>
+        <div class="flags"><span class="flag">R4 FLAG</span></div>
+      </header>
+      <div class="pitchers">
+        <span>Gage Jump <em>3.78 ERA · 52.1 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Merrill Kelly <em>5.20 ERA · 98.2 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">ATH 53.9%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: ATH 53.9 percent, AZ 46.1 percent">
+          <div class="seg segA" style="width:53.9%"></div>
+          <div class="seg segH" style="width:46.1%"></div>
+        </div>
+        <span class="problab">AZ 46.1%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">5.6–5.1</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">-117 / +117</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">+123 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+9.1 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+20.2%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">10.7 <em>(52% over 9.5)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Athletics ML (+123)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">53.9%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u — logged as lean only</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (4 checks)</summary>
+        <ul><li>Rule 2 check passed: market line +123 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 53.9% vs de-vigged market 43.7% — 10.2-point divergence within the 12-point cap.</li><li>Rule 4 flag: Gage Jump under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>Miami Marlins <span class="at">@</span> Houston Astros</h3>
+          <p class="meta">8:10 PM ET · Daikin Park · park factor 0.97</p>
+        </div>
+        <div class="flags"></div>
+      </header>
+      <div class="pitchers">
+        <span>Sandy Alcantara <em>3.89 ERA · 136.2 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Peter Lambert <em>3.03 ERA · 92 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">MIA 47.8%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: MIA 47.8 percent, HOU 52.2 percent">
+          <div class="seg segA" style="width:47.8%"></div>
+          <div class="seg segH" style="width:52.2%"></div>
+        </div>
+        <span class="problab">HOU 52.2%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">3.9–4.1</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">+109 / -109</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-130 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-neg">-4.3 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-neg">-7.7%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">7.9 <em>(31% over 9)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Houston Astros ML (-130)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">52.2%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u — no edge at market price</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (5 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -130 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 52.2% vs de-vigged market 55.2% — 3.0-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -4.3 pts (minimum 2). No allocation — a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>San Francisco Giants <span class="at">@</span> Kansas City Royals</h3>
+          <p class="meta">2:10 PM ET · Kauffman Stadium · park factor 1.03</p>
+        </div>
+        <div class="flags"></div>
+      </header>
+      <div class="pitchers">
+        <span>Landen Roupp <em>3.98 ERA · 104 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Seth Lugo <em>4.39 ERA · 110.2 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">SF 50.4%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: SF 50.4 percent, KC 49.6 percent">
+          <div class="seg segA" style="width:50.4%"></div>
+          <div class="seg segH" style="width:49.6%"></div>
+        </div>
+        <span class="problab">KC 49.6%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">4.6–4.6</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">-102 / +102</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-103 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-neg">-0.3 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-neg">-0.6%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">9.1 <em>(40% over 9.5)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">San Francisco Giants ML (-103)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">50.4%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u — no edge at market price</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (5 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -103 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 50.4% vs de-vigged market 49.5% — 0.9-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -0.3 pts (minimum 2). No allocation — a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article>
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>Minnesota Twins <span class="at">@</span> Cleveland Guardians</h3>
+          <p class="meta">6:40 PM ET · Progressive Field · park factor 0.97</p>
+        </div>
+        <div class="flags"></div>
+      </header>
+      <div class="pitchers">
+        <span>Bailey Ober <em>4.32 ERA · 77 IP</em></span>
+        <span class="vs">vs</span>
+        <span>Slade Cecconi <em>4.55 ERA · 99 IP</em></span>
+      </div>
+      
+      <div class="probrow">
+        <span class="problab">MIN 49.6%</span>
+        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: MIN 49.6 percent, CLE 50.4 percent">
+          <div class="seg segA" style="width:49.6%"></div>
+          <div class="seg segH" style="width:50.4%"></div>
+        </div>
+        <span class="problab">CLE 50.4%</span>
+      </div>
+      
+      <div class="statrow">
+        <div><span class="stlab">Projected</span><span class="stval">4.5–4.5</span></div>
+        <div><span class="stlab">Model fair</span><span class="stval">+102 / -102</span></div>
+        
+        <div><span class="stlab">Market line</span><span class="stval">-141 <em>consensus</em></span></div>
+        <div><span class="stlab">Edge vs price</span><span class="stval edge-neg">-8.1 pts</span></div>
+        <div><span class="stlab">EV per 1u</span><span class="stval edge-neg">-13.8%</span></div>
+        <div><span class="stlab">Sim total</span><span class="stval">8.9 <em>(48% over 8)</em></span></div>
+        
+      </div>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval">Cleveland Guardians ML (-141)</span></div>
+        <div><span class="playlab">Confidence</span><span class="playval">50.4%</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip tier-pass">⚪ Pass</span></div>
+        <div><span class="playlab">Suggested</span><span class="playval">0u — no edge at market price</span></div>
+      </div>
+      <details class="breakers">
+        <summary>Circuit-breaker log (5 checks)</summary>
+        <ul><li>Rule 2 check passed: market line -141 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 50.4% vs de-vigged market 57.0% — 6.6-point divergence within the 12-point cap.</li><li>Edge gate: model edge vs offered price is -8.1 pts (minimum 2). No allocation — a good side at a bad price is a bad bet.</li><li>Rule 4 check passed: both starters carry full-season workloads.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
+      </details>
+    </article></div>
+    <h2 class="sect">Scratched by circuit breaker</h2>
+    <div class="cards">
+    <article class="card card-scratch">
+      <header class="cardhead">
+        <div>
+          <h3>Washington Nationals <span class="at">@</span> Colorado Rockies</h3>
+          <p class="meta">3:10 PM ET · Coors Field</p>
+        </div>
+        <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
+      </header>
+      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for COL inside the pre-game window. Automatic scratch — no position.</p>
+    </article>
+    <article class="card card-scratch">
+      <header class="cardhead">
+        <div>
+          <h3>Tampa Bay Rays <span class="at">@</span> Toronto Blue Jays</h3>
+          <p class="meta">7:07 PM ET · Rogers Centre</p>
+        </div>
+        <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
+      </header>
+      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for TOR inside the pre-game window. Automatic scratch — no position.</p>
+    </article>
+    <article class="card card-scratch">
+      <header class="cardhead">
+        <div>
+          <h3>San Diego Padres <span class="at">@</span> Atlanta Braves</h3>
+          <p class="meta">7:15 PM ET · Truist Park</p>
+        </div>
+        <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
+      </header>
+      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for ATL inside the pre-game window. Automatic scratch — no position.</p>
+    </article>
+    <article class="card card-scratch">
+      <header class="cardhead">
+        <div>
+          <h3>Chicago White Sox <span class="at">@</span> Texas Rangers</h3>
+          <p class="meta">8:05 PM ET · Globe Life Field</p>
+        </div>
+        <div class="flags"><span class="flag flag-scr">⛔ SCRATCH</span></div>
+      </header>
+      <p class="scratchreason"><strong>Rule 7 — Late-Line Circuit Breaker.</strong> Starter TBD for CWS, TEX inside the pre-game window. Automatic scratch — no position.</p>
+    </article></div>
+  </section>
+
+  <section class="tab" id="tab-ledger">
+    <h2 class="sect">The public ledger</h2>
+    <div class="callout"><strong>The ledger opened July 22, 2026 at 0–0.</strong> No backfilled hot streaks, no screenshots, no deleted losses. Every pick is timestamped and logged before first pitch with the market line and unit size, graded automatically against final scores overnight, and never edited. Judge us on the full column, not the highlight reel.</div>
+    <div class="tiles">
+      <div class="tile"><span class="tl">Record</span><span class="tv">0–0</span><span class="td">graded picks</span></div>
+      <div class="tile"><span class="tl">Units</span><span class="tv">+0.00</span><span class="td">net P&amp;L</span></div>
+      <div class="tile"><span class="tl">ROI</span><span class="tv">—</span><span class="td">needs graded picks</span></div>
+      <div class="tile"><span class="tl">Pending</span><span class="tv">4</span><span class="td">2.5u at risk today</span></div></div>
+    <div class="tablewrap">
+    <table class="ledger">
+      <thead><tr><th>Date</th><th>Game</th><th>Pick</th><th>Edge</th><th>Units</th><th>P&amp;L</th><th>Result</th></tr></thead>
+      <tbody>
+  <tr>
+    <td>2026-07-22</td><td>PIT @ NYY</td><td>New York Yankees ML (-149)</td>
+    <td class="num">+6.7</td>
+    <td class="num">0.5u</td>
+    <td class="num">—</td>
+    <td><span class="pend">● Pending</span></td>
+  </tr>
+  <tr>
+    <td>2026-07-22</td><td>NYM @ MIL</td><td>Milwaukee Brewers ML (-140)</td>
+    <td class="num">+8.1</td>
+    <td class="num">0.5u</td>
+    <td class="num">—</td>
+    <td><span class="pend">● Pending</span></td>
+  </tr>
+  <tr>
+    <td>2026-07-22</td><td>BAL @ BOS</td><td>Boston Red Sox ML (-136)</td>
+    <td class="num">+4.8</td>
+    <td class="num">0.5u</td>
+    <td class="num">—</td>
+    <td><span class="pend">● Pending</span></td>
+  </tr>
+  <tr>
+    <td>2026-07-22</td><td>STL @ LAA</td><td>St. Louis Cardinals ML (-112)</td>
+    <td class="num">+8.3</td>
+    <td class="num">1u</td>
+    <td class="num">—</td>
+    <td><span class="pend">● Pending</span></td>
+  </tr></tbody>
+    </table>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks — anything we say about ROI before then is weather, not climate.</p>
+  </section>
+
+  <section class="tab" id="tab-method">
+    <h2 class="sect">How the engine works</h2>
+    <div class="prose">
+      <p>Think of the engine as a <strong>flight simulator for tonight's games</strong>. Instead of predicting one outcome, it plays each game 10,000 times and counts what happens. A team that wins 6,110 of 10,000 simulations is a 61.1% team, and the fair line falls straight out of the count. No gut feelings, no vibes; arithmetic.</p>
+      <h3>What each simulation knows</h3>
+      <ul>
+        <li><strong>Team run rates</strong> — runs scored and allowed per game for both clubs, live from the MLB Stats API, normalized to the league average.</li>
+        <li><strong>Starting pitchers</strong> — each starter's ERA vs league, weighted over the ~5.5 innings starters actually cover; the bullpen inherits the team's overall run prevention.</li>
+        <li><strong>Park factors</strong> — Coors Field is a hot-air balloon (1.24); T-Mobile Park is a walk-in freezer (0.92). Static season approximations, refreshed manually.</li>
+        <li><strong>Home-field advantage</strong> — an evidence-sized bump (~54% for an even matchup), not the folk-wisdom 60%.</li>
+        <li><strong>Fat-tailed scoring</strong> — runs come in bunches, so scores are drawn from a negative binomial distribution that allows crooked innings and blowouts, not a tidy bell curve.</li>
+      </ul>
+      <h3>The market is on the card</h3>
+      <p>A probability alone isn't a bet — a bet is a probability <em>versus a price</em>. Each game carries the market line and three numbers computed from it: <strong>Edge</strong> (our win probability minus the probability implied by the offered price), <strong>EV per unit</strong>, and a <strong>quarter-Kelly</strong> stake suggestion, always capped by the risk-tier framework — the governor beats the gas pedal. Two hard gates follow: the <strong>edge gate</strong> (no allocation under a 2-point edge — a good side at a bad price is a bad bet) and <strong>Rule 8, the Divergence Governor</strong>: when our model and the de-vigged market disagree by more than 12 points, we assume the market knows something our inputs don't — lineups, injury news, form — and the play is held for manual review instead of bet harder. A model that never doubts itself is a tout with extra steps.</p>
+      <h3>Then the circuit breakers get a veto</h3>
+      <p>The model proposes; eight risk rules dispose. Games with TBD starters are scratched, limited-workload starters trigger downgrades, capped juice forces run-line pivots, and every check — passed or failed — is printed on every card. That's the product.</p>
+      <h3>What this engine does <em>not</em> do — read this before betting</h3>
+      <ul>
+        <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed — lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
+        <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet — they're flagged for human review, never silently claimed.</li>
+        <li><strong>Not modeled:</strong> lineups, rest, umpires, weather. Park factors are static season approximations.</li>
+      </ul>
+      <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium — the whole tank is behind glass, down to the per-date random seed (20260722) that makes every day's board reproducible.</div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-rules">
+    <h2 class="sect">The eight circuit breakers</h2>
+    <div class="prose"><p>Bankroll rules work like the breaker panel in your house: any single circuit can fail without burning the place down. These run on every pick, every day.</p></div>
+    <div class="rulecard"><h3>Rule 2 — High-Juice Favorite Cap <span class="badge b-auto">Automated · market lines</span></h3><p>No straight moneylines on road favorites at −180 or heavier, or home favorites past −220 — evaluated against the actual market price. The play pivots to the −1.5 run line or passes. Laying heavy juice is renting a favorite at luxury prices — the wins are small and the losses are structural.</p></div>
+    <div class="rulecard"><h3>Rule 4 — Injury Return Protocol <span class="badge b-auto">Automated (heuristic)</span></h3><p>Mandatory volume freeze on pitchers fresh off the IL or on restricted workloads. Heuristic: a starter far under the expected innings load this deep in the season triggers the freeze and a one-tier confidence downgrade.</p></div>
+    <div class="rulecard"><h3>Rule 5 — Trailing Telemetry Deviation Penalty <span class="badge b-man">Manual review</span></h3><p>Sharp velocity, spin, or efficiency drops over a starter's trailing three outings trigger a downgrade or fade. Requires a Statcast feed — flagged for human review for now.</p></div>
+    <div class="rulecard"><h3>Rule 6 — Road wOBA Suppression Multiplier <span class="badge b-man">Manual review</span></h3><p>A 12% projected-scoring tax on visitors whose rolling 3-game road wOBA trails league baseline by .035+. Requires rolling splits — manual for now.</p></div>
+    <div class="rulecard"><h3>Rule 7 — Late-Line Circuit Breaker <span class="badge b-auto">Automated</span></h3><p>Any game with a TBD starter inside the pre-game window is scratched automatically. No named starter, no position — you don't board a flight with an unnamed pilot.</p></div>
+    <div class="rulecard"><h3>Rule 8 — Divergence Governor <span class="badge b-auto">Automated</span></h3><p>If the model's win probability and the de-vigged market disagree by more than 12 points, the play is held for manual review — no allocation, no matter how juicy the "edge" looks. A huge gap isn't a gift; it's a warning that the market has priced in something our inputs haven't seen. The best defense against a model's blind spots is respecting the one opponent that never sleeps.</p></div>
+    <div class="rulecard"><h3>Rookie Ambush Overhaul &amp; Two-Out NRFI Override <span class="badge b-na">Dormant</span></h3><p>NRFI/early-under governors (rookie launch-angle variance; #2–3 slot ISO vs high-ride fastballs). Open Ledger doesn't publish NRFI positions yet, so these breakers are dormant until that market ships.</p></div>
+    <div class="rulecard"><h3>Edge Gate &amp; Bankroll Governor <span class="badge b-auto">Automated</span></h3><p>No allocation under a 2-point edge versus the offered price. Sizing is the lesser of the confidence tier (3u / 2u / 1u) and a quarter-Kelly stake, with one-tier downgrades on flags and a hard daily ceiling of 10% of bankroll across all published plays.</p></div>
+  </section>
+
+  <footer class="legal">
+    <p><strong>Open Ledger Sports is an analytics publication, not a sportsbook.</strong> We do not accept, place, or facilitate wagers of any kind. All content is for informational and entertainment purposes only and is not betting advice. No outcome is guaranteed — anyone promising you a lock is selling you one.</p>
+    <p><strong>21+ only.</strong> If you or someone you know has a gambling problem, help is available: call or text <strong>1-800-GAMBLER</strong>. Please check the laws in your jurisdiction before wagering.</p>
+    <p>Data: MLB Stats API, snapshot 2026-07-22T15:30:00Z. Market lines: Covers.com MLB odds board (consensus lines), fetched 2026-07-22 ~16:00 UTC — lines move; verify prices at your sportsbook. Not affiliated with or endorsed by Major League Baseball. Engine 10,000 simulations per game · seed 20260722 (reproducible).</p>
+  </footer>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll("nav.tabs button");
+  const sections = document.querySelectorAll("section.tab");
+  function goTab(name) {
+    tabs.forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    sections.forEach(s => s.classList.toggle("active", s.id === "tab-" + name));
+    window.scrollTo({top: 0});
+  }
+  tabs.forEach(btn => btn.addEventListener("click", () => goTab(btn.dataset.tab)));
+  document.querySelectorAll("[data-goto]").forEach(el => el.addEventListener("click", e => {
+    e.preventDefault(); goTab(el.dataset.goto);
+  }));
+  const hash = location.hash.replace("#", "");
+  if (["free","board","ledger","method","rules"].includes(hash)) goTab(hash);
+</script>
+</body>
+</html>

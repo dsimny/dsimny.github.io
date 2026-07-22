@@ -15,6 +15,11 @@ ET = ZoneInfo("America/New_York")
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ET).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
+# Optional, same graceful-skip pattern as the Discord webhook: set the repo
+# variable DISCORD_INVITE_URL and the join prompts appear. Leave it unset and
+# the site simply renders without them, never with a dead link.
+DISCORD_INVITE = os.environ.get("DISCORD_INVITE_URL", "").strip()
+
 with open(os.path.join(ROOT, "data", f"board_{DATE}.json"), encoding="utf-8") as f:
     B = json.load(f)
 ledger = {"entries": [], "aggregates": None}
@@ -251,10 +256,22 @@ def scratch_card(s):
     </article>'''
 
 # ---------------- free pick section ----------------
+# Renders only when DISCORD_INVITE_URL is set, so the site never ships a dead
+# "join" button. Deliberately makes no promise about record or profit.
+join_block = f'''
+    <div class="join">
+      <p class="joinlead">The held plays go out in the Discord before first pitch.</p>
+      <p class="joinsub">Every one of them lands on the public ledger afterwards either way, win or lose. The ledger is the pitch; go read it before you decide we are worth following.</p>
+      <a class="joinbtn" href="{DISCORD_INVITE}" rel="noopener">Join the Discord</a>
+    </div>''' if DISCORD_INVITE else ""
+
 def tease(b):
-    edge_txt = f' · edge {b["edge"]*100:+.1f}' if b["edge"] is not None else ""
+    # Matchup and risk tier only. Printing confidence, edge and unit size here
+    # gave away most of a held play: on a two-team game, a stated confidence
+    # points straight at the side.
+    _, icon = TIER_META[b["risk_tier"]]
     return (f'<div class="tease"><span>{b["abbr"]}</span>'
-            f'<span class="tval">{b["confidence"]*100:.0f}%{edge_txt} · {b["units"]:g}u</span></div>')
+            f'<span class="tval">{icon} held</span></div>')
 teasers = "".join(tease(b) for b in plays if b is not free)
 
 if free is not None:
@@ -276,7 +293,7 @@ if free is not None:
       <span class="kicker">★ Free Pick of the Day</span>
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>{f_away} <span class="at">@</span> {f_home}</h1>
-      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
+      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays are held until they have been graded, then published in full, winners and losers alike, on <a href="#" data-goto="ledger">the ledger</a>. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
     </div>
     <article class="card freecard">
       <header class="cardhead">
@@ -312,6 +329,7 @@ if free is not None:
     <h2 class="sect">The rest of today's board</h2>
     <p class="sectsub">{max(len(plays)-1,0)} more plays and {len(scratches)} scratches on today's board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
     <div class="boardteasers">{teasers}</div>
+    {join_block}
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>
     <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a>. The whole tank is behind glass.</p>'''
 else:
@@ -430,6 +448,10 @@ html = f'''<!DOCTYPE html>
   .flag-lock {{ color:var(--s1); }}
   .card-locked {{ border-style:dashed; }}
   .lockedval {{ color:var(--ink2); font-style:italic; }}
+  .join {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-radius:14px; background:var(--surface); }}
+  .joinlead {{ font-weight:700; font-size:0.98rem; }}
+  .joinsub {{ margin-top:6px; font-size:0.83rem; color:var(--ink2); line-height:1.55; max-width:60ch; }}
+  .joinbtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s1); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
   .lockednote {{ margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }}
   .pitchers {{ display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }}
   .pitchers em {{ color:var(--muted); font-style:normal; font-size:0.75rem; }}

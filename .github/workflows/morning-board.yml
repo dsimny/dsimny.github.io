@@ -25,6 +25,8 @@ jobs:
       - name: Run engine (10,000 sims/game + circuit breakers)
         run: python scripts/engine.py
       - name: Build site
+        env:
+          DISCORD_INVITE_URL: ${{ vars.DISCORD_INVITE_URL }}   # optional — join prompt is omitted when unset
         run: python scripts/build_site.py
       - name: Post free pick to Discord
         env:

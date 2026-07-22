@@ -66,6 +66,10 @@
   .flag-lock { color:var(--s1); }
   .card-locked { border-style:dashed; }
   .lockedval { color:var(--ink2); font-style:italic; }
+  .join { margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-radius:14px; background:var(--surface); }
+  .joinlead { font-weight:700; font-size:0.98rem; }
+  .joinsub { margin-top:6px; font-size:0.83rem; color:var(--ink2); line-height:1.55; max-width:60ch; }
+  .joinbtn { display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s1); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }
   .lockednote { margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }
   .pitchers { display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }
   .pitchers em { color:var(--muted); font-style:normal; font-size:0.75rem; }
@@ -153,7 +157,7 @@
       <span class="kicker">★ Free Pick of the Day</span>
       <span class="kickerdate">Wednesday, July 22, 2026</span>
       <h1>St. Louis Cardinals <span class="at">@</span> Los Angeles Angels</h1>
-      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same 10,000 simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
+      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays are held until they have been graded, then published in full, winners and losers alike, on <a href="#" data-goto="ledger">the ledger</a>. Same engine, same 10,000 simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
     </div>
     <article class="card freecard">
       <header class="cardhead">
@@ -206,7 +210,8 @@
     </article>
     <h2 class="sect">The rest of today's board</h2>
     <p class="sectsub">3 more plays and 4 scratches on today's board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
-    <div class="boardteasers"><div class="tease"><span>PIT @ NYY</span><span class="tval">67% · edge +6.7 · 0.5u</span></div><div class="tease"><span>NYM @ MIL</span><span class="tval">66% · edge +8.1 · 0.5u</span></div><div class="tease"><span>BAL @ BOS</span><span class="tval">62% · edge +4.8 · 0.5u</span></div></div>
+    <div class="boardteasers"><div class="tease"><span>PIT @ NYY</span><span class="tval">🔴 held</span></div><div class="tease"><span>NYM @ MIL</span><span class="tval">🔴 held</span></div><div class="tease"><span>BAL @ BOS</span><span class="tval">🔴 held</span></div></div>
+    
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>
     <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a>. The whole tank is behind glass.</p></section>
 

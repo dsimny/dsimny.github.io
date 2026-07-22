@@ -22,6 +22,8 @@ jobs:
       - name: Grade yesterday's picks
         run: python scripts/grade.py
       - name: Rebuild site with updated ledger
+        env:
+          DISCORD_INVITE_URL: ${{ vars.DISCORD_INVITE_URL }}   # optional — join prompt is omitted when unset
         run: |
           # Rebuild against the most recent board so the ledger tab refreshes.
           LATEST=$(ls data/board_*.json 2>/dev/null | sort | tail -1 | sed -E 's/.*board_(.*)\.json/\1/')

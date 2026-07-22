@@ -50,7 +50,7 @@ Watch out for:
 - House rule 1 still applies: the ledger stays append-only. Nothing about
   this phase may make a loss easier to drop.
 
-## Phase 2 — deliver the premium plays
+## Phase 2 — deliver the premium plays — DONE 2026-07-22
 
 - New mode in `post_discord.py`: `board` — posts every published play with
   full card detail (pick, price, edge, units, breaker log).
@@ -63,11 +63,14 @@ Watch out for:
 - Both posts must skip gracefully when their webhook is unset, exactly as the
   current code does — a missing webhook must never fail a run.
 
-Prerequisites Daniel needs to set up:
-- A Discord server with two channels (public + members).
-- Two webhooks, saved as the two secrets above.
-- Whop (or equivalent) for payments and members-channel access, when the
-  record justifies charging.
+Built and tested 2026-07-22. Server, both channels, both webhooks and the
+invite are all live. Remaining prerequisite: Whop (or equivalent) for payments
+and members-channel access, when the record justifies charging.
+
+Phase 1 is still the blocker for actual exclusivity. Until the board is
+committed encrypted, these same picks stay readable in data/board_*.json
+before first pitch, so members are getting convenience and presentation
+rather than information nobody else can reach.
 
 ## Phase 3 — site changes
 

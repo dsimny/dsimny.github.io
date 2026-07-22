@@ -27,6 +27,7 @@ jobs:
       - name: Rebuild site with updated ledger
         env:
           DISCORD_INVITE_URL: ${{ vars.DISCORD_INVITE_URL }}   # optional — join prompt is omitted when unset
+          WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}   # optional — upgrade button omitted when unset
         run: |
           # Rebuild against the most recent board so the ledger tab refreshes.
           # Matches .enc as well as .json: today's board is still encrypted at

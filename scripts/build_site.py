@@ -22,6 +22,12 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 # the site simply renders without them, never with a dead link.
 DISCORD_INVITE = os.environ.get("DISCORD_INVITE_URL", "").strip()
 
+# The paid tier stays invisible until WHOP_CHECKOUT_URL is set, so the site
+# never advertises something that cannot be bought. Price lives here rather
+# than inline so it only has to change in one place.
+PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
+PREMIUM_PRICE = "$30/month"
+
 B = crypto_box.load_dataset(ROOT, "board", DATE)
 if B is None:
     raise SystemExit(f"No board for {DATE}. Run engine.py first.")
@@ -272,6 +278,19 @@ commit_block = f'''
       If the two match, nothing was altered once the games were underway. That is the whole guarantee, and you do not have to take our word for any of it.</p>
     </div>''' if COMMITMENT else ""
 
+# Deliberately promises access and disclosure, never profit. The ledger is the
+# only claim we are entitled to make, and it is public either way.
+upgrade_block = f'''
+    <div class="upgrade">
+      <p class="joinlead">Premium: the whole board, before first pitch.</p>
+      <p class="joinsub">Every play we allocate, with the side, the price, the sizing, the edge and the
+      full circuit-breaker log, in Discord before the games start. {PREMIUM_PRICE}.</p>
+      <p class="joinsub">Every one of them still publishes on the public ledger after grading, winners
+      and losers alike, so you can check the record before you pay and keep checking after. If the
+      ledger is not good enough to justify this, do not buy it.</p>
+      <a class="upgradebtn" href="{PREMIUM_URL}" rel="noopener">Go premium</a>
+    </div>''' if PREMIUM_URL else ""
+
 # ---------------- free pick section ----------------
 # Renders only when DISCORD_INVITE_URL is set, so the site never ships a dead
 # "join" button. Deliberately makes no promise about record or profit.
@@ -346,6 +365,7 @@ if free is not None:
     <h2 class="sect">The rest of today's board</h2>
     <p class="sectsub">{max(len(plays)-1,0)} more plays and {len(scratches)} scratches on today's board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
     <div class="boardteasers">{teasers}</div>
+    {upgrade_block}
     {join_block}
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>
     <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a>. The whole tank is behind glass.</p>'''
@@ -477,6 +497,8 @@ html = f'''<!DOCTYPE html>
   .commitlead {{ font-weight:700; font-size:0.92rem; }}
   .commitsub {{ margin-top:6px; font-size:0.8rem; color:var(--ink2); line-height:1.5; max-width:70ch; }}
   .commithash {{ display:block; margin:10px 0; padding:8px 10px; border-radius:8px; background:var(--page); border:1px solid var(--grid); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:0.72rem; color:var(--s1); word-break:break-all; }}
+  .upgrade {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--s1); border-radius:14px; background:var(--surface); }}
+  .upgradebtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--good); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
   .join {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-radius:14px; background:var(--surface); }}
   .joinlead {{ font-weight:700; font-size:0.98rem; }}
   .joinsub {{ margin-top:6px; font-size:0.83rem; color:var(--ink2); line-height:1.55; max-width:60ch; }}
@@ -581,6 +603,7 @@ html = f'''<!DOCTYPE html>
     {commit_block}
     <h2 class="sect">Published plays: {B["published_units"]:g}u total exposure</h2>
     <p class="sectsub">The free pick is shown in full. The rest go to premium members before first pitch. Every one of them, winners and losers alike, publishes on the ledger with its full breaker log once graded.</p>
+    {upgrade_block}
     <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today. Nothing cleared the gates. Passing is a position.</p>"}</div>
     <h2 class="sect">Model leans: no allocation, logged for transparency</h2>
     <p class="sectsub">{n_r8} held by the Rule 8 Divergence Governor, {n_noedge} benched by the edge gate, and the rest below the confidence floor.</p>

@@ -234,16 +234,16 @@ def locked_card(b):
           <h3>{away_name} <span class="at">@</span> {home_name}</h3>
           <p class="meta">{et_time(b["utc"])} · {b["venue"]}</p>
         </div>
-        <div class="flags"><span class="flag flag-lock">🔒 HELD</span></div>
+        <div class="flags"><span class="flag flag-lock">🔒 PREMIUM</span></div>
       </header>
       <div class="playrow">
         <div><span class="playlab">Play</span><span class="playval lockedval">Premium Only</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip {cls}">{icon} {tier_short}</span></div>
         <div><span class="playlab">Breaker checks</span><span class="playval">{len(b["checks"])} run</span></div>
       </div>
-      <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
-      timestamped in the public repository ahead of the game and publishes in full, with its
-      complete breaker log, on the ledger once graded. We hold the position, never the result.</p>
+      <p class="lockednote">Side, price, and sizing go to premium members before first pitch. The
+      pick is timestamped in the public repository ahead of the game and publishes in full, with
+      its complete breaker log, on the ledger once graded. We hold the position, never the result.</p>
     </article>'''
 
 def scratch_card(s):
@@ -288,7 +288,7 @@ def tease(b):
     # points straight at the side.
     _, icon = TIER_META[b["risk_tier"]]
     return (f'<div class="tease"><span>{b["abbr"]}</span>'
-            f'<span class="tval">{icon} held</span></div>')
+            f'<span class="tval">{icon} premium</span></div>')
 teasers = "".join(tease(b) for b in plays if b is not free)
 
 if free is not None:
@@ -310,7 +310,7 @@ if free is not None:
       <span class="kicker">★ Free Pick of the Day</span>
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>{f_away} <span class="at">@</span> {f_home}</h1>
-      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays are held until they have been graded, then published in full, winners and losers alike, on <a href="#" data-goto="ledger">the ledger</a>. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
+      <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>strong play, but not our Play of the Day</strong>: the top-confidence plays go to premium members before first pitch, then publish in full, winners and losers alike, on <a href="#" data-goto="ledger">the ledger</a> once graded. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
     </div>
     <article class="card freecard">
       <header class="cardhead">
@@ -580,7 +580,7 @@ html = f'''<!DOCTYPE html>
     </div>
     {commit_block}
     <h2 class="sect">Published plays: {B["published_units"]:g}u total exposure</h2>
-    <p class="sectsub">The free pick is shown in full. The rest are held until they are graded. Then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
+    <p class="sectsub">The free pick is shown in full. The rest go to premium members before first pitch. Every one of them, winners and losers alike, publishes on the ledger with its full breaker log once graded.</p>
     <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today. Nothing cleared the gates. Passing is a position.</p>"}</div>
     <h2 class="sect">Model leans: no allocation, logged for transparency</h2>
     <p class="sectsub">{n_r8} held by the Rule 8 Divergence Governor, {n_noedge} benched by the edge gate, and the rest below the confidence floor.</p>

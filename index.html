@@ -32,7 +32,10 @@
   section.tab.active { display:block; }
   h2.sect { font-size:1.02rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:26px 0 12px; }
   .sectsub { color:var(--muted); font-size:0.82rem; margin:-6px 0 12px; }
-  .kicker { display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:5px 12px; border-radius:99px; margin-bottom:14px; }
+  /* Deliberately larger than body text — this is the banner line of the page.
+     The date sits below it at small size so the headline never wraps on a phone. */
+  .kicker { display:inline-block; font-size:1.05rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:8px 16px; border-radius:99px; margin-bottom:6px; }
+  .kickerdate { display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:14px; }
   .hero { padding:28px 0 6px; }
   .hero h1 { font-size:1.7rem; line-height:1.18; letter-spacing:-0.01em; }
   .hero p.sub { color:var(--ink2); margin-top:8px; max-width:64ch; }
@@ -53,6 +56,10 @@
   .flags { display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; }
   .flag { font-size:0.66rem; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:99px; background:var(--surface2); border:1px solid var(--ring); color:var(--warn); }
   .flag-scr { color:var(--crit); } .flag-ok { color:var(--good); } .flag-free { color:var(--s1); }
+  .flag-lock { color:var(--s1); }
+  .card-locked { border-style:dashed; }
+  .lockedval { color:var(--ink2); font-style:italic; }
+  .lockednote { margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }
   .pitchers { display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }
   .pitchers em { color:var(--muted); font-style:normal; font-size:0.75rem; }
   .vs { color:var(--muted); font-size:0.7rem; }
@@ -134,9 +141,10 @@
 <div class="wrap">
   <section class="tab active" id="tab-free">
     <div class="hero">
-      <span class="kicker">★ Free Pick of the Day — Wednesday, July 22, 2026</span>
+      <span class="kicker">★ Free Pick of the Day</span>
+      <span class="kickerdate">Wednesday, July 22, 2026</span>
       <h1>St. Louis Cardinals <span class="at">@</span> Los Angeles Angels</h1>
-      <p class="sub">Every day, one pick free and in full — complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same 10,000 simulations, measured against real market prices — and logged on the public ledger before first pitch.</p>
+      <p class="sub">Every day, one pick free and in full — complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same 10,000 simulations, measured against real market prices — committed to the public record before first pitch, graded on the ledger after.</p>
     </div>
     <article class="card freecard">
       <header class="cardhead">
@@ -207,138 +215,58 @@
       </div>
     </div>
     <h2 class="sect">Published plays — 2.5u total exposure</h2>
+    <p class="sectsub">The free pick is shown in full. The rest are held until they are graded — then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
     <div class="cards">
-    <article class="card ">
+    <article class="card card-locked">
       <header class="cardhead">
         <div>
           <h3>Pittsburgh Pirates <span class="at">@</span> New York Yankees</h3>
-          <p class="meta">1:35 PM ET · Yankee Stadium · park factor 1.03</p>
+          <p class="meta">1:35 PM ET · Yankee Stadium</p>
         </div>
-        <div class="flags"><span class="flag">R4 FLAG</span></div>
+        <div class="flags"><span class="flag flag-lock">🔒 HELD</span></div>
       </header>
-      <div class="pitchers">
-        <span>Mitch Keller <em>5.14 ERA · 103.1 IP</em></span>
-        <span class="vs">vs</span>
-        <span>Gerrit Cole <em>3.93 ERA · 55 IP</em></span>
-      </div>
-      
-      <div class="probrow">
-        <span class="problab">PIT 33.4%</span>
-        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: PIT 33.4 percent, NYY 66.6 percent">
-          <div class="seg segA" style="width:33.4%"></div>
-          <div class="seg segH" style="width:66.6%"></div>
-        </div>
-        <span class="problab">NYY 66.6%</span>
-      </div>
-      
-      <div class="statrow">
-        <div><span class="stlab">Projected</span><span class="stval">4–6.4</span></div>
-        <div><span class="stlab">Model fair</span><span class="stval">+199 / -199</span></div>
-        
-        <div><span class="stlab">Market line</span><span class="stval">-149 <em>consensus</em></span></div>
-        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+6.7 pts</span></div>
-        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+11.2%</span></div>
-        <div><span class="stlab">Sim total</span><span class="stval">10.4 <em>(50% over 9)</em></span></div>
-        
-      </div>
       <div class="playrow">
-        <div><span class="playlab">Play</span><span class="playval">New York Yankees ML (-149)</span></div>
-        <div><span class="playlab">Confidence</span><span class="playval">66.6%</span></div>
+        <div><span class="playlab">Play</span><span class="playval lockedval">held until graded</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-long">🔴 Longshot</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0.5u (0.5% bankroll)</span></div>
+        <div><span class="playlab">Breaker checks</span><span class="playval">4 run</span></div>
       </div>
-      <details class="breakers">
-        <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -149 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 66.6% vs de-vigged market 58.4% — 8.1-point divergence within the 12-point cap.</li><li>Rule 4 flag: Gerrit Cole under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
-      </details>
+      <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
+      timestamped in the public repository ahead of the game and publishes in full — with its
+      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
     </article>
-    <article class="card ">
+    <article class="card card-locked">
       <header class="cardhead">
         <div>
           <h3>New York Mets <span class="at">@</span> Milwaukee Brewers</h3>
-          <p class="meta">2:10 PM ET · American Family Field · park factor 0.99</p>
+          <p class="meta">2:10 PM ET · American Family Field</p>
         </div>
-        <div class="flags"><span class="flag">R4 FLAG</span></div>
+        <div class="flags"><span class="flag flag-lock">🔒 HELD</span></div>
       </header>
-      <div class="pitchers">
-        <span>Christian Scott <em>2.87 ERA · 59.2 IP</em></span>
-        <span class="vs">vs</span>
-        <span>Logan Henderson <em>2.97 ERA · 33.1 IP</em></span>
-      </div>
-      
-      <div class="probrow">
-        <span class="problab">NYM 33.5%</span>
-        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: NYM 33.5 percent, MIL 66.5 percent">
-          <div class="seg segA" style="width:33.5%"></div>
-          <div class="seg segH" style="width:66.5%"></div>
-        </div>
-        <span class="problab">MIL 66.5%</span>
-      </div>
-      
-      <div class="statrow">
-        <div><span class="stlab">Projected</span><span class="stval">2.6–4.2</span></div>
-        <div><span class="stlab">Model fair</span><span class="stval">+198 / -198</span></div>
-        
-        <div><span class="stlab">Market line</span><span class="stval">-140 <em>consensus</em></span></div>
-        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+8.1 pts</span></div>
-        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+14.0%</span></div>
-        <div><span class="stlab">Sim total</span><span class="stval">6.9 <em>(22% over 9)</em></span></div>
-        
-      </div>
       <div class="playrow">
-        <div><span class="playlab">Play</span><span class="playval">Milwaukee Brewers ML (-140)</span></div>
-        <div><span class="playlab">Confidence</span><span class="playval">66.5%</span></div>
+        <div><span class="playlab">Play</span><span class="playval lockedval">held until graded</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-long">🔴 Longshot</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0.5u (0.5% bankroll)</span></div>
+        <div><span class="playlab">Breaker checks</span><span class="playval">4 run</span></div>
       </div>
-      <details class="breakers">
-        <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -140 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 66.5% vs de-vigged market 56.9% — 9.6-point divergence within the 12-point cap.</li><li>Rule 4 flag: Christian Scott, Logan Henderson under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
-      </details>
+      <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
+      timestamped in the public repository ahead of the game and publishes in full — with its
+      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
     </article>
-    <article class="card ">
+    <article class="card card-locked">
       <header class="cardhead">
         <div>
           <h3>Baltimore Orioles <span class="at">@</span> Boston Red Sox</h3>
-          <p class="meta">7:10 PM ET · Fenway Park · park factor 1.06</p>
+          <p class="meta">7:10 PM ET · Fenway Park</p>
         </div>
-        <div class="flags"><span class="flag">R4 FLAG</span></div>
+        <div class="flags"><span class="flag flag-lock">🔒 HELD</span></div>
       </header>
-      <div class="pitchers">
-        <span>Dean Kremer <em>4.15 ERA · 26 IP</em></span>
-        <span class="vs">vs</span>
-        <span>Jake Bennett <em>2.35 ERA · 53.2 IP</em></span>
-      </div>
-      
-      <div class="probrow">
-        <span class="problab">BAL 37.6%</span>
-        <div class="probbar" style="height:14px" role="img" aria-label="Win probability: BAL 37.6 percent, BOS 62.4 percent">
-          <div class="seg segA" style="width:37.6%"></div>
-          <div class="seg segH" style="width:62.4%"></div>
-        </div>
-        <span class="problab">BOS 62.4%</span>
-      </div>
-      
-      <div class="statrow">
-        <div><span class="stlab">Projected</span><span class="stval">3.2–4.5</span></div>
-        <div><span class="stlab">Model fair</span><span class="stval">+166 / -166</span></div>
-        
-        <div><span class="stlab">Market line</span><span class="stval">-136 <em>consensus</em></span></div>
-        <div><span class="stlab">Edge vs price</span><span class="stval edge-pos">+4.8 pts</span></div>
-        <div><span class="stlab">EV per 1u</span><span class="stval edge-pos">+8.3%</span></div>
-        <div><span class="stlab">Sim total</span><span class="stval">7.7 <em>(37% over 8)</em></span></div>
-        
-      </div>
       <div class="playrow">
-        <div><span class="playlab">Play</span><span class="playval">Boston Red Sox ML (-136)</span></div>
-        <div><span class="playlab">Confidence</span><span class="playval">62.4%</span></div>
+        <div><span class="playlab">Play</span><span class="playval lockedval">held until graded</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip tier-long">🔴 Longshot</span></div>
-        <div><span class="playlab">Suggested</span><span class="playval">0.5u (0.5% bankroll)</span></div>
+        <div><span class="playlab">Breaker checks</span><span class="playval">4 run</span></div>
       </div>
-      <details class="breakers">
-        <summary>Circuit-breaker log (4 checks)</summary>
-        <ul><li>Rule 2 check passed: market line -136 within juice caps (road -180, home -220).</li><li>Rule 8 check passed: model 62.4% vs de-vigged market 56.2% — 6.2-point divergence within the 12-point cap.</li><li>Rule 4 flag: Dean Kremer, Jake Bennett under 60 IP this deep in the season (limited workload / possible IL return). Volume freeze — confidence downgraded one tier.</li><li>Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required — Statcast feed not wired in v0.1.</li></ul>
-      </details>
+      <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
+      timestamped in the public repository ahead of the game and publishes in full — with its
+      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
     </article>
     <article class="card ">
       <header class="cardhead">

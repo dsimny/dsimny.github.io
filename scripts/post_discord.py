@@ -102,7 +102,7 @@ def build_pick_payload(date):
         "description": (f'**{free["matchup"]}** · {et_time(free["utc"])} · {free["venue"]}\n'
                         f'{a_sp["name"]} ({a_sp["era"]:.2f} ERA) vs {h_sp["name"]} ({h_sp["era"]:.2f} ERA)\n'
                         f'*Mid-board by design — the headliners live on the board. '
-                        f'Logged on the public ledger before first pitch.*'),
+                        f'Committed to the public record before first pitch, graded on the ledger after.*'),
         "color": TIER_COLOR.get(free["risk_tier"], BLUE),
         "fields": fields,
         "footer": {"text": FOOTER},

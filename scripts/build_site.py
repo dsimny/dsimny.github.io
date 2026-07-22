@@ -207,6 +207,36 @@ def card(b, published):
       </details>
     </article>'''
 
+def locked_card(b):
+    """Board card for a premium play: proves the position exists without giving it away.
+
+    Deliberately NOT a transparency rollback. The pick is committed to the public
+    repo before first pitch and published in full on the ledger once graded, win
+    or lose, so the record stays verifiable end to end (house rules 1 and 3).
+    Only the pre-game reveal is withheld.
+    """
+    cls, icon = TIER_META[b["risk_tier"]]
+    away_name, home_name = b["matchup"].split(" @ ")
+    tier_short = b["risk_tier"].split("(")[-1].rstrip(")") if "(" in b["risk_tier"] else b["risk_tier"]
+    return f'''
+    <article class="card card-locked">
+      <header class="cardhead">
+        <div>
+          <h3>{away_name} <span class="at">@</span> {home_name}</h3>
+          <p class="meta">{et_time(b["utc"])} · {b["venue"]}</p>
+        </div>
+        <div class="flags"><span class="flag flag-lock">🔒 HELD</span></div>
+      </header>
+      <div class="playrow">
+        <div><span class="playlab">Play</span><span class="playval lockedval">held until graded</span></div>
+        <div><span class="playlab">Risk</span><span class="playval tierchip {cls}">{icon} {tier_short}</span></div>
+        <div><span class="playlab">Breaker checks</span><span class="playval">{len(b["checks"])} run</span></div>
+      </div>
+      <p class="lockednote">Side, price, and sizing are held before first pitch. The pick is
+      timestamped in the public repository ahead of the game and publishes in full — with its
+      complete breaker log — on the ledger once graded. We hold the position, never the result.</p>
+    </article>'''
+
 def scratch_card(s):
     return f'''
     <article class="card card-scratch">
@@ -243,9 +273,10 @@ if free is not None:
                 f'{free["mkt_odds"]:+d} consensus price</span></div>') if free["mkt_odds"] is not None else ""
     free_section = f'''
     <div class="hero">
-      <span class="kicker">★ Free Pick of the Day — {NICE_DATE}</span>
+      <span class="kicker">★ Free Pick of the Day</span>
+      <span class="kickerdate">{NICE_DATE}</span>
       <h1>{f_away} <span class="at">@</span> {f_home}</h1>
-      <p class="sub">Every day, one pick free and in full — complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices — and logged on the public ledger before first pitch.</p>
+      <p class="sub">Every day, one pick free and in full — complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>mid-board play, not the headliner</strong>: the top-confidence plays live on <a href="#" data-goto="board">Today's Board</a>. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices — committed to the public record before first pitch, graded on the ledger after.</p>
     </div>
     <article class="card freecard">
       <header class="cardhead">
@@ -286,7 +317,8 @@ if free is not None:
 else:
     free_section = f'''
     <div class="hero">
-      <span class="kicker">Free Pick of the Day — {NICE_DATE}</span>
+      <span class="kicker">Free Pick of the Day</span>
+      <span class="kickerdate">{NICE_DATE}</span>
       <h1>No qualifying plays today.</h1>
       <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot — <strong>passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.</p>
       <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See today's board →</button></div>
@@ -364,7 +396,10 @@ html = f'''<!DOCTYPE html>
   section.tab.active {{ display:block; }}
   h2.sect {{ font-size:1.02rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:26px 0 12px; }}
   .sectsub {{ color:var(--muted); font-size:0.82rem; margin:-6px 0 12px; }}
-  .kicker {{ display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:5px 12px; border-radius:99px; margin-bottom:14px; }}
+  /* Deliberately larger than body text — this is the banner line of the page.
+     The date sits below it at small size so the headline never wraps on a phone. */
+  .kicker {{ display:inline-block; font-size:1.05rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:8px 16px; border-radius:99px; margin-bottom:6px; }}
+  .kickerdate {{ display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:14px; }}
   .hero {{ padding:28px 0 6px; }}
   .hero h1 {{ font-size:1.7rem; line-height:1.18; letter-spacing:-0.01em; }}
   .hero p.sub {{ color:var(--ink2); margin-top:8px; max-width:64ch; }}
@@ -385,6 +420,10 @@ html = f'''<!DOCTYPE html>
   .flags {{ display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; }}
   .flag {{ font-size:0.66rem; font-weight:700; letter-spacing:0.06em; padding:3px 8px; border-radius:99px; background:var(--surface2); border:1px solid var(--ring); color:var(--warn); }}
   .flag-scr {{ color:var(--crit); }} .flag-ok {{ color:var(--good); }} .flag-free {{ color:var(--s1); }}
+  .flag-lock {{ color:var(--s1); }}
+  .card-locked {{ border-style:dashed; }}
+  .lockedval {{ color:var(--ink2); font-style:italic; }}
+  .lockednote {{ margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }}
   .pitchers {{ display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }}
   .pitchers em {{ color:var(--muted); font-style:normal; font-size:0.75rem; }}
   .vs {{ color:var(--muted); font-size:0.7rem; }}
@@ -480,7 +519,8 @@ html = f'''<!DOCTYPE html>
       </div>
     </div>
     <h2 class="sect">Published plays — {B["published_units"]:g}u total exposure</h2>
-    <div class="cards">{"".join(card(b, True) for b in plays) or "<p class='sectsub'>None today — nothing cleared the gates. Passing is a position.</p>"}</div>
+    <p class="sectsub">The free pick is shown in full. The rest are held until they are graded — then every one of them, winners and losers alike, publishes on the ledger with its full breaker log.</p>
+    <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today — nothing cleared the gates. Passing is a position.</p>"}</div>
     <h2 class="sect">Model leans — no allocation, logged for transparency</h2>
     <p class="sectsub">{n_r8} held by the Rule 8 Divergence Governor, {n_noedge} benched by the edge gate, and the rest below the confidence floor.</p>
     <div class="cards">{"".join(card(b, False) for b in leans)}</div>

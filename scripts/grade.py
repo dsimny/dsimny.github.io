@@ -56,18 +56,18 @@ def main():
     if not os.path.exists(board_path):
         print(f"No board for {date} — nothing to grade.")
         return
-    with open(board_path) as f:
+    with open(board_path, encoding="utf-8") as f:
         B = json.load(f)
 
     if "--scores-file" in sys.argv:
-        with open(sys.argv[sys.argv.index("--scores-file") + 1]) as f:
+        with open(sys.argv[sys.argv.index("--scores-file") + 1], encoding="utf-8") as f:
             scores = json.load(f)
     else:
         scores = fetch_scores(date)
 
     ledger = {"entries": []}
     if os.path.exists(LEDGER):
-        with open(LEDGER) as f:
+        with open(LEDGER, encoding="utf-8") as f:
             ledger = json.load(f)
     already = {(e["date"], e["gamePk"]) for e in ledger["entries"]}
 
@@ -121,7 +121,7 @@ def main():
         "last_graded": date,
     }
     os.makedirs(os.path.dirname(LEDGER), exist_ok=True)
-    with open(LEDGER, "w") as f:
+    with open(LEDGER, "w", encoding="utf-8") as f:
         json.dump(ledger, f, indent=1)
     print(f"Graded {graded} picks for {date}. Ledger: {ledger['aggregates']['record']}, "
           f"{units_net:+.2f}u net, ROI {ledger['aggregates']['roi_pct']}%")

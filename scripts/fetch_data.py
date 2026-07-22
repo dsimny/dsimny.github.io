@@ -151,7 +151,7 @@ def main():
     }
     os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
     out = os.path.join(ROOT, "data", f"snapshot_{DATE}.json")
-    with open(out, "w") as f:
+    with open(out, "w", encoding="utf-8") as f:
         json.dump(snapshot, f, indent=1)
     print(f"Wrote {out}: {len(games)} games, {len(pitchers)} pitchers, odds for {len(odds)} games")
 

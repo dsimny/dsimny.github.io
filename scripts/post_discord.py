@@ -36,11 +36,14 @@ def load(path):
     p = os.path.join(ROOT, "data", path)
     if not os.path.exists(p):
         return None
-    with open(p) as f:
+    with open(p, encoding="utf-8") as f:
         return json.load(f)
 
+# %-d and %-I (strip the leading zero) only exist in glibc's strftime, so they
+# work on the Linux runner but crash on Windows. Compose those parts by hand.
 def et_time(utc_str):
-    return datetime.fromisoformat(utc_str.replace("Z", "+00:00")).astimezone(ET).strftime("%-I:%M %p ET")
+    t = datetime.fromisoformat(utc_str.replace("Z", "+00:00")).astimezone(ET)
+    return f"{t.hour % 12 or 12}:{t:%M %p} ET"
 
 def pick_free(plays):
     """Must mirror build_site.py: cleanest lower-board play, never the headliner."""
@@ -55,7 +58,8 @@ def build_pick_payload(date):
         print(f"No board for {date} — nothing to post.")
         return None
     plays = sorted([b for b in B["board"] if b.get("published")], key=lambda b: -b["confidence"])
-    nice = datetime.strptime(date, "%Y-%m-%d").strftime("%A, %B %-d")
+    _d = datetime.strptime(date, "%Y-%m-%d")
+    nice = f"{_d:%A, %B} {_d.day}"
 
     if not plays:
         embed = {
@@ -113,7 +117,8 @@ def build_recap_payload(date):
     if not entries:
         print(f"No graded entries for {date} — nothing to post.")
         return None
-    nice = datetime.strptime(date, "%Y-%m-%d").strftime("%A, %B %-d")
+    _d = datetime.strptime(date, "%Y-%m-%d")
+    nice = f"{_d:%A, %B} {_d.day}"
     chip = {"WIN": "✅", "LOSS": "❌", "VOID": "⚪"}
     day_pnl = sum(e["pnl"] for e in entries)
     lines = [f'{chip.get(e["result"], "•")} {e["pick"]} — {e.get("final_score", "void")} '

@@ -85,7 +85,7 @@ def nb_draws(rng, mean, n):
     return rng.poisson(lam)
 
 def main():
-    with open(os.path.join(ROOT, "data", f"snapshot_{DATE}.json")) as f:
+    with open(os.path.join(ROOT, "data", f"snapshot_{DATE}.json"), encoding="utf-8") as f:
         data = json.load(f)
 
     teams = {int(k): v for k, v in data["teams"].items()}
@@ -298,7 +298,7 @@ def main():
         "published_units": exposure,
         "n_published": len(published),
     }
-    with open(os.path.join(ROOT, "data", f"board_{DATE}.json"), "w") as f:
+    with open(os.path.join(ROOT, "data", f"board_{DATE}.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1)
 
     print(f"League run rate: {league_rate:.3f} r/g | League RA9: {league_era:.2f}")

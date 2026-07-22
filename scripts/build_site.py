@@ -15,18 +15,22 @@ ET = ZoneInfo("America/New_York")
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ET).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-with open(os.path.join(ROOT, "data", f"board_{DATE}.json")) as f:
+with open(os.path.join(ROOT, "data", f"board_{DATE}.json"), encoding="utf-8") as f:
     B = json.load(f)
 ledger = {"entries": [], "aggregates": None}
 lp = os.path.join(ROOT, "data", "ledger.json")
 if os.path.exists(lp):
-    with open(lp) as f:
+    with open(lp, encoding="utf-8") as f:
         ledger = json.load(f)
 
-NICE_DATE = datetime.strptime(DATE, "%Y-%m-%d").strftime("%A, %B %-d, %Y")
+# %-d and %-I (strip the leading zero) only exist in glibc's strftime, so they
+# work on the Linux runner but crash on Windows. Compose those parts by hand.
+_date_obj = datetime.strptime(DATE, "%Y-%m-%d")
+NICE_DATE = f"{_date_obj:%A, %B} {_date_obj.day}, {_date_obj.year}"
 
 def et_time(utc_str):
-    return datetime.fromisoformat(utc_str.replace("Z", "+00:00")).astimezone(ET).strftime("%-I:%M %p ET")
+    t = datetime.fromisoformat(utc_str.replace("Z", "+00:00")).astimezone(ET)
+    return f"{t.hour % 12 or 12}:{t:%M %p} ET"
 
 plays = sorted([b for b in B["board"] if b.get("published")], key=lambda b: -b["confidence"])
 leans = sorted([b for b in B["board"] if not b.get("published")], key=lambda b: -b["confidence"])
@@ -562,6 +566,6 @@ html = f'''<!DOCTYPE html>
 </html>'''
 
 out = os.path.join(ROOT, "index.html")
-with open(out, "w") as f:
+with open(out, "w", encoding="utf-8") as f:
     f.write(html)
 print(f"Wrote {out}: {len(html):,} bytes | free pick: {free['pick'] if free else 'NONE'} | {len(plays)} plays")

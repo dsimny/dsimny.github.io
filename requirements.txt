@@ -1,2 +1,6 @@
 numpy>=1.26
 requests>=2.31
+# All five scripts resolve dates in America/New_York. Linux ships the IANA
+# timezone database system-wide, Windows does not — this makes the scripts
+# behave identically everywhere instead of relying on the host OS.
+tzdata>=2024.1

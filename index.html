@@ -22,9 +22,13 @@
   .wrap { max-width:1060px; margin:0 auto; padding:0 20px; }
   header.site { position:sticky; top:0; z-index:10; background:rgba(13,13,13,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--grid); }
   .sitebar { display:flex; align-items:center; gap:24px; padding:14px 0 4px; flex-wrap:wrap; }
-  .wordmark { font-weight:800; letter-spacing:0.04em; font-size:1.05rem; }
-  .wordmark .open { color:var(--s1); }
-  .wordmark small { display:block; font-weight:500; font-size:0.62rem; letter-spacing:0.14em; color:var(--muted); text-transform:uppercase; }
+  /* The logo carries the name now, so it sits beside the tagline rather than
+     above it. Circular crop matches the mark's gold ring. */
+  .wordmark { display:flex; align-items:center; gap:12px; }
+  .sitelogo { width:46px; height:46px; flex:none; border-radius:50%; }
+  .markname { font-weight:800; letter-spacing:0.04em; font-size:1.05rem; }
+  .markname .open { color:var(--s1); }
+  .wordmark small { display:block; font-weight:500; font-size:0.62rem; letter-spacing:0.14em; color:var(--muted); text-transform:uppercase; line-height:1.4; }
   nav.tabs { display:flex; gap:4px; margin-left:auto; flex-wrap:wrap; }
   nav.tabs button { background:none; border:none; color:var(--ink2); font:inherit; font-size:0.86rem; padding:7px 13px; border-radius:8px; cursor:pointer; }
   nav.tabs button:hover { background:var(--surface2); }
@@ -38,9 +42,6 @@
   /* Deliberately larger than body text: this is the banner line of the page.
      The date sits below it at small size so the headline never wraps on a phone. */
   .kicker { display:inline-block; font-size:1.05rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:8px 16px; border-radius:99px; margin-bottom:6px; }
-  /* Circular crop trims the logo's square corners so the gold ring sits flush
-     against the page instead of floating in a navy box. */
-  .herologo { display:block; width:min(220px,58vw); height:auto; aspect-ratio:1; border-radius:50%; margin:0 0 18px; box-shadow:0 6px 26px rgba(0,0,0,0.45); }
   .kickerdate { display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:14px; }
   .hero { padding:28px 0 6px; }
   .hero h1 { font-size:1.7rem; line-height:1.18; letter-spacing:-0.01em; }
@@ -133,7 +134,9 @@
 </head>
 <body>
 <header class="site"><div class="wrap sitebar">
-  <div class="wordmark"><span class="open">OPEN LEDGER</span> SPORTS<small>Every pick on the record. Every rule in public.</small></div>
+  <div class="wordmark"><img class="sitelogo" src="assets/logo.jpg" width="440" height="440" alt="">
+    <div class="marktext"><span class="markname"><span class="open">OPEN LEDGER</span> SPORTS</span>
+      <small>Every pick on the record. Every rule in public.</small></div></div>
   <nav class="tabs" role="tablist">
     <button class="active" data-tab="free">Free Pick</button>
     <button data-tab="board">Today's Board</button>
@@ -147,8 +150,6 @@
 <div class="wrap">
   <section class="tab active" id="tab-free">
     <div class="hero">
-      <img class="herologo" src="assets/logo.jpg" width="440" height="440"
-           alt="Open Ledger Sports: transparency, performance, results">
       <span class="kicker">★ Free Pick of the Day</span>
       <span class="kickerdate">Wednesday, July 22, 2026</span>
       <h1>St. Louis Cardinals <span class="at">@</span> Los Angeles Angels</h1>

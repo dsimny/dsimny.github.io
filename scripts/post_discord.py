@@ -21,7 +21,7 @@ Run:  python scripts/post_discord.py pick  [YYYY-MM-DD] [--dry-run]
       python scripts/post_discord.py recap [YYYY-MM-DD] [--dry-run]
 """
 import json, os, sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import crypto_box
@@ -225,6 +225,41 @@ def routes():
         "recap": (build_recap_payload, WEBHOOK,         "DISCORD_WEBHOOK_URL"),
     }
 
+STATUS_PATH = os.path.join(ROOT, "data", "post_status.json")
+STATUS_KEEP = 30   # roughly a fortnight of three posts a day
+
+
+def record(mode, date, result, status=None, detail=""):
+    """Write the outcome of a Discord post into the repo.
+
+    A failed post must never fail the run, which also meant nothing surfaced a
+    dead webhook: the free-pick hook was broken for a day and the workflow went
+    green throughout. Recording the result here puts it somewhere visible
+    without needing access to the Actions logs.
+
+    Never records the webhook URL. Only the mode, the HTTP status and a short
+    message, none of which are secret.
+    """
+    try:
+        log = {"posts": []}
+        if os.path.exists(STATUS_PATH):
+            with open(STATUS_PATH, encoding="utf-8") as f:
+                log = json.load(f)
+        log["posts"] = [p for p in log["posts"]
+                        if not (p["date"] == date and p["mode"] == mode)]
+        log["posts"].append({
+            "date": date, "mode": mode, "result": result,
+            "http_status": status, "detail": detail[:200],
+            "at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        })
+        log["posts"] = sorted(log["posts"], key=lambda p: p["at_utc"])[-STATUS_KEEP:]
+        os.makedirs(os.path.dirname(STATUS_PATH), exist_ok=True)
+        with open(STATUS_PATH, "w", encoding="utf-8") as f:
+            json.dump(log, f, indent=1)
+    except Exception as exc:                     # telemetry must never break a run
+        print(f"NOTE: could not record post status: {exc}")
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     mode = args[0] if args else "pick"
@@ -243,20 +278,30 @@ def main():
 
     payload = build(date)
     if payload is None:
+        if not dry:
+            record(mode, date, "nothing_to_post")
         return
     if dry:
         print(json.dumps(payload, indent=2))
         return
     if not webhook:
         print(f"NOTE: {env_name} not set — skipping Discord post (board is unaffected).")
+        record(mode, date, "no_webhook", detail=f"{env_name} is not set")
         return
     import requests
-    r = requests.post(webhook, json=payload, timeout=30)
+    try:
+        r = requests.post(webhook, json=payload, timeout=30)
+    except Exception as exc:
+        print(f"WARNING: Discord post failed to send: {exc}")
+        record(mode, date, "failed", detail=str(exc))
+        return
     if r.status_code >= 300:
-        # Never fail the pipeline over a chat post — log and move on.
+        # Never fail the pipeline over a chat post: log, record, move on.
         print(f"WARNING: Discord post failed ({r.status_code}): {r.text[:300]}")
+        record(mode, date, "failed", status=r.status_code, detail=r.text)
     else:
         print(f"Posted {mode} for {date} to Discord.")
+        record(mode, date, "posted", status=r.status_code)
 
 if __name__ == "__main__":
     main()

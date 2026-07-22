@@ -237,7 +237,7 @@ def locked_card(b):
         <div class="flags"><span class="flag flag-lock">🔒 HELD</span></div>
       </header>
       <div class="playrow">
-        <div><span class="playlab">Play</span><span class="playval lockedval">held until graded</span></div>
+        <div><span class="playlab">Play</span><span class="playval lockedval">Premium Only</span></div>
         <div><span class="playlab">Risk</span><span class="playval tierchip {cls}">{icon} {tier_short}</span></div>
         <div><span class="playlab">Breaker checks</span><span class="playval">{len(b["checks"])} run</span></div>
       </div>
@@ -381,7 +381,7 @@ def pending_row(b):
     return f'''
   <tr>
     <td>{DATE}</td><td>{b["abbr"]}</td>
-    <td>{"<em>held until graded</em>" if held else b["pick"]}</td>
+    <td>{"<em>Premium Only</em>" if held else b["pick"]}</td>
     <td class="num">{"n/a" if held else f'{(b["edge"]*100 if b["edge"] is not None else 0):+.1f}'}</td>
     <td class="num">{"n/a" if held else f'{b["units"]:g}u'}</td>
     <td class="num">n/a</td>

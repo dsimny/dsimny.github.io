@@ -1,0 +1,20 @@
+{
+ "posts": [
+  {
+   "date": "2026-07-22",
+   "mode": "pick",
+   "result": "failed",
+   "http_status": 422,
+   "detail": "<!DOCTYPE html>\n<html>\n  <head>\n    <meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\">\n    <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; base-uri 'self'; con",
+   "at_utc": "2026-07-22T18:11:08Z"
+  },
+  {
+   "date": "2026-07-22",
+   "mode": "board",
+   "result": "posted",
+   "http_status": 204,
+   "detail": "",
+   "at_utc": "2026-07-22T18:11:08Z"
+  }
+ ]
+}

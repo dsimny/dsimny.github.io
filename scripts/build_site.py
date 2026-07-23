@@ -28,11 +28,13 @@ DISCORD_INVITE = os.environ.get("DISCORD_INVITE_URL", "").strip()
 PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
 PREMIUM_PRICE = "$30/month"
 
-# Email capture is a beehiiv embed. The form id is a public identifier, not a
-# secret, so it is hardcoded; set it to "" to drop the block entirely. beehiiv
-# hosts the form and the list, which keeps subscriber data and compliance
-# (consent, unsubscribe) out of this repo.
-BEEHIIV_FORM_ID = "44ad2542-ce25-424c-8448-e3921bface31"
+# Email capture. Set to a beehiiv form id to turn the embed (and its attribution
+# script) back on; "" drops both. Dropped 2026-07-23: beehiiv's automated
+# daily send needs a Max/Enterprise tier the empty list doesn't justify yet.
+# The RSS feed stays (tool-agnostic) so any future email tool can plug in.
+BEEHIIV_FORM_ID = ""
+beehiiv_attribution = ('<script type="text/javascript" async src="https://subscribe-forms.beehiiv.com/attribution.js"></script>'
+                       if BEEHIIV_FORM_ID else "")
 
 B = crypto_box.load_dataset(ROOT, "board", DATE)
 if B is None:
@@ -450,8 +452,7 @@ html = f'''<!DOCTYPE html>
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="shortcut icon" href="favicon.ico">
-<!-- beehiiv attribution: ties a subscribe-form signup to the page/referrer it came from. -->
-<script type="text/javascript" async src="https://subscribe-forms.beehiiv.com/attribution.js"></script>
+{beehiiv_attribution}
 <style>
   :root {{
     color-scheme: dark;

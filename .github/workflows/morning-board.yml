@@ -9,11 +9,12 @@ name: Morning board
 # refuses to publish any game that has already started, so a very late run
 # produces a short board or none at all rather than a dishonest one.
 on:
-  schedule:
-    - cron: "10 13 * * *"   # 9:10 AM ET
-    - cron: "10 14 * * *"   # 10:10 AM ET
-    - cron: "10 15 * * *"   # 11:10 AM ET, the intended time
-  workflow_dispatch: {}   # manual "run now" button in the Actions tab
+  # Triggered by cron-job.org via the workflow_dispatch API, daily at 11:10 AM ET.
+  # GitHub's own cron was removed 2026-07-23: it fired HOURS late and, worse,
+  # each late run re-posted the free pick and members board to Discord (the
+  # idempotency guard blocks a rebuild, not a re-post), spamming duplicates.
+  # cron-job.org fires once, on time. This is also the manual "Run workflow" button.
+  workflow_dispatch: {}
 
 permissions:
   contents: write

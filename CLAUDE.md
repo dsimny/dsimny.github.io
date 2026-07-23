@@ -165,9 +165,16 @@ to the workflow_dispatch API on time:
   - OLS Grade Ledger  -> grade-ledger.yml/dispatches   daily 4:10 AM ET
   - OLS Morning Board -> morning-board.yml/dispatches   daily 11:10 AM ET
 Auth is a fine-grained GitHub PAT (repo dsimny.github.io, Actions read/write
-only, expires 2027-07-23), held in cron-job.org, not in the repo. The GitHub
-cron windows in the workflows are kept as a fallback if cron-job.org is down;
-the idempotency guard means whichever trigger fires first wins.
+only, expires 2027-07-23), held in cron-job.org, not in the repo.
+
+The GitHub cron schedules were REMOVED 2026-07-23. They fired hours late AND
+each late run re-posted the free pick and members board to Discord (the
+idempotency guard blocks a board rebuild but not a Discord re-post), spamming
+duplicate notifications. cron-job.org fires each job once, on time, via the
+workflow_dispatch API, so the workflows now have only `workflow_dispatch` and
+no `schedule`. If cron-job.org ever fails, trigger the workflow manually from
+the Actions tab. NOTE: post_discord is NOT idempotent — any second run of the
+morning board (manual or otherwise) will re-post to Discord.
 
 First real ledger, 2026-07-22 slate graded 2026-07-23: 2-1, -0.32u, ROI
 -15.8%. The grade engine fetched real final scores and priced W/L/pnl

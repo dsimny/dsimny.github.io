@@ -3,8 +3,8 @@ name: Grade ledger
 # Grades yesterday's published picks against final scores and updates the
 # append-only ledger, then rebuilds the site so the record is live by morning.
 on:
-  schedule:
-    - cron: "10 8 * * *"
+  # Triggered by cron-job.org via the workflow_dispatch API, daily at 4:10 AM ET.
+  # GitHub cron removed 2026-07-23 (see morning-board.yml: late + duplicate posts).
   workflow_dispatch: {}
 
 permissions:

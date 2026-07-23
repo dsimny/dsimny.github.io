@@ -515,6 +515,11 @@ html = f'''<!DOCTYPE html>
   .commithash {{ display:block; margin:10px 0; padding:8px 10px; border-radius:8px; background:var(--page); border:1px solid var(--grid); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:0.72rem; color:var(--s1); word-break:break-all; }}
   .emailcap {{ margin:18px 0 6px; }}
   .emailcap .joinlead {{ margin-bottom:10px; }}
+  /* beehiiv's v3 form never posts a height, so its loader leaves the iframe at
+     a 2000px default. Pin it to something that fits the form (taller on mobile
+     where fields wrap) and let it fill the column width. */
+  .emailcap iframe {{ height:600px !important; width:100% !important; border:0; }}
+  @media (max-width:520px) {{ .emailcap iframe {{ height:660px !important; }} }}
   .upgrade {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--s1); border-radius:14px; background:var(--surface); }}
   .upgradebtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--good); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
   .join {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-radius:14px; background:var(--surface); }}

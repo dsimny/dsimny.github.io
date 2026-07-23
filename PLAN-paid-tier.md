@@ -90,8 +90,9 @@ premium picks really are exclusive rather than merely presented differently.
   payment had just failed. Nothing would have errored.
 - Event log goes to the private #ols-log channel, so grants and revokes are
   visible rather than silent.
-- Outstanding: identity verification for payouts, and proving that a real
-  purchase actually produces the role.
+- Identity verified and a bank account connected for payouts (2026-07-22).
+- Outstanding: proving that a real purchase actually produces the Discord role
+  (to be tested with the outside tester's promo-code checkout).
 
 To go live on the site, set the repo variable WHOP_CHECKOUT_URL to the
 checkout link. The upgrade button appears on the next build, and not before.

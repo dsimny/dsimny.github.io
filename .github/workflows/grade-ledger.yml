@@ -41,6 +41,23 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                 # optional fallback
           SITE_URL: ${{ vars.SITE_URL }}                                          # optional
         run: python scripts/post_discord.py recap
+      - name: Post record to X
+        # Yesterday's results + running ledger as a text post. Idempotent (records
+        # "posted" in data/post_status.json); skips cleanly if the keys are unset;
+        # never fails the grading run.
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}             # optional — X post skipped when unset
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}                  # optional
+        run: python scripts/post_social.py x
+      - name: Post record to Facebook
+        env:
+          FB_PAGE_ID: ${{ vars.FB_PAGE_ID }}                          # optional — FB post skipped when unset
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          SITE_URL: ${{ vars.SITE_URL }}                              # optional
+        run: python scripts/post_social.py facebook
       - name: Commit ledger and site
         run: |
           git config user.name "openledger-bot"

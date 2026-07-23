@@ -6,3 +6,6 @@ requests>=2.31
 tzdata>=2024.1
 # Fernet, for encrypting the board between publication and grading.
 cryptography>=42.0
+# OAuth 1.0a signing for posting the daily record to X (scripts/post_social.py).
+# Only imported on the live X post; dry-run and no-config paths don't need it.
+requests-oauthlib>=1.3

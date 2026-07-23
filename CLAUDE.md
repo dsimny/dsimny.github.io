@@ -37,7 +37,20 @@ to Discord.
                           → data/board_<date>.json     (the reveal: .enc replaced by plaintext)
   scripts/build_site.py   → index.html                 (ledger tab refreshed)
   scripts/post_discord.py recap                        (posts results, wins AND losses)
+  scripts/post_social.py  x / facebook                 (daily record → X + FB, wins AND losses)
 ```
+
+Social posting (scripts/post_social.py) reads data/ledger.json — the same record
+the site and the Discord recap use — and posts yesterday's results plus the
+running ledger to X (text, OAuth 1.0a, <=280 chars) and a Facebook Page. Losing
+days post too (generated from the ledger; no skip path) and every post carries
+21+/1-800-GAMBLER/not-betting-advice (house rules 1 and 5). Idempotent like the
+email sender: records "posted" per platform in data/post_status.json and refuses
+to re-post a date. Each platform skips cleanly if its credentials are unset and
+never fails the grading run. Note: X's v2 docs list OAuth 2.0, not 1.0a, for
+POST /2/tweets; 1.0a still works in practice and needs no token refresh, but if X
+rejects it the post just records "failed" (safe) and we move to the OAuth 2.0
+refresh-token flow. Preview: `python scripts/post_social.py x <date> --dry-run`.
 
 Test locally without network: `python scripts/engine.py 2026-07-22` against an
 existing snapshot, then `python scripts/build_site.py 2026-07-22`; grade with
@@ -131,7 +144,14 @@ with more care than the API keys, which are all replaceable.
   - ODDS_API_KEY (optional; without it edge/Kelly/Rules 2+8 inactive, site says so)
   - DISCORD_WEBHOOK_URL (optional; free pick → public channel)
   - DISCORD_WEBHOOK_URL_MEMBERS (optional; held plays → members channel)
-- Variables: SITE_URL, DISCORD_INVITE_URL (join prompt omitted when unset).
+  - RESEND_API_KEY (optional; daily free-pick email — skipped when unset)
+  - X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_SECRET (optional; all
+    four required to post the daily record to X — OAuth 1.0a User Context)
+  - FB_PAGE_ACCESS_TOKEN (optional; daily record → Facebook Page)
+- Variables: SITE_URL, DISCORD_INVITE_URL (join prompt omitted when unset),
+  RESEND_SEGMENT_ID (all-subscribers segment; email step no-ops when unset),
+  EMAIL_FROM (optional; defaults to picks@send.openledgersports.com),
+  FB_PAGE_ID (optional; the Page to post the record to).
 - Discord: server "Open Ledger Sports", #free-pick (public) and #members-only
   (gated by a Whop-managed "Members" role; Whop Bot must sit ABOVE Members in
   the role list or grants silently fail).

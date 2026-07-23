@@ -450,6 +450,8 @@ html = f'''<!DOCTYPE html>
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="shortcut icon" href="favicon.ico">
+<!-- beehiiv attribution: ties a subscribe-form signup to the page/referrer it came from. -->
+<script type="text/javascript" async src="https://subscribe-forms.beehiiv.com/attribution.js"></script>
 <style>
   :root {{
     color-scheme: dark;

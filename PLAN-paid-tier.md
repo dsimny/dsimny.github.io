@@ -91,8 +91,20 @@ premium picks really are exclusive rather than merely presented differently.
 - Event log goes to the private #ols-log channel, so grants and revokes are
   visible rather than silent.
 - Identity verified and a bank account connected for payouts (2026-07-22).
-- Outstanding: proving that a real purchase actually produces the Discord role
-  (to be tested with the outside tester's promo-code checkout).
+- Grant path VERIFIED 2026-07-22 with an outside tester (not the server owner):
+  checkout -> membership -> connect Discord -> Whop grants the Members role ->
+  #members-only becomes visible. The whole chain works.
+
+Gotchas learned doing it, worth telling every new member up front:
+- Checkout does NOT grant the role on its own. The member must connect their
+  Discord to Whop afterwards (whop.com -> their membership -> Connect Discord),
+  or #ols-log shows "Discord ID: No Discord" and they only see #free-pick.
+- Use the "forever" promo codes, not the "100% off first payment" one. The
+  latter puts the member on a 30-day trial that renews to $30. One tester
+  landed on it; fixed by extending the trial, but the forever codes avoid it.
+- A stray premium post reached the public #general once during webhook
+  testing. Not from the pipeline (board always posts to #members-only, proven
+  by channel_id). Deleted. Keep #general locked or gone.
 
 To go live on the site, set the repo variable WHOP_CHECKOUT_URL to the
 checkout link. The upgrade button appears on the next build, and not before.

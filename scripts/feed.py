@@ -101,7 +101,7 @@ def update(root, date, free, nice_date, analysis_html, generated_utc, site_url):
 def _write_xml(root, items, site_url):
     site = (site_url or "https://openledgersports.com").rstrip("/")
     parts = ['<?xml version="1.0" encoding="UTF-8"?>',
-             '<rss version="2.0"><channel>',
+             '<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>',
              f"<title>{_html.escape(CHANNEL_TITLE)}</title>",
              f"<link>{site}</link>",
              f"<description>{_html.escape(CHANNEL_DESC)}</description>",
@@ -113,7 +113,10 @@ def _write_xml(root, items, site_url):
             f"<link>{site}/#free</link>",
             f'<guid isPermaLink="false">olsp-{it["date"]}</guid>',
             f"<pubDate>{it['pubDate']}</pubDate>",
+            # Both, for maximum reader/ESP compatibility: some read description,
+            # some read content:encoded for the full HTML body.
             f"<description><![CDATA[{it['html']}]]></description>",
+            f"<content:encoded><![CDATA[{it['html']}]]></content:encoded>",
             "</item>",
         ]
     parts.append("</channel></rss>")

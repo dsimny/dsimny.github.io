@@ -41,7 +41,6 @@ jobs:
         env:
           DISCORD_INVITE_URL: ${{ vars.DISCORD_INVITE_URL }}   # optional — join prompt is omitted when unset
           WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}   # optional — upgrade button omitted when unset
-          GHL_WEBHOOK_URL: ${{ vars.GHL_WEBHOOK_URL }}   # optional — email form omitted when unset
         run: python scripts/build_site.py
       - name: Post free pick to Discord
         env:

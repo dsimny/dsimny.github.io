@@ -28,11 +28,11 @@ DISCORD_INVITE = os.environ.get("DISCORD_INVITE_URL", "").strip()
 PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
 PREMIUM_PRICE = "$30/month"
 
-# Optional email capture into GoHighLevel. This is a public inbound-webhook
-# endpoint meant to be called from the browser, not a secret, so it lives in a
-# repo variable and gets embedded in the page. The form only renders when it is
-# set, so the site never ships a form that posts nowhere.
-GHL_WEBHOOK = os.environ.get("GHL_WEBHOOK_URL", "").strip()
+# Email capture is a beehiiv embed. The form id is a public identifier, not a
+# secret, so it is hardcoded; set it to "" to drop the block entirely. beehiiv
+# hosts the form and the list, which keeps subscriber data and compliance
+# (consent, unsubscribe) out of this repo.
+BEEHIIV_FORM_ID = "44ad2542-ce25-424c-8448-e3921bface31"
 
 B = crypto_box.load_dataset(ROOT, "board", DATE)
 if B is None:
@@ -298,20 +298,13 @@ upgrade_block = f'''
     </div>''' if PREMIUM_URL else ""
 
 # Email capture, for people who won't join a Discord but will leave an address.
-# Deliberately plain: it promises the record and the reasoning, not a daily
-# inbox pick (we don't email picks yet) and not hype. Renders only when the
-# webhook is set. JS handler lives in the page script below.
+# The beehiiv loader renders its own form (title, field, button, consent) inline
+# where the script sits; a short lead-in sets the context above it.
 email_block = f'''
     <div class="emailcap">
-      <p class="joinlead">Not on Discord? Follow the record by email.</p>
-      <p class="joinsub">Drop your address and we'll send how the model works, the running ledger, and
-      the honest case for going premium. No daily spam, no hype. Unsubscribe anytime.</p>
-      <form id="emailform" class="emailform" novalidate>
-        <input id="emailinput" type="email" required placeholder="you@email.com" aria-label="Email address">
-        <button type="submit" class="joinbtn">Keep me posted</button>
-      </form>
-      <p id="emailok" class="emailok" hidden>On the list. Watch your inbox.</p>
-    </div>''' if GHL_WEBHOOK else ""
+      <p class="joinlead">Prefer email? The free pick, in your inbox each morning.</p>
+      <script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="{BEEHIIV_FORM_ID}"></script>
+    </div>''' if BEEHIIV_FORM_ID else ""
 
 # ---------------- free pick section ----------------
 # Renders only when DISCORD_INVITE_URL is set, so the site never ships a dead
@@ -520,10 +513,8 @@ html = f'''<!DOCTYPE html>
   .commitlead {{ font-weight:700; font-size:0.92rem; }}
   .commitsub {{ margin-top:6px; font-size:0.8rem; color:var(--ink2); line-height:1.5; max-width:70ch; }}
   .commithash {{ display:block; margin:10px 0; padding:8px 10px; border-radius:8px; background:var(--page); border:1px solid var(--grid); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:0.72rem; color:var(--s1); word-break:break-all; }}
-  .emailcap {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-radius:14px; background:var(--surface); }}
-  .emailform {{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }}
-  .emailform input {{ flex:1 1 220px; min-width:0; padding:10px 12px; border-radius:10px; border:1px solid var(--ring); background:var(--page); color:var(--ink); font-size:0.9rem; }}
-  .emailok {{ margin-top:10px; font-size:0.85rem; color:var(--good); font-weight:700; }}
+  .emailcap {{ margin:18px 0 6px; }}
+  .emailcap .joinlead {{ margin-bottom:10px; }}
   .upgrade {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--s1); border-radius:14px; background:var(--surface); }}
   .upgradebtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--good); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
   .join {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-radius:14px; background:var(--surface); }}
@@ -712,26 +703,7 @@ html = f'''<!DOCTYPE html>
   }}));
   const hash = location.hash.replace("#", "");
   if (["free","board","ledger","method","rules"].includes(hash)) goTab(hash);
-
-  // Email capture. Fire-and-forget POST to the GoHighLevel inbound webhook,
-  // same pattern as the other sites: show success immediately, never hang on
-  // the response, swallow errors. keepalive lets it finish after the UI updates.
-  const ef = document.getElementById("emailform");
-  if (ef) ef.addEventListener("submit", e => {{
-    e.preventDefault();
-    const input = document.getElementById("emailinput");
-    const email = (input.value || "").trim();
-    if (!email || !input.checkValidity()) {{ input.focus(); return; }}
-    fetch({GHL_WEBHOOK!r}, {{
-      method: "POST",
-      headers: {{ "Content-Type": "application/json" }},
-      body: JSON.stringify({{ email: email, source: "openledgersports.com",
-                             submitted_at: new Date().toISOString() }}),
-      keepalive: true
-    }}).catch(() => {{}});
-    ef.hidden = true;
-    document.getElementById("emailok").hidden = false;
-  }});
+  // Email capture is a beehiiv embed; the loader script handles its own submit.
 </script>
 </body>
 </html>'''

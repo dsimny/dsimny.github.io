@@ -1,0 +1,42 @@
+name: Rebuild site
+# Manually rebuild index.html and feed.xml from the LATEST committed board,
+# without touching the ledger or posting to Discord.
+#
+# Use this to recover the live site after a bad commit (e.g. a locally built
+# index.html for an old date overwriting the current one). It has the
+# encryption key, so it renders today's board correctly where a local build
+# can't. Safe to run any time: it only regenerates the site from data already
+# in the repo.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    env:
+      BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Rebuild from the latest board
+        env:
+          DISCORD_INVITE_URL: ${{ vars.DISCORD_INVITE_URL }}
+          WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          LATEST=$(ls data/board_*.json data/board_*.enc 2>/dev/null \
+                   | sed -E 's#.*board_(.*)\.(json|enc)$#\1#' | sort -u | tail -1)
+          if [ -n "$LATEST" ]; then python scripts/build_site.py "$LATEST"; fi
+      - name: Commit site
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html feed.xml data/
+          git diff --cached --quiet || git commit -m "Rebuild site $(date -u +%F)"
+          git push

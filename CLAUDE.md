@@ -8,6 +8,19 @@ Live site: https://openledgersports.com (custom domain; www and the
 dsimny.github.io URL both 301 to the apex). Local working copy lives at
 claude-code-projects/openledger-sports.
 
+## NEVER commit a locally built index.html or feed.xml
+
+They are generated files that CI rebuilds each run from the day's board.
+Since 2026-07-23 the board is encrypted, so a local machine WITHOUT
+BOARD_ENCRYPTION_KEY can only build an OLD date's board, and committing that
+index.html silently reverts the live site's free pick to a stale (already
+played) game. This happened once. When changing build_site.py or feed.py,
+commit ONLY the source: run `git checkout -- index.html feed.xml` to discard
+the local build first, then `git add` the specific source files (not -A). Let
+a workflow rebuild them. To fix the live site after a bad commit, trigger the
+"Rebuild site" workflow (workflow_dispatch) — it has the key and posts nothing
+to Discord.
+
 ## Architecture (daily pipeline, runs via GitHub Actions)
 
 ```

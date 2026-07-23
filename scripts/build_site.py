@@ -740,3 +740,12 @@ out = os.path.join(ROOT, "index.html")
 with open(out, "w", encoding="utf-8") as f:
     f.write(html)
 print(f"Wrote {out}: {len(html):,} bytes | free pick: {free['pick'] if free else 'NONE'} | {len(plays)} plays")
+
+# Public RSS feed of the free pick only. Built from the same `free` the page
+# uses, so it can never contain a premium play. Idempotent by date.
+import feed
+feed.update(ROOT, DATE, free,
+            NICE_DATE if free is None else f"{_date_obj:%A, %B} {_date_obj.day}",
+            gen_analysis(free) if free is not None else "",
+            B.get("generated_utc", ""), os.environ.get("SITE_URL", ""))
+print("Updated feed.xml")

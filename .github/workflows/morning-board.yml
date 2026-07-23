@@ -53,6 +53,17 @@ jobs:
           DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # optional
           SITE_URL: ${{ vars.SITE_URL }}                                            # optional
         run: python scripts/post_discord.py board
+      - name: Email the free pick to subscribers
+        # Reads data/feed_items.json (written by Build site above), so the email
+        # is byte-for-byte the free pick. Unlike the Discord posts this is
+        # idempotent: it records "sent" in data/post_status.json and refuses to
+        # re-send that date, so a repeat run never double-mails the list. Skips
+        # cleanly if the key or segment is unset; never fails the board.
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}       # optional — email skipped when unset
+          RESEND_SEGMENT_ID: ${{ vars.RESEND_SEGMENT_ID }}    # optional — all-subscribers segment
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}                  # optional — defaults to picks@send.openledgersports.com
+        run: python scripts/send_email.py pick
       - name: Commit board and site
         run: |
           git config user.name "openledger-bot"

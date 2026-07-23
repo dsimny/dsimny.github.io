@@ -201,6 +201,15 @@ Done:
   TXT _dmarc = "v=DMARC1; p=none;" for deliverability).
 - feed.xml already published (tool-agnostic RSS of the free pick, built by
   build_site.py -> feed.py; premium never in it).
+- scripts/send_email.py + a "Email the free pick" step in morning-board.yml.
+  It reads the day's item from data/feed_items.json (so the email is byte-for-
+  byte the free pick — never a premium play), POSTs it as a Resend broadcast
+  (segment_id, from, subject, html/text, send:true), and — unlike post_discord
+  — is IDEMPOTENT: it records "sent" in data/post_status.json and refuses to
+  re-send that date, so a repeat morning run never double-mails the list. Skips
+  cleanly (exit 0) if RESEND_API_KEY or RESEND_SEGMENT_ID is unset; never fails
+  the board. Dry-run: `python scripts/send_email.py pick <date> --dry-run`.
+  Only the wiring is unverified live — it has no segment to send to yet (below).
 
 Resend model gotchas learned:
 - "Audiences" are DEPRECATED in favor of SEGMENTS. Broadcasts send to a
@@ -212,10 +221,12 @@ Resend model gotchas learned:
   key can't be client-side.
 
 Next steps, in order:
-1. User provides an "all-subscribers" SEGMENT id from the Segments tab. Then
-   build the free-pick daily send: pipeline broadcasts the pick to that
-   segment each morning before first pitch, from picks@send.openledgersports.com.
-   Test by adding the user as a contact first.
+1. GO-LIVE for the daily send (code done, just config + one test): user gets an
+   "all-subscribers" SEGMENT id from the Segments tab and sets it as the repo
+   VARIABLE RESEND_SEGMENT_ID (Settings → Secrets and variables → Actions →
+   Variables). Add yourself as a contact in that segment first, then trigger
+   "Morning board" once and confirm the pick lands in your inbox. Until the
+   variable is set the email step no-ops, so shipping the code now is safe.
 2. Capture: a Cloudflare Worker that receives the site form POST and calls
    Resend contacts.create. Re-add the email form on the free-pick page pointing
    at the Worker. (The .emailcap wrapper CSS is still in build_site.py.)

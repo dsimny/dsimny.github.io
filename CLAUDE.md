@@ -47,10 +47,19 @@ days post too (generated from the ledger; no skip path) and every post carries
 21+/1-800-GAMBLER/not-betting-advice (house rules 1 and 5). Idempotent like the
 email sender: records "posted" per platform in data/post_status.json and refuses
 to re-post a date. Each platform skips cleanly if its credentials are unset and
-never fails the grading run. Note: X's v2 docs list OAuth 2.0, not 1.0a, for
-POST /2/tweets; 1.0a still works in practice and needs no token refresh, but if X
-rejects it the post just records "failed" (safe) and we move to the OAuth 2.0
-refresh-token flow. Preview: `python scripts/post_social.py x <date> --dry-run`.
+never fails the grading run. Preview: `python scripts/post_social.py x <date> --dry-run`.
+
+X specifics (learned 2026-07-23, first live attempt): OAuth 1.0a User Context
+DOES work for POST /2/tweets despite the v2 docs listing only OAuth 2.0 — the
+first live post returned 402 "credits depleted", i.e. it authenticated and was
+refused only for billing, not auth. X has NO free tier: it is pay-per-use,
+credits bought upfront in the developer console. Posting costs $0.015/request
+but $0.20 if the post contains a URL (~13x). So the X post carries NO link on
+purpose (build_x_text) — it's ~13x cheaper and X downranks link posts anyway;
+the site lives in the account bio. Do not re-add SITE to the X post. Until
+credits are funded, the X step records "failed" 402 each night (harmless; the
+board, ledger, site, Discord and email are all unaffected). Facebook has no
+such cost — Meta's Graph API is not metered — so its post keeps the link.
 
 Test locally without network: `python scripts/engine.py 2026-07-22` against an
 existing snapshot, then `python scripts/build_site.py 2026-07-22`; grade with

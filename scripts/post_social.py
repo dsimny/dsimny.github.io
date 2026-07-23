@@ -117,7 +117,13 @@ def _running(r):
 
 
 def build_x_text(date):
-    """<=280 chars. Drops the tagline before the record or the legal line — the
+    """<=280 chars, and DELIBERATELY carries no URL.
+
+    X's API prices a post with a link at $0.20 vs $0.015 without one — ~13x — and
+    X's own feed downranks link posts, so the site link is left off here. It lives
+    in the account bio instead. Do NOT add SITE back to this post without knowing
+    it multiplies the per-post cost. (The Facebook post keeps its link: Meta's API
+    is not metered.) Drops the tagline before the record or the legal line — the
     ledger numbers and 1-800-GAMBLER always survive the trim."""
     r = recap(date)
     if r is None:
@@ -126,10 +132,10 @@ def build_x_text(date):
     head = f"Yesterday graded: {day}, {r['day_pnl']:+.2f}u."
     led = f"Ledger: {_running(r)}."
     tag = "Every pick public before first pitch, every result graded — wins and losses."
-    lines = [head, led, tag, RG, SITE]
+    lines = [head, led, tag, RG]
     text = "\n".join(lines)
     if len(text) > X_LIMIT:                       # drop the tagline first
-        text = "\n".join([head, led, RG, SITE])
+        text = "\n".join([head, led, RG])
     return text[:X_LIMIT]
 
 

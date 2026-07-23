@@ -516,8 +516,7 @@ html = f'''<!DOCTYPE html>
   .commitlead {{ font-weight:700; font-size:0.92rem; }}
   .commitsub {{ margin-top:6px; font-size:0.8rem; color:var(--ink2); line-height:1.5; max-width:70ch; }}
   .commithash {{ display:block; margin:10px 0; padding:8px 10px; border-radius:8px; background:var(--page); border:1px solid var(--grid); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:0.72rem; color:var(--s1); word-break:break-all; }}
-  /* Email-capture wrapper: styled here so a future embed drops in cleanly.
-     The beehiiv-specific iframe sizing was removed with the beehiiv embed. */
+  /* Email-capture wrapper: styled here so a future embed drops in cleanly. */
   .emailcap {{ margin:18px 0 6px; }}
   .emailcap .joinlead {{ margin-bottom:10px; }}
   .upgrade {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--s1); border-radius:14px; background:var(--surface); }}

@@ -186,6 +186,49 @@ already been played. The 2026-07-21 board created that way was removed before
 grading so the ledger would not open with picks that were never live before
 first pitch. Only run it manually between midnight ET and first pitch.
 
+## Email service — IN PROGRESS as of 2026-07-23 (pick up here)
+
+Goal: (1) email the free pick daily to a list, (2) a content-free "board's up,
+check Discord" nudge to premium members. Beehiiv was tried and DROPPED (its
+automated RSS-to-send needs a Max/Enterprise tier not worth it for an empty
+list; all beehiiv code was removed from the site). Now using RESEND.
+
+Done:
+- Resend account "openledgersports". API key saved as the GitHub secret
+  RESEND_API_KEY (Full access).
+- Sending domain send.openledgersports.com VERIFIED (DKIM/SPF/MX live in
+  Cloudflare via Resend auto-configure; DMARC optional, not yet added — add
+  TXT _dmarc = "v=DMARC1; p=none;" for deliverability).
+- feed.xml already published (tool-agnostic RSS of the free pick, built by
+  build_site.py -> feed.py; premium never in it).
+
+Resend model gotchas learned:
+- "Audiences" are DEPRECATED in favor of SEGMENTS. Broadcasts send to a
+  segment_id (POST /broadcasts: segment_id, from, subject, html/text,
+  send:true or scheduled_at). No audience_id. Contacts.create needs no
+  audienceId.
+- Resend has NO drop-in signup form. Capturing site signups needs a small
+  server-side proxy (Cloudflare Worker — user has Cloudflare) because the API
+  key can't be client-side.
+
+Next steps, in order:
+1. User provides an "all-subscribers" SEGMENT id from the Segments tab. Then
+   build the free-pick daily send: pipeline broadcasts the pick to that
+   segment each morning before first pitch, from picks@send.openledgersports.com.
+   Test by adding the user as a contact first.
+2. Capture: a Cloudflare Worker that receives the site form POST and calls
+   Resend contacts.create. Re-add the email form on the free-pick page pointing
+   at the Worker. (The .emailcap wrapper CSS is still in build_site.py.)
+3. Premium nudge: Whop webhook (membership went valid/invalid) -> sync members
+   into a "premium" segment -> daily content-free nudge. Lower priority; premium
+   members already get the board on Discord.
+
+Other open threads (not code): testers have promo codes and an affiliate
+referral link; Instagram + Facebook accounts created (channel/social copy and
+the two canonical links — openledgersports.com and discord.gg/8EVazMtydq —
+were provided); Whop upgrade button on the site is still dormant
+(WHOP_CHECKOUT_URL unset) pending a real record.
+
 ## Roadmap (in trust-building order)
 
 1. Live multi-book best price via The Odds API (fetch_data.py already consumes

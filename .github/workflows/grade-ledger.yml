@@ -37,8 +37,9 @@ jobs:
           if [ -n "$LATEST" ]; then python scripts/build_site.py "$LATEST"; fi
       - name: Post results recap to Discord
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
-          SITE_URL: ${{ vars.SITE_URL }}                            # optional
+          DISCORD_WEBHOOK_URL_LEDGER: ${{ secrets.DISCORD_WEBHOOK_URL_LEDGER }}   # results channel; falls back to DISCORD_WEBHOOK_URL if unset
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                 # optional fallback
+          SITE_URL: ${{ vars.SITE_URL }}                                          # optional
         run: python scripts/post_discord.py recap
       - name: Commit ledger and site
         run: |

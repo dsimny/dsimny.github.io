@@ -29,9 +29,13 @@ import crypto_box
 ET = ZoneInfo("America/New_York")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL", "")
-# Separate channel for the held plays. Results always go to the public channel:
+# Separate channel for the held plays. Results always go to a PUBLIC channel:
 # the record stays public even when the picks are not.
 MEMBERS_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_MEMBERS", "")
+# Results recap gets its own public channel so it does not bury the free pick.
+# Falls back to the free-pick webhook if unset, so nothing breaks before the
+# channel exists.
+LEDGER_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_LEDGER", "")
 SITE = os.environ.get("SITE_URL", "").rstrip("/")
 
 MAX_EMBEDS = 10   # Discord's hard limit per message
@@ -220,9 +224,9 @@ def build_recap_payload(date):
 # mode -> (payload builder, webhook, env var name for the skip message)
 def routes():
     return {
-        "pick":  (build_pick_payload,  WEBHOOK,         "DISCORD_WEBHOOK_URL"),
-        "board": (build_board_payload, MEMBERS_WEBHOOK, "DISCORD_WEBHOOK_URL_MEMBERS"),
-        "recap": (build_recap_payload, WEBHOOK,         "DISCORD_WEBHOOK_URL"),
+        "pick":  (build_pick_payload,  WEBHOOK,                    "DISCORD_WEBHOOK_URL"),
+        "board": (build_board_payload, MEMBERS_WEBHOOK,            "DISCORD_WEBHOOK_URL_MEMBERS"),
+        "recap": (build_recap_payload, LEDGER_WEBHOOK or WEBHOOK,  "DISCORD_WEBHOOK_URL_LEDGER"),
     }
 
 STATUS_PATH = os.path.join(ROOT, "data", "post_status.json")

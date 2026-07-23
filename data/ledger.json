@@ -1,4 +1,54 @@
 {
- "entries": [],
- "aggregates": null
+ "entries": [
+  {
+   "date": "2026-07-22",
+   "gamePk": 824735,
+   "game": "BAL @ BOS",
+   "pick": "Boston Red Sox ML (-136)",
+   "units": 0.5,
+   "confidence": 0.6701,
+   "edge": 0.0938,
+   "odds_basis": -136,
+   "final_score": "3-6",
+   "result": "WIN",
+   "pnl": 0.368
+  },
+  {
+   "date": "2026-07-22",
+   "gamePk": 823761,
+   "game": "NYM @ MIL",
+   "pick": "Milwaukee Brewers ML (-158)",
+   "units": 0.5,
+   "confidence": 0.646,
+   "edge": 0.0336,
+   "odds_basis": -158,
+   "final_score": "3-4",
+   "result": "WIN",
+   "pnl": 0.316
+  },
+  {
+   "date": "2026-07-22",
+   "gamePk": 823110,
+   "game": "CIN @ SEA",
+   "pick": "Seattle Mariners ML (-155)",
+   "units": 1.0,
+   "confidence": 0.6506,
+   "edge": 0.0428,
+   "odds_basis": -155,
+   "final_score": "5-3",
+   "result": "LOSS",
+   "pnl": -1.0
+  }
+ ],
+ "aggregates": {
+  "record": "2-1",
+  "wins": 2,
+  "losses": 1,
+  "voids": 0,
+  "units_net": -0.316,
+  "units_risked": 2.0,
+  "roi_pct": -15.8,
+  "opened": "2026-07-22",
+  "last_graded": "2026-07-22"
+ }
 }

@@ -85,6 +85,23 @@
    "http_status": null,
    "detail": "missing FB_PAGE_ID, FB_PAGE_ACCESS_TOKEN",
    "at_utc": "2026-07-24T08:10:18Z"
+  },
+  {
+   "date": "2026-07-24",
+   "mode": "board",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354298436354048",
+   "detail": "",
+   "at_utc": "2026-07-24T15:10:27Z"
+  },
+  {
+   "date": "2026-07-24",
+   "mode": "pick",
+   "result": "no_config",
+   "http_status": null,
+   "detail": "RESEND_SEGMENT_ID not set",
+   "at_utc": "2026-07-24T15:10:27Z"
   }
  ]
 }

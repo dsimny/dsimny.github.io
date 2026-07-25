@@ -39,8 +39,11 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 API_KEY = os.environ.get("RESEND_API_KEY", "")
 SEGMENT_ID = os.environ.get("RESEND_SEGMENT_ID", "")
 # Verified sending domain is send.openledgersports.com; overridable but the
-# default is the address the DKIM/SPF records were set up for.
-EMAIL_FROM = os.environ.get("EMAIL_FROM", "Open Ledger Sports <picks@send.openledgersports.com>")
+# default is the address the DKIM/SPF records were set up for. Use `or`, not a
+# get() default: the workflow passes EMAIL_FROM=${{ vars.EMAIL_FROM }}, which is
+# an EMPTY STRING (not absent) when the variable is unset — and an empty `from`
+# makes Resend reject the send with 400 "The domain is invalid".
+EMAIL_FROM = os.environ.get("EMAIL_FROM") or "Open Ledger Sports <picks@send.openledgersports.com>"
 
 BROADCASTS_URL = "https://api.resend.com/broadcasts"
 

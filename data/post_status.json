@@ -127,6 +127,32 @@
    "http_status": null,
    "detail": "missing FB_PAGE_ID, FB_PAGE_ACCESS_TOKEN",
    "at_utc": "2026-07-25T08:10:20Z"
+  },
+  {
+   "date": "2026-07-25",
+   "mode": "pick",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-07-25T15:02:37Z"
+  },
+  {
+   "date": "2026-07-25",
+   "mode": "board",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-07-25T15:02:37Z"
+  },
+  {
+   "date": "2026-07-25",
+   "mode": "email",
+   "result": "failed",
+   "http_status": 400,
+   "detail": "{\"statusCode\":400,\"message\":\"The domain is invalid\",\"name\":\"validation_error\"}",
+   "at_utc": "2026-07-25T15:02:38Z"
   }
  ]
 }

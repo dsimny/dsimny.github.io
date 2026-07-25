@@ -22,9 +22,9 @@ from the full entry list every run.
 Run: python scripts/grade.py [YYYY-MM-DD]   (defaults to yesterday, ET)
 Test: python scripts/grade.py YYYY-MM-DD --scores-file path.json
       where the file maps gamePk -> {"away": runs, "home": runs, "final": true}
-      Optional: --closing-file path.json (gamePk -> {"away_ml","home_ml"}) to
-      exercise CLV, and --ledger path.json to write a throwaway ledger instead
-      of the real data/ledger.json.
+      Optional: --closing-file path.json (gamePk -> {"away_ml","home_ml",...}) to
+      exercise CLV, --ledger path.json and --totals-ledger path.json to write
+      throwaway ledgers instead of the real data/*.json.
 """
 import json, os, sys
 from datetime import datetime, timedelta
@@ -34,6 +34,7 @@ import crypto_box
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 LEDGER = os.path.join(ROOT, "data", "ledger.json")
+TOTALS_LEDGER = os.path.join(ROOT, "data", "totals_ledger.json")  # separate PAPER track
 
 def american_to_b(odds):
     return 100 / (-odds) if odds < 0 else odds / 100
@@ -56,6 +57,84 @@ def load_closing(root, date):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
     return {}
+
+def grade_totals(date, board, scores, closing, path):
+    """Paper-grade the per-game totals picks into a SEPARATE ledger: W/L/PUSH at a flat
+    1u, plus totals CLV (did the closing line move toward our side?). Deliberately apart
+    from the real moneyline ledger so it never touches the public record — it exists to
+    measure whether the calibrated run model beats the closing total, before any real
+    allocation. Append-only and idempotent per (date, gamePk), like the main ledger."""
+    led = {"entries": []}
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            led = json.load(f)
+    already = {(e["date"], e["gamePk"]) for e in led["entries"]}
+    graded = 0
+    for b in board:
+        tp = b.get("total_pick")
+        if not tp:
+            continue
+        key = (date, b.get("gamePk"))
+        if key in already:
+            continue
+        side, line, price = tp["side"], tp["line"], tp["price"]
+        entry = {"date": date, "gamePk": b.get("gamePk"), "game": b["abbr"], "market": "total",
+                 "side": side, "line": line, "price": price,
+                 "model_p": tp.get("model_p"), "edge": tp.get("edge")}
+        sc = scores.get(str(b.get("gamePk", "")))
+        if sc is None or not sc.get("final") or sc.get("away") is None:
+            entry.update(result="VOID", pnl=0.0, note="Game not final; paper stake returned.")
+        else:
+            actual = sc["home"] + sc["away"]
+            entry["actual_total"] = actual
+            if actual == line:
+                entry.update(result="PUSH", pnl=0.0)
+            else:
+                won = (actual > line) if side == "Over" else (actual < line)
+                entry.update(result="WIN" if won else "LOSS",
+                             pnl=round(american_to_b(price), 3) if won else -1.0)
+        # ---- totals CLV: closing line movement toward our side (runs), price as tiebreak ----
+        cl = closing.get(str(b.get("gamePk", "")))
+        if cl and cl.get("total") is not None:
+            close_line = cl["total"]
+            clv_runs = (close_line - line) if side == "Over" else (line - close_line)
+            entry["close_line"] = close_line
+            entry["clv_runs"] = round(clv_runs, 1)
+            if clv_runs != 0:
+                entry["beat_close"] = clv_runs > 0
+            elif cl.get("over_price") is not None and cl.get("under_price") is not None and tp.get("mkt_devig") is not None:
+                io, iu = american_to_implied(cl["over_price"]), american_to_implied(cl["under_price"])
+                close_side = (io / (io + iu)) if side == "Over" else 1 - (io / (io + iu))
+                entry["clv_pts"] = round((close_side - tp["mkt_devig"]) * 100, 2)
+                entry["beat_close"] = close_side > tp["mkt_devig"]
+        led["entries"].append(entry)
+        graded += 1
+
+    ent = led["entries"]
+    wins = sum(1 for e in ent if e["result"] == "WIN")
+    losses = sum(1 for e in ent if e["result"] == "LOSS")
+    pushes = sum(1 for e in ent if e["result"] == "PUSH")
+    voids = sum(1 for e in ent if e["result"] == "VOID")
+    net = round(sum(e["pnl"] for e in ent), 3)
+    decided = wins + losses
+    clv_e = [e for e in ent if e.get("clv_runs") is not None]
+    led["aggregates"] = {
+        "record": f"{wins}-{losses}" + (f"-{pushes}p" if pushes else "") + (f"-{voids}v" if voids else ""),
+        "win_pct": round(100 * wins / decided, 1) if decided else None,
+        "paper_units_net": net,
+        "paper_roi_pct": round(100 * net / decided, 2) if decided else None,   # flat 1u/bet
+        "avg_clv_runs": round(sum(e["clv_runs"] for e in clv_e) / len(clv_e), 3) if clv_e else None,
+        "beat_close_pct": round(100 * sum(1 for e in clv_e if e.get("beat_close")) / len(clv_e), 1) if clv_e else None,
+        "graded_with_clv": len(clv_e),
+        "note": "PAPER track — flat 1u, not staked, separate from the moneyline ledger.",
+        "last_graded": date,
+    }
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(led, f, indent=1)
+    a = led["aggregates"]
+    print(f"Totals paper: graded {graded} for {date}. {a['record']}, win {a['win_pct']}%, "
+          f"{net:+.2f}u paper, CLV {a['avg_clv_runs']} runs / beat close {a['beat_close_pct']}% (n={len(clv_e)})")
 
 def fair_pick_odds(b):
     """Model fair odds for the pick side (used only if no market odds logged)."""
@@ -86,6 +165,7 @@ def main():
     # full grade path run against throwaway files without touching the real,
     # append-only ledger. Default to the live paths.
     ledger_path = sys.argv[sys.argv.index("--ledger") + 1] if "--ledger" in sys.argv else LEDGER
+    totals_ledger_path = sys.argv[sys.argv.index("--totals-ledger") + 1] if "--totals-ledger" in sys.argv else TOTALS_LEDGER
 
     B = crypto_box.load_dataset(ROOT, "board", date)
     if B is None:
@@ -199,6 +279,9 @@ def main():
              f" (n={clv_block['graded_with_clv']})") if clv_ent else ""
     print(f"Graded {graded} picks for {date}. Ledger: {ledger['aggregates']['record']}, "
           f"{units_net:+.2f}u net, ROI {ledger['aggregates']['roi_pct']}%{clv_s}")
+
+    # Paper-grade the totals track into its own ledger (never touches the record above).
+    grade_totals(date, B["board"], scores, closing, totals_ledger_path)
 
     reveal(date, B)
 

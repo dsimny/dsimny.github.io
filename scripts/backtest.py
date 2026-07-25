@@ -206,6 +206,18 @@ def evaluate(snap, sims, model_weight, odds_by_pk):
             p_mkt = ih / (ia + ih)
             row.update(p_mkt=p_mkt, p_blend=model_weight * p_model + (1 - model_weight) * p_mkt,
                        away_ml=od["away_ml"], home_ml=od["home_ml"])
+
+        # ---- Totals: the model's simulated run-total distribution vs the actual total ----
+        totals = sim["a_runs"] + sim["h_runs"]
+        t_actual = res["home"] + res["away"]
+        p10, p25, p75, p90 = (float(v) for v in np.percentile(totals, [10, 25, 75, 90]))
+        row["t_mean"] = float(totals.mean())
+        row["t_actual"] = t_actual
+        # mid-P PIT: where the actual total lands in the model's distribution (uniform if calibrated)
+        row["t_pit"] = (int((totals < t_actual).sum()) + 0.5 * int((totals == t_actual).sum())) / len(totals)
+        row["t_in50"] = 1 if p25 <= t_actual <= p75 else 0   # central-50% interval coverage
+        row["t_in80"] = 1 if p10 <= t_actual <= p90 else 0   # central-80% interval coverage
+
         rows.append(row)
     return rows
 
@@ -255,6 +267,34 @@ def roi(rows, model_weight):
         print("  Flat-stake ROI: no bets cleared the edge gate.")
 
 
+def totals_report(rows):
+    """Calibrate the model's run-total distribution against actual finals. Needs no
+    market — just the sim distribution vs what the game actually totaled. Bias/MAE
+    test the mean; coverage + PIT test the whole distribution (and thus DISPERSION)."""
+    r = [x for x in rows if x.get("t_mean") is not None]
+    if not r:
+        return
+    n = len(r)
+    mmt = sum(x["t_mean"] for x in r) / n
+    mat = sum(x["t_actual"] for x in r) / n
+    bias = mmt - mat
+    mae = sum(abs(x["t_mean"] - x["t_actual"]) for x in r) / n
+    rmse = (sum((x["t_mean"] - x["t_actual"]) ** 2 for x in r) / n) ** 0.5
+    over_mean = sum(1 for x in r if x["t_actual"] > x["t_mean"]) / n
+    cov50 = sum(x["t_in50"] for x in r) / n
+    cov80 = sum(x["t_in80"] for x in r) / n
+    print("\nTotals — model run-total distribution vs actual finals:")
+    print(f"  model mean {mmt:.2f}  vs  actual {mat:.2f}  ->  bias {bias:+.2f} runs")
+    print(f"  MAE {mae:.2f}  RMSE {rmse:.2f}   |  actual over model-mean {over_mean * 100:.1f}%  (50% = unbiased)")
+    print(f"  interval coverage: central 50% caught {cov50 * 100:.1f}% (want ~50), central 80% caught {cov80 * 100:.1f}% (want ~80)")
+    print("    <50 = distribution too NARROW (DISPERSION too high); >50/80 = too WIDE (too low)")
+    bins = [0] * 10
+    for x in r:
+        bins[min(9, int(x["t_pit"] * 10))] += 1
+    print("  PIT deciles (actual's percentile in model dist; flat ~10% each = calibrated):")
+    print("    " + "  ".join(f"{b / n * 100:4.1f}" for b in bins))
+
+
 def report(rows, dates, args, have_odds):
     if not rows:
         print("No graded games in range (all skipped: not final, missing starter, or too early).")
@@ -277,6 +317,7 @@ def report(rows, dates, args, have_odds):
             roi(mrows, args.model_weight)
     print("\nCalibration (predicted home-win% -> actual):")
     calibration(rows, "p_model")
+    totals_report(rows)
 
 
 def main():

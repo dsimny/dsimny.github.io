@@ -53,7 +53,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.6-team-regression"
+ENGINE_VERSION = "0.7-totals-track"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -381,6 +381,32 @@ def main():
             # units = the LESSER of the tier cap and quarter-Kelly (rounded to 0.5u)
             units = min(units, max(0.5, round(kelly_pct * 2) / 2))
 
+        # ---- Totals paper track (v0.7): log the model's over/under call vs the market ----
+        # NOT staked and NOT in the moneyline exposure — recorded so grade.py can book its
+        # W/L and CLV in a SEPARATE ledger (data/totals_ledger.json). The full-season backtest
+        # showed the run-total model is well-calibrated; this measures whether that translates
+        # into beating the closing total before any real allocation. Side = the one the model
+        # rates above the de-vigged market; needs the over/under prices, else stays None.
+        total_pick = None
+        if mkt and mkt.get("total") is not None and mkt.get("over_price") is not None and mkt.get("under_price") is not None:
+            line_t = mkt["total"]
+            m_over = float((totals > line_t).mean())
+            io, iu = american_to_implied(mkt["over_price"]), american_to_implied(mkt["under_price"])
+            mkt_over_devig = io / (io + iu)
+            pick_over = m_over >= mkt_over_devig
+            side_price = mkt["over_price"] if pick_over else mkt["under_price"]
+            side_model_p = m_over if pick_over else (1 - m_over)
+            side_mkt_devig = mkt_over_devig if pick_over else (1 - mkt_over_devig)
+            t_b = american_to_b(side_price)
+            total_pick = {
+                "side": "Over" if pick_over else "Under",
+                "line": line_t, "price": side_price,
+                "over_price": mkt["over_price"], "under_price": mkt["under_price"],
+                "model_p": round(side_model_p, 4), "mkt_devig": round(side_mkt_devig, 4),
+                "edge": round(side_model_p - american_to_implied(side_price), 4),
+                "ev_per_unit": round(side_model_p * t_b - (1 - side_model_p), 4),
+            }
+
         board.append({
             "gamePk": g["gamePk"],
             "matchup": f'{away["name"]} @ {home["name"]}',
@@ -408,7 +434,8 @@ def main():
             "no_edge": no_edge,
             "mkt_odds": mkt_odds, "mkt_total": mkt["total"] if mkt else None,
             "mkt_away_ml": mkt["away_ml"] if mkt else None, "mkt_home_ml": mkt["home_ml"] if mkt else None,
-            "p_over_mkt": round(float((totals > mkt["total"]).mean()), 4) if mkt else None,
+            "p_over_mkt": round(float((totals > mkt["total"]).mean()), 4) if (mkt and mkt.get("total") is not None) else None,
+            "total_pick": total_pick,
             "edge": round(edge, 4) if edge is not None else None,
             "ev_per_unit": round(ev, 4) if ev is not None else None,
             "kelly_pct": round(kelly_pct, 2) if kelly_pct is not None else None,

@@ -173,7 +173,7 @@ with more care than the API keys, which are all replaceable.
   Pick side, confidence, fair line, edge, EV and sizing all run on the blended
   prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
   calibration. No market line → pure model (no blend). Board stamps
-  engine_version="0.6-team-regression".
+  engine_version="0.7-totals-track".
 - Market math: edge = blended prob − implied prob of offered price; divergence =
   RAW model prob − de-vigged market prob; EV per unit; quarter-Kelly capped by tier.
 
@@ -184,6 +184,27 @@ stabilized ERA+FIP+regression starter rate, the real bullpen ERA, and a
 added yet (not live): CLV figures and backtest numbers. Surface CLV on the ledger
 tab only once capture-closing is running and the ledger actually carries clv_pts;
 cite backtest calibration only after a full-season run, not the preliminary window.
+
+## Totals paper track (v0.7) — measuring before staking
+
+The full-season backtest showed the model's run-total distribution is well-calibrated
+(bias +0.08 runs over 1414 games, flat PIT) while its moneyline barely beats a coin
+flip — so totals is the arena where a fundamentals model has a real shot. v0.7 starts
+MEASURING it without risking the record:
+
+- fetch_data.py / fetch_closing.py now capture the over/under PRICES (not just the line).
+- engine.py logs a `total_pick` per game (side = the one the model rates above the
+  de-vigged market, with line/price/model_p/edge). It is NOT staked and NOT in the
+  moneyline exposure — purely recorded.
+- grade.py's grade_totals() paper-grades those into data/totals_ledger.json (SEPARATE
+  from the real ledger): W/L/PUSH at a flat 1u, plus totals CLV = closing line movement
+  toward our side (runs), price de-vig as the tiebreak when the line is unchanged. Own
+  aggregates (record, win%, paper ROI, avg_clv_runs, beat_close%).
+- Honest ceiling: calibrated-to-reality ≠ beats-the-market. The closing total is sharp
+  too. The real edge would come from adding info the opening line lags — WEATHER first
+  (free NWS/Open-Meteo by park), then bullpen availability, then umpires. This track is
+  the gate: only promote totals to real staked plays (real board + ledger + site) once
+  its CLV is convincingly positive. Nothing on the public site changes until then.
 
 ## Circuit breakers (the product's identity — never weaken silently)
 

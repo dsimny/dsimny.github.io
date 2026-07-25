@@ -181,20 +181,32 @@ def main():
                 ev = by_name.get((a_name, h_name))
                 if not ev:
                     continue
-                a_mls, h_mls, tots = [], [], []
+                a_mls, h_mls, tots, ovr, und = [], [], [], [], []
                 for bk in ev.get("bookmakers", []):
                     for m in bk.get("markets", []):
                         if m["key"] == "h2h":
                             for o in m["outcomes"]:
                                 (a_mls if o["name"] == a_name else h_mls).append(o["price"])
-                        elif m["key"] == "totals" and m["outcomes"]:
-                            tots.append(m["outcomes"][0].get("point"))
+                        elif m["key"] == "totals":
+                            for o in m.get("outcomes", []):
+                                if o.get("point") is not None:
+                                    tots.append(o["point"])
+                                if o.get("name") == "Over" and o.get("price") is not None:
+                                    ovr.append(o["price"])
+                                elif o.get("name") == "Under" and o.get("price") is not None:
+                                    und.append(o["price"])
                 if a_mls and h_mls:
-                    odds[str(g["gamePk"])] = {
+                    rec = {
                         "away_ml": int(statistics.median(a_mls)),
                         "home_ml": int(statistics.median(h_mls)),
-                        "total": float(statistics.median([t for t in tots if t is not None])) if any(t is not None for t in tots) else None,
+                        "total": float(statistics.median(tots)) if tots else None,
                     }
+                    # over/under prices enable the totals paper track (edge + CLV); absent on
+                    # books that only posted the line, in which case totals stays untracked.
+                    if ovr and und:
+                        rec["over_price"] = int(statistics.median(ovr))
+                        rec["under_price"] = int(statistics.median(und))
+                    odds[str(g["gamePk"])] = rec
             odds_source = f"The Odds API, median across US books, fetched {datetime.utcnow().isoformat()}Z"
         except Exception as e:  # odds are optional — never sink the board over them
             print(f"WARNING: odds fetch failed ({e}); engine will run without market gates.")

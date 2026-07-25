@@ -260,6 +260,17 @@ MEASURING it without risking the record:
   the role list or grants silently fail).
 - Actions → General → Workflow permissions must be "Read and write".
 - Pages: deploy from branch `main`, folder `/ (root)`.
+- DNS (Cloudflare, DNS-only / grey cloud — the records point straight at GitHub
+  Pages, no Cloudflare proxy). The apex needs BOTH IPv4 and IPv6, or the site is
+  unreachable on IPv6-only networks (most cell carriers) while still working on
+  IPv4 wifi — it presents in mobile browsers as "address is invalid", not an
+  outage (diagnosed 2026-07-25: apex had only A records; www worked on wifi but
+  redirects to the apex so it failed on cellular too).
+  - `@` (apex)  A     185.199.108.153 / .109.153 / .110.153 / .111.153
+  - `@` (apex)  AAAA  2606:50c0:8000::153 / 8001::153 / 8002::153 / 8003::153
+  - `www`       CNAME dsimny.github.io  (301s to the apex)
+  If the site loads on wifi but not cellular AFTER the AAAA records have
+  propagated, suspect a carrier gambling-content filter on the line, not DNS.
 
 ## Current deploy status (as of 2026-07-22)
 

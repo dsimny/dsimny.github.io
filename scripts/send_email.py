@@ -46,6 +46,11 @@ BROADCASTS_URL = "https://api.resend.com/broadcasts"
 
 STATUS_PATH = os.path.join(ROOT, "data", "post_status.json")
 STATUS_KEEP = 30   # matches post_discord.py: about a fortnight of daily posts
+# Status key in the SHARED post_status.json. Deliberately NOT "pick": post_discord.py
+# also records (date, "pick") there, and its record() deletes any existing (date, mode)
+# entry — so with a shared "pick" key a repeat morning run would wipe this sender's
+# "sent" guard and DOUBLE-SEND the email. A distinct mode isolates our idempotency.
+STATUS_MODE = "email"
 
 
 def load_status():
@@ -135,7 +140,7 @@ def main():
         # The board is unaffected; just note it and move on.
         print(f"No feed item for {date} — nothing to email.")
         if not dry:
-            record(mode, date, "nothing_to_send")
+            record(STATUS_MODE, date, "nothing_to_send")
         return
 
     payload = build_payload(item)
@@ -152,10 +157,10 @@ def main():
         missing = " and ".join(n for n, v in
                                [("RESEND_API_KEY", API_KEY), ("RESEND_SEGMENT_ID", SEGMENT_ID)] if not v)
         print(f"NOTE: {missing} not set — skipping email (board is unaffected).")
-        record(mode, date, "no_config", detail=f"{missing} not set")
+        record(STATUS_MODE, date, "no_config", detail=f"{missing} not set")
         return
 
-    if already_sent(date, mode):
+    if already_sent(date, STATUS_MODE):
         print(f"Email for {date} already sent — refusing to re-send.")
         return
 
@@ -165,13 +170,13 @@ def main():
                           headers={"Authorization": f"Bearer {API_KEY}"})
     except Exception as exc:
         print(f"WARNING: Resend broadcast failed to send: {exc}")
-        record(mode, date, "failed", detail=str(exc))
+        record(STATUS_MODE, date, "failed", detail=str(exc))
         return
     if r.status_code >= 300:
         # Never fail the pipeline over an email: log, record, move on. A "failed"
         # record does not block a later retry; only "sent" does.
         print(f"WARNING: Resend broadcast failed ({r.status_code}): {r.text[:300]}")
-        record(mode, date, "failed", status=r.status_code, detail=r.text)
+        record(STATUS_MODE, date, "failed", status=r.status_code, detail=r.text)
         return
     bid = ""
     try:
@@ -179,7 +184,7 @@ def main():
     except Exception:
         pass
     print(f"Sent email for {date} via Resend" + (f" (broadcast {bid})." if bid else "."))
-    record(mode, date, "sent", status=r.status_code, detail=bid)
+    record(STATUS_MODE, date, "sent", status=r.status_code, detail=bid)
 
 
 if __name__ == "__main__":

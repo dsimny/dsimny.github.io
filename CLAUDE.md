@@ -311,7 +311,14 @@ Done:
   re-send that date, so a repeat morning run never double-mails the list. Skips
   cleanly (exit 0) if RESEND_API_KEY or RESEND_SEGMENT_ID is unset; never fails
   the board. Dry-run: `python scripts/send_email.py pick <date> --dry-run`.
-  Only the wiring is unverified live — it has no segment to send to yet (below).
+  Payload shape confirmed 2026-07-25 against Resend's current docs: segment_id +
+  send:true (in the create call) is correct — audiences were renamed to segments.
+  BUG FIXED 2026-07-25: the emailer recorded idempotency under mode "pick", which
+  collides with post_discord's "pick" key in the SHARED post_status.json —
+  post_discord runs first each morning and its record() deletes any (date,"pick")
+  entry, so a repeat morning run wiped the emailer's "sent" guard and would
+  double-mail. The emailer now records under a dedicated mode "email" (STATUS_MODE).
+  Still needs RESEND_SEGMENT_ID + a contact in the segment to actually go live (below).
 
 Resend model gotchas learned:
 - "Audiences" are DEPRECATED in favor of SEGMENTS. Broadcasts send to a

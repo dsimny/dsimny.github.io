@@ -94,14 +94,16 @@ def gen_analysis(b):
     if era_gap >= 0.75:
         p1 = (f'<p><strong>The mound tilts this game.</strong> {psp["name"]} brings a {psp["era"]:.2f} ERA and '
               f'{psp["whip"]:.2f} WHIP over {psp["ip"]:g} innings against {osp["name"]} at {osp["era"]:.2f} '
-              f'({osp["whip"]:.2f} WHIP). A {era_gap:.1f}-run ERA gap, weighted over the ~5.5 innings a starter '
-              f'covers, moves real win probability before anyone swings. Baserunners are kindling: '
+              f'({osp["whip"]:.2f} WHIP). A {era_gap:.1f}-run ERA gap — which the engine first stabilizes with FIP '
+              f'and innings pitched, then weights over the ~5.5 innings a starter covers — moves real win '
+              f'probability before anyone swings. Baserunners are kindling: '
               f'the {psp["whip"]:.2f}-vs-{osp["whip"]:.2f} WHIP spread decides whose innings stay quiet.</p>')
     elif era_gap <= -0.5:
         p1 = (f'<p><strong>The pick survives a starter disadvantage.</strong> {osp["name"]} ({osp["era"]:.2f} ERA, '
               f'{osp["whip"]:.2f} WHIP) outgrades {psp["name"]} ({psp["era"]:.2f}, {psp["whip"]:.2f}) on the season '
-              f'line, so this edge is carried by the lineups and bullpens, not the first five innings. The engine '
-              f'weighs starters over ~5.5 innings; the other 3.5 belong to the clubs.</p>')
+              f'line, so this edge is carried by the clubs\' season-long scoring and their bullpens, not the first '
+              f'five innings. The engine credits the starter over ~5.5 innings and each team\'s real bullpen ERA '
+              f'over the other 3.5.</p>')
     else:
         p1 = (f'<p><strong>The starters roughly cancel.</strong> {psp["name"]} ({psp["era"]:.2f} ERA, {psp["whip"]:.2f} '
               f'WHIP over {psp["ip"]:g} IP) against {osp["name"]} ({osp["era"]:.2f}, {osp["whip"]:.2f}) is close to a '
@@ -112,10 +114,20 @@ def gen_analysis(b):
     park_note = ("a hitter-friendly park (factor %.2f)" % pf) if pf >= 1.05 else \
                 ("a run-suppressing park (factor %.2f)" % pf) if pf <= 0.95 else \
                 ("a neutral park (factor %.2f)" % pf)
+    # The published confidence is the sim result BLENDED toward the market, so it is
+    # no longer the raw fraction of simulations won. Say both honestly when the raw
+    # model number is on the board (v0.3+); fall back to the old phrasing otherwise.
+    model_conf = b.get("model_conf")
+    if model_conf is not None and abs(model_conf - conf) > 0.005:
+        win_clause = (f'which makes {pick_name} a <strong>{model_conf*100:.1f}%</strong> team; blended with the '
+                      f'de-vigged market that settles at a published <strong>{conf*100:.1f}%</strong>, a fair price '
+                      f'of <strong>{fair:+d}</strong>')
+    else:
+        win_clause = (f'with {pick_name} winning <strong>{conf*100:.1f}%</strong> of them, a fair price of '
+                      f'<strong>{fair:+d}</strong>')
     p2 = (f'<p><strong>The clubs, the park, the count.</strong> {pick_name} ({p_rec}) score {p_rpg:g} and allow '
           f'{p_rapg:g} runs a game; {opp_name} ({o_rec}) score {o_rpg:g} and allow {o_rapg:g}. In {park_note}, '
-          f'{B["n_sims"]:,} simulations land on a {proj} average score, with {pick_name} winning '
-          f'<strong>{conf*100:.1f}%</strong> of them, a fair price of <strong>{fair:+d}</strong>.</p>')
+          f'{B["n_sims"]:,} simulations land on a {proj} average score, {win_clause}.</p>')
 
     # P3 — market (or its absence)
     if b["mkt_odds"] is not None:
@@ -650,24 +662,28 @@ html = f'''<!DOCTYPE html>
   <section class="tab" id="tab-method">
     <h2 class="sect">How the engine works</h2>
     <div class="prose">
-      <p>Think of the engine as a <strong>flight simulator for tonight's games</strong>. Instead of predicting one outcome, it plays each game {B["n_sims"]:,} times and counts what happens. A team that wins 6,110 of 10,000 simulations is a 61.1% team, and the fair line falls straight out of the count. No gut feelings, no vibes; arithmetic.</p>
+      <p>Think of the engine as a <strong>flight simulator for tonight's games</strong>. Instead of predicting one outcome, it plays each game {B["n_sims"]:,} times and counts what happens. A team that wins 6,110 of 10,000 simulations is a 61.1% team <em>by our model's own reckoning</em> — the starting point, not the published number. Before any bet is priced we blend that estimate toward the market (see below), so the confidence on a card is the simulator checked against the sharpest line in the building, not talking to itself. No gut feelings, no vibes; arithmetic, then a reality check.</p>
       <h3>What each simulation knows</h3>
       <ul>
-        <li><strong>Team run rates:</strong> runs scored and allowed per game for both clubs, live from the MLB Stats API, normalized to the league average.</li>
-        <li><strong>Starting pitchers:</strong> each starter's ERA vs league, weighted over the ~5.5 innings starters actually cover; the bullpen inherits the team's overall run prevention.</li>
+        <li><strong>Team run rates:</strong> runs scored and allowed per game for both clubs, live from the MLB Stats API, normalized to the league average and then regressed partway toward it — a hot April overstates a team the way a hot streak overstates a hitter, so we shrink the gap instead of taking it at face value.</li>
+        <li><strong>Starting pitchers:</strong> a stabilized starter rate over the ~5.5 innings a starter actually covers — his ERA blended with his FIP (which strips out defense and luck), then regressed toward league average by innings pitched, so a 20-inning hot streak isn't mistaken for true talent.</li>
+        <li><strong>Bullpens:</strong> the defending team's real relief-corps ERA covers the innings the starter doesn't — not an assumption that every pen is league-average.</li>
         <li><strong>Park factors:</strong> Coors Field is a hot-air balloon (1.24); T-Mobile Park is a walk-in freezer (0.92). Static season approximations, refreshed manually.</li>
         <li><strong>Home-field advantage:</strong> an evidence-sized bump (~54% for an even matchup), not the folk-wisdom 60%.</li>
         <li><strong>Fat-tailed scoring:</strong> runs come in bunches, so scores are drawn from a negative binomial distribution that allows crooked innings and blowouts, not a tidy bell curve.</li>
       </ul>
+      <h3>We anchor to the market, then look for the gap</h3>
+      <p>The closing MLB line is the single sharpest public forecast of a game that exists, so we don't pretend a simulator knows better than every professional bettor combined. Before pricing anything, we <strong>blend</strong> the model's win probability with the market's own, vig removed — roughly half and half. That pulls the engine's confidence back toward reality, and it's why our published numbers cluster near the coin-flip zone where most baseball games honestly live. The model still gets a vote; it just doesn't get to ignore the room.</p>
       <h3>The market is on the card</h3>
-      <p>A probability alone isn't a bet; a bet is a probability <em>versus a price</em>. Each game carries the market line and three numbers computed from it: <strong>Edge</strong> (our win probability minus the probability implied by the offered price), <strong>EV per unit</strong>, and a <strong>quarter-Kelly</strong> stake suggestion, always capped by the risk-tier framework. The governor beats the gas pedal. Two hard gates follow: the <strong>edge gate</strong> (no allocation under a 2-point edge; a good side at a bad price is a bad bet) and <strong>Rule 8, the Divergence Governor</strong>: when our model and the de-vigged market disagree by more than 12 points, we assume the market knows something our inputs don't (lineups, injury news, form), and the play is held for manual review instead of bet harder. A model that never doubts itself is a tout with extra steps.</p>
+      <p>A probability alone isn't a bet; a bet is a probability <em>versus a price</em>. Each game carries the market line and three numbers computed from it: <strong>Edge</strong> (our blended win probability minus the probability implied by the offered price), <strong>EV per unit</strong>, and a <strong>quarter-Kelly</strong> stake suggestion, always capped by the risk-tier framework. The governor beats the gas pedal. Two hard gates follow: the <strong>edge gate</strong> (no allocation under a 2-point edge; a good side at a bad price is a bad bet) and <strong>Rule 8, the Divergence Governor</strong>: when our model and the de-vigged market disagree by more than 12 points, we assume the market knows something our inputs don't (lineups, injury news, form), and the play is held for manual review instead of bet harder. A model that never doubts itself is a tout with extra steps.</p>
       <h3>Then the circuit breakers get a veto</h3>
       <p>The model proposes; eight risk rules dispose. Games with TBD starters are scratched, limited-workload starters trigger downgrades, capped juice forces run-line pivots, and every check, passed or failed, is printed on every card. That's the product.</p>
       <h3>What this engine does <em>not</em> do: read this before betting</h3>
       <ul>
         <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed. Lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
         <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet; they're flagged for human review, never silently claimed.</li>
-        <li><strong>Not modeled:</strong> lineups, rest, umpires, weather. Park factors are static season approximations.</li>
+        <li><strong>Not modeled:</strong> lineups, rest, umpires, weather. Park factors are static season approximations. Blending toward the market is our hedge here — the line already prices the lineup card we don't read.</li>
+        <li><strong>We lean on the market by design.</strong> Because we blend toward the closing-market probability, our picks rarely stray far from it: when the market is wrong in a way our inputs can't see, we're wrong with it too. That's the trade — fewer spectacular calls, and fewer face-plants.</li>
       </ul>
       <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium; the whole tank is behind glass, down to the per-date random seed ({B["seed"]}) that makes every day's board reproducible.</div>
     </div>

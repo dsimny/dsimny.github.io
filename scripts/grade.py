@@ -10,12 +10,21 @@ Grading rules:
     and says so in the entry).
   - Run-line -1.5 pick: pick team won by 2+.
   - Game not Final (postponed/suspended): VOID — stake returned, logged.
+Closing-line value (CLV): if fetch_closing.py captured a closing line for the
+game (data/closing_<date>.json), each entry also books open-vs-close: open_ml,
+close_ml, clv_pts (de-vigged prob points, + = we beat the close), beat_close.
+Aggregates carry a CLV block. Entries with no closing line are simply blank,
+so pre-CLV history is untouched (the ledger is append-only — never backfilled).
+
 Ledger entries are never edited after grading; aggregates are recomputed
 from the full entry list every run.
 
 Run: python scripts/grade.py [YYYY-MM-DD]   (defaults to yesterday, ET)
 Test: python scripts/grade.py YYYY-MM-DD --scores-file path.json
       where the file maps gamePk -> {"away": runs, "home": runs, "final": true}
+      Optional: --closing-file path.json (gamePk -> {"away_ml","home_ml"}) to
+      exercise CLV, and --ledger path.json to write a throwaway ledger instead
+      of the real data/ledger.json.
 """
 import json, os, sys
 from datetime import datetime, timedelta
@@ -28,6 +37,25 @@ LEDGER = os.path.join(ROOT, "data", "ledger.json")
 
 def american_to_b(odds):
     return 100 / (-odds) if odds < 0 else odds / 100
+
+def american_to_implied(odds):
+    return (-odds) / (-odds + 100) if odds < 0 else 100 / (odds + 100)
+
+def devig_pick_prob(away_ml, home_ml, pick_is_home):
+    """No-vig probability of the pick side from a two-way moneyline."""
+    ia, ih = american_to_implied(away_ml), american_to_implied(home_ml)
+    tot = ia + ih
+    if tot <= 0:
+        return None
+    return (ih if pick_is_home else ia) / tot
+
+def load_closing(root, date):
+    """Closing lines captured near first pitch by fetch_closing.py, or {}."""
+    path = os.path.join(root, "data", f"closing_{date}.json")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
 def fair_pick_odds(b):
     """Model fair odds for the pick side (used only if no market odds logged)."""
@@ -54,6 +82,11 @@ def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     date = args[0] if args else (datetime.now(ZoneInfo("America/New_York")) - timedelta(days=1)).strftime("%Y-%m-%d")
 
+    # --ledger / --closing-file are test hooks (like --scores-file): they let the
+    # full grade path run against throwaway files without touching the real,
+    # append-only ledger. Default to the live paths.
+    ledger_path = sys.argv[sys.argv.index("--ledger") + 1] if "--ledger" in sys.argv else LEDGER
+
     B = crypto_box.load_dataset(ROOT, "board", date)
     if B is None:
         print(f"No board for {date}: nothing to grade.")
@@ -71,9 +104,15 @@ def main():
     else:
         scores = fetch_scores(date)
 
+    if "--closing-file" in sys.argv:
+        with open(sys.argv[sys.argv.index("--closing-file") + 1], encoding="utf-8") as f:
+            closing = json.load(f)
+    else:
+        closing = load_closing(ROOT, date)
+
     ledger = {"entries": []}
-    if os.path.exists(LEDGER):
-        with open(LEDGER, encoding="utf-8") as f:
+    if os.path.exists(ledger_path):
+        with open(ledger_path, encoding="utf-8") as f:
             ledger = json.load(f)
     already = {(e["date"], e["gamePk"]) for e in ledger["entries"]}
 
@@ -85,6 +124,8 @@ def main():
         if key in already:
             continue
         sc = scores.get(str(b.get("gamePk", "")))
+        a_ab, h_ab = b["abbr"].split(" @ ")
+        pick_is_home = b["pick_team_abbr"] == h_ab
         entry = {
             "date": date, "gamePk": b.get("gamePk"), "game": b["abbr"],
             "pick": b["pick"], "units": b["units"],
@@ -95,8 +136,6 @@ def main():
             entry.update(result="VOID", pnl=0.0,
                          note="Game not final (postponed/suspended); stake returned.")
         else:
-            a_ab, h_ab = b["abbr"].split(" @ ")
-            pick_is_home = b["pick_team_abbr"] == h_ab
             margin = (sc["home"] - sc["away"]) if pick_is_home else (sc["away"] - sc["home"])
             won = margin > 1.5 if "run line" in b["pick"] else margin > 0
             odds = b.get("mkt_odds")
@@ -108,6 +147,24 @@ def main():
                 entry.update(result="WIN", pnl=round(b["units"] * american_to_b(odds), 3))
             else:
                 entry.update(result="LOSS", pnl=-b["units"])
+
+        # ---- CLV: our published (opening) price vs the closing line ----
+        # Positive clv_pts = the market moved TOWARD our side after we posted, i.e.
+        # we got a better-than-close price. Recorded when a closing line exists for
+        # the game; blank otherwise (as it is for every pre-CLV entry). Result-
+        # independent — it measures line-picking, not luck.
+        cl = closing.get(str(b.get("gamePk", "")))
+        open_a, open_h = b.get("mkt_away_ml"), b.get("mkt_home_ml")
+        if cl and cl.get("away_ml") is not None and cl.get("home_ml") is not None \
+                and open_a is not None and open_h is not None:
+            open_p = devig_pick_prob(open_a, open_h, pick_is_home)
+            close_p = devig_pick_prob(cl["away_ml"], cl["home_ml"], pick_is_home)
+            if open_p is not None and close_p is not None:
+                entry["open_ml"] = open_h if pick_is_home else open_a
+                entry["close_ml"] = cl["home_ml"] if pick_is_home else cl["away_ml"]
+                entry["clv_pts"] = round((close_p - open_p) * 100, 2)
+                entry["beat_close"] = close_p > open_p
+
         ledger["entries"].append(entry)
         graded += 1
 
@@ -118,19 +175,30 @@ def main():
     voids = sum(1 for e in ent if e["result"] == "VOID")
     units_net = round(sum(e["pnl"] for e in ent), 3)
     units_risked = round(sum(e["units"] for e in ent if e["result"] != "VOID"), 3)
+    # CLV over just the entries that carry a closing line. A far faster read on
+    # whether the picks have edge than W/L: line-picking skill shows up here in
+    # dozens of bets, ROI takes hundreds.
+    clv_ent = [e for e in ent if e.get("clv_pts") is not None]
+    clv_block = {"graded_with_clv": len(clv_ent), "avg_clv_pts": None, "beat_close_pct": None}
+    if clv_ent:
+        clv_block["avg_clv_pts"] = round(sum(e["clv_pts"] for e in clv_ent) / len(clv_ent), 2)
+        clv_block["beat_close_pct"] = round(100 * sum(1 for e in clv_ent if e["clv_pts"] > 0) / len(clv_ent), 1)
     ledger["aggregates"] = {
         "record": f"{wins}-{losses}" + (f"-{voids}v" if voids else ""),
         "wins": wins, "losses": losses, "voids": voids,
         "units_net": units_net, "units_risked": units_risked,
         "roi_pct": round(100 * units_net / units_risked, 2) if units_risked else None,
+        "clv": clv_block,
         "opened": "2026-07-22",
         "last_graded": date,
     }
-    os.makedirs(os.path.dirname(LEDGER), exist_ok=True)
-    with open(LEDGER, "w", encoding="utf-8") as f:
+    os.makedirs(os.path.dirname(ledger_path), exist_ok=True)
+    with open(ledger_path, "w", encoding="utf-8") as f:
         json.dump(ledger, f, indent=1)
+    clv_s = (f", CLV {clv_block['avg_clv_pts']:+.2f} pts avg / beat close {clv_block['beat_close_pct']}%"
+             f" (n={clv_block['graded_with_clv']})") if clv_ent else ""
     print(f"Graded {graded} picks for {date}. Ledger: {ledger['aggregates']['record']}, "
-          f"{units_net:+.2f}u net, ROI {ledger['aggregates']['roi_pct']}%")
+          f"{units_net:+.2f}u net, ROI {ledger['aggregates']['roi_pct']}%{clv_s}")
 
     reveal(date, B)
 

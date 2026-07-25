@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+# backtest.py's point-in-time snapshot cache — derived, re-fetchable, and would
+# otherwise be swept into CI's `git add data/`. Not part of the public ledger.
+data/backtest/

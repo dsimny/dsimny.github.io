@@ -73,6 +73,55 @@ def main():
     if missing:
         raise SystemExit(f"Standings missing runs data for: {[t['abbr'] for t in missing]}")
 
+    # ---- Bullpen: team reliever ERA (one bulk call: pitching statSplits, sitCode rp) ----
+    # v0.4 gives the engine a real bullpen for the ~3.5/9 of the game the starter
+    # doesn't cover, instead of assuming league-average relief. Best-effort: if the
+    # split is unavailable, pen_era stays None and the engine falls back to the
+    # team's overall run-prevention rate, exactly as v0.3 did.
+    try:
+        pen = get(f"{MLB}/teams/stats", stats="statSplits", group="pitching",
+                  season=SEASON, sitCodes="rp", sportIds=1, gameType="R")
+        for s in (pen.get("stats") or [{}])[0].get("splits") or []:
+            tid = str(s.get("team", {}).get("id"))
+            era = s.get("stat", {}).get("era")
+            if tid in teams and era is not None:
+                try:
+                    teams[tid]["pen_era"] = float(era)
+                except (TypeError, ValueError):
+                    pass
+    except Exception as e:  # never sink the board over the bullpen split
+        print(f"WARNING: bullpen split fetch failed ({e}); engine falls back to team RA for the pen.")
+    for t in teams.values():
+        t.setdefault("pen_era", None)   # None = no data → engine fallback
+
+    # ---- League pitching totals (for the engine's FIP constant, v0.5) ----
+    # One bulk call summed across teams. The engine derives its FIP constant from
+    # these so league-average FIP lands on the league run scale. Absent -> engine
+    # skips FIP and uses ERA only.
+    def _ip(x):  # "103.2" means 103 innings and 2/3, not 103.2
+        w, _, frac = str(x).partition(".")
+        try:
+            return int(w) + {"1": 1 / 3, "2": 2 / 3}.get(frac, 0.0)
+        except ValueError:
+            return 0.0
+    league_pitching = None
+    try:
+        tp = get(f"{MLB}/teams/stats", stats="season", group="pitching",
+                 season=SEASON, sportIds=1, gameType="R")
+        tot = {"ip": 0.0, "hr": 0, "bb": 0, "hbp": 0, "k": 0, "er": 0}
+        for s in (tp.get("stats") or [{}])[0].get("splits") or []:
+            st = s["stat"]
+            tot["ip"] += _ip(st.get("inningsPitched", 0))
+            tot["hr"] += st.get("homeRuns", 0)
+            tot["bb"] += st.get("baseOnBalls", 0)
+            tot["hbp"] += st.get("hitByPitch", 0)
+            tot["k"] += st.get("strikeOuts", 0)
+            tot["er"] += st.get("earnedRuns", 0)
+        if tot["ip"] > 0:
+            league_pitching = {k: round(v, 3) for k, v in tot.items()}
+    except Exception as e:  # never sink the board over it
+        print(f"WARNING: league pitching totals fetch failed ({e}); engine skips FIP, uses ERA only.")
+
     # ---- Probable pitcher season stats (one batched call) ----
     pids = sorted({g["teams"][side].get("probablePitcher", {}).get("id")
                    for g in games_raw for side in ("away", "home")
@@ -93,6 +142,12 @@ def main():
                     "ip": float(s["inningsPitched"]),
                     "whip": float(s["whip"]),
                     "k9": float(s["strikeoutsPer9Inn"]),
+                    # FIP components (v0.5): the engine blends ERA with FIP to strip
+                    # defense/luck. Absent -> engine falls back to ERA only.
+                    "hr": int(s.get("homeRuns", 0)),
+                    "bb": int(s.get("baseOnBalls", 0)),
+                    "hbp": int(s.get("hitByPitch", 0)),
+                    "k": int(s.get("strikeOuts", 0)),
                 }
             except (KeyError, ValueError):
                 continue  # no usable season line -> treated as TBD by the engine
@@ -153,6 +208,7 @@ def main():
         "season": SEASON,
         "teams": teams,
         "pitchers": pitchers,
+        "league_pitching": league_pitching,
         "odds_source": odds_source,
         "odds": odds,
         "park_factors_note": "Approximate season-level run park factors; refresh from Baseball Savant.",

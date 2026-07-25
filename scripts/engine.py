@@ -12,13 +12,24 @@ Model (documented honestly — this is v0.1, not a black box):
   2. Team attack rate  = RS / G  (normalized vs league).
   3. Team defense rate = RA / G  (normalized vs league).
   4. Expected runs for team X vs opponent Y:
-       lambda_X = league_rate * attack_X * defense_Y * park * hfa_adj * sp_adj
-     where sp_adj blends the opposing STARTER's ERA vs league ERA over the
-     starter's share of the game (default 5.5 IP of 9).
+       lambda_X = league_rate * attack_X * prevention_Y * park * hfa_adj
+     where prevention_Y (v0.4) blends the opposing STARTER's rate over the
+     starter's share of the game (default 5.5 IP of 9) with the opposing
+     BULLPEN's ERA over the rest, each vs league ERA. Missing reliever ERA
+     falls back to the team's overall RA/G. The starter's rate (v0.5) is not
+     raw ERA but a stabilized rate: ERA blended with FIP (strips defense/luck)
+     and regressed toward league average by innings pitched (small samples pulled
+     toward the mean). Missing FIP components fall back to raw ERA.
   5. Runs are drawn from a negative binomial (Gamma-Poisson mixture) to match
      MLB's overdispersed run distribution (variance > mean).
   6. Ties after "regulation" are resolved by simulating extra frames from
      per-inning Poisson rates until the tie breaks.
+  7. v0.3: the raw sim prints systematically overconfident moneyline
+     probabilities (no bullpen, raw-ERA starters, season-long team rates, no
+     lineups). Before pricing any edge we shrink each model win probability
+     toward the de-vigged market price (MODEL_WEIGHT). The market is the
+     sharpest public MLB estimator there is; blending toward it is the single
+     biggest calibration fix in the engine.
 Outputs per game: win probabilities, projected score, fair moneyline,
 run-line (+/-1.5) cover rates, total-runs distribution, and a fully
 transparent list of every circuit-breaker check that fired.
@@ -42,11 +53,21 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
+ENGINE_VERSION = "0.6-team-regression"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
 HFA_RUNS = 1.026         # home team run-rate bump (≈54% HFA overall)
 DISPERSION = 2.4         # negative binomial shape (lower = fatter tails)
+FACTOR_SHRINK = 0.6      # v0.6: regression-to-mean for TEAM rates. Season RS/RA overstate the
+                         # true talent spread (noisy, schedule-unadjusted, mid-season), so we
+                         # shrink each attack/prevention factor 40% toward 1.0 (league average) —
+                         # the same principle v0.5 applies to pitchers. A full-season backtest
+                         # (1414 games) showed the raw model over-dispersed on favourites (the
+                         # 0.6-0.7 bucket predicted 64% but went 55%); shrinking dropped Brier
+                         # from 0.2504 to ~0.2483, below the no-skill baseline, WITHOUT the
+                         # run-total distortion that lowering DISPERSION would cause. Backtest
+                         # plateaus 0.5-0.7; 0.6 is the conservative pick. 1.0 = old behaviour.
 LOW_IP_THRESHOLD = 60.0  # Rule 4 heuristic: starter under 60 IP this deep in
                          # the season => limited workload / possible IL return
 
@@ -61,6 +82,17 @@ DIVERGENCE_CAP = 0.12    # Rule 8 (Divergence Governor): if model vs de-vigged m
                          # knows something our inputs don't (lineups, injury news, form).
                          # Demote to lean + manual review instead of "bet the farm".
 KELLY_FRACTION = 0.25    # quarter Kelly
+FIP_WEIGHT = 0.5         # v0.5: weight on FIP vs ERA in the starter's stabilized rate.
+                         # FIP (defense/luck-independent) is more predictive; ERA reflects
+                         # what actually happened. 0.5 splits them; 0.0 = pure ERA (old).
+PRIOR_IP = 60.0          # v0.5: regression strength in innings. A starter is weighted
+                         # 50/50 with the league at 60 IP, ~3/4 his own rate by 180 IP.
+                         # Stops a 20-IP hot streak being trusted at face value.
+MODEL_WEIGHT = 0.5       # v0.3 market blend: weight on the sim vs the de-vigged market
+                         # when both are available. 0.5 = trust the model and the market
+                         # equally. Lower it to lean harder on the market while the sim's
+                         # calibration is still unproven; 1.0 reproduces the old v0.2
+                         # (pure-model) behaviour. No effect on games with no market line.
 
 # Unit sizing per the Open Ledger risk framework
 def risk_tier(conf):
@@ -99,6 +131,78 @@ def first_pitch_passed(utc_str, now_utc):
         return True
     return start <= now_utc
 
+def fip_constant_from(league_pitching, league_era):
+    """FIP constant anchoring league-average FIP to the league run scale, from
+    league pitching totals. None when totals are unavailable (older snapshots)."""
+    lp = league_pitching
+    if not lp or not lp.get("ip"):
+        return None
+    league_fip_core = (13 * lp["hr"] + 3 * (lp["bb"] + lp["hbp"]) - 2 * lp["k"]) / lp["ip"]
+    return league_era - league_fip_core
+
+def stabilized_starter_rate(sp, league_era, fip_constant):
+    """Stabilized starter run rate on the league_era scale (v0.5).
+
+    ERA blended with FIP (defense/luck-independent), then regressed toward the
+    league by innings pitched: a small sample is pulled toward average, a full
+    season keeps most of its own rate. Falls back to raw ERA when FIP components
+    or the league constant are missing (older snapshots).
+    """
+    era = sp["era"]
+    ip = sp.get("ip", 0.0) or 0.0
+    if fip_constant is not None and ip > 0 and all(k in sp for k in ("hr", "bb", "hbp", "k")):
+        fip = (13 * sp["hr"] + 3 * (sp["bb"] + sp["hbp"]) - 2 * sp["k"]) / ip + fip_constant
+        skill = FIP_WEIGHT * fip + (1 - FIP_WEIGHT) * era
+    else:
+        skill = era
+    return (ip * skill + PRIOR_IP * league_era) / (ip + PRIOR_IP)
+
+def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng, n_sims=N_SIMS):
+    """Pure Monte Carlo core: expected runs -> N sims -> score/win distributions.
+
+    No market or circuit-breaker logic — just the model. Shared by the daily engine
+    (main) and scripts/backtest.py so both exercise exactly the same model. Returns
+    the raw run-count arrays plus p_home; callers derive whatever markets they need
+    (moneyline, totals, run lines) from the arrays.
+    """
+    def shrink(factor):
+        # pull a rate factor toward 1.0 (league average). FACTOR_SHRINK=1.0 is identity.
+        return 1.0 + FACTOR_SHRINK * (factor - 1.0)
+
+    def prevention(starter, team):
+        starter_factor = stabilized_starter_rate(starter, league_era, fip_constant) / league_era
+        pen = team.get("pen_era")
+        pen_factor = (pen / league_era) if pen else (team["ra"] / (team["w"] + team["l"])) / league_rate
+        return STARTER_SHARE * starter_factor + (1 - STARTER_SHARE) * pen_factor
+
+    a_attack = shrink((away["rs"] / (away["w"] + away["l"])) / league_rate)
+    h_attack = shrink((home["rs"] / (home["w"] + home["l"])) / league_rate)
+    lam_away = league_rate * a_attack * shrink(prevention(h_sp, home)) * park / math.sqrt(HFA_RUNS)
+    lam_home = league_rate * h_attack * shrink(prevention(a_sp, away)) * park * math.sqrt(HFA_RUNS)
+
+    a_runs = nb_draws(rng, lam_away, n_sims)
+    h_runs = nb_draws(rng, lam_home, n_sims)
+
+    ties = a_runs == h_runs
+    n_ties = int(ties.sum())
+    if n_ties:
+        # extra innings: per-inning Poisson until decided
+        ta = lam_away / 9 * 1.9  # ghost-runner era inflates XI scoring
+        th = lam_home / 9 * 1.9
+        xa, xh = a_runs[ties].copy(), h_runs[ties].copy()
+        undecided = np.ones(n_ties, dtype=bool)
+        while undecided.any():
+            da = rng.poisson(ta, undecided.sum())
+            dh = rng.poisson(th, undecided.sum())
+            xa[undecided] += da
+            xh[undecided] += dh
+            undecided_idx = np.where(undecided)[0]
+            still = da == dh
+            undecided[undecided_idx[~still]] = False
+        a_runs[ties], h_runs[ties] = xa, xh
+
+    return {"a_runs": a_runs, "h_runs": h_runs, "p_home": float((h_runs > a_runs).mean())}
+
 def main():
     if crypto_box.already_published(ROOT, DATE) and "--force" not in sys.argv:
         print(f"Board for {DATE} is already published. Nothing to do.")
@@ -116,6 +220,9 @@ def main():
     total_g = sum(t["w"] + t["l"] for t in teams.values())
     league_rate = total_rs / total_g                     # runs per team-game
     league_era = 9 * sum(t["ra"] for t in teams.values()) / (total_g * 9)  # ≈ RA9
+
+    # FIP constant for the stabilized starter rate (v0.5); None on older snapshots.
+    fip_constant = fip_constant_from(data.get("league_pitching"), league_era)
 
     rng = np.random.default_rng(SEED)
     board, scratches = [], []
@@ -162,42 +269,15 @@ def main():
             })
             continue
 
-        # ---- Expected run rates ----
-        def sp_adj(starter):
-            return STARTER_SHARE * (starter["era"] / league_era) + (1 - STARTER_SHARE)
-
-        a_attack = (away["rs"] / (away["w"] + away["l"])) / league_rate
-        h_attack = (home["rs"] / (home["w"] + home["l"])) / league_rate
-        a_def = (away["ra"] / (away["w"] + away["l"])) / league_rate
-        h_def = (home["ra"] / (home["w"] + home["l"])) / league_rate
-
-        lam_away = league_rate * a_attack * h_def * sp_adj(h_sp) * park / math.sqrt(HFA_RUNS)
-        lam_home = league_rate * h_attack * a_def * sp_adj(a_sp) * park * math.sqrt(HFA_RUNS)
-
-        # ---- Simulate ----
-        a_runs = nb_draws(rng, lam_away, N_SIMS)
-        h_runs = nb_draws(rng, lam_home, N_SIMS)
-
-        ties = a_runs == h_runs
-        n_ties = int(ties.sum())
-        if n_ties:
-            # extra innings: per-inning Poisson until decided
-            ta = lam_away / 9 * 1.9  # ghost-runner era inflates XI scoring
-            th = lam_home / 9 * 1.9
-            xa, xh = a_runs[ties].copy(), h_runs[ties].copy()
-            undecided = np.ones(n_ties, dtype=bool)
-            while undecided.any():
-                da = rng.poisson(ta, undecided.sum())
-                dh = rng.poisson(th, undecided.sum())
-                xa[undecided] += da
-                xh[undecided] += dh
-                undecided_idx = np.where(undecided)[0]
-                still = da == dh
-                undecided[undecided_idx[~still]] = False
-            a_runs[ties], h_runs[ties] = xa, xh
-
-        p_home = float((h_runs > a_runs).mean())
-        p_away = 1 - p_home
+        # ---- Expected run rates + simulation (shared core) ----
+        # Run prevention splits the STARTER (over STARTER_SHARE of the game, at the
+        # stabilized ERA/FIP rate) from the team's BULLPEN over the rest — see
+        # simulate_game(). backtest.py calls the identical function, so the backtest
+        # measures exactly the model that ships.
+        sim = simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng)
+        a_runs, h_runs = sim["a_runs"], sim["h_runs"]
+        p_home_model = sim["p_home"]
+        p_away_model = 1 - p_home_model
         totals = a_runs + h_runs
         mean_total = float(totals.mean())
         # nearest half-run total line for reference
@@ -207,16 +287,31 @@ def main():
         rl_home_m15 = float(((h_runs - a_runs) > 1.5).mean())   # home -1.5
         rl_away_p15 = float(((a_runs - h_runs) > -1.5).mean())  # away +1.5
 
-        fair_home = prob_to_american(p_home)
-        fair_away = prob_to_american(p_away)
-
         # ---- Market odds (v0.2) ----
         mkt = data.get("odds", {}).get(str(g["gamePk"]))
 
-        # ---- Pick side ----
+        # ---- Market blend (v0.3): shrink the model win prob toward the de-vigged market ----
+        # Everything downstream (pick side, confidence, fair line, edge, EV, sizing) runs on
+        # the BLENDED probability. The raw model prob is kept for the Rule 8 divergence check
+        # and for calibration tracking on the ledger. With no market line we fall back to the
+        # pure model and MODEL_WEIGHT has no effect.
+        p_home_mkt = None
+        if mkt:
+            imp_a0, imp_h0 = american_to_implied(mkt["away_ml"]), american_to_implied(mkt["home_ml"])
+            p_home_mkt = imp_h0 / (imp_a0 + imp_h0)         # de-vigged market home prob
+            p_home = MODEL_WEIGHT * p_home_model + (1 - MODEL_WEIGHT) * p_home_mkt
+        else:
+            p_home = p_home_model
+        p_away = 1 - p_home
+
+        fair_home = prob_to_american(p_home)
+        fair_away = prob_to_american(p_away)
+
+        # ---- Pick side (chosen on the blended probability) ----
         pick_home = p_home >= p_away
         pick_team = home if pick_home else away
-        pick_prob = p_home if pick_home else p_away
+        pick_prob = p_home if pick_home else p_away                    # blended: drives edge/EV/sizing
+        pick_prob_model = p_home_model if pick_home else p_away_model  # raw sim, for divergence only
         pick_fair = fair_home if pick_home else fair_away
         pick_label = f'{pick_team["name"]} ML'
 
@@ -226,12 +321,11 @@ def main():
         if mkt:
             mkt_odds = mkt["home_ml"] if pick_home else mkt["away_ml"]
             imp_pick = american_to_implied(mkt_odds)
-            imp_a, imp_h = american_to_implied(mkt["away_ml"]), american_to_implied(mkt["home_ml"])
-            p_mkt_devig = (imp_h if pick_home else imp_a) / (imp_a + imp_h)  # vig removed
-            edge = pick_prob - imp_pick                     # vs the price you actually get
-            divergence = pick_prob - p_mkt_devig            # honest model-vs-market gap
+            p_mkt_devig = p_home_mkt if pick_home else (1 - p_home_mkt)  # vig removed
+            edge = pick_prob - imp_pick                     # blended prob vs the price you actually get
+            divergence = pick_prob_model - p_mkt_devig      # honest RAW-model-vs-market gap
             b_net = american_to_b(mkt_odds)
-            ev = pick_prob * b_net - (1 - pick_prob)        # EV per 1u staked
+            ev = pick_prob * b_net - (1 - pick_prob)        # EV per 1u staked (blended)
             kelly_pct = max(0.0, KELLY_FRACTION * ev / b_net) * 100
             pick_label = f'{pick_team["name"]} ML ({mkt_odds:+d})'
 
@@ -253,9 +347,9 @@ def main():
         if divergence is not None:
             if abs(divergence) > DIVERGENCE_CAP:
                 rule8 = True
-                checks.append(f'Rule 8 fired: model sees {pick_prob:.1%}, de-vigged market says {p_mkt_devig:.1%}: a {abs(divergence)*100:.1f}-point divergence (cap {DIVERGENCE_CAP*100:.0f}). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.')
+                checks.append(f'Rule 8 fired: raw model sees {pick_prob_model:.1%}, de-vigged market says {p_mkt_devig:.1%}: a {abs(divergence)*100:.1f}-point divergence (cap {DIVERGENCE_CAP*100:.0f}). When the model and the market disagree this hard, the market usually knows something our inputs do not (lineups, injury news, form). Demoted to lean pending manual review.')
             else:
-                checks.append(f'Rule 8 check passed: model {pick_prob:.1%} vs de-vigged market {p_mkt_devig:.1%}: {abs(divergence)*100:.1f}-point divergence within the {DIVERGENCE_CAP*100:.0f}-point cap.')
+                checks.append(f'Rule 8 check passed: raw model {pick_prob_model:.1%} vs de-vigged market {p_mkt_devig:.1%}: {abs(divergence)*100:.1f}-point divergence within the {DIVERGENCE_CAP*100:.0f}-point cap (blended to {pick_prob:.1%} at MODEL_WEIGHT={MODEL_WEIGHT}).')
 
         # ---- Edge gate (v0.2) ----
         no_edge = False
@@ -295,9 +389,14 @@ def main():
             "away_rec": f'{away["w"]}-{away["l"]}', "home_rec": f'{home["w"]}-{home["l"]}',
             "away_rpg": round(away["rs"]/(away["w"]+away["l"]), 2), "home_rpg": round(home["rs"]/(home["w"]+home["l"]), 2),
             "away_rapg": round(away["ra"]/(away["w"]+away["l"]), 2), "home_rapg": round(home["ra"]/(home["w"]+home["l"]), 2),
-            "awaySP": {"name": a_sp["name"], "era": a_sp["era"], "ip": a_sp["ip"], "whip": a_sp["whip"], "k9": a_sp["k9"]},
-            "homeSP": {"name": h_sp["name"], "era": h_sp["era"], "ip": h_sp["ip"], "whip": h_sp["whip"], "k9": h_sp["k9"]},
+            "awaySP": {"name": a_sp["name"], "era": a_sp["era"], "ip": a_sp["ip"], "whip": a_sp["whip"], "k9": a_sp["k9"], "stab_rate": round(stabilized_starter_rate(a_sp, league_era, fip_constant), 2)},
+            "homeSP": {"name": h_sp["name"], "era": h_sp["era"], "ip": h_sp["ip"], "whip": h_sp["whip"], "k9": h_sp["k9"], "stab_rate": round(stabilized_starter_rate(h_sp, league_era, fip_constant), 2)},
+            "away_pen_era": away.get("pen_era"), "home_pen_era": home.get("pen_era"),
             "p_home": round(p_home, 4), "p_away": round(p_away, 4),
+            "p_home_model": round(p_home_model, 4), "p_away_model": round(p_away_model, 4),
+            "model_conf": round(pick_prob_model, 4),
+            "p_mkt_devig": round(p_mkt_devig, 4) if p_mkt_devig is not None else None,
+            "model_weight": MODEL_WEIGHT if mkt else None,
             "proj_away": round(float(a_runs.mean()), 1), "proj_home": round(float(h_runs.mean()), 1),
             "fair_home": fair_home, "fair_away": fair_away,
             "ref_total": line, "p_over": round(p_over, 4), "mean_total": round(mean_total, 1),
@@ -330,6 +429,7 @@ def main():
 
     out = {
         "date": DATE,
+        "engine_version": ENGINE_VERSION, "model_weight": MODEL_WEIGHT,
         "generated_utc": data["snapshot_utc"], "n_sims": N_SIMS, "seed": SEED,
         "odds_source": data.get("odds_source"),
         "n_slate": len(data["games"]),

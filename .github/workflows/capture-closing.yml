@@ -1,0 +1,43 @@
+name: Capture closing lines
+# Captures the current market line for today's slate into data/closing_<date>.json
+# for CLV tracking (roadmap item 2). Meant to run SEVERAL times a day via its own
+# cron-job.org triggers — each run updates only games that have NOT started yet,
+# so every game ends up stored at the last line seen before its first pitch (its
+# close). The nightly grader reads the file and books open-vs-close per pick.
+#
+# Suggested cron-job.org triggers (workflow_dispatch API, like the other two jobs):
+#   ~11:30 AM ET  (day-game closes)
+#   ~ 6:45 PM ET  (evening-game closes)
+#   ~ 9:15 PM ET  (late West Coast closes)
+# More runs = tighter closes; a missed run just means a slightly earlier line.
+#
+# Needs ODDS_API_KEY only — it re-fetches the schedule from the MLB Stats API and
+# never reads the encrypted board, so no BOARD_ENCRYPTION_KEY here. With the key
+# unset the script no-ops and CLV stays blank (no failure).
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Capture current lines
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}   # required for capture; no-ops cleanly if unset
+        run: python scripts/fetch_closing.py
+      - name: Commit closing lines
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash || true   # several capture runs + the board/grade jobs share data/
+          git add data/closing_*.json
+          git diff --cached --quiet || git commit -m "Closing lines $(date -u +%FT%TZ)"
+          git push

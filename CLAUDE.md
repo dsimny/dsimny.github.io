@@ -32,13 +32,26 @@ to Discord.
   scripts/post_discord.py pick                         (free pick → public channel)
   scripts/post_discord.py board                        (held plays → members channel)
 
+.github/workflows/capture-closing.yml (several times/day via cron-job.org)
+  scripts/fetch_closing.py → data/closing_<date>.json  (last pre-first-pitch line per game, for CLV)
+
 .github/workflows/grade-ledger.yml   (daily 08:10 UTC)
-  scripts/grade.py        → data/ledger.json           (final scores → W/L/VOID, units, ROI; APPEND-ONLY)
+  scripts/grade.py        → data/ledger.json           (final scores → W/L/VOID, units, ROI, CLV; APPEND-ONLY)
                           → data/board_<date>.json     (the reveal: .enc replaced by plaintext)
   scripts/build_site.py   → index.html                 (ledger tab refreshed)
   scripts/post_discord.py recap                        (posts results, wins AND losses)
   scripts/post_social.py  x / facebook                 (daily record → X + FB, wins AND losses)
 ```
+
+CLV (closing-line value): fetch_closing.py re-fetches the schedule (MLB API, no
+key) plus current odds (ODDS_API_KEY) and records each game's last line BEFORE
+first pitch in data/closing_<date>.json — an already-started game is never
+overwritten with an in-play line, so repeated runs converge on the true close.
+grade.py reads that file and books open-vs-close per pick (open_ml, close_ml,
+clv_pts = de-vigged prob points where + means we beat the close, beat_close),
+plus a `clv` aggregate block. Entries with no closing line stay blank, so the
+append-only history is never rewritten. Wire capture-closing.yml to a few
+cron-job.org triggers through the day (suggested times are in the workflow).
 
 Social posting (scripts/post_social.py) reads data/ledger.json — the same record
 the site and the Discord recap use — and posts yesterday's results plus the
@@ -60,6 +73,35 @@ the site lives in the account bio. Do not re-add SITE to the X post. Until
 credits are funded, the X step records "failed" 402 each night (harmless; the
 board, ledger, site, Discord and email are all unaffected). Facebook has no
 such cost — Meta's Graph API is not metered — so its post keeps the link.
+
+## Backtest harness (scripts/backtest.py) — measure the model, tune the knobs
+
+Replays the ACTUAL engine over historical games (calls engine.simulate_game, the
+same function the daily board uses — extracted to module level in v0.5 so the
+backtest can't drift from production; the refactor was verified byte-for-byte).
+Reconstructs every game's inputs STRICTLY as of the morning before it (no
+look-ahead): standings?date=<day-before>, pitcher/league byDateRange through the
+day before, final scores from the schedule linescore. Reports Brier / log-loss /
+accuracy / a calibration table vs the no-skill base rate.
+
+Two honest limits, both documented in the file's header: (1) no historical odds on
+the free Odds API tier, so it scores the RAW model's win probabilities, not ROI or
+CLV, and can't tune MODEL_WEIGHT — pass --odds-dir with odds_<date>.json to unlock
+market comparison + flat-stake ROI; (2) the reliever statSplit IGNORES its date
+cutoff (returns full-season, i.e. leaks the future) so the backtest uses the
+engine's team-RA fallback for the bullpen rather than the real pen split.
+
+Reconstructed snapshots cache under data/backtest/ (gitignored — do NOT commit;
+CI's `git add data/` would otherwise sweep them in). Sweep a knob with
+`--sweep prior_ip:30,60,120` (also fip_weight, model_weight, dispersion, hfa,
+factor_shrink). NOTE on interpreting sweeps: DISPERSION is a TRAP — lowering it
+improves moneyline Brier by dumping unrealistic run variance in, which this
+moneyline-only backtest can't see it wrecking the totals; the honest lever for the
+raw model's over-dispersion is FACTOR_SHRINK (v0.6), not DISPERSION. Also: a few weeks is
+noise — differences under ~0.001 Brier over a few hundred games are not real. Run
+a full season (or more) before retuning PRIOR_IP / FIP_WEIGHT / MODEL_WEIGHT off it.
+  python scripts/backtest.py --start 2026-04-01 --end 2026-09-28 --sims 3000
+  python scripts/backtest.py --days 30 --sweep prior_ip:30,60,120
 
 Test locally without network: `python scripts/engine.py 2026-07-22` against an
 existing snapshot, then `python scripts/build_site.py 2026-07-22`; grade with
@@ -100,17 +142,48 @@ be graded and never be revealed: those days would be permanently missing from
 the ledger, on a site whose whole claim is that nothing goes missing. Treat it
 with more care than the API keys, which are all replaceable.
 
-## The model (engine.py) — honest v0.2, documented on the site's Methodology tab
+## The model (engine.py) — v0.6, documented on the site's Methodology tab
 
-- Team run rates (RS/RA per game from standings) normalized to league average.
-- Starter ERA vs league, weighted over 5.5/9 of the game; bullpen = team rate.
+- Team run rates (RS/RA per game from standings), normalized to league average and
+  (v0.6, FACTOR_SHRINK=0.6) regressed 40% toward it in engine.simulate_game() —
+  season rates overstate the true talent spread (noisy, schedule-unadjusted). The
+  full-season backtest (1414 games) showed the raw model over-dispersed on
+  favourites (0.6-0.7 bucket predicted 64%, went 55%); the shrink dropped Brier
+  from 0.2504 to 0.2482 (below the no-skill baseline) and de-biased that bucket,
+  WITHOUT the run-total distortion that lowering DISPERSION would have caused.
+- v0.4 RUN PREVENTION = STARTER over 5.5/9 of the game + the team's real BULLPEN
+  ERA (reliever statSplit, fetched in fetch_data.py as teams[].pen_era) over the
+  rest, each vs league ERA. Replaces v0.3's team-RA×starter-blend, which
+  double-counted the staff and modelled no bullpen. Missing pen_era → falls back
+  to team RA/G (engine.prevention()), so old snapshots still grade.
+- v0.5 STARTER RATE is not raw ERA but engine.starter_rate(): ERA blended with
+  FIP (FIP_WEIGHT=0.5; strips defense/luck; needs pitcher hr/bb/hbp/k + the
+  snapshot's league_pitching totals for the FIP constant) then regressed toward
+  league average by innings pitched (PRIOR_IP=60, so a 20-IP hot streak is pulled
+  toward the mean). Missing FIP components → ERA-only, still regressed. Board logs
+  each SP's stab_rate.
 - Static park factors (dict in fetch_data.py); home advantage ×1.026 on runs.
 - Negative binomial scoring (Gamma-Poisson, DISPERSION=2.4); extra innings
   simulated at 1.9× per-inning rates until decided.
 - Per-date seed = int(YYYYMMDD) → every board is reproducible. Never use
   wall-clock randomness.
-- Market math: edge = model prob − implied prob of offered price; divergence =
-  model prob − de-vigged market prob; EV per unit; quarter-Kelly capped by tier.
+- v0.3 MARKET BLEND: the raw sim is systematically overconfident, so before any
+  edge is priced the model win prob is shrunk toward the de-vigged market:
+  blended = MODEL_WEIGHT·model + (1−MODEL_WEIGHT)·market (MODEL_WEIGHT=0.5).
+  Pick side, confidence, fair line, edge, EV and sizing all run on the blended
+  prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
+  calibration. No market line → pure model (no blend). Board stamps
+  engine_version="0.6-team-regression".
+- Market math: edge = blended prob − implied prob of offered price; divergence =
+  RAW model prob − de-vigged market prob; EV per unit; quarter-Kelly capped by tier.
+
+SITE COPY (House Rules 4 & 8): the Methodology tab was updated 2026-07-25 to match
+v0.3–v0.5 — it now describes the market blend ("We anchor to the market"), the
+stabilized ERA+FIP+regression starter rate, the real bullpen ERA, and a
+"we lean on the market by design" line in the "does NOT do" list. Deliberately NOT
+added yet (not live): CLV figures and backtest numbers. Surface CLV on the ledger
+tab only once capture-closing is running and the ledger actually carries clv_pts;
+cite backtest calibration only after a full-season run, not the preliminary window.
 
 ## Circuit breakers (the product's identity — never weaken silently)
 
@@ -273,7 +346,10 @@ were provided); Whop upgrade button on the site is still dormant
 
 1. Live multi-book best price via The Odds API (fetch_data.py already consumes
    the key; upgrade from median-consensus to per-book best price + book name).
-2. Log opening vs closing lines → CLV tracking on the ledger.
+2. Log opening vs closing lines → CLV tracking on the ledger. [CODE SHIPPED
+   2026-07-24: scripts/fetch_closing.py + capture-closing.yml + grade.py CLV
+   fields/aggregate. REMAINING: set up the cron-job.org triggers for
+   capture-closing, and surface CLV on the site's ledger tab (build_site.py).]
 3. Statcast feeds → automate Rules 3/5/6, retire "manual review" labels.
 4. Third-party verification (Pikkit/Juice Reel) after ~1 month of record.
 5. NRFI market (activates the two dormant breakers). Then, only once the ledger

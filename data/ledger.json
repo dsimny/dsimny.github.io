@@ -77,17 +77,69 @@
    "final_score": "10-6",
    "result": "LOSS",
    "pnl": -0.5
+  },
+  {
+   "date": "2026-07-24",
+   "gamePk": 823601,
+   "game": "LAD @ NYM",
+   "pick": "Los Angeles Dodgers ML (-134)",
+   "units": 1.0,
+   "confidence": 0.6534,
+   "edge": 0.0808,
+   "odds_basis": -134,
+   "final_score": "4-2",
+   "result": "WIN",
+   "pnl": 0.746
+  },
+  {
+   "date": "2026-07-24",
+   "gamePk": 824573,
+   "game": "HOU @ CWS",
+   "pick": "Chicago White Sox ML (-134)",
+   "units": 1.0,
+   "confidence": 0.6409,
+   "edge": 0.0683,
+   "odds_basis": -134,
+   "final_score": "9-5",
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-07-24",
+   "gamePk": 823680,
+   "game": "ATH @ MIN",
+   "pick": "Minnesota Twins ML (-141)",
+   "units": 0.5,
+   "confidence": 0.6249,
+   "edge": 0.0398,
+   "odds_basis": -141,
+   "final_score": "2-0",
+   "result": "LOSS",
+   "pnl": -0.5
+  },
+  {
+   "date": "2026-07-24",
+   "gamePk": 823196,
+   "game": "LAA @ SF",
+   "pick": "San Francisco Giants ML (-158)",
+   "units": 0.5,
+   "confidence": 0.6848,
+   "edge": 0.0724,
+   "odds_basis": -158,
+   "final_score": "6-7",
+   "result": "WIN",
+   "pnl": 0.316
   }
  ],
  "aggregates": {
-  "record": "2-4",
-  "wins": 2,
-  "losses": 4,
+  "record": "4-6",
+  "wins": 4,
+  "losses": 6,
   "voids": 0,
-  "units_net": -1.816,
-  "units_risked": 3.5,
-  "roi_pct": -51.89,
+  "units_net": -2.254,
+  "units_risked": 6.5,
+  "roi_pct": -34.68,
   "opened": "2026-07-22",
-  "last_graded": "2026-07-23"
+  "last_graded": "2026-07-24"
  }
 }

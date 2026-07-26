@@ -153,6 +153,31 @@
    "http_status": 400,
    "detail": "{\"statusCode\":400,\"message\":\"The domain is invalid\",\"name\":\"validation_error\"}",
    "at_utc": "2026-07-25T15:10:20Z"
+  },
+  {
+   "date": "2026-07-25",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-07-26T08:10:21Z"
+  },
+  {
+   "date": "2026-07-25",
+   "mode": "x",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-07-26T08:10:21Z"
+  },
+  {
+   "date": "2026-07-25",
+   "mode": "facebook",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-07-26T08:10:21Z"
   }
  ]
 }

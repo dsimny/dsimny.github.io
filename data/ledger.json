@@ -139,7 +139,12 @@
   "units_net": -2.254,
   "units_risked": 6.5,
   "roi_pct": -34.68,
+  "clv": {
+   "graded_with_clv": 0,
+   "avg_clv_pts": null,
+   "beat_close_pct": null
+  },
   "opened": "2026-07-22",
-  "last_graded": "2026-07-24"
+  "last_graded": "2026-07-25"
  }
 }

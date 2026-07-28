@@ -9,13 +9,13 @@
   "mins_to_first_pitch": 70
  },
  "824489": {
-  "away_ml": -128,
-  "home_ml": 110,
+  "away_ml": -133,
+  "home_ml": 114,
   "total": 9.0,
-  "over_price": -110,
-  "under_price": -110,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 400
+  "over_price": -109,
+  "under_price": -112,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 40
  },
  "824243": {
   "away_ml": 122,
@@ -54,13 +54,13 @@
   "mins_to_first_pitch": 370
  },
  "822703": {
-  "away_ml": 120,
-  "home_ml": -141,
-  "total": 8.5,
-  "over_price": -120,
-  "under_price": 100,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 375
+  "away_ml": -120,
+  "home_ml": 104,
+  "total": 9.5,
+  "over_price": -102,
+  "under_price": -118,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 15
  },
  "823598": {
   "away_ml": -160,
@@ -72,75 +72,75 @@
   "mins_to_first_pitch": 400
  },
  "823676": {
-  "away_ml": 145,
-  "home_ml": -168,
-  "total": 9.0,
-  "over_price": -115,
-  "under_price": -105,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 430
- },
- "824569": {
-  "away_ml": -123,
-  "home_ml": 106,
-  "total": 8.0,
-  "over_price": -105,
-  "under_price": -114,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 430
- },
- "823026": {
-  "away_ml": -112,
-  "home_ml": -104,
-  "total": 9.0,
-  "over_price": 100,
-  "under_price": -120,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 435
- },
- "824003": {
-  "away_ml": -107,
-  "home_ml": -108,
-  "total": 8.5,
+  "away_ml": 149,
+  "home_ml": -178,
+  "total": 8.75,
   "over_price": -105,
   "under_price": -115,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 548
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 70
+ },
+ "824569": {
+  "away_ml": -145,
+  "home_ml": 125,
+  "total": 7.5,
+  "over_price": -107,
+  "under_price": -110,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 70
+ },
+ "823026": {
+  "away_ml": -115,
+  "home_ml": 100,
+  "total": 7.5,
+  "over_price": -108,
+  "under_price": -110,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 75
+ },
+ "824003": {
+  "away_ml": -126,
+  "home_ml": 107,
+  "total": 9.5,
+  "over_price": -105,
+  "under_price": -115,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 188
  },
  "824976": {
-  "away_ml": -149,
-  "home_ml": 127,
-  "total": 10.0,
-  "over_price": -110,
-  "under_price": -110,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 550
+  "away_ml": -145,
+  "home_ml": 128,
+  "total": 10.5,
+  "over_price": -115,
+  "under_price": -105,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 190
  },
  "823275": {
-  "away_ml": 178,
-  "home_ml": -205,
-  "total": 8.0,
-  "over_price": -116,
-  "under_price": -103,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 550
+  "away_ml": 121,
+  "home_ml": -143,
+  "total": 8.5,
+  "over_price": -107,
+  "under_price": -112,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 190
  },
  "823193": {
-  "away_ml": -148,
-  "home_ml": 128,
+  "away_ml": -121,
+  "home_ml": 104,
   "total": 7.5,
-  "over_price": 100,
-  "under_price": -120,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 555
+  "over_price": -110,
+  "under_price": -110,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 195
  },
  "823923": {
-  "away_ml": 163,
-  "home_ml": -188,
-  "total": 9.5,
-  "over_price": 100,
-  "under_price": -120,
-  "captured_utc": "2026-07-28T16:30:27Z",
-  "mins_to_first_pitch": 580
+  "away_ml": 129,
+  "home_ml": -150,
+  "total": 9.0,
+  "over_price": -119,
+  "under_price": 100,
+  "captured_utc": "2026-07-28T22:30:29Z",
+  "mins_to_first_pitch": 220
  }
 }

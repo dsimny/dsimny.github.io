@@ -34,10 +34,11 @@ Outputs per game: win probabilities, projected score, fair moneyline,
 run-line (+/-1.5) cover rates, total-runs distribution, and a fully
 transparent list of every circuit-breaker check that fired.
 
-Circuit breakers implemented in code: Rules 2, 4 (heuristic), 7.
-Rules 3/5/6 (velocity/spin telemetry, road wOBA) require Statcast feeds not
-wired in v0.1 — they are surfaced as "manual review" flags, never silently
-claimed. NRFI rules are N/A (no NRFI market in v0.1).
+Circuit breakers implemented in code: Rules 2, 4 (heuristic), 6 (detection
+only — the run tax is gated behind backtest validation, WOBA_TAX=0), 7.
+Rules 3/5 (velocity/spin telemetry) require Statcast feeds not wired — they
+are surfaced as "manual review" flags, never silently claimed. NRFI rules are
+N/A (no NRFI market yet).
 """
 
 import json, math, os, sys
@@ -54,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.8-rule2-daynight"
+ENGINE_VERSION = "0.9-woba-detect"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -71,6 +72,19 @@ FACTOR_SHRINK = 0.6      # v0.6: regression-to-mean for TEAM rates. Season RS/RA
                          # plateaus 0.5-0.7; 0.6 is the conservative pick. 1.0 = old behaviour.
 LOW_IP_THRESHOLD = 60.0  # Rule 4 heuristic: starter under 60 IP this deep in
                          # the season => limited workload / possible IL return
+
+# Rule 6 (Road wOBA Suppression) — v0.9: DETECTION live, ACTION gated.
+# Trigger: away team's trailing-14-day wOBA trails the league's by > WOBA_GAP
+# (playbook threshold .035). WOBA_TAX is the run-rate reduction applied to the
+# away team when the trigger fires. It is 0.0 ON PURPOSE: the playbook
+# prescribes 12%, but a hardwired recency tax cuts against the engine's
+# validated regression-to-mean philosophy (FACTOR_SHRINK exists because short
+# samples mislead), so the tax ships only after a full-season backtest sweep
+# (backtest.py --sweep woba_tax:0,0.04,0.08,0.12) shows it helps — and watch
+# the totals calibration too, not just moneyline Brier. Do not set non-zero
+# by taste.
+WOBA_GAP = 0.035
+WOBA_TAX = 0.0
 
 # Rule 2 thresholds — v0.8 (2026-07-29, docs/SYSTEM_PLAYBOOK.md adoption): a flat
 # cap on ANY favorite, tighter for day games. Applied to MARKET lines (real
@@ -159,6 +173,16 @@ def first_pitch_passed(utc_str, now_utc):
         return True
     return start <= now_utc
 
+def woba_suppression(away, league_woba):
+    """Rule 6 trigger: (fired, gap) from the away team's trailing-14d wOBA vs the
+    league's over the same window. (None, None) when either side is missing (old
+    snapshots, failed fetch): absent data must read as 'unknown', never 'passed'."""
+    w = away.get("woba_14d")
+    if w is None or league_woba is None:
+        return None, None
+    gap = league_woba - w
+    return gap > WOBA_GAP, gap
+
 def is_day_game(utc_str, venue):
     """Day game = first pitch before DAY_GAME_CUTOFF_HOUR venue-local (MLB's
     convention). Unparseable times count as night: the night cap is the looser
@@ -198,13 +222,15 @@ def stabilized_starter_rate(sp, league_era, fip_constant):
         skill = era
     return (ip * skill + PRIOR_IP * league_era) / (ip + PRIOR_IP)
 
-def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng, n_sims=N_SIMS):
+def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng, n_sims=N_SIMS, league_woba=None):
     """Pure Monte Carlo core: expected runs -> N sims -> score/win distributions.
 
-    No market or circuit-breaker logic — just the model. Shared by the daily engine
-    (main) and scripts/backtest.py so both exercise exactly the same model. Returns
-    the raw run-count arrays plus p_home; callers derive whatever markets they need
-    (moneyline, totals, run lines) from the arrays.
+    No market or circuit-breaker logic — just the model, plus the one breaker that
+    IS model (Rule 6's away-run tax, inert while WOBA_TAX=0). Shared by the daily
+    engine (main) and scripts/backtest.py so both exercise exactly the same model —
+    which is what lets the backtest sweep WOBA_TAX honestly. Returns the raw
+    run-count arrays plus p_home and the Rule 6 trigger state; callers derive
+    whatever markets they need (moneyline, totals, run lines) from the arrays.
     """
     def shrink(factor):
         # pull a rate factor toward 1.0 (league average). FACTOR_SHRINK=1.0 is identity.
@@ -220,6 +246,10 @@ def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_con
     h_attack = shrink((home["rs"] / (home["w"] + home["l"])) / league_rate)
     lam_away = league_rate * a_attack * shrink(prevention(h_sp, home)) * park / math.sqrt(HFA_RUNS)
     lam_home = league_rate * h_attack * shrink(prevention(a_sp, away)) * park * math.sqrt(HFA_RUNS)
+
+    woba_fired, woba_gap = woba_suppression(away, league_woba)
+    if woba_fired and WOBA_TAX > 0:
+        lam_away *= 1.0 - WOBA_TAX
 
     a_runs = nb_draws(rng, lam_away, n_sims)
     h_runs = nb_draws(rng, lam_home, n_sims)
@@ -242,7 +272,8 @@ def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_con
             undecided[undecided_idx[~still]] = False
         a_runs[ties], h_runs[ties] = xa, xh
 
-    return {"a_runs": a_runs, "h_runs": h_runs, "p_home": float((h_runs > a_runs).mean())}
+    return {"a_runs": a_runs, "h_runs": h_runs, "p_home": float((h_runs > a_runs).mean()),
+            "woba_fired": woba_fired, "woba_gap": woba_gap}
 
 def main():
     if crypto_box.already_published(ROOT, DATE) and "--force" not in sys.argv:
@@ -264,6 +295,8 @@ def main():
 
     # FIP constant for the stabilized starter rate (v0.5); None on older snapshots.
     fip_constant = fip_constant_from(data.get("league_pitching"), league_era)
+
+    league_woba = data.get("league_woba_14d")
 
     rng = np.random.default_rng(SEED)
     board, scratches = [], []
@@ -315,7 +348,8 @@ def main():
         # stabilized ERA/FIP rate) from the team's BULLPEN over the rest — see
         # simulate_game(). backtest.py calls the identical function, so the backtest
         # measures exactly the model that ships.
-        sim = simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng)
+        sim = simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng,
+                            league_woba=league_woba)
         a_runs, h_runs = sim["a_runs"], sim["h_runs"]
         p_home_model = sim["p_home"]
         p_away_model = 1 - p_home_model
@@ -410,8 +444,21 @@ def main():
         else:
             checks.append('Rule 4 check passed: both starters carry full-season workloads.')
 
-        # ---- Rules 3/5/6: not automated in v0.1 — say so ----
-        checks.append('Rules 3/5/6 (velocity/spin telemetry, road wOBA suppression): manual review required: Statcast feed not wired in v0.1.')
+        # ---- Rule 6 (Road wOBA Suppression): detection automated in v0.9, tax gated ----
+        wf, wg = sim["woba_fired"], sim["woba_gap"]
+        if wf is None:
+            checks.append('Rule 6 (Road wOBA Suppression): no 14-day wOBA in this snapshot: manual review.')
+        elif wf:
+            action = (f'{WOBA_TAX:.0%} run tax applied to the away run rate.' if WOBA_TAX > 0 else
+                      'Detection only — the run tax is OFF pending full-season backtest validation, so this flag changes nothing today.')
+            checks.append(f'Rule 6 flag: away 14-day wOBA {away["woba_14d"]:.3f} trails league {league_woba:.3f} '
+                          f'by {wg:.3f} (threshold {WOBA_GAP:.3f}). {action}')
+        else:
+            checks.append(f'Rule 6 check passed: away 14-day wOBA {away["woba_14d"]:.3f} vs league {league_woba:.3f} '
+                          f'(gap {wg:+.3f}, threshold {WOBA_GAP:.3f}).')
+
+        # ---- Rules 3/5: not automated — say so ----
+        checks.append('Rules 3/5 (velocity/spin telemetry): manual review required: Statcast feed not wired.')
 
         tier, units = risk_tier(pick_prob)
         if downgraded and units > 0:
@@ -476,6 +523,7 @@ def main():
             "risk_tier": tier, "units": units,
             "rule2_pivot": rule2, "day_game": day_game,
             "rule4_flag": bool(flags4), "rule8_flag": rule8,
+            "rule6_flag": wf, "away_woba_14d": away.get("woba_14d"), "league_woba_14d": league_woba,
             "no_edge": no_edge,
             "mkt_odds": mkt_odds, "mkt_total": mkt["total"] if mkt else None,
             "mkt_away_ml": mkt["away_ml"] if mkt else None, "mkt_home_ml": mkt["home_ml"] if mkt else None,

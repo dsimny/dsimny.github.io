@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-07-23",
-   "mode": "facebook",
-   "result": "no_config",
-   "http_status": null,
-   "detail": "missing FB_PAGE_ID, FB_PAGE_ACCESS_TOKEN",
-   "at_utc": "2026-07-24T08:10:18Z"
-  },
-  {
-   "date": "2026-07-24",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-07-24T15:10:27Z"
-  },
-  {
-   "date": "2026-07-24",
-   "mode": "pick",
-   "result": "no_config",
-   "http_status": null,
-   "detail": "RESEND_SEGMENT_ID not set",
-   "at_utc": "2026-07-24T15:10:27Z"
-  },
-  {
    "date": "2026-07-24",
    "mode": "recap",
    "result": "posted",
@@ -253,6 +228,32 @@
    "http_status": null,
    "detail": "",
    "at_utc": "2026-07-29T08:10:33Z"
+  },
+  {
+   "date": "2026-07-29",
+   "mode": "pick",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-07-29T15:10:23Z"
+  },
+  {
+   "date": "2026-07-29",
+   "mode": "board",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-07-29T15:10:23Z"
+  },
+  {
+   "date": "2026-07-29",
+   "mode": "email",
+   "result": "sent",
+   "http_status": 200,
+   "detail": "96817b6c-62d4-4e24-bbfe-91dad82f3332",
+   "at_utc": "2026-07-29T15:10:23Z"
   }
  ]
 }

@@ -181,14 +181,18 @@ with more care than the API keys, which are all replaceable.
   Pick side, confidence, fair line, edge, EV and sizing all run on the blended
   prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
   calibration. No market line → pure model (no blend). Board stamps
-  engine_version="0.11-best-of-board".
-- v0.9 RULE 6 DETECTION: fetch_data.py pulls each team's trailing-14-day wOBA
-  (one byDateRange hitting call; wOBA computed from components with static
-  weights — error cancels in the team-vs-league gap) plus the league's over the
-  same window. engine.simulate_game() takes league_woba and computes the Rule 6
-  trigger (away wOBA trails league by > WOBA_GAP=.035); the run tax WOBA_TAX
-  is 0.0 — DETECTION ONLY — until a full-season backtest sweep validates a size
-  (see backtest notes). Missing data → cards say "manual review", never "passed".
+  engine_version="0.12-woba-tax".
+- v0.9 RULE 6 DETECTION / v0.12 TAX: fetch_data.py pulls each team's
+  trailing-14-day wOBA (one byDateRange hitting call; wOBA computed from
+  components with static weights — error cancels in the team-vs-league gap)
+  plus the league's over the same window. engine.simulate_game() takes
+  league_woba, computes the Rule 6 trigger (away wOBA trails league by >
+  WOBA_GAP=.035) and applies WOBA_TAX=0.08 to the away run rate when fired.
+  0.08 was SET BY THE FULL-SEASON SWEEP (2026-07-29, 1454 games, 152
+  triggered): untaxed model over-projected triggered totals +0.31 runs, 0.08
+  zeroed the bias AND won Brier on all games and the fired subset; the
+  playbook's 12% over-corrected. Missing data → cards say "manual review",
+  never "passed". Re-tune only via the sweep, never by taste.
 - Market math: edge = blended prob − implied prob of offered price; divergence =
   RAW model prob − de-vigged market prob; EV per unit; quarter-Kelly capped by tier.
 
@@ -241,11 +245,12 @@ MEASURING it without risking the record:
   per docs/SYSTEM_PLAYBOOK.md — strictly TIGHTER (home favorites −220..−181 that
   the old rule allowed straight now pivot too). Site rulecard copy updated same day.
 - Rule 4 (heuristic): starter < 60 IP this deep in season → units downgraded one tier.
-- Rule 6 (v0.9, 2026-07-29): road wOBA DETECTION automated (away trailing-14d
-  wOBA vs league, threshold .035, from MLB API byDateRange splits) — but the
-  12% run tax is OFF (WOBA_TAX=0) until a full-season `--sweep woba_tax`
-  validates it. Cards say "detection only" on every flag; missing data reads
-  "manual review", never "passed".
+- Rule 6 (detection v0.9, tax v0.12, both 2026-07-29): away trailing-14d wOBA
+  vs league (threshold .035, MLB API byDateRange splits) → 8% run tax on the
+  away rate when fired. The size came from the full-season sweep, NOT the
+  playbook's 12% (which over-corrected); cards print the tax on every flag;
+  missing data reads "manual review", never "passed". Re-tune only via
+  `--sweep woba_tax` on a full season (Actions "Backtest sweep" workflow).
 - Rules 3/5: NOT automated (need Statcast telemetry) — always surfaced as
   "manual review" on cards, never silently claimed. Automating these is roadmap.
 - Rule 7: TBD starter → game scratched, published with reason.
@@ -260,8 +265,8 @@ Daniel's rule spec for where the model should go. It is a SPEC, not live
 behavior: a playbook rule exists only once implemented in engine.py, and House
 Rule 4 forbids claiming otherwise. The doc's appendix carries the authoritative
 per-rule status; summary: Rule 2 day/night caps LIVE (v0.8), Rule 7 was already
-live, Road wOBA Suppression detection LIVE (v0.9) with the 12% tax OFF and
-BACKTEST-GATED (sweep woba_tax on a full season before setting it), Thermal/Venue
+live, Road wOBA Suppression LIVE END-TO-END (detection v0.9; tax v0.12 at 8%,
+sized by the 2026-07-29 full-season sweep — the playbook's 12% over-corrected), Thermal/Venue
 LIVE on the totals paper track (v0.10: temperature multiplier + hot-day fly-ball
 kicker on the paper pick only — the literal 35% HR/FB tax cannot map onto a model
 with no HR/FB component), Pérez/Cole rules are blocked on a props product that doesn't exist,

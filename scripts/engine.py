@@ -55,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.11-best-of-board"
+ENGINE_VERSION = "0.12-woba-tax"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -73,18 +73,18 @@ FACTOR_SHRINK = 0.6      # v0.6: regression-to-mean for TEAM rates. Season RS/RA
 LOW_IP_THRESHOLD = 60.0  # Rule 4 heuristic: starter under 60 IP this deep in
                          # the season => limited workload / possible IL return
 
-# Rule 6 (Road wOBA Suppression) — v0.9: DETECTION live, ACTION gated.
+# Rule 6 (Road wOBA Suppression) — detection v0.9, tax v0.12 (2026-07-29).
 # Trigger: away team's trailing-14-day wOBA trails the league's by > WOBA_GAP
 # (playbook threshold .035). WOBA_TAX is the run-rate reduction applied to the
-# away team when the trigger fires. It is 0.0 ON PURPOSE: the playbook
-# prescribes 12%, but a hardwired recency tax cuts against the engine's
-# validated regression-to-mean philosophy (FACTOR_SHRINK exists because short
-# samples mislead), so the tax ships only after a full-season backtest sweep
-# (backtest.py --sweep woba_tax:0,0.04,0.08,0.12) shows it helps — and watch
-# the totals calibration too, not just moneyline Brier. Do not set non-zero
-# by taste.
+# away team when the trigger fires. 0.08 was set by the full-season sweep
+# (2026-04-01..07-27, 1454 games, 152 triggered, sims=3000, Actions run
+# 30476496954): the untaxed model over-projected triggered games' totals by
+# +0.31 runs; 0.08 removed that bias almost exactly (-0.01) AND was the Brier
+# optimum on both all games (0.2481->0.2477) and the fired subset
+# (0.2466->0.2439); the playbook's 12% over-corrected (-0.18 bias, worse
+# Brier). Re-tune only via the same sweep on a full season — never by taste.
 WOBA_GAP = 0.035
-WOBA_TAX = 0.0
+WOBA_TAX = 0.08
 
 # Weather → run environment (v0.10) — TOTALS PAPER TRACK ONLY. The staked
 # moneyline board never sees these: main() runs the weather-adjusted sim as a

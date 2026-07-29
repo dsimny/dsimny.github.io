@@ -8,13 +8,6 @@ name: Backtest sweep
 # Commits NOTHING and needs NO secrets: data/backtest/ is gitignored, the
 # backtest reads no encrypted files, and permissions are read-only.
 on:
-  # BOOTSTRAP trigger: GitHub refuses workflow_dispatch for a workflow that has
-  # never existed on the default branch, so the first run fires on push to the
-  # development branch (path-scoped to this file). Remove this block when the
-  # workflow merges to main — dispatch works from then on.
-  push:
-    branches: [claude/sports-betting-model-adjustments-l8tla7]
-    paths: [".github/workflows/backtest-sweep.yml"]
   workflow_dispatch:
     inputs:
       start:

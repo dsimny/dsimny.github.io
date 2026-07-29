@@ -231,7 +231,8 @@ def evaluate(snap, sims, model_weight, odds_by_pk):
                                    league_woba=snap.get("league_woba_14d"))
         p_model = sim["p_home"]
         y = 1 if res["home"] > res["away"] else 0
-        row = {"p_model": p_model, "p_blend": p_model, "p_mkt": None, "away_ml": None, "home_ml": None, "y": y}
+        row = {"p_model": p_model, "p_blend": p_model, "p_mkt": None, "away_ml": None, "home_ml": None, "y": y,
+               "woba_fired": sim.get("woba_fired")}  # Rule 6 trigger — lets sweeps report the taxed subset
         od = (odds_by_pk or {}).get(str(g["gamePk"]))
         if od and od.get("away_ml") is not None and od.get("home_ml") is not None:
             ia, ih = engine.american_to_implied(od["away_ml"]), engine.american_to_implied(od["home_ml"])
@@ -411,7 +412,12 @@ def main():
         print(f"\nSweep {param} over {vals}  | {dates[0]}..{dates[-1]}, sims={args.sims}")
         saved = {a: getattr(engine, a) for a in ATTR.values()}
         key = "p_blend" if (args.odds_dir and param == "model_weight") else "p_model"
-        print(f'  {param:>12}  {"Brier":>8} {"LogLoss":>8} {"Acc":>7}  {"N":>5}')
+        # The fired-subset columns are where a woba_tax sweep is actually decided:
+        # the tax only touches triggered games, so all-games Brier dilutes the
+        # signal ~10:1, and tBiasF (model-minus-actual mean total on triggered
+        # games) is the DISPERSION-trap check — a tax that helps moneyline Brier
+        # by pushing triggered games' totals negative is stealing, not learning.
+        print(f'  {param:>12}  {"Brier":>8} {"LogLoss":>8} {"Acc":>7}  {"N":>5}  {"Nfired":>6} {"BrierF":>8} {"tBiasF":>7}')
         for v in vals:
             fv, mw = float(v), args.model_weight
             if param == "model_weight":
@@ -420,8 +426,12 @@ def main():
                 setattr(engine, ATTR[param], fv)
             rows = run(mw)
             if rows:
+                fired = [r for r in rows if r.get("woba_fired")]
+                bf = f'{brier(fired, key):.4f}' if fired else "n/a"
+                tb = (f'{sum(r["t_mean"] - r["t_actual"] for r in fired) / len(fired):+.2f}'
+                      if fired and fired[0].get("t_mean") is not None else "n/a")
                 print(f'  {v:>12}  {brier(rows, key):>8.4f} {logloss(rows, key):>8.4f} '
-                      f'{accuracy(rows, key) * 100:>6.1f}% {len(rows):>5}')
+                      f'{accuracy(rows, key) * 100:>6.1f}% {len(rows):>5}  {len(fired):>6} {bf:>8} {tb:>7}')
         for a, val in saved.items():
             setattr(engine, a, val)
         return

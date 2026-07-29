@@ -135,12 +135,12 @@
   "mins_to_first_pitch": 195
  },
  "823923": {
-  "away_ml": 129,
+  "away_ml": 128,
   "home_ml": -150,
   "total": 9.0,
-  "over_price": -119,
-  "under_price": 100,
-  "captured_utc": "2026-07-28T22:30:29Z",
-  "mins_to_first_pitch": 220
+  "over_price": -118,
+  "under_price": -1,
+  "captured_utc": "2026-07-29T01:30:24Z",
+  "mins_to_first_pitch": 40
  }
 }

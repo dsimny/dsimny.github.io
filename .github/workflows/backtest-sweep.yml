@@ -8,6 +8,13 @@ name: Backtest sweep
 # Commits NOTHING and needs NO secrets: data/backtest/ is gitignored, the
 # backtest reads no encrypted files, and permissions are read-only.
 on:
+  # BOOTSTRAP trigger: GitHub refuses workflow_dispatch for a workflow that has
+  # never existed on the default branch, so the first run fires on push to the
+  # development branch (path-scoped to this file). Remove this block when the
+  # workflow merges to main — dispatch works from then on.
+  push:
+    branches: [claude/sports-betting-model-adjustments-l8tla7]
+    paths: [".github/workflows/backtest-sweep.yml"]
   workflow_dispatch:
     inputs:
       start:
@@ -48,11 +55,14 @@ jobs:
           # (post-v0.9 snapshots that carry the 14-day wOBA fields). Never widen
           # the prefix: restoring a pre-v0.9 cache would leave Rule 6 silently
           # inert and make a woba_tax sweep meaningless.
-          key: bt-woba-${{ inputs.start }}-${{ inputs.end }}
+          key: bt-woba-${{ inputs.start || '2026-04-01' }}-${{ inputs.end || '2026-07-27' }}
           restore-keys: bt-woba-
       - name: Run backtest
+        # The || fallbacks serve the push-bootstrap trigger, where inputs are
+        # empty: it runs the default full-season woba_tax sweep.
         run: |
-          ARGS="--start ${{ inputs.start }} --end ${{ inputs.end }} --sims ${{ inputs.sims }}"
-          if [ -n "${{ inputs.sweep }}" ]; then ARGS="$ARGS --sweep ${{ inputs.sweep }}"; fi
+          ARGS="--start ${{ inputs.start || '2026-04-01' }} --end ${{ inputs.end || '2026-07-27' }} --sims ${{ inputs.sims || '3000' }}"
+          SWEEP="${{ inputs.sweep || 'woba_tax:0,0.04,0.08,0.12' }}"
+          if [ -n "$SWEEP" ]; then ARGS="$ARGS --sweep $SWEEP"; fi
           echo "python scripts/backtest.py $ARGS"
           python scripts/backtest.py $ARGS

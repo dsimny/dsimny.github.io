@@ -5,11 +5,10 @@
 > **Core Objective:** Provide high-EV, quantitative sports forecasting through strict risk management, pitch/player telemetry, and daily automated model calibrations.
 
 <!--
-STATUS: PARTIAL — sections 1–2 only, pasted 2026-07-29.
+STATUS: PARTIAL — sections 1–2 and the command reference index, pasted 2026-07-29.
 Still to be added from the source document:
   3. TIER 2: OPERATIONAL GUARDRAILS & EXCEPTION MATRIX (trigger thresholds + mandated actions)
-  4. TIER 3: POST-GAME CALIBRATION & FEEDBACK ENGINE
-  5. Command reference index / workflow diagram
+  4. TIER 3: POST-GAME CALIBRATION & FEEDBACK ENGINE (incl. workflow diagram)
 
 IMPORTANT — this document is a REFERENCE SPEC, not live behavior. The daily
 board is produced by scripts/engine.py, which only does what is coded. Rules
@@ -70,3 +69,27 @@ Suggested Bet: [X] units ([X]% bankroll)
 🎯 Rationale: [Correlated game script & structural synergy rationale]
 Suggested Bet: [X] unit ([X]% bankroll)
 ```
+
+---
+
+## 5. ADD-ON: COMMAND REFERENCE INDEX
+
+```text
+Simulate outcomes for these games 10,000 times and give probability of each parlay hitting.
+Track today's pending bets and update ROI after results.
+Find correlated props for this matchup.
+Rank player props by EV (expected value).
+```
+
+<!--
+Pipeline mapping (as of 2026-07-29):
+- 10,000-sim outcomes: LIVE — engine.py runs exactly this daily per game
+  (seeded per date, reproducible). Parlay hit probability is not produced;
+  the product publishes no parlays.
+- Track pending bets / ROI: LIVE — grade.py settles each slate into the
+  append-only data/ledger.json (W/L/VOID, units, ROI, CLV) the morning after.
+- Correlated props / rank props by EV: NOT POSSIBLE today — no player-prop
+  data source is fetched (The Odds API props markets are not consumed).
+  Would be new scope: data feed first, then EV ranking.
+-->
+

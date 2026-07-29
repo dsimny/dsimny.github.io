@@ -25,13 +25,19 @@ Two honest limits:
     pen; it slightly understates v0.4's contribution but never leaks.
 
 Reconstructed inputs are cached under data/backtest/ so sweeps re-simulate without
-re-hitting the API. Sims are seeded per date, so a run is reproducible.
+re-hitting the API. Sims are seeded per date, so a run is reproducible. NOTE:
+snapshots cached before v0.9 lack the 14-day wOBA fields (Rule 6 stays inert on
+them) — pass --refresh once to re-fetch with wOBA included before sweeping
+woba_tax. When judging a woba_tax sweep, check the totals calibration report as
+well as moneyline Brier: the tax cuts away run totals on triggered games, and a
+moneyline-only read can't see totals damage (the DISPERSION trap).
 
 Run:
   python scripts/backtest.py --days 14
   python scripts/backtest.py --start 2026-05-01 --end 2026-06-30 --sims 3000
   python scripts/backtest.py --start 2026-05-01 --end 2026-06-30 --sweep prior_ip:30,60,90
   python scripts/backtest.py --start 2026-05-01 --end 2026-06-30 --sweep fip_weight:0,0.5,1
+  python scripts/backtest.py --start 2026-04-01 --end 2026-09-28 --sweep woba_tax:0,0.04,0.08,0.12
 """
 import argparse
 import datetime as dt
@@ -49,7 +55,7 @@ import requests
 _saved_argv = sys.argv
 sys.argv = [sys.argv[0]]
 import engine
-from fetch_data import PARK_FACTORS
+from fetch_data import PARK_FACTORS, WOBA_WINDOW_DAYS, woba_from
 sys.argv = _saved_argv
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
@@ -121,6 +127,30 @@ def reconstruct(date, season, meta, cache_dir, refresh=False):
                                "rs": r.get("runsScored"), "ra": r.get("runsAllowed"),
                                "pen_era": None}  # bullpen split leaks; engine falls back to team RA
 
+    # Trailing-14-day team wOBA (Rule 6 detection, engine v0.9). byDateRange
+    # respects its cutoffs (unlike the reliever statSplit), so this is
+    # point-in-time safe: window ends the day BEFORE the slate, same as live.
+    league_woba_14d = None
+    try:
+        s14 = (dt.date.fromisoformat(date) - dt.timedelta(days=WOBA_WINDOW_DAYS)).isoformat()
+        hsplits = get(f"{MLB}/teams/stats", stats="byDateRange", group="hitting",
+                      startDate=s14, endDate=prev, season=season, sportIds=1, gameType="R")
+        agg = {}
+        for s in (hsplits.get("stats") or [{}])[0].get("splits") or []:
+            tid = str(s.get("team", {}).get("id"))
+            stat = s.get("stat", {})
+            if tid in teams:
+                teams[tid]["woba_14d"] = woba_from(stat)
+            for k in ("atBats", "hits", "doubles", "triples", "homeRuns",
+                      "baseOnBalls", "intentionalWalks", "hitByPitch", "sacFlies"):
+                try:
+                    agg[k] = agg.get(k, 0) + int(stat.get(k, 0) or 0)
+                except (TypeError, ValueError):
+                    pass
+        league_woba_14d = woba_from(agg)
+    except Exception:
+        pass  # Rule 6 simply stays inert for this date
+
     pitchers = {}
     if pids:
         ppl = get(f"{MLB}/people", personIds=",".join(map(str, sorted(pids))),
@@ -157,7 +187,8 @@ def reconstruct(date, season, meta, cache_dir, refresh=False):
         pass
 
     snap = {"date": date, "season": season, "teams": teams, "pitchers": pitchers,
-            "league_pitching": league_pitching, "games": games, "results": results,
+            "league_pitching": league_pitching, "league_woba_14d": league_woba_14d,
+            "games": games, "results": results,
             "park_factors": PARK_FACTORS}
     os.makedirs(cache_dir, exist_ok=True)
     with open(cache, "w", encoding="utf-8") as f:
@@ -196,7 +227,8 @@ def evaluate(snap, sims, model_weight, odds_by_pk):
             continue
         park = parks.get(g["venue"], 1.00)
         sim = engine.simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era,
-                                   fip_constant, rng, n_sims=sims)
+                                   fip_constant, rng, n_sims=sims,
+                                   league_woba=snap.get("league_woba_14d"))
         p_model = sim["p_home"]
         y = 1 if res["home"] > res["away"] else 0
         row = {"p_model": p_model, "p_blend": p_model, "p_mkt": None, "away_ml": None, "home_ml": None, "y": y}
@@ -372,7 +404,8 @@ def main():
         vals = [v.strip() for v in raw.split(",") if v.strip()]
         # engine module globals a sweep can drive; model_weight is passed to run() instead
         ATTR = {"fip_weight": "FIP_WEIGHT", "prior_ip": "PRIOR_IP",
-                "dispersion": "DISPERSION", "hfa": "HFA_RUNS", "factor_shrink": "FACTOR_SHRINK"}
+                "dispersion": "DISPERSION", "hfa": "HFA_RUNS", "factor_shrink": "FACTOR_SHRINK",
+                "woba_tax": "WOBA_TAX", "woba_gap": "WOBA_GAP"}
         if param not in ATTR and param != "model_weight":
             ap.error("sweep param must be one of: " + ", ".join(list(ATTR) + ["model_weight"]))
         print(f"\nSweep {param} over {vals}  | {dates[0]}..{dates[-1]}, sims={args.sims}")

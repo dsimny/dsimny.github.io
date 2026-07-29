@@ -9,7 +9,7 @@ in the exact shape engine.py consumes.
 Run: python scripts/fetch_data.py [YYYY-MM-DD]
 """
 import json, os, statistics, sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import requests
 
@@ -37,6 +37,32 @@ def get(url, **params):
     r = requests.get(url, params=params, timeout=30)
     r.raise_for_status()
     return r.json()
+
+# ---- Rule 6 (Road wOBA Suppression, engine v0.9): trailing-window team wOBA ----
+# Static modern wOBA weights (approximate). Fine here because the rule compares
+# team wOBA vs league wOBA computed with the SAME weights over the SAME window,
+# so weight error largely cancels out of the gap. Shared with backtest.py.
+WOBA_WINDOW_DAYS = 14
+WOBA_WEIGHTS = {"ubb": 0.69, "hbp": 0.72, "b1": 0.89, "b2": 1.27, "b3": 1.62, "hr": 2.10}
+
+def woba_from(st):
+    """wOBA from an MLB API hitting stat dict. None when components are missing
+    or the sample is under ~50 PA (a couple of games — too thin to mean anything)."""
+    try:
+        ab = int(st.get("atBats", 0)); h = int(st.get("hits", 0))
+        b2 = int(st.get("doubles", 0)); b3 = int(st.get("triples", 0)); hr = int(st.get("homeRuns", 0))
+        bb = int(st.get("baseOnBalls", 0)); ibb = int(st.get("intentionalWalks", 0))
+        hbp = int(st.get("hitByPitch", 0)); sf = int(st.get("sacFlies", 0))
+    except (TypeError, ValueError):
+        return None
+    ubb = max(bb - ibb, 0)
+    denom = ab + ubb + sf + hbp
+    if denom < 50:
+        return None
+    b1 = h - b2 - b3 - hr
+    w = WOBA_WEIGHTS
+    num = w["ubb"] * ubb + w["hbp"] * hbp + w["b1"] * b1 + w["b2"] * b2 + w["b3"] * b3 + w["hr"] * hr
+    return round(num / denom, 4)
 
 def main():
     # The board runs on several cron windows because GitHub's scheduler is
@@ -93,6 +119,35 @@ def main():
         print(f"WARNING: bullpen split fetch failed ({e}); engine falls back to team RA for the pen.")
     for t in teams.values():
         t.setdefault("pen_era", None)   # None = no data → engine fallback
+
+    # ---- Trailing-14-day team wOBA (Rule 6 detection, engine v0.9) ----
+    # One bulk byDateRange call over the window ENDING YESTERDAY (no same-day
+    # leak). Best-effort like the bullpen split: any failure leaves woba_14d
+    # None and the engine reports Rule 6 as "manual review" for the day.
+    league_woba_14d = None
+    try:
+        d0 = datetime.fromisoformat(DATE)
+        win_start = (d0 - timedelta(days=WOBA_WINDOW_DAYS)).strftime("%Y-%m-%d")
+        win_end = (d0 - timedelta(days=1)).strftime("%Y-%m-%d")
+        hs = get(f"{MLB}/teams/stats", stats="byDateRange", group="hitting",
+                 startDate=win_start, endDate=win_end, season=SEASON, sportIds=1, gameType="R")
+        agg = {}
+        for s in (hs.get("stats") or [{}])[0].get("splits") or []:
+            tid = str(s.get("team", {}).get("id"))
+            st = s.get("stat", {})
+            if tid in teams:
+                teams[tid]["woba_14d"] = woba_from(st)
+            for k in ("atBats", "hits", "doubles", "triples", "homeRuns",
+                      "baseOnBalls", "intentionalWalks", "hitByPitch", "sacFlies"):
+                try:
+                    agg[k] = agg.get(k, 0) + int(st.get(k, 0) or 0)
+                except (TypeError, ValueError):
+                    pass
+        league_woba_14d = woba_from(agg)
+    except Exception as e:  # never sink the board over a split
+        print(f"WARNING: 14-day hitting split fetch failed ({e}); Rule 6 stays manual-review today.")
+    for t in teams.values():
+        t.setdefault("woba_14d", None)
 
     # ---- League pitching totals (for the engine's FIP constant, v0.5) ----
     # One bulk call summed across teams. The engine derives its FIP constant from
@@ -221,6 +276,7 @@ def main():
         "teams": teams,
         "pitchers": pitchers,
         "league_pitching": league_pitching,
+        "league_woba_14d": league_woba_14d,
         "odds_source": odds_source,
         "odds": odds,
         "park_factors_note": "Approximate season-level run park factors; refresh from Baseball Savant.",

@@ -84,6 +84,14 @@ look-ahead): standings?date=<day-before>, pitcher/league byDateRange through the
 day before, final scores from the schedule linescore. Reports Brier / log-loss /
 accuracy / a calibration table vs the no-skill base rate.
 
+v0.9 adds Rule 6 to the backtest: reconstruct() fetches the trailing-14-day
+wOBA point-in-time (byDateRange respects cutoffs, unlike the reliever split)
+and `--sweep woba_tax:0,0.04,0.08,0.12` tunes the tax. Two caveats: snapshots
+cached before v0.9 lack the wOBA fields (pass --refresh once), and judge a
+woba_tax sweep on the TOTALS calibration report too, not just moneyline Brier —
+the tax cuts away run totals on triggered games, the same blind spot as the
+DISPERSION trap below.
+
 Two honest limits, both documented in the file's header: (1) no historical odds on
 the free Odds API tier, so it scores the RAW model's win probabilities, not ROI or
 CLV, and can't tune MODEL_WEIGHT — pass --odds-dir with odds_<date>.json to unlock
@@ -173,7 +181,14 @@ with more care than the API keys, which are all replaceable.
   Pick side, confidence, fair line, edge, EV and sizing all run on the blended
   prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
   calibration. No market line → pure model (no blend). Board stamps
-  engine_version="0.8-rule2-daynight".
+  engine_version="0.9-woba-detect".
+- v0.9 RULE 6 DETECTION: fetch_data.py pulls each team's trailing-14-day wOBA
+  (one byDateRange hitting call; wOBA computed from components with static
+  weights — error cancels in the team-vs-league gap) plus the league's over the
+  same window. engine.simulate_game() takes league_woba and computes the Rule 6
+  trigger (away wOBA trails league by > WOBA_GAP=.035); the run tax WOBA_TAX
+  is 0.0 — DETECTION ONLY — until a full-season backtest sweep validates a size
+  (see backtest notes). Missing data → cards say "manual review", never "passed".
 - Market math: edge = blended prob − implied prob of offered price; divergence =
   RAW model prob − de-vigged market prob; EV per unit; quarter-Kelly capped by tier.
 
@@ -214,7 +229,12 @@ MEASURING it without risking the record:
   per docs/SYSTEM_PLAYBOOK.md — strictly TIGHTER (home favorites −220..−181 that
   the old rule allowed straight now pivot too). Site rulecard copy updated same day.
 - Rule 4 (heuristic): starter < 60 IP this deep in season → units downgraded one tier.
-- Rules 3/5/6: NOT automated (need Statcast/wOBA feeds) — always surfaced as
+- Rule 6 (v0.9, 2026-07-29): road wOBA DETECTION automated (away trailing-14d
+  wOBA vs league, threshold .035, from MLB API byDateRange splits) — but the
+  12% run tax is OFF (WOBA_TAX=0) until a full-season `--sweep woba_tax`
+  validates it. Cards say "detection only" on every flag; missing data reads
+  "manual review", never "passed".
+- Rules 3/5: NOT automated (need Statcast telemetry) — always surfaced as
   "manual review" on cards, never silently claimed. Automating these is roadmap.
 - Rule 7: TBD starter → game scratched, published with reason.
 - Rule 8 (Divergence Governor): |model − de-vigged market| > 12 pts → held as
@@ -228,8 +248,8 @@ Daniel's rule spec for where the model should go. It is a SPEC, not live
 behavior: a playbook rule exists only once implemented in engine.py, and House
 Rule 4 forbids claiming otherwise. The doc's appendix carries the authoritative
 per-rule status; summary: Rule 2 day/night caps LIVE (v0.8), Rule 7 was already
-live, Road wOBA Suppression is feasible without Statcast (MLB API byDateRange
-wOBA components) but is BACKTEST-GATED before its 12% tax ships, Thermal/Venue
+live, Road wOBA Suppression detection LIVE (v0.9) with the 12% tax OFF and
+BACKTEST-GATED (sweep woba_tax on a full season before setting it), Thermal/Venue
 goes through the totals paper track (weather is that track's designated first
 upgrade — do NOT bolt a literal 35% HR/FB tax onto a model with no HR/FB
 component), Pérez/Cole rules are blocked on a props product that doesn't exist,

@@ -42,6 +42,7 @@ claimed. NRFI rules are N/A (no NRFI market in v0.1).
 
 import json, math, os, sys
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 import numpy as np
 
 import crypto_box
@@ -53,7 +54,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.7-totals-track"
+ENGINE_VERSION = "0.8-rule2-daynight"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -71,9 +72,36 @@ FACTOR_SHRINK = 0.6      # v0.6: regression-to-mean for TEAM rates. Season RS/RA
 LOW_IP_THRESHOLD = 60.0  # Rule 4 heuristic: starter under 60 IP this deep in
                          # the season => limited workload / possible IL return
 
-# Rule 2 thresholds — v0.2: applied to MARKET lines (real prices, real juice)
-ROAD_FAV_CAP = -180
-HOME_FAV_CAP = -220
+# Rule 2 thresholds — v0.8 (2026-07-29, docs/SYSTEM_PLAYBOOK.md adoption): a flat
+# cap on ANY favorite, tighter for day games. Applied to MARKET lines (real
+# prices, real juice). Replaces v0.2's road −180 / home −220 split; the change is
+# strictly TIGHTER (home favorites now capped at −180/−170 instead of −220), so
+# nothing the old rule blocked is allowed now.
+NIGHT_FAV_CAP = -180
+DAY_FAV_CAP = -170
+DAY_GAME_CUTOFF_HOUR = 17  # first pitch before 5 PM venue-local counts as a day game
+
+# Venue -> IANA timezone, for Rule 2's day/night classification. Static like
+# PARK_FACTORS in fetch_data.py; keys must match the snapshot's venue names.
+# Unknown venue falls back to America/New_York.
+VENUE_TZ = {
+    "Coors Field": "America/Denver", "Fenway Park": "America/New_York",
+    "Chase Field": "America/Phoenix", "Kauffman Stadium": "America/Chicago",
+    "Yankee Stadium": "America/New_York", "Wrigley Field": "America/Chicago",
+    "Great American Ball Park": "America/New_York", "Citizens Bank Park": "America/New_York",
+    "Angel Stadium": "America/Los_Angeles", "Truist Park": "America/New_York",
+    "Rogers Centre": "America/Toronto", "Dodger Stadium": "America/Los_Angeles",
+    "American Family Field": "America/Chicago", "Globe Life Field": "America/Chicago",
+    "Progressive Field": "America/New_York", "Daikin Park": "America/Chicago",
+    "Busch Stadium": "America/Chicago", "Nationals Park": "America/New_York",
+    "PNC Park": "America/New_York", "Oracle Park": "America/Los_Angeles",
+    "Petco Park": "America/Los_Angeles", "T-Mobile Park": "America/Los_Angeles",
+    "Citi Field": "America/New_York", "loanDepot park": "America/New_York",
+    "Camden Yards": "America/New_York", "Target Field": "America/Chicago",
+    "Comerica Park": "America/Detroit", "Guaranteed Rate Field": "America/Chicago",
+    "Rate Field": "America/Chicago", "George M. Steinbrenner Field": "America/New_York",
+    "Sutter Health Park": "America/Los_Angeles",
+}
 
 # v0.2 market-aware gates
 MIN_EDGE = 0.02          # publish only if model prob beats vigged market implied by 2+ pts
@@ -130,6 +158,19 @@ def first_pitch_passed(utc_str, now_utc):
     except (ValueError, AttributeError):
         return True
     return start <= now_utc
+
+def is_day_game(utc_str, venue):
+    """Day game = first pitch before DAY_GAME_CUTOFF_HOUR venue-local (MLB's
+    convention). Unparseable times count as night: the night cap is the looser
+    of the two, so a bad timestamp can only make Rule 2 no stricter than v0.2's
+    road cap — never let a data glitch tighten a rule invisibly.
+    """
+    try:
+        start = datetime.fromisoformat(utc_str.replace("Z", "+00:00"))
+    except (ValueError, AttributeError):
+        return False
+    local = start.astimezone(ZoneInfo(VENUE_TZ.get(venue, "America/New_York")))
+    return local.hour < DAY_GAME_CUTOFF_HOUR
 
 def fip_constant_from(league_pitching, league_era):
     """FIP constant anchoring league-average FIP to the league run scale, from
@@ -329,18 +370,21 @@ def main():
             kelly_pct = max(0.0, KELLY_FRACTION * ev / b_net) * 100
             pick_label = f'{pick_team["name"]} ML ({mkt_odds:+d})'
 
-        # ---- Rule 2: High-Juice Favorite Cap (v0.2: on the MARKET line) ----
+        # ---- Rule 2: High-Juice Favorite Cap (v0.8: flat day/night caps on the MARKET line) ----
         rule2 = False
+        day_game = is_day_game(g["utc"], g["venue"])
+        fav_cap = DAY_FAV_CAP if day_game else NIGHT_FAV_CAP
+        cap_kind = "day" if day_game else "night"
         cap_line = mkt_odds if mkt_odds is not None else pick_fair
         cap_src = "market" if mkt_odds is not None else "model-fair (no market line)"
-        if (not pick_home and cap_line <= ROAD_FAV_CAP) or (pick_home and cap_line <= HOME_FAV_CAP):
+        if cap_line <= fav_cap:
             rule2 = True
             rl_prob = rl_home_m15 if pick_home else float(((a_runs - h_runs) > 1.5).mean())
-            checks.append(f'Rule 2 fired: {cap_src} line {cap_line:+d} exceeds juice cap: pivoted off the moneyline to {pick_team["abbr"]} -1.5 (covers {rl_prob:.1%} of sims).')
+            checks.append(f'Rule 2 fired: {cap_src} line {cap_line:+d} exceeds the {cap_kind}-game juice cap ({fav_cap}): pivoted off the moneyline to {pick_team["abbr"]} -1.5 (covers {rl_prob:.1%} of sims).')
             pick_label = f'{pick_team["name"]} -1.5 run line'
             pick_prob = rl_prob
         else:
-            checks.append(f'Rule 2 check passed: {cap_src} line {cap_line:+d} within juice caps (road {ROAD_FAV_CAP}, home {HOME_FAV_CAP}).')
+            checks.append(f'Rule 2 check passed: {cap_src} line {cap_line:+d} within the {cap_kind}-game juice cap ({fav_cap}; night {NIGHT_FAV_CAP}, day {DAY_FAV_CAP}, day = first pitch before {DAY_GAME_CUTOFF_HOUR}:00 venue-local).')
 
         # ---- Rule 8: Divergence Governor (v0.2) ----
         rule8 = False
@@ -430,7 +474,8 @@ def main():
             "pick": pick_label, "pick_team_abbr": pick_team["abbr"],
             "confidence": round(pick_prob, 4),
             "risk_tier": tier, "units": units,
-            "rule2_pivot": rule2, "rule4_flag": bool(flags4), "rule8_flag": rule8,
+            "rule2_pivot": rule2, "day_game": day_game,
+            "rule4_flag": bool(flags4), "rule8_flag": rule8,
             "no_edge": no_edge,
             "mkt_odds": mkt_odds, "mkt_total": mkt["total"] if mkt else None,
             "mkt_away_ml": mkt["away_ml"] if mkt else None, "mkt_home_ml": mkt["home_ml"] if mkt else None,

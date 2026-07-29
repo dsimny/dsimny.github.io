@@ -173,7 +173,7 @@ with more care than the API keys, which are all replaceable.
   Pick side, confidence, fair line, edge, EV and sizing all run on the blended
   prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
   calibration. No market line → pure model (no blend). Board stamps
-  engine_version="0.7-totals-track".
+  engine_version="0.8-rule2-daynight".
 - Market math: edge = blended prob − implied prob of offered price; divergence =
   RAW model prob − de-vigged market prob; EV per unit; quarter-Kelly capped by tier.
 
@@ -208,7 +208,11 @@ MEASURING it without risking the record:
 
 ## Circuit breakers (the product's identity — never weaken silently)
 
-- Rule 2: no road favorites −180+ / home −220+ (market line) → pivot to −1.5 run line.
+- Rule 2 (v0.8, 2026-07-29): no favorites −180+ at night / −170+ in day games
+  (market line; day = first pitch before 5 PM venue-local, static venue→tz map in
+  engine.py) → pivot to −1.5 run line. Replaced v0.2's road −180 / home −220 split
+  per docs/SYSTEM_PLAYBOOK.md — strictly TIGHTER (home favorites −220..−181 that
+  the old rule allowed straight now pivot too). Site rulecard copy updated same day.
 - Rule 4 (heuristic): starter < 60 IP this deep in season → units downgraded one tier.
 - Rules 3/5/6: NOT automated (need Statcast/wOBA feeds) — always surfaced as
   "manual review" on cards, never silently claimed. Automating these is roadmap.
@@ -217,6 +221,22 @@ MEASURING it without risking the record:
   lean, no allocation ("the market knows something our inputs don't").
 - Edge gate: < 2-pt edge vs offered price → no allocation.
 - Sizing: min(confidence tier 3u/2u/1u, quarter-Kelly), 10u daily exposure cap.
+
+## SYSTEM_PLAYBOOK (docs/SYSTEM_PLAYBOOK.md) — the adjustment spec, adopted 2026-07-29
+
+Daniel's rule spec for where the model should go. It is a SPEC, not live
+behavior: a playbook rule exists only once implemented in engine.py, and House
+Rule 4 forbids claiming otherwise. The doc's appendix carries the authoritative
+per-rule status; summary: Rule 2 day/night caps LIVE (v0.8), Rule 7 was already
+live, Road wOBA Suppression is feasible without Statcast (MLB API byDateRange
+wOBA components) but is BACKTEST-GATED before its 12% tax ships, Thermal/Venue
+goes through the totals paper track (weather is that track's designated first
+upgrade — do NOT bolt a literal 35% HR/FB tax onto a model with no HR/FB
+component), Pérez/Cole rules are blocked on a props product that doesn't exist,
+Pederson/Two-Out-WHIP rules are dormant until NRFI ships, and the parlay
+templates/commands have no product surface. When touching the engine, check
+changes against BOTH this playbook and the circuit-breaker section above; if
+they conflict, the tighter rule wins and the conflict gets flagged to Daniel.
 
 ## House rules (non-negotiable; they ARE the brand)
 

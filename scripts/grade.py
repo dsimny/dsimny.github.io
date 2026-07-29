@@ -80,7 +80,9 @@ def grade_totals(date, board, scores, closing, path):
         side, line, price = tp["side"], tp["line"], tp["price"]
         entry = {"date": date, "gamePk": b.get("gamePk"), "game": b["abbr"], "market": "total",
                  "side": side, "line": line, "price": price,
-                 "model_p": tp.get("model_p"), "edge": tp.get("edge")}
+                 "model_p": tp.get("model_p"), "edge": tp.get("edge"),
+                 # v0.10: split the ledger by weather-adjusted vs not (None = pre-v0.10 board)
+                 "wx_applied": tp.get("wx_applied")}
         sc = scores.get(str(b.get("gamePk", "")))
         if sc is None or not sc.get("final") or sc.get("away") is None:
             entry.update(result="VOID", pnl=0.0, note="Game not final; paper stake returned.")

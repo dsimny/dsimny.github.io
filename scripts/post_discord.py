@@ -6,7 +6,10 @@ Two modes, wired into the two daily workflows:
   pick   (after the morning board)  — posts the Free Pick of the Day as a rich
          embed, plus a one-line teaser of the rest of the board.
   board  (after the morning board)  — posts every held play in full to the
-         members channel. Never includes the free pick (house rule 2).
+         members channel. Never includes the free pick (house rule 2). When
+         the gates leave no held plays, posts the engine's ✳ Best of Board
+         lean at 0 units instead (v0.11) — members always see at least one
+         play, clearly marked as not staked.
   recap  (after nightly grading)    — posts yesterday's graded results and the
          running ledger (record, units, ROI).
 
@@ -79,11 +82,15 @@ def build_pick_payload(date):
     nice = f"{_d:%A, %B} {_d.day}"
 
     if not plays:
+        desc = ("The engine ran the full slate and nothing cleared the circuit breakers "
+                "and the edge gate at an allocatable price. We don't manufacture a pick to "
+                "fill the slot. **Passing is a position too.**")
+        if any(b.get("best_of_board") for b in B["board"]):
+            desc += ("\n\n*Members see today's ✳ Best of Board — the model's top choice that "
+                     "didn't clear the markers, at 0 units — with every failed gate printed.*")
         embed = {
             "title": f"No qualifying plays today: {nice}",
-            "description": ("The engine ran the full slate and nothing cleared the circuit breakers "
-                            "and the edge gate at an allocatable price. We don't manufacture a pick to "
-                            "fill the slot. **Passing is a position too.**"),
+            "description": desc,
             "color": GRAY,
             "footer": {"text": FOOTER},
         }
@@ -150,12 +157,47 @@ def build_board_payload(date):
     plays = sorted([b for b in B["board"] if b.get("published")], key=lambda b: -b["confidence"])
     free = pick_free(plays)
     held = [b for b in plays if b is not free]
-    if not held:
-        print(f"No held plays for {date}: the free pick was the only allocation.")
-        return None
-
     _d = datetime.strptime(date, "%Y-%m-%d")
     nice = f"{_d:%A, %B} {_d.day}"
+
+    if not held:
+        # ✳ Best of Board (engine v0.11): the members channel never goes silent.
+        # When the gates leave no held plays, post the model's top remaining
+        # lean at 0 units, asterisked, with its failed gates in full — a look
+        # inside the tank, not a staked pick. If the engine marked nothing
+        # (e.g. every lean was a Rule 8 demotion), fall back to the old skip.
+        bob = next((b for b in B["board"] if b.get("best_of_board")), None)
+        if bob is None:
+            print(f"No held plays for {date} and no best-of-board lean: nothing to post.")
+            return None
+        a_sp, h_sp = bob["awaySP"], bob["homeSP"]
+        fields = [
+            {"name": "Lean", "value": f'**{bob["pick"]}**', "inline": True},
+            {"name": "Confidence", "value": f'{bob["confidence"]*100:.1f}% of {bob["n_sims"]:,} sims', "inline": True},
+            {"name": "Suggested", "value": "**0u — not staked** (did not clear the gates)", "inline": True},
+            {"name": "Projected", "value": f'{bob["proj_away"]:g}–{bob["proj_home"]:g}', "inline": True},
+            {"name": "Model fair", "value": f'{bob["fair_away"]:+d} / {bob["fair_home"]:+d}', "inline": True},
+        ]
+        if bob["mkt_odds"] is not None:
+            fields.append({"name": "Edge vs price",
+                           "value": f'{bob["edge"]*100:+.1f} pts · EV {bob["ev_per_unit"]*100:+.1f}%', "inline": True})
+        fields.append({"name": "Circuit breakers (why it isn't staked)",
+                       "value": "\n".join(f"• {c}" for c in bob["checks"])[:1024]})
+        embed = {
+            "title": f'✳ Best of Board (not staked): {bob["matchup"]}',
+            "description": (f'{et_time(bob["utc"])} · {bob["venue"]}\n'
+                            f'{a_sp["name"]} ({a_sp["era"]:.2f} ERA) vs {h_sp["name"]} ({h_sp["era"]:.2f} ERA)\n'
+                            f'*Nothing cleared the gates for allocation today. This is the model\'s best '
+                            f'remaining choice, published at 0 units so you can see it — and see exactly '
+                            f'why we passed. Passing is a position too.*'),
+            "color": GRAY,
+            "fields": fields,
+            "footer": {"text": FOOTER + " · unstaked leans never enter the ledger"},
+        }
+        lead = f"**Members board: {nice}** · no plays cleared the gates · ✳ best-of-board lean below, 0u"
+        if SITE:
+            lead += f"\nFull board with reasons: {SITE}/#board"
+        return {"username": "Open Ledger Sports", "content": lead, "embeds": [embed]}
     shown, dropped = held[:MAX_EMBEDS], held[MAX_EMBEDS:]
 
     embeds = []

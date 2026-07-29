@@ -199,6 +199,7 @@ def flags_html(b):
     if b["rule2_pivot"]: flags += '<span class="flag">R2 PIVOT</span>'
     if b["rule4_flag"]: flags += '<span class="flag">R4 FLAG</span>'
     if b.get("rule8_flag"): flags += '<span class="flag flag-scr">R8 DIVERGENCE</span>'
+    if b.get("best_of_board"): flags += '<span class="flag flag-free">✳ BEST OF BOARD</span>'
     if free is not None and b is free: flags += '<span class="flag flag-free">★ FREE PICK</span>'
     return flags
 
@@ -208,6 +209,8 @@ def card(b, published):
     checks = "".join(f"<li>{c}</li>" for c in b["checks"])
     if published:
         units_str = f'{b["units"]:g}u ({b["units"]:g}% bankroll)'
+    elif b.get("best_of_board"):
+        units_str = "0u — best of board✳, did not clear the gates"
     elif b.get("rule8_flag"):
         units_str = "0u, held by Rule 8"
     elif b.get("no_edge"):
@@ -406,7 +409,7 @@ else:
       <span class="kicker">Free Pick of the Day</span>
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>No qualifying plays today.</h1>
-      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.</p>
+      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.{' Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all.' if any(b.get("best_of_board") for b in leans) else ''}</p>
       <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See today's board →</button></div>
     </div>'''
 
@@ -683,7 +686,7 @@ html = f'''<!DOCTYPE html>
       <ul>
         <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed. Lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
         <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet; they're flagged for human review, never silently claimed.</li>
-        <li><strong>Not modeled:</strong> lineups, rest, umpires, weather. Park factors are static season approximations. Blending toward the market is our hedge here — the line already prices the lineup card we don't read.</li>
+        <li><strong>Not modeled on any published play:</strong> lineups, rest, umpires, weather. (Weather is being measured on an internal paper track that stakes nothing and touches no published pick — it earns its way in or it doesn't.) Park factors are static season approximations. Blending toward the market is our hedge here — the line already prices the lineup card we don't read.</li>
         <li><strong>We lean on the market by design.</strong> Because we blend toward the closing-market probability, our picks rarely stray far from it: when the market is wrong in a way our inputs can't see, we're wrong with it too. That's the trade — fewer spectacular calls, and fewer face-plants.</li>
       </ul>
       <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium; the whole tank is behind glass, down to the per-date random seed ({B["seed"]}) that makes every day's board reproducible.</div>

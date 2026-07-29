@@ -55,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.9-woba-detect"
+ENGINE_VERSION = "0.11-best-of-board"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -85,6 +85,31 @@ LOW_IP_THRESHOLD = 60.0  # Rule 4 heuristic: starter under 60 IP this deep in
 # by taste.
 WOBA_GAP = 0.035
 WOBA_TAX = 0.0
+
+# Weather → run environment (v0.10) — TOTALS PAPER TRACK ONLY. The staked
+# moneyline board never sees these: main() runs the weather-adjusted sim as a
+# SECOND simulation on a SEPARATE rng stream, used solely for total_pick, so
+# the real product is bit-identical with or without weather data. Coefficients
+# are conservative approximations of public run-scoring research; the totals
+# paper ledger (win%/CLV, entries stamped wx_applied) is the validation
+# instrument — measuring whether weather beats the opening total is the whole
+# point of the track.
+WX_BASE_TEMP = 70.0     # °F at which the temperature multiplier is 1.0
+WX_TEMP_COEF = 0.004    # +0.4% runs per °F above base; cold days go below 1.0
+WX_MULT_MIN, WX_MULT_MAX = 0.90, 1.18   # sanity clamp on each side's COMBINED multiplier.
+                                        # 1.18 leaves room for a realistic worst case
+                                        # (100°F base 1.12 x 1.05 kicker = 1.176) while
+                                        # still bounding a data glitch; 0.90 floors a
+                                        # 45°F cold snap.
+WX_HOT_TEMP = 85.0      # playbook Thermal/Venue trigger temperature
+WX_HOT_KICKER = 0.05    # extra runs OFF a fly-ball starter on a hot day. Adaptation
+                        # of the playbook's "35% HR/FB inflation tax": this engine has
+                        # no HR/FB component, so the intent (heat hurts fly-ball
+                        # pitchers most) maps to a modest bump on the runs scored
+                        # against that starter — not a literal 35% of anything.
+FLYBALL_AO_MIN = 0.55   # fly-ball starter proxy: airOuts/(airOuts+groundOuts) above
+                        # this. Stands in for the playbook's FB%>42% — true batted-ball
+                        # FB% isn't in the MLB API's standard stats; the outs mix is.
 
 # Rule 2 thresholds — v0.8 (2026-07-29, docs/SYSTEM_PLAYBOOK.md adoption): a flat
 # cap on ANY favorite, tighter for day games. Applied to MARKET lines (real
@@ -173,6 +198,39 @@ def first_pitch_passed(utc_str, now_utc):
         return True
     return start <= now_utc
 
+def flyball_proxy(sp):
+    """airOuts share of a starter's outs-on-contact mix; None under 50 recorded
+    outs (too thin) or when the snapshot predates v0.10 (no ao/go fields)."""
+    ao, go = sp.get("ao") or 0, sp.get("go") or 0
+    if ao + go < 50:
+        return None
+    return ao / (ao + go)
+
+def weather_multipliers(wx, a_sp, h_sp):
+    """(m_away, m_home, note) for the totals-track sim. (1, 1, None) for roofed
+    parks or missing data. Temperature moves both sides symmetrically; the
+    hot-day kicker adds runs only against a fly-ball starter."""
+    if not wx or wx.get("roof") or wx.get("temp_f") is None:
+        return 1.0, 1.0, None
+    t = float(wx["temp_f"])
+    base = 1.0 + WX_TEMP_COEF * (t - WX_BASE_TEMP)
+    m_away = m_home = base
+    kicks = []
+    if t >= WX_HOT_TEMP:
+        fb_h, fb_a = flyball_proxy(h_sp), flyball_proxy(a_sp)
+        if fb_h is not None and fb_h > FLYBALL_AO_MIN:   # heat hurts the HOME starter -> away runs up
+            m_away *= 1.0 + WX_HOT_KICKER
+            kicks.append(f'home SP fly-ball ({fb_h:.0%} air outs)')
+        if fb_a is not None and fb_a > FLYBALL_AO_MIN:
+            m_home *= 1.0 + WX_HOT_KICKER
+            kicks.append(f'away SP fly-ball ({fb_a:.0%} air outs)')
+    m_away = min(max(m_away, WX_MULT_MIN), WX_MULT_MAX)
+    m_home = min(max(m_home, WX_MULT_MIN), WX_MULT_MAX)
+    note = f'{t:.0f}°F at first pitch: run environment x{base:.3f}'
+    if kicks:
+        note += f' + {WX_HOT_KICKER:.0%} hot-day kicker vs {", ".join(kicks)}'
+    return m_away, m_home, note
+
 def woba_suppression(away, league_woba):
     """Rule 6 trigger: (fired, gap) from the away team's trailing-14d wOBA vs the
     league's over the same window. (None, None) when either side is missing (old
@@ -222,7 +280,7 @@ def stabilized_starter_rate(sp, league_era, fip_constant):
         skill = era
     return (ip * skill + PRIOR_IP * league_era) / (ip + PRIOR_IP)
 
-def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng, n_sims=N_SIMS, league_woba=None):
+def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_constant, rng, n_sims=N_SIMS, league_woba=None, wx_mult=(1.0, 1.0)):
     """Pure Monte Carlo core: expected runs -> N sims -> score/win distributions.
 
     No market or circuit-breaker logic — just the model, plus the one breaker that
@@ -250,6 +308,11 @@ def simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era, fip_con
     woba_fired, woba_gap = woba_suppression(away, league_woba)
     if woba_fired and WOBA_TAX > 0:
         lam_away *= 1.0 - WOBA_TAX
+
+    # v0.10 weather multiplier — (1,1) except on the totals-track second sim,
+    # so the staked board's lams (and draws) are untouched by weather.
+    lam_away *= wx_mult[0]
+    lam_home *= wx_mult[1]
 
     a_runs = nb_draws(rng, lam_away, n_sims)
     h_runs = nb_draws(rng, lam_home, n_sims)
@@ -299,6 +362,11 @@ def main():
     league_woba = data.get("league_woba_14d")
 
     rng = np.random.default_rng(SEED)
+    # Separate stream for the weather-adjusted totals sims (v0.10): the second
+    # simulation must not advance the main stream, or the mere PRESENCE of
+    # weather data would shift every later game's draws and change the staked
+    # board. Two independent seeded streams keep both reproducible.
+    rng_wx = np.random.default_rng(SEED + 1)
     board, scratches = [], []
 
     now_utc = datetime.now(timezone.utc)
@@ -479,9 +547,21 @@ def main():
         # into beating the closing total before any real allocation. Side = the one the model
         # rates above the de-vigged market; needs the over/under prices, else stays None.
         total_pick = None
+        wx = g.get("wx")
         if mkt and mkt.get("total") is not None and mkt.get("over_price") is not None and mkt.get("under_price") is not None:
             line_t = mkt["total"]
-            m_over = float((totals > line_t).mean())
+            # v0.10: weather adjusts ONLY this paper pick, via a second sim on its
+            # own rng stream. No usable weather -> the vanilla totals, as v0.7.
+            wxa, wxh, wx_note = weather_multipliers(wx, a_sp, h_sp)
+            wx_applied = (wxa, wxh) != (1.0, 1.0)
+            if wx_applied:
+                sim_wx = simulate_game(away, home, a_sp, h_sp, park, league_rate, league_era,
+                                       fip_constant, rng_wx, league_woba=league_woba, wx_mult=(wxa, wxh))
+                totals_wx = sim_wx["a_runs"] + sim_wx["h_runs"]
+            else:
+                totals_wx = totals
+            m_over = float((totals_wx > line_t).mean())
+            m_over_nowx = float((totals > line_t).mean())
             io, iu = american_to_implied(mkt["over_price"]), american_to_implied(mkt["under_price"])
             mkt_over_devig = io / (io + iu)
             pick_over = m_over >= mkt_over_devig
@@ -496,13 +576,23 @@ def main():
                 "model_p": round(side_model_p, 4), "mkt_devig": round(side_mkt_devig, 4),
                 "edge": round(side_model_p - american_to_implied(side_price), 4),
                 "ev_per_unit": round(side_model_p * t_b - (1 - side_model_p), 4),
+                # weather audit trail: what was applied, and what the pick's prob
+                # would have been WITHOUT weather (same side), for the ledger split.
+                "wx_applied": wx_applied,
+                "wx_mult": [round(wxa, 4), round(wxh, 4)] if wx_applied else None,
+                "model_p_nowx": round(m_over_nowx if pick_over else 1 - m_over_nowx, 4),
             }
+            if wx_applied:
+                checks.append(f'Weather (totals paper track ONLY): {wx_note}. Applied to the paper totals pick; '
+                              'the staked board ignores weather entirely.')
+            elif wx and wx.get("roof"):
+                checks.append('Weather: roofed park, no adjustment (totals paper track).')
 
         board.append({
             "gamePk": g["gamePk"],
             "matchup": f'{away["name"]} @ {home["name"]}',
             "abbr": f'{away["abbr"]} @ {home["abbr"]}',
-            "utc": g["utc"], "venue": g["venue"], "park_factor": park,
+            "utc": g["utc"], "venue": g["venue"], "park_factor": park, "wx": wx,
             "away_rec": f'{away["w"]}-{away["l"]}', "home_rec": f'{home["w"]}-{home["l"]}',
             "away_rpg": round(away["rs"]/(away["w"]+away["l"]), 2), "home_rpg": round(home["rs"]/(home["w"]+home["l"]), 2),
             "away_rapg": round(away["ra"]/(away["w"]+away["l"]), 2), "home_rapg": round(home["ra"]/(home["w"]+home["l"]), 2),
@@ -547,6 +637,27 @@ def main():
             b["published"] = False
             b["checks"].append("Daily exposure cap: 10% bankroll ceiling reached; logged as model lean only, no allocation.")
 
+    # ---- ✳ Best of Board (v0.11): when the gates leave the members channel empty ----
+    # House Rule 6 still holds: nothing is staked and the "no qualifying plays"
+    # message still runs. But on days with zero published plays — or exactly one,
+    # which becomes the free pick and leaves members with nothing — the top
+    # remaining lean is marked Best of Board: the model's best choice that did
+    # NOT clear the markers, surfaced at 0 units with its failed gates on the
+    # card. Rule 8 demotions are never eligible ("the market knows something" is
+    # not a best-choice candidate). Never graded into the ledger (unstaked); the
+    # revealed board carries its outcome. Ranked by edge (best price-adjusted
+    # choice), confidence as the no-market tiebreak.
+    for b in board:
+        b["best_of_board"] = False
+    if len(published) <= 1:
+        eligible = [b for b in board if not b.get("published") and not b["rule8_flag"]]
+        if eligible:
+            bob = max(eligible, key=lambda b: (b["edge"] if b["edge"] is not None else -9.0, b["confidence"]))
+            bob["best_of_board"] = True
+            bob["checks"].append("✳ Best of Board: the gates left no held plays today, so this is the model's "
+                                 "top remaining lean — 0 units, NOT staked, published for transparency. "
+                                 "The checks above show exactly which gate it failed.")
+
     out = {
         "date": DATE,
         "engine_version": ENGINE_VERSION, "model_weight": MODEL_WEIGHT,
@@ -579,7 +690,7 @@ def main():
         mkt_s = f'{b["mkt_odds"]:+d}' if b["mkt_odds"] is not None else "n/a"
         edge_s = f'{b["edge"]*100:+.1f}' if b["edge"] is not None else "n/a"
         print(f'{tag}{b["abbr"]:<12} {b["pick"]:<34} conf {b["confidence"]:.1%}  mkt {mkt_s:>5}  edge {edge_s:>5}  {b["units"]}u'
-              f'{"  [R2]" if b["rule2_pivot"] else ""}{"  [R4]" if b["rule4_flag"] else ""}{"  [R8 DIVERGENCE]" if b["rule8_flag"] else ""}{"  [no edge]" if b["no_edge"] else ""}')
+              f'{"  [R2]" if b["rule2_pivot"] else ""}{"  [R4]" if b["rule4_flag"] else ""}{"  [R8 DIVERGENCE]" if b["rule8_flag"] else ""}{"  [no edge]" if b["no_edge"] else ""}{"  [✳ BEST OF BOARD]" if b.get("best_of_board") else ""}')
     for s in scratches:
         print(f'SCRATCH {s["abbr"]:<12} {s["rule"]}')
 

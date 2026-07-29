@@ -683,7 +683,7 @@ html = f'''<!DOCTYPE html>
       <ul>
         <li><strong>Market lines are a snapshot</strong>, not a live tick-by-tick feed. Lines move, and the price at your book may differ. Confirm the number before you bet it.</li>
         <li><strong>Telemetry rules are manual.</strong> Statcast velocity/spin trends and rolling road wOBA (Rules 3, 5, 6) aren't automated yet; they're flagged for human review, never silently claimed.</li>
-        <li><strong>Not modeled:</strong> lineups, rest, umpires, weather. Park factors are static season approximations. Blending toward the market is our hedge here — the line already prices the lineup card we don't read.</li>
+        <li><strong>Not modeled on any published play:</strong> lineups, rest, umpires, weather. (Weather is being measured on an internal paper track that stakes nothing and touches no published pick — it earns its way in or it doesn't.) Park factors are static season approximations. Blending toward the market is our hedge here — the line already prices the lineup card we don't read.</li>
         <li><strong>We lean on the market by design.</strong> Because we blend toward the closing-market probability, our picks rarely stray far from it: when the market is wrong in a way our inputs can't see, we're wrong with it too. That's the trade — fewer spectacular calls, and fewer face-plants.</li>
       </ul>
       <div class="callout">Why publish our limitations next to our picks? Because a pick site that hides its wiring is asking you to bet on a magic trick. Ours is an aquarium; the whole tank is behind glass, down to the per-date random seed ({B["seed"]}) that makes every day's board reproducible.</div>

@@ -33,6 +33,29 @@ PARK_FACTORS = {
     "George M. Steinbrenner Field": 1.06, "Sutter Health Park": 1.02,
 }
 
+# Approximate park coordinates + roof flag for the game-time weather fetch
+# (v0.10, totals paper track only). Roofed/retractable parks get no weather:
+# climate-controlled when closed, and whether it WILL be closed isn't knowable
+# pre-game. Keys match PARK_FACTORS.
+PARK_COORDS = {
+    "Coors Field": (39.756, -104.994, False), "Fenway Park": (42.346, -71.097, False),
+    "Chase Field": (33.445, -112.067, True), "Kauffman Stadium": (39.051, -94.480, False),
+    "Yankee Stadium": (40.829, -73.926, False), "Wrigley Field": (41.948, -87.655, False),
+    "Great American Ball Park": (39.097, -84.507, False), "Citizens Bank Park": (39.906, -75.166, False),
+    "Angel Stadium": (33.800, -117.883, False), "Truist Park": (33.891, -84.468, False),
+    "Rogers Centre": (43.641, -79.389, True), "Dodger Stadium": (34.074, -118.240, False),
+    "American Family Field": (43.028, -87.971, True), "Globe Life Field": (32.747, -97.084, True),
+    "Progressive Field": (41.496, -81.685, False), "Daikin Park": (29.757, -95.356, True),
+    "Busch Stadium": (38.623, -90.193, False), "Nationals Park": (38.873, -77.007, False),
+    "PNC Park": (40.447, -80.006, False), "Oracle Park": (37.778, -122.389, False),
+    "Petco Park": (32.707, -117.157, False), "T-Mobile Park": (47.591, -122.332, True),
+    "Citi Field": (40.757, -73.846, False), "loanDepot park": (25.778, -80.220, True),
+    "Camden Yards": (39.284, -76.622, False), "Target Field": (44.982, -93.278, False),
+    "Comerica Park": (42.339, -83.049, False), "Guaranteed Rate Field": (41.830, -87.634, False),
+    "Rate Field": (41.830, -87.634, False), "George M. Steinbrenner Field": (27.980, -82.507, False),
+    "Sutter Health Park": (38.580, -121.513, False),
+}
+
 def get(url, **params):
     r = requests.get(url, params=params, timeout=30)
     r.raise_for_status()
@@ -203,6 +226,10 @@ def main():
                     "bb": int(s.get("baseOnBalls", 0)),
                     "hbp": int(s.get("hitByPitch", 0)),
                     "k": int(s.get("strikeOuts", 0)),
+                    # outs mix (v0.10): fly-ball-starter proxy for the weather
+                    # kicker on the totals paper track. Absent -> no kicker.
+                    "ao": int(s.get("airOuts", 0)),
+                    "go": int(s.get("groundOuts", 0)),
                 }
             except (KeyError, ValueError):
                 continue  # no usable season line -> treated as TBD by the engine
@@ -220,6 +247,44 @@ def main():
             "awaySP": a_sp if str(a_sp) in pitchers else None,
             "homeSP": h_sp if str(h_sp) in pitchers else None,
         })
+
+    # ---- Weather (v0.10): game-time forecast per outdoor park (Open-Meteo, no key) ----
+    # Feeds ONLY the totals paper track: the staked moneyline board ignores weather
+    # entirely (engine runs the weather sim separately). The hourly grid is requested
+    # in UTC and matched against the game's UTC start hour — no timezone math.
+    # Best-effort per venue; any failure leaves wx None and the totals go un-adjusted.
+    wx_cache = {}
+    for g in games:
+        park = PARK_COORDS.get(g["venue"])
+        if park is None:
+            g["wx"] = None
+            continue
+        lat, lon, roof = park
+        if roof:
+            g["wx"] = {"roof": True}
+            continue
+        try:
+            if g["venue"] not in wx_cache:
+                end_d = (datetime.fromisoformat(DATE) + timedelta(days=1)).strftime("%Y-%m-%d")
+                wx_cache[g["venue"]] = get("https://api.open-meteo.com/v1/forecast",
+                    latitude=lat, longitude=lon,
+                    hourly="temperature_2m,windspeed_10m,winddirection_10m,relative_humidity_2m",
+                    temperature_unit="fahrenheit", windspeed_unit="mph",
+                    start_date=DATE, end_date=end_d, timezone="UTC")
+            h = wx_cache[g["venue"]].get("hourly", {})
+            want = g["utc"][:13]  # "YYYY-MM-DDTHH" — floor of first pitch, close enough for temp
+            idx = next((i for i, t in enumerate(h.get("time", [])) if t.startswith(want)), None)
+            if idx is None or h["temperature_2m"][idx] is None:
+                g["wx"] = None
+            else:
+                g["wx"] = {"roof": False,
+                           "temp_f": h["temperature_2m"][idx],
+                           "wind_mph": h["windspeed_10m"][idx],
+                           "wind_dir_deg": h["winddirection_10m"][idx],
+                           "humidity_pct": h["relative_humidity_2m"][idx]}
+        except Exception as e:  # weather is optional — never sink the board over it
+            print(f"WARNING: weather fetch failed for {g['venue']} ({e}); totals un-adjusted there.")
+            g["wx"] = None
 
     # ---- Odds (optional): The Odds API, consensus = median across books ----
     odds, odds_source = {}, None

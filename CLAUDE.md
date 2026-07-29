@@ -181,7 +181,7 @@ with more care than the API keys, which are all replaceable.
   Pick side, confidence, fair line, edge, EV and sizing all run on the blended
   prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
   calibration. No market line → pure model (no blend). Board stamps
-  engine_version="0.9-woba-detect".
+  engine_version="0.10-wx-totals".
 - v0.9 RULE 6 DETECTION: fetch_data.py pulls each team's trailing-14-day wOBA
   (one byDateRange hitting call; wOBA computed from components with static
   weights — error cancels in the team-vs-league gap) plus the league's over the
@@ -215,11 +215,23 @@ MEASURING it without risking the record:
   from the real ledger): W/L/PUSH at a flat 1u, plus totals CLV = closing line movement
   toward our side (runs), price de-vig as the tiebreak when the line is unchanged. Own
   aggregates (record, win%, paper ROI, avg_clv_runs, beat_close%).
+- WEATHER SHIPPED (v0.10, 2026-07-29): fetch_data.py pulls the game-hour forecast per
+  OUTDOOR park from Open-Meteo (free, no key; static PARK_COORDS with roof flags —
+  roofed/retractable parks get none; UTC hourly grid matched to the game's UTC start,
+  no tz math). engine.py runs a SECOND sim on a SEPARATE rng stream (SEED+1) with
+  temperature (±WX_TEMP_COEF per °F around 70) plus a hot-day (≥85°F) kicker vs
+  fly-ball starters (air-out-share proxy, ao/go now in pitcher stats) — used ONLY for
+  total_pick. The staked board is bit-identical with or without weather data (the
+  separate stream is what guarantees later games' draws don't shift). total_pick logs
+  wx_applied/wx_mult/model_p_nowx and grade.py stamps wx_applied into the totals
+  ledger, so the track's win%/CLV can be split weather vs not — that split IS the
+  validation. Wind speed/direction are fetched but NOT modeled (park orientation
+  azimuths would be needed to sign the wind effect; don't guess them).
 - Honest ceiling: calibrated-to-reality ≠ beats-the-market. The closing total is sharp
-  too. The real edge would come from adding info the opening line lags — WEATHER first
-  (free NWS/Open-Meteo by park), then bullpen availability, then umpires. This track is
+  too. The real edge comes from adding info the opening line lags — weather (now
+  measuring), then bullpen availability, then umpires. This track is
   the gate: only promote totals to real staked plays (real board + ledger + site) once
-  its CLV is convincingly positive. Nothing on the public site changes until then.
+  its CLV is convincingly positive. Nothing staked on the public site changes until then.
 
 ## Circuit breakers (the product's identity — never weaken silently)
 
@@ -250,9 +262,9 @@ Rule 4 forbids claiming otherwise. The doc's appendix carries the authoritative
 per-rule status; summary: Rule 2 day/night caps LIVE (v0.8), Rule 7 was already
 live, Road wOBA Suppression detection LIVE (v0.9) with the 12% tax OFF and
 BACKTEST-GATED (sweep woba_tax on a full season before setting it), Thermal/Venue
-goes through the totals paper track (weather is that track's designated first
-upgrade — do NOT bolt a literal 35% HR/FB tax onto a model with no HR/FB
-component), Pérez/Cole rules are blocked on a props product that doesn't exist,
+LIVE on the totals paper track (v0.10: temperature multiplier + hot-day fly-ball
+kicker on the paper pick only — the literal 35% HR/FB tax cannot map onto a model
+with no HR/FB component), Pérez/Cole rules are blocked on a props product that doesn't exist,
 Pederson/Two-Out-WHIP rules are dormant until NRFI ships, and the parlay
 templates/commands have no product surface. When touching the engine, check
 changes against BOTH this playbook and the circuit-breaker section above; if

@@ -55,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.10-wx-totals"
+ENGINE_VERSION = "0.11-best-of-board"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -637,6 +637,27 @@ def main():
             b["published"] = False
             b["checks"].append("Daily exposure cap: 10% bankroll ceiling reached; logged as model lean only, no allocation.")
 
+    # ---- ✳ Best of Board (v0.11): when the gates leave the members channel empty ----
+    # House Rule 6 still holds: nothing is staked and the "no qualifying plays"
+    # message still runs. But on days with zero published plays — or exactly one,
+    # which becomes the free pick and leaves members with nothing — the top
+    # remaining lean is marked Best of Board: the model's best choice that did
+    # NOT clear the markers, surfaced at 0 units with its failed gates on the
+    # card. Rule 8 demotions are never eligible ("the market knows something" is
+    # not a best-choice candidate). Never graded into the ledger (unstaked); the
+    # revealed board carries its outcome. Ranked by edge (best price-adjusted
+    # choice), confidence as the no-market tiebreak.
+    for b in board:
+        b["best_of_board"] = False
+    if len(published) <= 1:
+        eligible = [b for b in board if not b.get("published") and not b["rule8_flag"]]
+        if eligible:
+            bob = max(eligible, key=lambda b: (b["edge"] if b["edge"] is not None else -9.0, b["confidence"]))
+            bob["best_of_board"] = True
+            bob["checks"].append("✳ Best of Board: the gates left no held plays today, so this is the model's "
+                                 "top remaining lean — 0 units, NOT staked, published for transparency. "
+                                 "The checks above show exactly which gate it failed.")
+
     out = {
         "date": DATE,
         "engine_version": ENGINE_VERSION, "model_weight": MODEL_WEIGHT,
@@ -669,7 +690,7 @@ def main():
         mkt_s = f'{b["mkt_odds"]:+d}' if b["mkt_odds"] is not None else "n/a"
         edge_s = f'{b["edge"]*100:+.1f}' if b["edge"] is not None else "n/a"
         print(f'{tag}{b["abbr"]:<12} {b["pick"]:<34} conf {b["confidence"]:.1%}  mkt {mkt_s:>5}  edge {edge_s:>5}  {b["units"]}u'
-              f'{"  [R2]" if b["rule2_pivot"] else ""}{"  [R4]" if b["rule4_flag"] else ""}{"  [R8 DIVERGENCE]" if b["rule8_flag"] else ""}{"  [no edge]" if b["no_edge"] else ""}')
+              f'{"  [R2]" if b["rule2_pivot"] else ""}{"  [R4]" if b["rule4_flag"] else ""}{"  [R8 DIVERGENCE]" if b["rule8_flag"] else ""}{"  [no edge]" if b["no_edge"] else ""}{"  [✳ BEST OF BOARD]" if b.get("best_of_board") else ""}')
     for s in scratches:
         print(f'SCRATCH {s["abbr"]:<12} {s["rule"]}')
 

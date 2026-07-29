@@ -181,7 +181,7 @@ with more care than the API keys, which are all replaceable.
   Pick side, confidence, fair line, edge, EV and sizing all run on the blended
   prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
   calibration. No market line → pure model (no blend). Board stamps
-  engine_version="0.10-wx-totals".
+  engine_version="0.11-best-of-board".
 - v0.9 RULE 6 DETECTION: fetch_data.py pulls each team's trailing-14-day wOBA
   (one byDateRange hitting call; wOBA computed from components with static
   weights — error cancels in the team-vs-league gap) plus the league's over the
@@ -282,7 +282,14 @@ they conflict, the tighter rule wins and the conflict gets flagged to Daniel.
 5. Legal footer everywhere: analytics not a sportsbook, no bets accepted,
    21+, 1-800-GAMBLER, no-guarantee language. Do not remove or soften.
 6. If no plays clear the gates: publish "no qualifying plays — passing is a
-   position too." Never manufacture a pick.
+   position too." Never manufacture a pick. (Amended 2026-07-29, per Daniel:
+   whenever the gates leave the members channel empty — 0 published plays, or
+   exactly 1 which becomes the free pick — the engine marks a ✳ Best of Board
+   lean: the top non-Rule-8 lean by edge, at 0 units, failed gates printed on
+   the card. It is explicitly NOT staked, never enters the ledger, and the
+   no-play message still runs alongside it. Site shows the ✳ flag; the members
+   Discord post carries it so members always see at least one play. Rule 8
+   demotions are never eligible.)
 7. Held plays are held, not hidden. Every one is fingerprinted before first
    pitch and published in full after grading, win or lose. Withholding a pick
    before the game is the product; withholding it after is fraud.

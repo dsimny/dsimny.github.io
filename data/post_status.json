@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-07-24",
-   "mode": "recap",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529791669094842578",
-   "detail": "",
-   "at_utc": "2026-07-25T08:10:19Z"
-  },
-  {
-   "date": "2026-07-24",
-   "mode": "x",
-   "result": "failed",
-   "http_status": 402,
-   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
-   "at_utc": "2026-07-25T08:10:20Z"
-  },
-  {
-   "date": "2026-07-24",
-   "mode": "facebook",
-   "result": "no_config",
-   "http_status": null,
-   "detail": "missing FB_PAGE_ID, FB_PAGE_ACCESS_TOKEN",
-   "at_utc": "2026-07-25T08:10:20Z"
-  },
-  {
    "date": "2026-07-25",
    "mode": "pick",
    "result": "posted",
@@ -254,6 +229,31 @@
    "http_status": 200,
    "detail": "96817b6c-62d4-4e24-bbfe-91dad82f3332",
    "at_utc": "2026-07-29T15:10:23Z"
+  },
+  {
+   "date": "2026-07-29",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-07-30T08:10:26Z"
+  },
+  {
+   "date": "2026-07-29",
+   "mode": "x",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-07-30T08:10:26Z"
+  },
+  {
+   "date": "2026-07-29",
+   "mode": "facebook",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-07-30T08:10:26Z"
   }
  ]
 }

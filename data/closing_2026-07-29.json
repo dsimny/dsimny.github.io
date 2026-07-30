@@ -140,9 +140,9 @@
   "away_ml": 130,
   "home_ml": -154,
   "total": 8.5,
-  "over_price": -118,
-  "under_price": -102,
-  "captured_utc": "2026-07-29T22:30:30Z",
-  "mins_to_first_pitch": 219
+  "over_price": -115,
+  "under_price": -106,
+  "captured_utc": "2026-07-30T01:30:23Z",
+  "mins_to_first_pitch": 40
  }
 }

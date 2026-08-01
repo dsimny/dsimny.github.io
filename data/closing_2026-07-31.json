@@ -118,20 +118,20 @@
  },
  "823922": {
   "away_ml": 138,
-  "home_ml": -157,
+  "home_ml": -160,
   "total": 8.0,
   "over_price": -110,
-  "under_price": -109,
-  "captured_utc": "2026-07-31T22:30:30Z",
-  "mins_to_first_pitch": 219
+  "under_price": -110,
+  "captured_utc": "2026-08-01T01:30:23Z",
+  "mins_to_first_pitch": 40
  },
  "823111": {
-  "away_ml": 143,
-  "home_ml": -162,
+  "away_ml": 145,
+  "home_ml": -170,
   "total": 8.0,
-  "over_price": 100,
-  "under_price": -120,
-  "captured_utc": "2026-07-31T22:30:30Z",
-  "mins_to_first_pitch": 219
+  "over_price": -102,
+  "under_price": -118,
+  "captured_utc": "2026-08-01T01:30:23Z",
+  "mins_to_first_pitch": 40
  }
 }

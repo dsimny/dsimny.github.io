@@ -1,0 +1,1049 @@
+{
+ "games": [
+  {
+   "away": 143,
+   "awaySP": 554430,
+   "gamePk": 824807,
+   "home": 110,
+   "homeSP": 680694,
+   "utc": "2026-08-02T17:35:00Z",
+   "venue": "Oriole Park at Camden Yards",
+   "wx": null
+  },
+  {
+   "away": 120,
+   "awaySP": 676917,
+   "gamePk": 824891,
+   "home": 144,
+   "homeSP": 702275,
+   "utc": "2026-08-02T17:35:00Z",
+   "venue": "Truist Park",
+   "wx": {
+    "humidity_pct": 75,
+    "roof": false,
+    "temp_f": 83.6,
+    "wind_dir_deg": 215,
+    "wind_mph": 10.6
+   }
+  },
+  {
+   "away": 138,
+   "awaySP": 669461,
+   "gamePk": 822783,
+   "home": 141,
+   "homeSP": 453286,
+   "utc": "2026-08-02T17:37:00Z",
+   "venue": "Rogers Centre",
+   "wx": {
+    "roof": true
+   }
+  },
+  {
+   "away": 109,
+   "awaySP": 518876,
+   "gamePk": 824404,
+   "home": 114,
+   "homeSP": 668909,
+   "utc": "2026-08-02T17:40:00Z",
+   "venue": "Progressive Field",
+   "wx": {
+    "humidity_pct": 74,
+    "roof": false,
+    "temp_f": 79.4,
+    "wind_dir_deg": 204,
+    "wind_mph": 9.8
+   }
+  },
+  {
+   "away": 134,
+   "awaySP": 656605,
+   "gamePk": 824483,
+   "home": 113,
+   "homeSP": 695505,
+   "utc": "2026-08-02T17:40:00Z",
+   "venue": "Great American Ball Park",
+   "wx": {
+    "humidity_pct": 95,
+    "roof": false,
+    "temp_f": 70.4,
+    "wind_dir_deg": 237,
+    "wind_mph": 9.1
+   }
+  },
+  {
+   "away": 145,
+   "awaySP": 641743,
+   "gamePk": 822943,
+   "home": 139,
+   "homeSP": 643377,
+   "utc": "2026-08-02T17:40:00Z",
+   "venue": "Tropicana Field",
+   "wx": null
+  },
+  {
+   "away": 146,
+   "awaySP": 645261,
+   "gamePk": 823592,
+   "home": 121,
+   "homeSP": null,
+   "utc": "2026-08-02T17:40:00Z",
+   "venue": "Citi Field",
+   "wx": {
+    "humidity_pct": 69,
+    "roof": false,
+    "temp_f": 83.8,
+    "wind_dir_deg": 157,
+    "wind_mph": 15.5
+   }
+  },
+  {
+   "away": 140,
+   "awaySP": 677958,
+   "gamePk": 824163,
+   "home": 117,
+   "homeSP": 663567,
+   "utc": "2026-08-02T18:10:00Z",
+   "venue": "Daikin Park",
+   "wx": {
+    "roof": true
+   }
+  },
+  {
+   "away": 147,
+   "awaySP": 543037,
+   "gamePk": 824648,
+   "home": 112,
+   "homeSP": 607067,
+   "utc": "2026-08-02T18:20:00Z",
+   "venue": "Wrigley Field",
+   "wx": {
+    "humidity_pct": 91,
+    "roof": false,
+    "temp_f": 71.8,
+    "wind_dir_deg": 352,
+    "wind_mph": 15.2
+   }
+  },
+  {
+   "away": 118,
+   "awaySP": 607625,
+   "gamePk": 824323,
+   "home": 115,
+   "homeSP": 607536,
+   "utc": "2026-08-02T19:10:00Z",
+   "venue": "Coors Field",
+   "wx": {
+    "humidity_pct": 7,
+    "roof": false,
+    "temp_f": 100.9,
+    "wind_dir_deg": 67,
+    "wind_mph": 8.0
+   }
+  },
+  {
+   "away": 158,
+   "awaySP": 694819,
+   "gamePk": 823996,
+   "home": 108,
+   "homeSP": 700712,
+   "utc": "2026-08-02T19:15:00Z",
+   "venue": "Angel Stadium",
+   "wx": {
+    "humidity_pct": 55,
+    "roof": false,
+    "temp_f": 85.9,
+    "wind_dir_deg": 242,
+    "wind_mph": 7.1
+   }
+  },
+  {
+   "away": 116,
+   "awaySP": 672456,
+   "gamePk": 824971,
+   "home": 133,
+   "homeSP": 695611,
+   "utc": "2026-08-02T20:05:00Z",
+   "venue": "Sutter Health Park",
+   "wx": {
+    "humidity_pct": 19,
+    "roof": false,
+    "temp_f": 98.5,
+    "wind_dir_deg": 298,
+    "wind_mph": 4.3
+   }
+  },
+  {
+   "away": 137,
+   "awaySP": 694738,
+   "gamePk": 823270,
+   "home": 135,
+   "homeSP": 650633,
+   "utc": "2026-08-02T20:10:00Z",
+   "venue": "Petco Park",
+   "wx": {
+    "humidity_pct": 70,
+    "roof": false,
+    "temp_f": 80.7,
+    "wind_dir_deg": 244,
+    "wind_mph": 7.7
+   }
+  },
+  {
+   "away": 142,
+   "awaySP": 671737,
+   "gamePk": 823107,
+   "home": 136,
+   "homeSP": 669923,
+   "utc": "2026-08-02T20:10:00Z",
+   "venue": "T-Mobile Park",
+   "wx": {
+    "roof": true
+   }
+  },
+  {
+   "away": 111,
+   "awaySP": 687562,
+   "gamePk": 823919,
+   "home": 119,
+   "homeSP": 686218,
+   "utc": "2026-08-02T23:20:00Z",
+   "venue": "UNIQLO Field at Dodger Stadium",
+   "wx": null
+  }
+ ],
+ "league_pitching": {
+  "bb": 11224,
+  "er": 13735,
+  "hbp": 1446,
+  "hr": 3856,
+  "ip": 29561.333,
+  "k": 27943
+ },
+ "league_woba_14d": 0.3149,
+ "odds": {
+  "822783": {
+   "away_ml": 115,
+   "home_ml": -130,
+   "over_price": 100,
+   "total": 9.0,
+   "under_price": -120
+  },
+  "822943": {
+   "away_ml": 129,
+   "home_ml": -148,
+   "over_price": -105,
+   "total": 7.5,
+   "under_price": -115
+  },
+  "823107": {
+   "away_ml": 122,
+   "home_ml": -139,
+   "over_price": -123,
+   "total": 7.0,
+   "under_price": 102
+  },
+  "823270": {
+   "away_ml": 129,
+   "home_ml": -149,
+   "over_price": -112,
+   "total": 8.0,
+   "under_price": -108
+  },
+  "823592": {
+   "away_ml": -121,
+   "home_ml": 105,
+   "over_price": -118,
+   "total": 8.5,
+   "under_price": 100
+  },
+  "823919": {
+   "away_ml": 158,
+   "home_ml": -181,
+   "over_price": -105,
+   "total": 8.5,
+   "under_price": -115
+  },
+  "823996": {
+   "away_ml": -225,
+   "home_ml": 195,
+   "over_price": -114,
+   "total": 7.5,
+   "under_price": -105
+  },
+  "824163": {
+   "away_ml": 118,
+   "home_ml": -134,
+   "over_price": -115,
+   "total": 8.5,
+   "under_price": -105
+  },
+  "824323": {
+   "away_ml": 113,
+   "home_ml": -129,
+   "over_price": -110,
+   "total": 11.5,
+   "under_price": -110
+  },
+  "824404": {
+   "away_ml": 149,
+   "home_ml": -173,
+   "over_price": -105,
+   "total": 8.0,
+   "under_price": -115
+  },
+  "824483": {
+   "away_ml": 120,
+   "home_ml": -137,
+   "over_price": -120,
+   "total": 8.5,
+   "under_price": 100
+  },
+  "824648": {
+   "away_ml": -125,
+   "home_ml": 108,
+   "over_price": -115,
+   "total": 6.5,
+   "under_price": -105
+  },
+  "824807": {
+   "away_ml": -134,
+   "home_ml": 118,
+   "over_price": -105,
+   "total": 8.0,
+   "under_price": -112
+  },
+  "824891": {
+   "away_ml": 101,
+   "home_ml": -118,
+   "over_price": -116,
+   "total": 8.5,
+   "under_price": -102
+  },
+  "824971": {
+   "away_ml": -113,
+   "home_ml": -101,
+   "over_price": -105,
+   "total": 11.0,
+   "under_price": -115
+  }
+ },
+ "odds_source": "The Odds API, median across US books, fetched 2026-08-02T15:10:26.967042Z",
+ "park_factors": {
+  "American Family Field": 0.99,
+  "Angel Stadium": 1.0,
+  "Busch Stadium": 0.97,
+  "Camden Yards": 1.0,
+  "Chase Field": 1.05,
+  "Citi Field": 0.96,
+  "Citizens Bank Park": 1.01,
+  "Comerica Park": 0.97,
+  "Coors Field": 1.24,
+  "Daikin Park": 0.97,
+  "Dodger Stadium": 0.98,
+  "Fenway Park": 1.06,
+  "George M. Steinbrenner Field": 1.06,
+  "Globe Life Field": 0.98,
+  "Great American Ball Park": 1.04,
+  "Guaranteed Rate Field": 1.03,
+  "Kauffman Stadium": 1.03,
+  "Nationals Park": 0.99,
+  "Oracle Park": 0.94,
+  "PNC Park": 0.97,
+  "Petco Park": 0.95,
+  "Progressive Field": 0.97,
+  "Rate Field": 1.03,
+  "Rogers Centre": 1.0,
+  "Sutter Health Park": 1.02,
+  "T-Mobile Park": 0.92,
+  "Target Field": 0.99,
+  "Truist Park": 1.0,
+  "Wrigley Field": 1.02,
+  "Yankee Stadium": 1.03,
+  "loanDepot park": 0.95
+ },
+ "park_factors_note": "Approximate season-level run park factors; refresh from Baseball Savant.",
+ "pitchers": {
+  "453286": {
+   "ao": 35,
+   "bb": 14,
+   "era": 9.49,
+   "go": 18,
+   "hbp": 1,
+   "hr": 9,
+   "ip": 24.2,
+   "k": 18,
+   "k9": 6.57,
+   "name": "Max Scherzer",
+   "whip": 1.82
+  },
+  "518876": {
+   "ao": 127,
+   "bb": 42,
+   "era": 4.86,
+   "go": 113,
+   "hbp": 3,
+   "hr": 22,
+   "ip": 109.1,
+   "k": 71,
+   "k9": 5.84,
+   "name": "Merrill Kelly",
+   "whip": 1.45
+  },
+  "543037": {
+   "ao": 84,
+   "bb": 14,
+   "era": 3.57,
+   "go": 45,
+   "hbp": 1,
+   "hr": 11,
+   "ip": 68.0,
+   "k": 73,
+   "k9": 9.66,
+   "name": "Gerrit Cole",
+   "whip": 1.09
+  },
+  "554430": {
+   "ao": 85,
+   "bb": 23,
+   "era": 2.53,
+   "go": 91,
+   "hbp": 2,
+   "hr": 13,
+   "ip": 103.0,
+   "k": 123,
+   "k9": 10.75,
+   "name": "Zack Wheeler",
+   "whip": 0.92
+  },
+  "607067": {
+   "ao": 118,
+   "bb": 40,
+   "era": 4.67,
+   "go": 122,
+   "hbp": 7,
+   "hr": 17,
+   "ip": 111.2,
+   "k": 83,
+   "k9": 6.69,
+   "name": "Colin Rea",
+   "whip": 1.4
+  },
+  "607536": {
+   "ao": 102,
+   "bb": 21,
+   "era": 7.34,
+   "go": 106,
+   "hbp": 5,
+   "hr": 21,
+   "ip": 99.1,
+   "k": 85,
+   "k9": 7.7,
+   "name": "Kyle Freeland",
+   "whip": 1.55
+  },
+  "607625": {
+   "ao": 135,
+   "bb": 40,
+   "era": 4.22,
+   "go": 117,
+   "hbp": 6,
+   "hr": 15,
+   "ip": 123.2,
+   "k": 96,
+   "k9": 6.99,
+   "name": "Seth Lugo",
+   "whip": 1.37
+  },
+  "641743": {
+   "ao": 114,
+   "bb": 41,
+   "era": 4.25,
+   "go": 105,
+   "hbp": 20,
+   "hr": 14,
+   "ip": 103.2,
+   "k": 87,
+   "k9": 7.55,
+   "name": "Anthony Kay",
+   "whip": 1.36
+  },
+  "643377": {
+   "ao": 77,
+   "bb": 30,
+   "era": 3.74,
+   "go": 80,
+   "hbp": 2,
+   "hr": 13,
+   "ip": 86.2,
+   "k": 92,
+   "k9": 9.55,
+   "name": "Griffin Jax",
+   "whip": 1.23
+  },
+  "645261": {
+   "ao": 161,
+   "bb": 39,
+   "era": 3.82,
+   "go": 160,
+   "hbp": 7,
+   "hr": 17,
+   "ip": 150.2,
+   "k": 115,
+   "k9": 6.87,
+   "name": "Sandy Alcantara",
+   "whip": 1.21
+  },
+  "650633": {
+   "ao": 128,
+   "bb": 50,
+   "era": 3.38,
+   "go": 121,
+   "hbp": 9,
+   "hr": 13,
+   "ip": 125.1,
+   "k": 109,
+   "k9": 7.83,
+   "name": "Michael King",
+   "whip": 1.17
+  },
+  "656605": {
+   "ao": 133,
+   "bb": 38,
+   "era": 4.83,
+   "go": 110,
+   "hbp": 8,
+   "hr": 13,
+   "ip": 113.2,
+   "k": 87,
+   "k9": 6.89,
+   "name": "Mitch Keller",
+   "whip": 1.31
+  },
+  "663567": {
+   "ao": 129,
+   "bb": 39,
+   "era": 3.06,
+   "go": 74,
+   "hbp": 8,
+   "hr": 11,
+   "ip": 103.0,
+   "k": 100,
+   "k9": 8.74,
+   "name": "Peter Lambert",
+   "whip": 1.15
+  },
+  "668909": {
+   "ao": 103,
+   "bb": 38,
+   "era": 3.71,
+   "go": 115,
+   "hbp": 3,
+   "hr": 21,
+   "ip": 133.1,
+   "k": 168,
+   "k9": 11.34,
+   "name": "Gavin Williams",
+   "whip": 1.07
+  },
+  "669461": {
+   "ao": 116,
+   "bb": 40,
+   "era": 5.26,
+   "go": 76,
+   "hbp": 4,
+   "hr": 19,
+   "ip": 102.2,
+   "k": 100,
+   "k9": 8.77,
+   "name": "Matthew Liberatore",
+   "whip": 1.56
+  },
+  "669923": {
+   "ao": 115,
+   "bb": 25,
+   "era": 3.98,
+   "go": 116,
+   "hbp": 3,
+   "hr": 15,
+   "ip": 120.0,
+   "k": 107,
+   "k9": 8.03,
+   "name": "George Kirby",
+   "whip": 1.3
+  },
+  "671737": {
+   "ao": 131,
+   "bb": 49,
+   "era": 3.65,
+   "go": 86,
+   "hbp": 2,
+   "hr": 17,
+   "ip": 120.2,
+   "k": 139,
+   "k9": 10.37,
+   "name": "Taj Bradley",
+   "whip": 1.21
+  },
+  "672456": {
+   "ao": 138,
+   "bb": 23,
+   "era": 3.34,
+   "go": 110,
+   "hbp": 4,
+   "hr": 11,
+   "ip": 110.1,
+   "k": 79,
+   "k9": 6.44,
+   "name": "Keider Montero",
+   "whip": 1.02
+  },
+  "676917": {
+   "ao": 92,
+   "bb": 36,
+   "era": 3.55,
+   "go": 118,
+   "hbp": 12,
+   "hr": 10,
+   "ip": 116.2,
+   "k": 130,
+   "k9": 10.03,
+   "name": "Cade Cavalli",
+   "whip": 1.29
+  },
+  "677958": {
+   "ao": 109,
+   "bb": 38,
+   "era": 4.03,
+   "go": 99,
+   "hbp": 3,
+   "hr": 13,
+   "ip": 102.2,
+   "k": 93,
+   "k9": 8.15,
+   "name": "Kumar Rocker",
+   "whip": 1.29
+  },
+  "680694": {
+   "ao": 94,
+   "bb": 52,
+   "era": 3.74,
+   "go": 130,
+   "hbp": 2,
+   "hr": 12,
+   "ip": 118.0,
+   "k": 114,
+   "k9": 8.69,
+   "name": "Kyle Bradish",
+   "whip": 1.36
+  },
+  "686218": {
+   "ao": 104,
+   "bb": 29,
+   "era": 4.95,
+   "go": 65,
+   "hbp": 7,
+   "hr": 17,
+   "ip": 92.2,
+   "k": 104,
+   "k9": 10.1,
+   "name": "Emmet Sheehan",
+   "whip": 1.25
+  },
+  "687562": {
+   "ao": 74,
+   "bb": 11,
+   "era": 2.74,
+   "go": 70,
+   "hbp": 2,
+   "hr": 5,
+   "ip": 65.2,
+   "k": 46,
+   "k9": 6.3,
+   "name": "Jake Bennett",
+   "whip": 0.97
+  },
+  "694738": {
+   "ao": 83,
+   "bb": 48,
+   "era": 4.12,
+   "go": 131,
+   "hbp": 4,
+   "hr": 8,
+   "ip": 113.2,
+   "k": 114,
+   "k9": 9.03,
+   "name": "Landen Roupp",
+   "whip": 1.26
+  },
+  "694819": {
+   "ao": 85,
+   "bb": 28,
+   "era": 1.58,
+   "go": 87,
+   "hbp": 9,
+   "hr": 10,
+   "ip": 120.0,
+   "k": 185,
+   "k9": 13.88,
+   "name": "Jacob Misiorowski",
+   "whip": 0.75
+  },
+  "695505": {
+   "ao": 120,
+   "bb": 41,
+   "era": 2.4,
+   "go": 80,
+   "hbp": 0,
+   "hr": 13,
+   "ip": 112.2,
+   "k": 128,
+   "k9": 10.22,
+   "name": "Chase Burns",
+   "whip": 1.12
+  },
+  "695611": {
+   "ao": 62,
+   "bb": 25,
+   "era": 4.0,
+   "go": 46,
+   "hbp": 3,
+   "hr": 7,
+   "ip": 63.0,
+   "k": 68,
+   "k9": 9.71,
+   "name": "Gage Jump",
+   "whip": 1.4
+  },
+  "700712": {
+   "ao": 83,
+   "bb": 49,
+   "era": 2.7,
+   "go": 104,
+   "hbp": 8,
+   "hr": 6,
+   "ip": 93.1,
+   "k": 88,
+   "k9": 8.49,
+   "name": "Walbert Ure\u00f1a",
+   "whip": 1.26
+  },
+  "702275": {
+   "ao": 54,
+   "bb": 33,
+   "era": 4.5,
+   "go": 53,
+   "hbp": 4,
+   "hr": 9,
+   "ip": 54.0,
+   "k": 49,
+   "k9": 8.17,
+   "name": "JR Ritchie",
+   "whip": 1.41
+  }
+ },
+ "season": 2026,
+ "snapshot_utc": "2026-08-02T15:10:26Z",
+ "source": "MLB Stats API (statsapi.mlb.com), fetched 2026-08-02",
+ "teams": {
+  "108": {
+   "abbr": "LAA",
+   "l": 69,
+   "name": "Los Angeles Angels",
+   "pen_era": 4.37,
+   "ra": 544,
+   "rs": 467,
+   "w": 42,
+   "woba_14d": 0.2883
+  },
+  "109": {
+   "abbr": "AZ",
+   "l": 52,
+   "name": "Arizona Diamondbacks",
+   "pen_era": 4.2,
+   "ra": 501,
+   "rs": 508,
+   "w": 59,
+   "woba_14d": 0.357
+  },
+  "110": {
+   "abbr": "BAL",
+   "l": 57,
+   "name": "Baltimore Orioles",
+   "pen_era": 4.03,
+   "ra": 534,
+   "rs": 507,
+   "w": 54,
+   "woba_14d": 0.3021
+  },
+  "111": {
+   "abbr": "BOS",
+   "l": 51,
+   "name": "Boston Red Sox",
+   "pen_era": 2.95,
+   "ra": 410,
+   "rs": 466,
+   "w": 59,
+   "woba_14d": 0.3124
+  },
+  "112": {
+   "abbr": "CHC",
+   "l": 48,
+   "name": "Chicago Cubs",
+   "pen_era": 3.91,
+   "ra": 479,
+   "rs": 569,
+   "w": 63,
+   "woba_14d": 0.3481
+  },
+  "113": {
+   "abbr": "CIN",
+   "l": 58,
+   "name": "Cincinnati Reds",
+   "pen_era": 4.5,
+   "ra": 523,
+   "rs": 452,
+   "w": 52,
+   "woba_14d": 0.3001
+  },
+  "114": {
+   "abbr": "CLE",
+   "l": 56,
+   "name": "Cleveland Guardians",
+   "pen_era": 3.91,
+   "ra": 462,
+   "rs": 441,
+   "w": 56,
+   "woba_14d": 0.3026
+  },
+  "115": {
+   "abbr": "COL",
+   "l": 67,
+   "name": "Colorado Rockies",
+   "pen_era": 4.97,
+   "ra": 635,
+   "rs": 530,
+   "w": 44,
+   "woba_14d": 0.3059
+  },
+  "116": {
+   "abbr": "DET",
+   "l": 58,
+   "name": "Detroit Tigers",
+   "pen_era": 3.86,
+   "ra": 442,
+   "rs": 494,
+   "w": 53,
+   "woba_14d": 0.3525
+  },
+  "117": {
+   "abbr": "HOU",
+   "l": 55,
+   "name": "Houston Astros",
+   "pen_era": 4.11,
+   "ra": 552,
+   "rs": 521,
+   "w": 57,
+   "woba_14d": 0.3533
+  },
+  "118": {
+   "abbr": "KC",
+   "l": 66,
+   "name": "Kansas City Royals",
+   "pen_era": 5.37,
+   "ra": 568,
+   "rs": 466,
+   "w": 46,
+   "woba_14d": 0.304
+  },
+  "119": {
+   "abbr": "LAD",
+   "l": 42,
+   "name": "Los Angeles Dodgers",
+   "pen_era": 4.01,
+   "ra": 414,
+   "rs": 568,
+   "w": 69,
+   "woba_14d": 0.3314
+  },
+  "120": {
+   "abbr": "WSH",
+   "l": 57,
+   "name": "Washington Nationals",
+   "pen_era": 4.96,
+   "ra": 587,
+   "rs": 605,
+   "w": 55,
+   "woba_14d": 0.3621
+  },
+  "121": {
+   "abbr": "NYM",
+   "l": 65,
+   "name": "New York Mets",
+   "pen_era": 3.82,
+   "ra": 513,
+   "rs": 457,
+   "w": 47,
+   "woba_14d": 0.3118
+  },
+  "133": {
+   "abbr": "ATH",
+   "l": 66,
+   "name": "Athletics",
+   "pen_era": 5.64,
+   "ra": 630,
+   "rs": 487,
+   "w": 45,
+   "woba_14d": 0.307
+  },
+  "134": {
+   "abbr": "PIT",
+   "l": 56,
+   "name": "Pittsburgh Pirates",
+   "pen_era": 4.34,
+   "ra": 538,
+   "rs": 576,
+   "w": 56,
+   "woba_14d": 0.2898
+  },
+  "135": {
+   "abbr": "SD",
+   "l": 54,
+   "name": "San Diego Padres",
+   "pen_era": 3.62,
+   "ra": 480,
+   "rs": 467,
+   "w": 57,
+   "woba_14d": 0.3741
+  },
+  "136": {
+   "abbr": "SEA",
+   "l": 58,
+   "name": "Seattle Mariners",
+   "pen_era": 3.52,
+   "ra": 445,
+   "rs": 447,
+   "w": 54,
+   "woba_14d": 0.3121
+  },
+  "137": {
+   "abbr": "SF",
+   "l": 64,
+   "name": "San Francisco Giants",
+   "pen_era": 4.29,
+   "ra": 518,
+   "rs": 466,
+   "w": 47,
+   "woba_14d": 0.3068
+  },
+  "138": {
+   "abbr": "STL",
+   "l": 57,
+   "name": "St. Louis Cardinals",
+   "pen_era": 4.37,
+   "ra": 498,
+   "rs": 478,
+   "w": 54,
+   "woba_14d": 0.266
+  },
+  "139": {
+   "abbr": "TB",
+   "l": 45,
+   "name": "Tampa Bay Rays",
+   "pen_era": 3.93,
+   "ra": 444,
+   "rs": 483,
+   "w": 65,
+   "woba_14d": 0.3103
+  },
+  "140": {
+   "abbr": "TEX",
+   "l": 56,
+   "name": "Texas Rangers",
+   "pen_era": 4.26,
+   "ra": 494,
+   "rs": 462,
+   "w": 55,
+   "woba_14d": 0.3228
+  },
+  "141": {
+   "abbr": "TOR",
+   "l": 59,
+   "name": "Toronto Blue Jays",
+   "pen_era": 3.82,
+   "ra": 492,
+   "rs": 438,
+   "w": 52,
+   "woba_14d": 0.289
+  },
+  "142": {
+   "abbr": "MIN",
+   "l": 56,
+   "name": "Minnesota Twins",
+   "pen_era": 4.85,
+   "ra": 554,
+   "rs": 526,
+   "w": 56,
+   "woba_14d": 0.2812
+  },
+  "143": {
+   "abbr": "PHI",
+   "l": 53,
+   "name": "Philadelphia Phillies",
+   "pen_era": 4.43,
+   "ra": 494,
+   "rs": 482,
+   "w": 58,
+   "woba_14d": 0.3047
+  },
+  "144": {
+   "abbr": "ATL",
+   "l": 45,
+   "name": "Atlanta Braves",
+   "pen_era": 3.46,
+   "ra": 439,
+   "rs": 545,
+   "w": 66,
+   "woba_14d": 0.3286
+  },
+  "145": {
+   "abbr": "CWS",
+   "l": 52,
+   "name": "Chicago White Sox",
+   "pen_era": 3.79,
+   "ra": 475,
+   "rs": 522,
+   "w": 58,
+   "woba_14d": 0.293
+  },
+  "146": {
+   "abbr": "MIA",
+   "l": 55,
+   "name": "Miami Marlins",
+   "pen_era": 3.89,
+   "ra": 483,
+   "rs": 494,
+   "w": 57,
+   "woba_14d": 0.3146
+  },
+  "147": {
+   "abbr": "NYY",
+   "l": 49,
+   "name": "New York Yankees",
+   "pen_era": 3.03,
+   "ra": 424,
+   "rs": 510,
+   "w": 62,
+   "woba_14d": 0.27
+  },
+  "158": {
+   "abbr": "MIL",
+   "l": 41,
+   "name": "Milwaukee Brewers",
+   "pen_era": 3.62,
+   "ra": 417,
+   "rs": 555,
+   "w": 69,
+   "woba_14d": 0.3348
+  }
+ }
+}

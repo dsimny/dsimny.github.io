@@ -36,102 +36,102 @@
   "mins_to_first_pitch": 370
  },
  "823517": {
-  "away_ml": 168,
-  "home_ml": -199,
+  "away_ml": 127,
+  "home_ml": -149,
   "total": 8.5,
-  "over_price": -102,
-  "under_price": -118,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 395
+  "over_price": -116,
+  "under_price": -104,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 35
  },
  "824731": {
-  "away_ml": 113,
-  "home_ml": -130,
-  "total": 9.0,
-  "over_price": -110,
-  "under_price": -110,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 400
- },
- "824888": {
-  "away_ml": 125,
-  "home_ml": -143,
-  "total": 9.0,
-  "over_price": -120,
-  "under_price": 100,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 405
- },
- "824084": {
-  "away_ml": -143,
-  "home_ml": 125,
-  "total": 9.0,
-  "over_price": -113,
-  "under_price": -106,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 430
- },
- "823756": {
-  "away_ml": 126,
-  "home_ml": -145,
-  "total": 7.5,
-  "over_price": -105,
-  "under_price": -115,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 430
- },
- "824645": {
-  "away_ml": -214,
-  "home_ml": 182,
-  "total": 9.0,
-  "over_price": -115,
-  "under_price": -105,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 455
- },
- "822865": {
-  "away_ml": 167,
-  "home_ml": -196,
-  "total": 8.0,
-  "over_price": -106,
-  "under_price": -114,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 455
- },
- "824161": {
-  "away_ml": 112,
-  "home_ml": -129,
+  "away_ml": 109,
+  "home_ml": -125,
   "total": 8.5,
   "over_price": -105,
-  "under_price": -115,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 460
+  "under_price": -114,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 40
  },
- "824321": {
-  "away_ml": -162,
-  "home_ml": 142,
-  "total": 11.0,
-  "over_price": -110,
-  "under_price": -108,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 490
+ "824888": {
+  "away_ml": 109,
+  "home_ml": -127,
+  "total": 8.5,
+  "over_price": -115,
+  "under_price": -103,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 45
  },
- "825054": {
-  "away_ml": 106,
-  "home_ml": -118,
+ "824084": {
+  "away_ml": -102,
+  "home_ml": -114,
   "total": 9.0,
-  "over_price": -102,
-  "under_price": -118,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 550
+  "over_price": -114,
+  "under_price": -105,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 70
  },
- "823108": {
-  "away_ml": 110,
-  "home_ml": -128,
-  "total": 7.5,
+ "823756": {
+  "away_ml": 107,
+  "home_ml": -125,
+  "total": 7.25,
+  "over_price": -5,
+  "under_price": -114,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 70
+ },
+ "824645": {
+  "away_ml": 107,
+  "home_ml": -125,
+  "total": 9.5,
+  "over_price": -105,
+  "under_price": -114,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 95
+ },
+ "822865": {
+  "away_ml": 159,
+  "home_ml": -191,
+  "total": 8.0,
   "over_price": -115,
   "under_price": -105,
-  "captured_utc": "2026-08-04T16:30:29Z",
-  "mins_to_first_pitch": 550
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 95
+ },
+ "824161": {
+  "away_ml": 104,
+  "home_ml": -122,
+  "total": 7.5,
+  "over_price": -7,
+  "under_price": -111,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 100
+ },
+ "824321": {
+  "away_ml": -154,
+  "home_ml": 132,
+  "total": 11.5,
+  "over_price": -110,
+  "under_price": -110,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 130
+ },
+ "825054": {
+  "away_ml": -109,
+  "home_ml": -109,
+  "total": 9.5,
+  "over_price": 100,
+  "under_price": -121,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 190
+ },
+ "823108": {
+  "away_ml": 123,
+  "home_ml": -146,
+  "total": 8.0,
+  "over_price": -109,
+  "under_price": -111,
+  "captured_utc": "2026-08-04T22:30:29Z",
+  "mins_to_first_pitch": 190
  }
 }

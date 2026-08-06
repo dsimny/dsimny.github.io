@@ -55,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.12-woba-tax"
+ENGINE_VERSION = "0.13-best-price"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -458,19 +458,31 @@ def main():
         pick_fair = fair_home if pick_home else fair_away
         pick_label = f'{pick_team["name"]} ML'
 
-        # Market numbers for the pick side
+        # Market numbers for the pick side — v0.13: edge/EV/Kelly (and Rule 2 below)
+        # evaluate at the BEST price across US books, the price a bettor can
+        # actually get. The consensus median is kept alongside: the de-vig math
+        # (market blend, Rule 8 divergence) and CLV stay anchored to it, so
+        # best-price ingestion raises measured edge without flattering either.
+        # Old snapshots without best_* fields fall back to the consensus.
         mkt_odds = edge = ev = kelly_pct = divergence = None
         p_mkt_devig = None
+        mkt_book = mkt_odds_consensus = None
         if mkt:
-            mkt_odds = mkt["home_ml"] if pick_home else mkt["away_ml"]
+            mkt_odds_consensus = mkt["home_ml"] if pick_home else mkt["away_ml"]
+            if pick_home:
+                mkt_odds = mkt.get("best_home_ml") or mkt_odds_consensus
+                mkt_book = mkt.get("best_home_book")
+            else:
+                mkt_odds = mkt.get("best_away_ml") or mkt_odds_consensus
+                mkt_book = mkt.get("best_away_book")
             imp_pick = american_to_implied(mkt_odds)
-            p_mkt_devig = p_home_mkt if pick_home else (1 - p_home_mkt)  # vig removed
-            edge = pick_prob - imp_pick                     # blended prob vs the price you actually get
+            p_mkt_devig = p_home_mkt if pick_home else (1 - p_home_mkt)  # vig removed, from the CONSENSUS medians
+            edge = pick_prob - imp_pick                     # blended prob vs the best price you can actually get
             divergence = pick_prob_model - p_mkt_devig      # honest RAW-model-vs-market gap
             b_net = american_to_b(mkt_odds)
-            ev = pick_prob * b_net - (1 - pick_prob)        # EV per 1u staked (blended)
+            ev = pick_prob * b_net - (1 - pick_prob)        # EV per 1u staked (blended, at best price)
             kelly_pct = max(0.0, KELLY_FRACTION * ev / b_net) * 100
-            pick_label = f'{pick_team["name"]} ML ({mkt_odds:+d})'
+            pick_label = f'{pick_team["name"]} ML ({mkt_odds:+d}{", " + mkt_book if mkt_book else ""})'
 
         # ---- Rule 2: High-Juice Favorite Cap (v0.8: flat day/night caps on the MARKET line) ----
         rule2 = False
@@ -565,13 +577,20 @@ def main():
             io, iu = american_to_implied(mkt["over_price"]), american_to_implied(mkt["under_price"])
             mkt_over_devig = io / (io + iu)
             pick_over = m_over >= mkt_over_devig
-            side_price = mkt["over_price"] if pick_over else mkt["under_price"]
+            # v0.13: paper-stake the totals side at the BEST price quoted at the
+            # consensus line; the de-vig above stays on the median prices.
+            if pick_over:
+                side_price = mkt.get("best_over_price") or mkt["over_price"]
+                side_book = mkt.get("best_over_book")
+            else:
+                side_price = mkt.get("best_under_price") or mkt["under_price"]
+                side_book = mkt.get("best_under_book")
             side_model_p = m_over if pick_over else (1 - m_over)
             side_mkt_devig = mkt_over_devig if pick_over else (1 - mkt_over_devig)
             t_b = american_to_b(side_price)
             total_pick = {
                 "side": "Over" if pick_over else "Under",
-                "line": line_t, "price": side_price,
+                "line": line_t, "price": side_price, "book": side_book,
                 "over_price": mkt["over_price"], "under_price": mkt["under_price"],
                 "model_p": round(side_model_p, 4), "mkt_devig": round(side_mkt_devig, 4),
                 "edge": round(side_model_p - american_to_implied(side_price), 4),
@@ -615,7 +634,8 @@ def main():
             "rule4_flag": bool(flags4), "rule8_flag": rule8,
             "rule6_flag": wf, "away_woba_14d": away.get("woba_14d"), "league_woba_14d": league_woba,
             "no_edge": no_edge,
-            "mkt_odds": mkt_odds, "mkt_total": mkt["total"] if mkt else None,
+            "mkt_odds": mkt_odds, "mkt_book": mkt_book, "mkt_odds_consensus": mkt_odds_consensus,
+            "mkt_total": mkt["total"] if mkt else None,
             "mkt_away_ml": mkt["away_ml"] if mkt else None, "mkt_home_ml": mkt["home_ml"] if mkt else None,
             "p_over_mkt": round(float((totals > mkt["total"]).mean()), 4) if (mkt and mkt.get("total") is not None) else None,
             "total_pick": total_pick,

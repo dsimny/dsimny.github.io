@@ -176,8 +176,17 @@ def market_cells(b):
     if b["mkt_odds"] is None:
         return '<div><span class="stlab">Market</span><span class="stval">n/a</span></div>'
     edge_cls = "edge-pos" if b["edge"] >= 0.02 else ("edge-neg" if b["edge"] < 0 else "")
+    # v0.13: the price shown is the BEST across US books, with its book named;
+    # the consensus median rides along. Pre-v0.13 boards have no book -> the
+    # price IS the consensus and says so.
+    if b.get("mkt_book"):
+        cons = b.get("mkt_odds_consensus")
+        line_cell = (f'<div><span class="stlab">Best price</span><span class="stval">{b["mkt_odds"]:+d} '
+                     f'<em>{b["mkt_book"]}{f" · consensus {cons:+d}" if cons is not None else ""}</em></span></div>')
+    else:
+        line_cell = f'<div><span class="stlab">Market line</span><span class="stval">{b["mkt_odds"]:+d} <em>consensus</em></span></div>'
     return f'''
-        <div><span class="stlab">Market line</span><span class="stval">{b["mkt_odds"]:+d} <em>consensus</em></span></div>
+        {line_cell}
         <div><span class="stlab">Edge vs price</span><span class="stval {edge_cls}">{b["edge"]*100:+.1f} pts</span></div>
         <div><span class="stlab">EV per 1u</span><span class="stval {edge_cls}">{b["ev_per_unit"]*100:+.1f}%</span></div>'''
 

@@ -208,11 +208,20 @@ def main():
         sc = scores.get(str(b.get("gamePk", "")))
         a_ab, h_ab = b["abbr"].split(" @ ")
         pick_is_home = b["pick_team_abbr"] == h_ab
+        # odds_basis (v0.13): the price the pick was actually priced at, its book,
+        # and the consensus alongside. Pre-v0.13 boards have no mkt_book, so their
+        # basis reads "consensus-median" — old entries in the ledger keep the bare
+        # int this field used to be (append-only: never rewritten).
         entry = {
             "date": date, "gamePk": b.get("gamePk"), "game": b["abbr"],
             "pick": b["pick"], "units": b["units"],
             "confidence": b["confidence"], "edge": b.get("edge"),
-            "odds_basis": b.get("mkt_odds"),
+            "odds_basis": {
+                "price": b.get("mkt_odds"),
+                "book": b.get("mkt_book"),
+                "basis": "best-price" if b.get("mkt_book") else "consensus-median",
+                "consensus": b.get("mkt_odds_consensus", b.get("mkt_odds")),
+            },
         }
         if sc is None or not sc.get("final") or sc.get("away") is None:
             entry.update(result="VOID", pnl=0.0,

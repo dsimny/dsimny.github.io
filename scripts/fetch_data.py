@@ -61,6 +61,76 @@ def get(url, **params):
     r.raise_for_status()
     return r.json()
 
+def _payout(o):
+    """Net decimal payout per 1u staked. Higher = better for the bettor, which is
+    what 'best price' means: -105 beats -120, +130 beats +110."""
+    return 100 / -o if o < 0 else o / 100
+
+def consolidate_odds(events, games, teams):
+    """Per-game odds record: MEDIAN consensus + BEST price per side (v0.13).
+
+    The consensus median stays the de-vig anchor — market blend, Rule 8
+    divergence, and CLV all read it, so best-price ingestion can't flatter
+    them. The best price (with its book) is what a bettor can actually get,
+    so edge/EV/Kelly and Rule 2 evaluate against it. Totals best prices are
+    taken ONLY at the consensus line: a better price on a different total is
+    a different bet, not a better price.
+
+    Module-level and pure so it can be unit-tested offline against a
+    fabricated Odds API payload.
+    """
+    by_name = {(ev["away_team"], ev["home_team"]): ev for ev in events}
+    odds = {}
+    for g in games:
+        a_name, h_name = teams[str(g["away"])]["name"], teams[str(g["home"])]["name"]
+        ev = by_name.get((a_name, h_name))
+        if not ev:
+            continue
+        a_mls, h_mls, tots, tot_quotes = [], [], [], []
+        best = {}   # side -> (payout, price, book)
+        for bk in ev.get("bookmakers", []):
+            book = bk.get("title") or bk.get("key", "?")
+            for m in bk.get("markets", []):
+                if m["key"] == "h2h":
+                    for o in m["outcomes"]:
+                        side = "away" if o["name"] == a_name else "home"
+                        (a_mls if side == "away" else h_mls).append(o["price"])
+                        cur = best.get(side)
+                        if cur is None or _payout(o["price"]) > cur[0]:
+                            best[side] = (_payout(o["price"]), o["price"], book)
+                elif m["key"] == "totals":
+                    for o in m.get("outcomes", []):
+                        if o.get("point") is None:
+                            continue
+                        tots.append(o["point"])
+                        if o.get("name") in ("Over", "Under") and o.get("price") is not None:
+                            tot_quotes.append((o["point"], o["name"], o["price"], book))
+        if not (a_mls and h_mls):
+            continue
+        rec = {
+            "away_ml": int(statistics.median(a_mls)),
+            "home_ml": int(statistics.median(h_mls)),
+            "total": float(statistics.median(tots)) if tots else None,
+        }
+        if "away" in best:
+            rec["best_away_ml"], rec["best_away_book"] = best["away"][1], best["away"][2]
+        if "home" in best:
+            rec["best_home_ml"], rec["best_home_book"] = best["home"][1], best["home"][2]
+        if rec["total"] is not None:
+            ovr = [(p, b) for pt, s, p, b in tot_quotes if s == "Over" and pt == rec["total"]]
+            und = [(p, b) for pt, s, p, b in tot_quotes if s == "Under" and pt == rec["total"]]
+            # over/under prices enable the totals paper track (edge + CLV); only
+            # books quoting the consensus line count, else totals stays untracked.
+            if ovr and und:
+                rec["over_price"] = int(statistics.median([p for p, _ in ovr]))
+                rec["under_price"] = int(statistics.median([p for p, _ in und]))
+                bo = max(ovr, key=lambda x: _payout(x[0]))
+                bu = max(und, key=lambda x: _payout(x[0]))
+                rec["best_over_price"], rec["best_over_book"] = bo[0], bo[1]
+                rec["best_under_price"], rec["best_under_book"] = bu[0], bu[1]
+        odds[str(g["gamePk"])] = rec
+    return odds
+
 # ---- Rule 6 (Road wOBA Suppression, engine v0.9): trailing-window team wOBA ----
 # Static modern wOBA weights (approximate). Fine here because the rule compares
 # team wOBA vs league wOBA computed with the SAME weights over the SAME window,
@@ -286,48 +356,16 @@ def main():
             print(f"WARNING: weather fetch failed for {g['venue']} ({e}); totals un-adjusted there.")
             g["wx"] = None
 
-    # ---- Odds (optional): The Odds API, consensus = median across books ----
+    # ---- Odds (optional): The Odds API — median consensus + best price (v0.13) ----
     odds, odds_source = {}, None
     key = os.environ.get("ODDS_API_KEY")
     if key:
         try:
             events = get("https://api.the-odds-api.com/v4/sports/baseball_mlb/odds",
                          apiKey=key, regions="us", markets="h2h,totals", oddsFormat="american")
-            by_name = {}
-            for ev in events:
-                by_name[(ev["away_team"], ev["home_team"])] = ev
-            for g in games:
-                a_name, h_name = teams[str(g["away"])]["name"], teams[str(g["home"])]["name"]
-                ev = by_name.get((a_name, h_name))
-                if not ev:
-                    continue
-                a_mls, h_mls, tots, ovr, und = [], [], [], [], []
-                for bk in ev.get("bookmakers", []):
-                    for m in bk.get("markets", []):
-                        if m["key"] == "h2h":
-                            for o in m["outcomes"]:
-                                (a_mls if o["name"] == a_name else h_mls).append(o["price"])
-                        elif m["key"] == "totals":
-                            for o in m.get("outcomes", []):
-                                if o.get("point") is not None:
-                                    tots.append(o["point"])
-                                if o.get("name") == "Over" and o.get("price") is not None:
-                                    ovr.append(o["price"])
-                                elif o.get("name") == "Under" and o.get("price") is not None:
-                                    und.append(o["price"])
-                if a_mls and h_mls:
-                    rec = {
-                        "away_ml": int(statistics.median(a_mls)),
-                        "home_ml": int(statistics.median(h_mls)),
-                        "total": float(statistics.median(tots)) if tots else None,
-                    }
-                    # over/under prices enable the totals paper track (edge + CLV); absent on
-                    # books that only posted the line, in which case totals stays untracked.
-                    if ovr and und:
-                        rec["over_price"] = int(statistics.median(ovr))
-                        rec["under_price"] = int(statistics.median(und))
-                    odds[str(g["gamePk"])] = rec
-            odds_source = f"The Odds API, median across US books, fetched {datetime.utcnow().isoformat()}Z"
+            odds = consolidate_odds(events, games, teams)
+            odds_source = (f"The Odds API, US books: consensus = median, plus best price per side "
+                           f"with book, fetched {datetime.utcnow().isoformat()}Z")
         except Exception as e:  # odds are optional — never sink the board over them
             print(f"WARNING: odds fetch failed ({e}); engine will run without market gates.")
             odds, odds_source = {}, None

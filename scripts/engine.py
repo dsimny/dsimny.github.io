@@ -55,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.11-best-of-board"
+ENGINE_VERSION = "0.14-watchlist"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -73,18 +73,18 @@ FACTOR_SHRINK = 0.6      # v0.6: regression-to-mean for TEAM rates. Season RS/RA
 LOW_IP_THRESHOLD = 60.0  # Rule 4 heuristic: starter under 60 IP this deep in
                          # the season => limited workload / possible IL return
 
-# Rule 6 (Road wOBA Suppression) — v0.9: DETECTION live, ACTION gated.
+# Rule 6 (Road wOBA Suppression) — detection v0.9, tax v0.12 (2026-07-29).
 # Trigger: away team's trailing-14-day wOBA trails the league's by > WOBA_GAP
 # (playbook threshold .035). WOBA_TAX is the run-rate reduction applied to the
-# away team when the trigger fires. It is 0.0 ON PURPOSE: the playbook
-# prescribes 12%, but a hardwired recency tax cuts against the engine's
-# validated regression-to-mean philosophy (FACTOR_SHRINK exists because short
-# samples mislead), so the tax ships only after a full-season backtest sweep
-# (backtest.py --sweep woba_tax:0,0.04,0.08,0.12) shows it helps — and watch
-# the totals calibration too, not just moneyline Brier. Do not set non-zero
-# by taste.
+# away team when the trigger fires. 0.08 was set by the full-season sweep
+# (2026-04-01..07-27, 1454 games, 152 triggered, sims=3000, Actions run
+# 30476496954): the untaxed model over-projected triggered games' totals by
+# +0.31 runs; 0.08 removed that bias almost exactly (-0.01) AND was the Brier
+# optimum on both all games (0.2481->0.2477) and the fired subset
+# (0.2466->0.2439); the playbook's 12% over-corrected (-0.18 bias, worse
+# Brier). Re-tune only via the same sweep on a full season — never by taste.
 WOBA_GAP = 0.035
-WOBA_TAX = 0.0
+WOBA_TAX = 0.08
 
 # Weather → run environment (v0.10) — TOTALS PAPER TRACK ONLY. The staked
 # moneyline board never sees these: main() runs the weather-adjusted sim as a
@@ -144,6 +144,11 @@ VENUE_TZ = {
 
 # v0.2 market-aware gates
 MIN_EDGE = 0.02          # publish only if model prob beats vigged market implied by 2+ pts
+WATCH_EDGE_MIN = 0.01    # v0.14 edge-band watch floor: ML candidates with edge in
+                         # [1.0%, MIN_EDGE) publish as WATCH-ONLY (0u) — the near-miss
+                         # band made visible instead of invisible. MIN_EDGE itself is
+                         # unchanged; thresholds move only via the gate-study process
+                         # (House Rule 9), never by loosening.
 DIVERGENCE_CAP = 0.12    # Rule 8 (Divergence Governor): if model vs de-vigged market
                          # disagreement exceeds 12 points, the market almost certainly
                          # knows something our inputs don't (lineups, injury news, form).
@@ -458,19 +463,31 @@ def main():
         pick_fair = fair_home if pick_home else fair_away
         pick_label = f'{pick_team["name"]} ML'
 
-        # Market numbers for the pick side
+        # Market numbers for the pick side — v0.13: edge/EV/Kelly (and Rule 2 below)
+        # evaluate at the BEST price across US books, the price a bettor can
+        # actually get. The consensus median is kept alongside: the de-vig math
+        # (market blend, Rule 8 divergence) and CLV stay anchored to it, so
+        # best-price ingestion raises measured edge without flattering either.
+        # Old snapshots without best_* fields fall back to the consensus.
         mkt_odds = edge = ev = kelly_pct = divergence = None
         p_mkt_devig = None
+        mkt_book = mkt_odds_consensus = None
         if mkt:
-            mkt_odds = mkt["home_ml"] if pick_home else mkt["away_ml"]
+            mkt_odds_consensus = mkt["home_ml"] if pick_home else mkt["away_ml"]
+            if pick_home:
+                mkt_odds = mkt.get("best_home_ml") or mkt_odds_consensus
+                mkt_book = mkt.get("best_home_book")
+            else:
+                mkt_odds = mkt.get("best_away_ml") or mkt_odds_consensus
+                mkt_book = mkt.get("best_away_book")
             imp_pick = american_to_implied(mkt_odds)
-            p_mkt_devig = p_home_mkt if pick_home else (1 - p_home_mkt)  # vig removed
-            edge = pick_prob - imp_pick                     # blended prob vs the price you actually get
+            p_mkt_devig = p_home_mkt if pick_home else (1 - p_home_mkt)  # vig removed, from the CONSENSUS medians
+            edge = pick_prob - imp_pick                     # blended prob vs the best price you can actually get
             divergence = pick_prob_model - p_mkt_devig      # honest RAW-model-vs-market gap
             b_net = american_to_b(mkt_odds)
-            ev = pick_prob * b_net - (1 - pick_prob)        # EV per 1u staked (blended)
+            ev = pick_prob * b_net - (1 - pick_prob)        # EV per 1u staked (blended, at best price)
             kelly_pct = max(0.0, KELLY_FRACTION * ev / b_net) * 100
-            pick_label = f'{pick_team["name"]} ML ({mkt_odds:+d})'
+            pick_label = f'{pick_team["name"]} ML ({mkt_odds:+d}{", " + mkt_book if mkt_book else ""})'
 
         # ---- Rule 2: High-Juice Favorite Cap (v0.8: flat day/night caps on the MARKET line) ----
         rule2 = False
@@ -565,13 +582,20 @@ def main():
             io, iu = american_to_implied(mkt["over_price"]), american_to_implied(mkt["under_price"])
             mkt_over_devig = io / (io + iu)
             pick_over = m_over >= mkt_over_devig
-            side_price = mkt["over_price"] if pick_over else mkt["under_price"]
+            # v0.13: paper-stake the totals side at the BEST price quoted at the
+            # consensus line; the de-vig above stays on the median prices.
+            if pick_over:
+                side_price = mkt.get("best_over_price") or mkt["over_price"]
+                side_book = mkt.get("best_over_book")
+            else:
+                side_price = mkt.get("best_under_price") or mkt["under_price"]
+                side_book = mkt.get("best_under_book")
             side_model_p = m_over if pick_over else (1 - m_over)
             side_mkt_devig = mkt_over_devig if pick_over else (1 - mkt_over_devig)
             t_b = american_to_b(side_price)
             total_pick = {
                 "side": "Over" if pick_over else "Under",
-                "line": line_t, "price": side_price,
+                "line": line_t, "price": side_price, "book": side_book,
                 "over_price": mkt["over_price"], "under_price": mkt["under_price"],
                 "model_p": round(side_model_p, 4), "mkt_devig": round(side_mkt_devig, 4),
                 "edge": round(side_model_p - american_to_implied(side_price), 4),
@@ -615,7 +639,8 @@ def main():
             "rule4_flag": bool(flags4), "rule8_flag": rule8,
             "rule6_flag": wf, "away_woba_14d": away.get("woba_14d"), "league_woba_14d": league_woba,
             "no_edge": no_edge,
-            "mkt_odds": mkt_odds, "mkt_total": mkt["total"] if mkt else None,
+            "mkt_odds": mkt_odds, "mkt_book": mkt_book, "mkt_odds_consensus": mkt_odds_consensus,
+            "mkt_total": mkt["total"] if mkt else None,
             "mkt_away_ml": mkt["away_ml"] if mkt else None, "mkt_home_ml": mkt["home_ml"] if mkt else None,
             "p_over_mkt": round(float((totals > mkt["total"]).mean()), 4) if (mkt and mkt.get("total") is not None) else None,
             "total_pick": total_pick,
@@ -658,6 +683,58 @@ def main():
                                  "top remaining lean — 0 units, NOT staked, published for transparency. "
                                  "The checks above show exactly which gate it failed.")
 
+    # ---- Watch List (v0.14): tracked, not staked ----
+    # A WATCH pick clears SOME but not all gates, or belongs to a market still
+    # in its proving period. Computed and published like real picks, at 0 units,
+    # graded nightly into data/watchlist.json — a paper record that never mixes
+    # with the staked ledger in any display or total. Three tagged sources.
+    watch = []
+    for b in board:
+        a_name, h_name = b["matchup"].split(" @ ")
+        a_ab, h_ab = b["abbr"].split(" @ ")
+        base = {"gamePk": b["gamePk"], "matchup": b["matchup"], "abbr": b["abbr"],
+                "utc": b["utc"], "venue": b["venue"], "units": 0.0}
+        # market-proving: totals picks clearing the edge + divergence gates while
+        # the totals market is still on its paper proving track.
+        tp = b.get("total_pick")
+        if tp and tp["edge"] is not None and tp["edge"] >= MIN_EDGE \
+                and abs(tp["model_p"] - tp["mkt_devig"]) <= DIVERGENCE_CAP:
+            watch.append({**base, "market": "total",
+                "pick": f'{tp["side"]} {tp["line"]:g} ({tp["price"]:+d}{", " + tp["book"] if tp.get("book") else ""})',
+                "side": tp["side"], "line": tp["line"], "price": tp["price"], "book": tp.get("book"),
+                "model_p": tp["model_p"], "edge": tp["edge"],
+                "divergence": round(tp["model_p"] - tp["mkt_devig"], 4),
+                "tag": "market-proving",
+                "reason": "Clears the edge and divergence gates, but totals are still in their paper proving period."})
+        # edge-band: near-miss ML candidates in [WATCH_EDGE_MIN, MIN_EDGE). Rule 2
+        # pivots are excluded (their logged edge prices the moneyline, not the run
+        # line they pivoted to); Rule 8 holds get their own tag below.
+        if (not b.get("published") and not b["rule8_flag"] and not b["rule2_pivot"]
+                and b["edge"] is not None and WATCH_EDGE_MIN <= b["edge"] < MIN_EDGE):
+            watch.append({**base, "market": "moneyline", "pick": b["pick"],
+                "pick_team_abbr": b["pick_team_abbr"],
+                "price": b["mkt_odds"], "book": b.get("mkt_book"),
+                "model_p": b["confidence"], "edge": b["edge"], "divergence": b.get("divergence"),
+                "tag": "edge-band",
+                "reason": (f'Edge {b["edge"]*100:+.1f} pts sits in the near-miss band '
+                           f'[{WATCH_EDGE_MIN*100:.0f}%, {MIN_EDGE*100:.0f}%). The gate holds; '
+                           f'the near-miss is visible instead of invisible.')})
+        # R8-hold: the Divergence Governor's holds, folded into the watch surface
+        # with their divergence numbers. Recorded as the MONEYLINE side — the
+        # divergence that held it is a moneyline disagreement — even when Rule 2
+        # also pivoted the display pick to the run line.
+        if b["rule8_flag"] and b["mkt_odds"] is not None:
+            pick_name = h_name if b["pick_team_abbr"] == h_ab else a_name
+            watch.append({**base, "market": "moneyline",
+                "pick": f'{pick_name} ML ({b["mkt_odds"]:+d}{", " + b["mkt_book"] if b.get("mkt_book") else ""})',
+                "pick_team_abbr": b["pick_team_abbr"],
+                "price": b["mkt_odds"], "book": b.get("mkt_book"),
+                "model_p": b["confidence"], "edge": b["edge"], "divergence": b.get("divergence"),
+                "tag": "R8-hold",
+                "reason": (f'Rule 8 hold: raw model vs de-vigged market divergence '
+                           f'{abs(b["divergence"])*100:.1f} pts exceeds the {DIVERGENCE_CAP*100:.0f}-pt cap. '
+                           f'The market knows something; we track instead of bet.')})
+
     out = {
         "date": DATE,
         "engine_version": ENGINE_VERSION, "model_weight": MODEL_WEIGHT,
@@ -666,8 +743,10 @@ def main():
         "n_slate": len(data["games"]),
         "league_rate": round(league_rate, 3), "league_ra9": round(league_era, 2),
         "board": board, "scratches": scratches,
+        "watch_picks": watch,
         "published_units": exposure,
         "n_published": len(published),
+        "n_watch": len(watch),
     }
     board_path, board_sha, enc = crypto_box.save_dataset(ROOT, "board", DATE, out)
     if enc:
@@ -693,6 +772,8 @@ def main():
               f'{"  [R2]" if b["rule2_pivot"] else ""}{"  [R4]" if b["rule4_flag"] else ""}{"  [R8 DIVERGENCE]" if b["rule8_flag"] else ""}{"  [no edge]" if b["no_edge"] else ""}{"  [✳ BEST OF BOARD]" if b.get("best_of_board") else ""}')
     for s in scratches:
         print(f'SCRATCH {s["abbr"]:<12} {s["rule"]}')
+    for w in watch:
+        print(f'WATCH   {w["abbr"]:<12} [{w["tag"]}] {w["pick"]:<34} model {w["model_p"]:.1%}  edge {w["edge"]*100:+.1f}  0u')
 
 if __name__ == "__main__":
     main()

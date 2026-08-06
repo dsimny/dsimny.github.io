@@ -140,6 +140,25 @@ def build_pick_payload(date):
         embed["url"] = SITE
     return {"username": "Open Ledger Sports", "embeds": [embed]}
 
+def watch_embed(B):
+    """v0.14: the day's watch picks as one 'WATCH — tracked, not staked' divider
+    embed for the members board post. Paper record, never mixed with the ledger."""
+    watch = B.get("watch_picks") or []
+    if not watch:
+        return None
+    lines = [f'• `{w["tag"]}` **{w["abbr"]}** — {w["pick"]} · model {w["model_p"]*100:.1f}% · edge {w["edge"]*100:+.1f} pts'
+             for w in watch[:15]]
+    if len(watch) > 15:
+        lines.append(f"…and {len(watch) - 15} more on the site.")
+    return {
+        "title": "— WATCH — tracked, not staked —",
+        "description": ("\n".join(lines) +
+                        "\n\n*0 units each. Watch picks clear some but not all gates (or their market is "
+                        "still proving on paper) and grade into their own public paper record — never "
+                        "the staked ledger. Promotion criteria are on the site.*")[:4000],
+        "color": GRAY,
+    }
+
 def build_board_payload(date):
     """Members post: every published play EXCEPT the free one, in full.
 
@@ -167,9 +186,15 @@ def build_board_payload(date):
         # inside the tank, not a staked pick. If the engine marked nothing
         # (e.g. every lean was a Rule 8 demotion), fall back to the old skip.
         bob = next((b for b in B["board"] if b.get("best_of_board")), None)
-        if bob is None:
-            print(f"No held plays for {date} and no best-of-board lean: nothing to post.")
+        wx_e = watch_embed(B)
+        if bob is None and wx_e is None:
+            print(f"No held plays for {date}, no best-of-board lean, no watch picks: nothing to post.")
             return None
+        if bob is None:
+            lead = f"**Members board: {nice}** · no plays cleared the gates · watch list below (0u)"
+            if SITE:
+                lead += f"\nFull board with reasons: {SITE}/#board"
+            return {"username": "Open Ledger Sports", "content": lead, "embeds": [wx_e]}
         a_sp, h_sp = bob["awaySP"], bob["homeSP"]
         fields = [
             {"name": "Lean", "value": f'**{bob["pick"]}**', "inline": True},
@@ -197,7 +222,8 @@ def build_board_payload(date):
         lead = f"**Members board: {nice}** · no plays cleared the gates · ✳ best-of-board lean below, 0u"
         if SITE:
             lead += f"\nFull board with reasons: {SITE}/#board"
-        return {"username": "Open Ledger Sports", "content": lead, "embeds": [embed]}
+        return {"username": "Open Ledger Sports", "content": lead,
+                "embeds": [embed] + ([wx_e] if wx_e else [])}
     shown, dropped = held[:MAX_EMBEDS], held[MAX_EMBEDS:]
 
     embeds = []
@@ -226,11 +252,19 @@ def build_board_payload(date):
         })
     embeds[-1]["footer"] = {"text": FOOTER + " · every one of these lands on the public ledger once graded"}
 
+    # v0.14: watch picks ride under their own divider, after the held plays,
+    # if Discord's 10-embed ceiling leaves room.
+    wx_e = watch_embed(B)
+    if wx_e and len(embeds) < MAX_EMBEDS:
+        embeds.append(wx_e)
+
     held_units = sum(b["units"] for b in held)
     lead = (f"**Members board: {nice}** · {len(held)} held "
             f"{'play' if len(held) == 1 else 'plays'} · {held_units:g}u exposure")
     if dropped:
         lead += f" · {len(dropped)} more on the site once graded"
+    if wx_e and len(embeds) >= MAX_EMBEDS and embeds[-1] is not wx_e:
+        lead += " · watch list on the site (no embed room)"
     if SITE:
         lead += f"\nFree pick and full methodology: {SITE}"
     return {"username": "Open Ledger Sports", "content": lead, "embeds": embeds}

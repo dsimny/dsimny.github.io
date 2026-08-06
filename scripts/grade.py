@@ -35,6 +35,7 @@ import crypto_box
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 LEDGER = os.path.join(ROOT, "data", "ledger.json")
 TOTALS_LEDGER = os.path.join(ROOT, "data", "totals_ledger.json")  # separate PAPER track
+WATCHLIST = os.path.join(ROOT, "data", "watchlist.json")          # v0.14 watch tier — PAPER, never mixes with LEDGER
 
 def american_to_b(odds):
     return 100 / (-odds) if odds < 0 else odds / 100
@@ -138,6 +139,81 @@ def grade_totals(date, board, scores, closing, path):
     print(f"Totals paper: graded {graded} for {date}. {a['record']}, win {a['win_pct']}%, "
           f"{net:+.2f}u paper, CLV {a['avg_clv_runs']} runs / beat close {a['beat_close_pct']}% (n={len(clv_e)})")
 
+def grade_watchlist(date, watch, scores, path):
+    """Grade the day's watch picks (v0.14) into their own append-only paper
+    ledger. Same grading rules as the real ledger — final scores, price P&L,
+    VOID on non-final — at flat 1u PAPER stakes so the record accumulates the
+    evidence the promotion criteria need; every surface displays them as 0u
+    staked. Aggregates per tag and per market. Never touches ledger.json, and
+    nothing here is ever summed into the staked record. Idempotent per
+    (date, gamePk, market, tag)."""
+    led = {"entries": []}
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            led = json.load(f)
+    already = {(e["date"], e["gamePk"], e["market"], e["tag"]) for e in led["entries"]}
+    graded = 0
+    for w in watch:
+        key = (date, w["gamePk"], w["market"], w["tag"])
+        if key in already:
+            continue
+        entry = {"date": date, "gamePk": w["gamePk"], "game": w["abbr"], "market": w["market"],
+                 "tag": w["tag"], "pick": w["pick"], "price": w.get("price"), "book": w.get("book"),
+                 "model_p": w.get("model_p"), "edge": w.get("edge"), "divergence": w.get("divergence")}
+        sc = scores.get(str(w["gamePk"]))
+        if sc is None or not sc.get("final") or sc.get("away") is None:
+            entry.update(result="VOID", pnl=0.0, note="Game not final; paper stake returned.")
+        elif w["market"] == "total":
+            actual = sc["home"] + sc["away"]
+            entry["actual_total"] = actual
+            if actual == w["line"]:
+                entry.update(result="PUSH", pnl=0.0)
+            else:
+                won = (actual > w["line"]) if w["side"] == "Over" else (actual < w["line"])
+                entry.update(result="WIN" if won else "LOSS",
+                             pnl=round(american_to_b(w["price"]), 3) if won else -1.0)
+        else:  # moneyline
+            a_ab, h_ab = w["abbr"].split(" @ ")
+            is_home = w.get("pick_team_abbr") == h_ab
+            margin = (sc["home"] - sc["away"]) if is_home else (sc["away"] - sc["home"])
+            entry["final_score"] = f'{sc["away"]}-{sc["home"]}'
+            if w.get("price") is None:
+                entry.update(result="VOID", pnl=0.0, note="No price logged; not paper-graded.")
+            elif margin > 0:
+                entry.update(result="WIN", pnl=round(american_to_b(w["price"]), 3))
+            else:
+                entry.update(result="LOSS", pnl=-1.0)
+        led["entries"].append(entry)
+        graded += 1
+
+    def agg(entries):
+        wins = sum(1 for e in entries if e["result"] == "WIN")
+        losses = sum(1 for e in entries if e["result"] == "LOSS")
+        pushes = sum(1 for e in entries if e["result"] == "PUSH")
+        voids = sum(1 for e in entries if e["result"] == "VOID")
+        net = round(sum(e["pnl"] for e in entries), 3)
+        decided = wins + losses
+        return {"record": f"{wins}-{losses}" + (f"-{pushes}p" if pushes else "") + (f"-{voids}v" if voids else ""),
+                "n_graded": len(entries),
+                "win_pct": round(100 * wins / decided, 1) if decided else None,
+                "paper_units_net": net,
+                "paper_roi_pct": round(100 * net / decided, 2) if decided else None}
+
+    ent = led["entries"]
+    led["aggregates"] = {
+        **agg(ent),
+        "by_tag": {t: agg([e for e in ent if e["tag"] == t]) for t in sorted({e["tag"] for e in ent})},
+        "by_market": {m: agg([e for e in ent if e["market"] == m]) for m in sorted({e["market"] for e in ent})},
+        "note": "WATCH tier PAPER record — flat 1u paper, 0u staked, never mixed into the staked ledger.",
+        "last_graded": date,
+    }
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(led, f, indent=1)
+    a = led["aggregates"]
+    print(f"Watch list: graded {graded} for {date}. {a['record']}, win {a['win_pct']}%, "
+          f"{a['paper_units_net']:+.2f}u paper across {a['n_graded']} tracked.")
+
 def fair_pick_odds(b):
     """Model fair odds for the pick side (used only if no market odds logged)."""
     return b["fair_home"] if b["pick_team_abbr"] == b["abbr"].split(" @ ")[1] else b["fair_away"]
@@ -208,11 +284,20 @@ def main():
         sc = scores.get(str(b.get("gamePk", "")))
         a_ab, h_ab = b["abbr"].split(" @ ")
         pick_is_home = b["pick_team_abbr"] == h_ab
+        # odds_basis (v0.13): the price the pick was actually priced at, its book,
+        # and the consensus alongside. Pre-v0.13 boards have no mkt_book, so their
+        # basis reads "consensus-median" — old entries in the ledger keep the bare
+        # int this field used to be (append-only: never rewritten).
         entry = {
             "date": date, "gamePk": b.get("gamePk"), "game": b["abbr"],
             "pick": b["pick"], "units": b["units"],
             "confidence": b["confidence"], "edge": b.get("edge"),
-            "odds_basis": b.get("mkt_odds"),
+            "odds_basis": {
+                "price": b.get("mkt_odds"),
+                "book": b.get("mkt_book"),
+                "basis": "best-price" if b.get("mkt_book") else "consensus-median",
+                "consensus": b.get("mkt_odds_consensus", b.get("mkt_odds")),
+            },
         }
         if sc is None or not sc.get("final") or sc.get("away") is None:
             entry.update(result="VOID", pnl=0.0,
@@ -284,6 +369,8 @@ def main():
 
     # Paper-grade the totals track into its own ledger (never touches the record above).
     grade_totals(date, B["board"], scores, closing, totals_ledger_path)
+    watchlist_path = sys.argv[sys.argv.index("--watchlist") + 1] if "--watchlist" in sys.argv else WATCHLIST
+    grade_watchlist(date, B.get("watch_picks") or [], scores, watchlist_path)
 
     reveal(date, B)
 

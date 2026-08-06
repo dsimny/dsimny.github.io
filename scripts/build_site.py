@@ -58,6 +58,14 @@ def et_time(utc_str):
 plays = sorted([b for b in B["board"] if b.get("published")], key=lambda b: -b["confidence"])
 leans = sorted([b for b in B["board"] if not b.get("published")], key=lambda b: -b["confidence"])
 scratches = B["scratches"]
+# v0.14 Watch List: tracked, not staked. Its paper record lives in
+# data/watchlist.json and NEVER mixes with the staked ledger in any display.
+watch = B.get("watch_picks") or []
+watchlist = {"entries": [], "aggregates": None}
+_wl = os.path.join(ROOT, "data", "watchlist.json")
+if os.path.exists(_wl):
+    with open(_wl, encoding="utf-8") as f:
+        watchlist = json.load(f)
 has_odds = any(b["mkt_odds"] is not None for b in B["board"])
 n_r8 = sum(1 for b in leans if b.get("rule8_flag"))
 n_noedge = sum(1 for b in leans if b.get("no_edge"))
@@ -176,8 +184,17 @@ def market_cells(b):
     if b["mkt_odds"] is None:
         return '<div><span class="stlab">Market</span><span class="stval">n/a</span></div>'
     edge_cls = "edge-pos" if b["edge"] >= 0.02 else ("edge-neg" if b["edge"] < 0 else "")
+    # v0.13: the price shown is the BEST across US books, with its book named;
+    # the consensus median rides along. Pre-v0.13 boards have no book -> the
+    # price IS the consensus and says so.
+    if b.get("mkt_book"):
+        cons = b.get("mkt_odds_consensus")
+        line_cell = (f'<div><span class="stlab">Best price</span><span class="stval">{b["mkt_odds"]:+d} '
+                     f'<em>{b["mkt_book"]}{f" · consensus {cons:+d}" if cons is not None else ""}</em></span></div>')
+    else:
+        line_cell = f'<div><span class="stlab">Market line</span><span class="stval">{b["mkt_odds"]:+d} <em>consensus</em></span></div>'
     return f'''
-        <div><span class="stlab">Market line</span><span class="stval">{b["mkt_odds"]:+d} <em>consensus</em></span></div>
+        {line_cell}
         <div><span class="stlab">Edge vs price</span><span class="stval {edge_cls}">{b["edge"]*100:+.1f} pts</span></div>
         <div><span class="stlab">EV per 1u</span><span class="stval {edge_cls}">{b["ev_per_unit"]*100:+.1f}%</span></div>'''
 
@@ -274,6 +291,27 @@ def locked_card(b):
       <p class="lockednote">Side, price, and sizing go to premium members before first pitch. The
       pick is timestamped in the public repository ahead of the game and publishes in full, with
       its complete breaker log, on the ledger once graded. We hold the position, never the result.</p>
+    </article>'''
+
+def watch_card(w):
+    div = f'{w["divergence"]*100:+.1f} pts' if w.get("divergence") is not None else "n/a"
+    return f'''
+    <article class="card card-lean">
+      <header class="cardhead">
+        <div>
+          <h3>{w["matchup"].replace(" @ ", ' <span class="at">@</span> ')}</h3>
+          <p class="meta">{et_time(w["utc"])} · {w["venue"]} · {w["market"]}</p>
+        </div>
+        <div class="flags"><span class="flag flag-free">👁 WATCH · {w["tag"].upper()}</span></div>
+      </header>
+      <div class="playrow">
+        <div><span class="playlab">Pick</span><span class="playval">{w["pick"]}</span></div>
+        <div><span class="playlab">Model</span><span class="playval">{w["model_p"]*100:.1f}%</span></div>
+        <div><span class="playlab">Edge</span><span class="playval">{w["edge"]*100:+.1f} pts</span></div>
+        <div><span class="playlab">Divergence</span><span class="playval">{div}</span></div>
+      </div>
+      <p class="sectsub">{w["reason"]}</p>
+      <p class="sectsub"><strong>0 units — tracked, not staked. Promotion criteria below.</strong></p>
     </article>'''
 
 def scratch_card(s):
@@ -409,7 +447,7 @@ else:
       <span class="kicker">Free Pick of the Day</span>
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>No qualifying plays today.</h1>
-      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.{' Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all.' if any(b.get("best_of_board") for b in leans) else ''}</p>
+      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.{' Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all.' if any(b.get("best_of_board") for b in leans) else ''}{f' The <strong>Watch List</strong> on the board tab shows what almost made it — {len(watch)} tracked at 0 units, never staked.' if watch else ''}</p>
       <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See today's board →</button></div>
     </div>'''
 
@@ -643,6 +681,15 @@ html = f'''<!DOCTYPE html>
     <p class="sectsub">The free pick is shown in full. The rest go to premium members before first pitch. Every one of them, winners and losers alike, publishes on the ledger with its full breaker log once graded.</p>
     {upgrade_block}
     <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today. Nothing cleared the gates. Passing is a position.</p>"}</div>
+    <h2 class="sect">Watch List: tracked, not staked</h2>
+    <p class="sectsub">A watch pick clears some but not all gates, or belongs to a market still in its proving period. Each is computed, published, and graded exactly like a real pick — at 0 units, on a separate paper record that never mixes with the staked ledger.</p>
+    <div class="cards">{"".join(watch_card(w) for w in watch) or "<p class='sectsub'>No watch picks today.</p>"}</div>
+    <div class="callout"><strong>Promotion criteria (the policy, verbatim):</strong> a market or band graduates from watch to staked only when its paper record reaches n ≥ 100 graded picks AND shows non-negative units at the prices logged AND the calibration for that segment is within 4 points. Promotion = version bump + methodology note. Demotion works the same way in reverse (a staked market that goes 100-pick negative returns to paper — also public).</div>
+    {f"""<div class="tiles">
+      <div class="tile"><span class="tl">Watch record</span><span class="tv">{watchlist["aggregates"]["record"]}</span><span class="td">paper record — never mixed into the staked ledger</span></div>
+      <div class="tile"><span class="tl">Paper units</span><span class="tv">{watchlist["aggregates"]["paper_units_net"]:+.2f}</span><span class="td">flat 1u paper, 0u staked</span></div>
+      <div class="tile"><span class="tl">Paper ROI</span><span class="tv">{f"{watchlist['aggregates']['paper_roi_pct']:+.1f}%" if watchlist["aggregates"]["paper_roi_pct"] is not None else "n/a"}</span><span class="td">on {watchlist["aggregates"]["n_graded"]} tracked picks</span></div>
+    </div>""" if watchlist.get("aggregates") else ""}
     <h2 class="sect">Model leans: no allocation, logged for transparency</h2>
     <p class="sectsub">{n_r8} held by the Rule 8 Divergence Governor, {n_noedge} benched by the edge gate, and the rest below the confidence floor.</p>
     <div class="cards">{"".join(card(b, False) for b in leans)}</div>
@@ -699,7 +746,7 @@ html = f'''<!DOCTYPE html>
     <div class="rulecard"><h3>Rule 2: High-Juice Favorite Cap <span class="badge b-auto">Automated · market lines</span></h3><p>No straight moneylines on favorites at −180 or heavier — −170 for day games — evaluated against the actual market price. The play pivots to the −1.5 run line or passes. Laying heavy juice is renting a favorite at luxury prices: the wins are small and the losses are structural.</p></div>
     <div class="rulecard"><h3>Rule 4: Injury Return Protocol <span class="badge b-auto">Automated (heuristic)</span></h3><p>Mandatory volume freeze on pitchers fresh off the IL or on restricted workloads. Heuristic: a starter far under the expected innings load this deep in the season triggers the freeze and a one-tier confidence downgrade.</p></div>
     <div class="rulecard"><h3>Rule 5: Trailing Telemetry Deviation Penalty <span class="badge b-man">Manual review</span></h3><p>Sharp velocity, spin, or efficiency drops over a starter's trailing three outings trigger a downgrade or fade. Requires a Statcast feed, so it is flagged for human review for now.</p></div>
-    <div class="rulecard"><h3>Rule 6: Road wOBA Suppression Multiplier <span class="badge b-auto">Automated detection · tax not yet applied</span></h3><p>Visitors whose trailing 14-day wOBA trails the league baseline by .035+ are flagged automatically on every card, computed from real rolling splits. The scoring tax itself is deliberately not applied yet: it goes live only if a full-season backtest proves it helps, and until then every flag says exactly that. Detection without action, honestly labeled, beats action without evidence.</p></div>
+    <div class="rulecard"><h3>Rule 6: Road wOBA Suppression Multiplier <span class="badge b-auto">Automated · backtest-validated</span></h3><p>Visitors whose trailing 14-day wOBA trails the league baseline by .035+ take an 8% tax on their projected scoring, computed from real rolling splits and printed on every card. Why 8% and not the 12% the rule was drafted with? A full-season backtest (1,454 games) showed the untaxed model over-projected those cold road offenses by a third of a run; 8% erased the bias almost exactly, and 12% over-corrected. The tax went live only after that evidence — sized by measurement, not taste.</p></div>
     <div class="rulecard"><h3>Rule 7: Late-Line Circuit Breaker <span class="badge b-auto">Automated</span></h3><p>Any game with a TBD starter inside the pre-game window is scratched automatically. No named starter, no position: you don't board a flight with an unnamed pilot.</p></div>
     <div class="rulecard"><h3>Rule 8: Divergence Governor <span class="badge b-auto">Automated</span></h3><p>If the model's win probability and the de-vigged market disagree by more than 12 points, the play is held for manual review, with no allocation, no matter how juicy the "edge" looks. A huge gap isn't a gift; it's a warning that the market has priced in something our inputs haven't seen. The best defense against a model's blind spots is respecting the one opponent that never sleeps.</p></div>
     <div class="rulecard"><h3>Rookie Ambush Overhaul &amp; Two-Out NRFI Override <span class="badge b-na">Dormant</span></h3><p>NRFI/early-under governors (rookie launch-angle variance; #2–3 slot ISO vs high-ride fastballs). Open Ledger doesn't publish NRFI positions yet, so these breakers are dormant until that market ships.</p></div>

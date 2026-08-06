@@ -1,0 +1,61 @@
+name: Backtest sweep
+# On-demand model-tuning runs (workflow_dispatch only — never scheduled).
+# The runner has open egress to the MLB Stats API, which local sandboxes may
+# not, so this is the canonical place to run full-season sweeps. Results go to
+# the step log; the reconstructed-snapshot cache is kept in the Actions cache
+# so repeat sweeps skip the ~120-date API reconstruction.
+#
+# Commits NOTHING and needs NO secrets: data/backtest/ is gitignored, the
+# backtest reads no encrypted files, and permissions are read-only.
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date (YYYY-MM-DD)"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date (YYYY-MM-DD)"
+        required: true
+        default: "2026-07-27"
+      sims:
+        description: "Sims per game"
+        required: true
+        default: "3000"
+      sweep:
+        description: "param:v1,v2,... (empty = full calibration report, no sweep)"
+        required: false
+        default: "woba_tax:0,0.04,0.08,0.12"
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Restore reconstructed-snapshot cache
+        uses: actions/cache@v4
+        with:
+          path: data/backtest
+          # The bt-woba prefix scopes restores to caches built by THIS workflow
+          # (post-v0.9 snapshots that carry the 14-day wOBA fields). Never widen
+          # the prefix: restoring a pre-v0.9 cache would leave Rule 6 silently
+          # inert and make a woba_tax sweep meaningless.
+          key: bt-woba-${{ inputs.start || '2026-04-01' }}-${{ inputs.end || '2026-07-27' }}
+          restore-keys: bt-woba-
+      - name: Run backtest
+        # The || fallbacks serve the push-bootstrap trigger, where inputs are
+        # empty: it runs the default full-season woba_tax sweep.
+        run: |
+          ARGS="--start ${{ inputs.start || '2026-04-01' }} --end ${{ inputs.end || '2026-07-27' }} --sims ${{ inputs.sims || '3000' }}"
+          SWEEP="${{ inputs.sweep || 'woba_tax:0,0.04,0.08,0.12' }}"
+          if [ -n "$SWEEP" ]; then ARGS="$ARGS --sweep $SWEEP"; fi
+          echo "python scripts/backtest.py $ARGS"
+          python scripts/backtest.py $ARGS

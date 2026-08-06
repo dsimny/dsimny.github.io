@@ -55,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.13-best-price"
+ENGINE_VERSION = "0.14-watchlist"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -144,6 +144,11 @@ VENUE_TZ = {
 
 # v0.2 market-aware gates
 MIN_EDGE = 0.02          # publish only if model prob beats vigged market implied by 2+ pts
+WATCH_EDGE_MIN = 0.01    # v0.14 edge-band watch floor: ML candidates with edge in
+                         # [1.0%, MIN_EDGE) publish as WATCH-ONLY (0u) — the near-miss
+                         # band made visible instead of invisible. MIN_EDGE itself is
+                         # unchanged; thresholds move only via the gate-study process
+                         # (House Rule 9), never by loosening.
 DIVERGENCE_CAP = 0.12    # Rule 8 (Divergence Governor): if model vs de-vigged market
                          # disagreement exceeds 12 points, the market almost certainly
                          # knows something our inputs don't (lineups, injury news, form).
@@ -678,6 +683,58 @@ def main():
                                  "top remaining lean — 0 units, NOT staked, published for transparency. "
                                  "The checks above show exactly which gate it failed.")
 
+    # ---- Watch List (v0.14): tracked, not staked ----
+    # A WATCH pick clears SOME but not all gates, or belongs to a market still
+    # in its proving period. Computed and published like real picks, at 0 units,
+    # graded nightly into data/watchlist.json — a paper record that never mixes
+    # with the staked ledger in any display or total. Three tagged sources.
+    watch = []
+    for b in board:
+        a_name, h_name = b["matchup"].split(" @ ")
+        a_ab, h_ab = b["abbr"].split(" @ ")
+        base = {"gamePk": b["gamePk"], "matchup": b["matchup"], "abbr": b["abbr"],
+                "utc": b["utc"], "venue": b["venue"], "units": 0.0}
+        # market-proving: totals picks clearing the edge + divergence gates while
+        # the totals market is still on its paper proving track.
+        tp = b.get("total_pick")
+        if tp and tp["edge"] is not None and tp["edge"] >= MIN_EDGE \
+                and abs(tp["model_p"] - tp["mkt_devig"]) <= DIVERGENCE_CAP:
+            watch.append({**base, "market": "total",
+                "pick": f'{tp["side"]} {tp["line"]:g} ({tp["price"]:+d}{", " + tp["book"] if tp.get("book") else ""})',
+                "side": tp["side"], "line": tp["line"], "price": tp["price"], "book": tp.get("book"),
+                "model_p": tp["model_p"], "edge": tp["edge"],
+                "divergence": round(tp["model_p"] - tp["mkt_devig"], 4),
+                "tag": "market-proving",
+                "reason": "Clears the edge and divergence gates, but totals are still in their paper proving period."})
+        # edge-band: near-miss ML candidates in [WATCH_EDGE_MIN, MIN_EDGE). Rule 2
+        # pivots are excluded (their logged edge prices the moneyline, not the run
+        # line they pivoted to); Rule 8 holds get their own tag below.
+        if (not b.get("published") and not b["rule8_flag"] and not b["rule2_pivot"]
+                and b["edge"] is not None and WATCH_EDGE_MIN <= b["edge"] < MIN_EDGE):
+            watch.append({**base, "market": "moneyline", "pick": b["pick"],
+                "pick_team_abbr": b["pick_team_abbr"],
+                "price": b["mkt_odds"], "book": b.get("mkt_book"),
+                "model_p": b["confidence"], "edge": b["edge"], "divergence": b.get("divergence"),
+                "tag": "edge-band",
+                "reason": (f'Edge {b["edge"]*100:+.1f} pts sits in the near-miss band '
+                           f'[{WATCH_EDGE_MIN*100:.0f}%, {MIN_EDGE*100:.0f}%). The gate holds; '
+                           f'the near-miss is visible instead of invisible.')})
+        # R8-hold: the Divergence Governor's holds, folded into the watch surface
+        # with their divergence numbers. Recorded as the MONEYLINE side — the
+        # divergence that held it is a moneyline disagreement — even when Rule 2
+        # also pivoted the display pick to the run line.
+        if b["rule8_flag"] and b["mkt_odds"] is not None:
+            pick_name = h_name if b["pick_team_abbr"] == h_ab else a_name
+            watch.append({**base, "market": "moneyline",
+                "pick": f'{pick_name} ML ({b["mkt_odds"]:+d}{", " + b["mkt_book"] if b.get("mkt_book") else ""})',
+                "pick_team_abbr": b["pick_team_abbr"],
+                "price": b["mkt_odds"], "book": b.get("mkt_book"),
+                "model_p": b["confidence"], "edge": b["edge"], "divergence": b.get("divergence"),
+                "tag": "R8-hold",
+                "reason": (f'Rule 8 hold: raw model vs de-vigged market divergence '
+                           f'{abs(b["divergence"])*100:.1f} pts exceeds the {DIVERGENCE_CAP*100:.0f}-pt cap. '
+                           f'The market knows something; we track instead of bet.')})
+
     out = {
         "date": DATE,
         "engine_version": ENGINE_VERSION, "model_weight": MODEL_WEIGHT,
@@ -686,8 +743,10 @@ def main():
         "n_slate": len(data["games"]),
         "league_rate": round(league_rate, 3), "league_ra9": round(league_era, 2),
         "board": board, "scratches": scratches,
+        "watch_picks": watch,
         "published_units": exposure,
         "n_published": len(published),
+        "n_watch": len(watch),
     }
     board_path, board_sha, enc = crypto_box.save_dataset(ROOT, "board", DATE, out)
     if enc:
@@ -713,6 +772,8 @@ def main():
               f'{"  [R2]" if b["rule2_pivot"] else ""}{"  [R4]" if b["rule4_flag"] else ""}{"  [R8 DIVERGENCE]" if b["rule8_flag"] else ""}{"  [no edge]" if b["no_edge"] else ""}{"  [✳ BEST OF BOARD]" if b.get("best_of_board") else ""}')
     for s in scratches:
         print(f'SCRATCH {s["abbr"]:<12} {s["rule"]}')
+    for w in watch:
+        print(f'WATCH   {w["abbr"]:<12} [{w["tag"]}] {w["pick"]:<34} model {w["model_p"]:.1%}  edge {w["edge"]*100:+.1f}  0u')
 
 if __name__ == "__main__":
     main()

@@ -37,6 +37,8 @@ to Discord.
 
 .github/workflows/grade-ledger.yml   (daily 08:10 UTC)
   scripts/grade.py        → data/ledger.json           (final scores → W/L/VOID, units, ROI, CLV; APPEND-ONLY)
+                          → data/totals_ledger.json    (totals paper track, separate)
+                          → data/watchlist.json        (v0.14 watch tier paper record, separate; never mixes with ledger.json)
                           → data/board_<date>.json     (the reveal: .enc replaced by plaintext)
   scripts/build_site.py   → index.html                 (ledger tab refreshed)
   scripts/post_discord.py recap                        (posts results, wins AND losses)
@@ -181,7 +183,24 @@ with more care than the API keys, which are all replaceable.
   Pick side, confidence, fair line, edge, EV and sizing all run on the blended
   prob; the raw prob is kept for Rule 8 and logged (model_conf/p_mkt_devig) for
   calibration. No market line → pure model (no blend). Board stamps
-  engine_version="0.12-woba-tax".
+  engine_version="0.14-watchlist".
+- v0.13 BEST-PRICE: fetch_data.consolidate_odds() (pure, unit-testable) records
+  the median consensus AND the best price per side across US books with the
+  book name; totals best prices only at the consensus line. Edge/EV/Kelly and
+  Rule 2 evaluate at BEST price (what a bettor can actually get; raises every
+  measured edge 1–3 pts); the market blend, Rule 8 divergence, and CLV stay
+  anchored to the CONSENSUS medians so best-price can't flatter them. Pick
+  labels carry the book; ledger odds_basis = {price, book, basis, consensus}.
+- v0.14 WATCH LIST: engine emits watch_picks (0u, tracked-not-staked), three
+  tagged sources: "market-proving" (totals clearing edge+divergence gates while
+  totals are paper-only), "edge-band" (ML near-misses with edge in
+  [WATCH_EDGE_MIN=1.0%, MIN_EDGE) — the visible near-miss band; Rule 2 pivots
+  excluded, their edge prices the ML not the RL), "R8-hold" (Divergence
+  Governor holds, recorded as the ML side). grade.py grades them nightly into
+  data/watchlist.json (append-only, flat 1u PAPER, aggregates per tag/market)
+  which NEVER mixes with ledger.json in any display, total, or post. Site
+  renders the section + the promotion criteria verbatim; members Discord post
+  carries a "WATCH — tracked, not staked" divider embed.
 - v0.9 RULE 6 DETECTION / v0.12 TAX: fetch_data.py pulls each team's
   trailing-14-day wOBA (one byDateRange hitting call; wOBA computed from
   components with static weights — error cancels in the team-vs-league gap)
@@ -236,6 +255,25 @@ MEASURING it without risking the record:
   measuring), then bullpen availability, then umpires. This track is
   the gate: only promote totals to real staked plays (real board + ledger + site) once
   its CLV is convincingly positive. Nothing staked on the public site changes until then.
+
+## Engine version history (update this table on every version bump)
+
+| version | date (2026) | change |
+|---|---|---|
+| 0.1 | Jul 21 | initial engine: team rates, park, HFA, negative binomial, Rules 2/4/7 |
+| 0.2 | ~Jul 23 | market gates: real odds, edge gate, Rule 8, quarter-Kelly, Rule 2 on market lines |
+| 0.3 | ~Jul 24 | market blend (MODEL_WEIGHT=0.5 toward de-vigged consensus) |
+| 0.4 | ~Jul 24 | real bullpen ERA over the non-starter innings |
+| 0.5 | ~Jul 25 | stabilized starter rate (ERA+FIP, regressed by IP); simulate_game extracted for the backtest |
+| 0.6 | ~Jul 26 | FACTOR_SHRINK=0.6 team-rate regression (full-season backtest: Brier 0.2504→0.2482) |
+| 0.7 | ~Jul 28 | totals paper track (total_pick + totals_ledger.json; measuring before staking) |
+| 0.8 | Jul 29 | Rule 2 day/night caps −180/−170, venue-local (playbook adoption; strictly tighter than road −180/home −220) |
+| 0.9 | Jul 29 | Rule 6 road-wOBA detection (14-day byDateRange splits), tax gated at 0 |
+| 0.10 | Jul 29 | weather on the totals paper track (second sim, separate rng stream; temp + hot-day fly-ball kicker) |
+| 0.11 | Jul 29 | ✳ Best of Board lean when the gates leave the members channel empty (House Rule 6 amendment) |
+| 0.12 | Jul 29 | WOBA_TAX=0.08, sized by full-season sweep (1454 games: zeroed +0.31-run triggered-totals bias, won Brier; 12% over-corrected) |
+| 0.13 | Aug 6 | best-price odds ingestion: edge/EV/Kelly/Rule 2 at best book price w/ book names; consensus kept for de-vig + CLV |
+| 0.14 | Aug 6 | Watch List tier: watch_picks (market-proving / edge-band / R8-hold), watchlist.json paper record, site + Discord surfaces |
 
 ## Circuit breakers (the product's identity — never weaken silently)
 
@@ -303,6 +341,18 @@ they conflict, the tighter rule wins and the conflict gets flagged to Daniel.
    did (the board "live on Today's Board" after gating, and the Discord join
    block offering held plays to free joiners). Re-read the user-facing copy
    whenever behaviour changes.
+9. Gate thresholds change only through the gate study (adopted 2026-08-06 from
+   the v0.3 addendum, Section C): MIN_EDGE, the Rule 8 cap, and (later) the
+   Kelly fraction may change ONLY if the proposed band is profitable on the
+   tuning season AND validates on the held-out season AND the change ships as
+   a version bump with both seasons' numbers recorded in the version-history
+   table. No threshold changes outside this process — especially not during a
+   cold streak or a quiet-board streak; that is precisely when the temptation
+   peaks and the discipline is the product. (The 2026-08-01 board confirmed
+   the quiet board is a true reading — all candidate edges negative at
+   consensus prices — not a stuck gauge. Volume comes from better prices,
+   more candidates, and better inputs, never from quietly loosening gates.
+   The near-miss band is visible on the Watch List instead.)
 
 ## Config (GitHub → Settings)
 
@@ -447,8 +497,8 @@ were provided); Whop upgrade button on the site is still dormant
 
 ## Roadmap (in trust-building order)
 
-1. Live multi-book best price via The Odds API (fetch_data.py already consumes
-   the key; upgrade from median-consensus to per-book best price + book name).
+1. Live multi-book best price via The Odds API. [SHIPPED 2026-08-06, v0.13:
+   best price per side + book name; consensus median retained for de-vig/CLV.]
 2. Log opening vs closing lines → CLV tracking on the ledger. [CODE SHIPPED
    2026-07-24: scripts/fetch_closing.py + capture-closing.yml + grade.py CLV
    fields/aggregate. REMAINING: set up the cron-job.org triggers for

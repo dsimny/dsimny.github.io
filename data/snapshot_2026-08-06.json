@@ -1,0 +1,878 @@
+{
+ "games": [
+  {
+   "away": 108,
+   "awaySP": 696270,
+   "gamePk": 824804,
+   "home": 110,
+   "homeSP": 687064,
+   "utc": "2026-08-06T16:35:00Z",
+   "venue": "Oriole Park at Camden Yards",
+   "wx": null
+  },
+  {
+   "away": 133,
+   "awaySP": 686930,
+   "gamePk": 824481,
+   "home": 113,
+   "homeSP": 671096,
+   "utc": "2026-08-06T16:40:00Z",
+   "venue": "Great American Ball Park",
+   "wx": {
+    "humidity_pct": 75,
+    "roof": false,
+    "temp_f": 81.7,
+    "wind_dir_deg": 126,
+    "wind_mph": 5.0
+   }
+  },
+  {
+   "away": 121,
+   "awaySP": 690997,
+   "gamePk": 824401,
+   "home": 114,
+   "homeSP": 656492,
+   "utc": "2026-08-06T17:10:00Z",
+   "venue": "Progressive Field",
+   "wx": {
+    "humidity_pct": 45,
+    "roof": false,
+    "temp_f": 87.7,
+    "wind_dir_deg": 264,
+    "wind_mph": 4.3
+   }
+  },
+  {
+   "away": 134,
+   "awaySP": 677952,
+   "gamePk": 823754,
+   "home": 158,
+   "homeSP": 669160,
+   "utc": "2026-08-06T18:10:00Z",
+   "venue": "American Family Field",
+   "wx": {
+    "roof": true
+   }
+  },
+  {
+   "away": 141,
+   "awaySP": 656302,
+   "gamePk": 824664,
+   "home": 112,
+   "homeSP": 656849,
+   "utc": "2026-08-06T18:20:00Z",
+   "venue": "Wrigley Field",
+   "wx": {
+    "humidity_pct": 91,
+    "roof": false,
+    "temp_f": 74.9,
+    "wind_dir_deg": 170,
+    "wind_mph": 6.1
+   }
+  },
+  {
+   "away": 116,
+   "awaySP": 664285,
+   "gamePk": 823105,
+   "home": 136,
+   "homeSP": 682243,
+   "utc": "2026-08-06T20:10:00Z",
+   "venue": "T-Mobile Park",
+   "wx": {
+    "roof": true
+   }
+  },
+  {
+   "away": 120,
+   "awaySP": 571945,
+   "gamePk": 823430,
+   "home": 143,
+   "homeSP": 650911,
+   "utc": "2026-08-06T22:05:00Z",
+   "venue": "Citizens Bank Park",
+   "wx": {
+    "humidity_pct": 65,
+    "roof": false,
+    "temp_f": 85.9,
+    "wind_dir_deg": 194,
+    "wind_mph": 8.5
+   }
+  },
+  {
+   "away": 145,
+   "awaySP": 622491,
+   "gamePk": 824729,
+   "home": 111,
+   "homeSP": 624133,
+   "utc": "2026-08-06T23:10:00Z",
+   "venue": "Fenway Park",
+   "wx": {
+    "humidity_pct": 58,
+    "roof": false,
+    "temp_f": 88.2,
+    "wind_dir_deg": 237,
+    "wind_mph": 7.4
+   }
+  },
+  {
+   "away": 146,
+   "awaySP": 676083,
+   "gamePk": 824885,
+   "home": 144,
+   "homeSP": 527048,
+   "utc": "2026-08-06T23:15:00Z",
+   "venue": "Truist Park",
+   "wx": {
+    "humidity_pct": 68,
+    "roof": false,
+    "temp_f": 83.6,
+    "wind_dir_deg": 142,
+    "wind_mph": 5.1
+   }
+  },
+  {
+   "away": 142,
+   "awaySP": 641927,
+   "gamePk": 824080,
+   "home": 118,
+   "homeSP": 608379,
+   "utc": "2026-08-06T23:40:00Z",
+   "venue": "Kauffman Stadium",
+   "wx": {
+    "humidity_pct": 69,
+    "roof": false,
+    "temp_f": 84.1,
+    "wind_dir_deg": 29,
+    "wind_mph": 4.1
+   }
+  },
+  {
+   "away": 135,
+   "awaySP": 621111,
+   "gamePk": 825053,
+   "home": 109,
+   "homeSP": 684442,
+   "utc": "2026-08-07T01:40:00Z",
+   "venue": "Chase Field",
+   "wx": {
+    "roof": true
+   }
+  }
+ ],
+ "league_pitching": {
+  "bb": 11574,
+  "er": 14145,
+  "hbp": 1486,
+  "hr": 3976,
+  "ip": 30489.333,
+  "k": 28819
+ },
+ "league_woba_14d": 0.3086,
+ "odds": {
+  "823105": {
+   "away_ml": 114,
+   "home_ml": -126,
+   "over_price": -108,
+   "total": 8.0,
+   "under_price": -111
+  },
+  "823430": {
+   "away_ml": 280,
+   "home_ml": -325,
+   "over_price": -105,
+   "total": 9.0,
+   "under_price": -115
+  },
+  "823754": {
+   "away_ml": 114,
+   "home_ml": -128,
+   "over_price": -115,
+   "total": 7.5,
+   "under_price": -105
+  },
+  "824080": {
+   "away_ml": 108,
+   "home_ml": -123,
+   "over_price": -102,
+   "total": 9.0,
+   "under_price": -118
+  },
+  "824401": {
+   "away_ml": 106,
+   "home_ml": -121,
+   "over_price": -102,
+   "total": 7.5,
+   "under_price": -118
+  },
+  "824481": {
+   "away_ml": 145,
+   "home_ml": -161,
+   "over_price": -103,
+   "total": 9.5,
+   "under_price": -115
+  },
+  "824664": {
+   "away_ml": -113,
+   "home_ml": 102,
+   "over_price": -105,
+   "total": 7.5,
+   "under_price": -114
+  },
+  "824729": {
+   "away_ml": 159,
+   "home_ml": -180,
+   "over_price": -105,
+   "total": 9.0,
+   "under_price": -116
+  },
+  "824804": {
+   "away_ml": 166,
+   "home_ml": -190,
+   "over_price": -113,
+   "total": 9.5,
+   "under_price": -105
+  },
+  "824885": {
+   "away_ml": 129,
+   "home_ml": -143,
+   "over_price": -120,
+   "total": 9.0,
+   "under_price": 100
+  },
+  "825053": {
+   "away_ml": -105,
+   "home_ml": -105,
+   "over_price": -107,
+   "total": 9.0,
+   "under_price": -112
+  }
+ },
+ "odds_source": "The Odds API, median across US books, fetched 2026-08-06T15:10:27.005227Z",
+ "park_factors": {
+  "American Family Field": 0.99,
+  "Angel Stadium": 1.0,
+  "Busch Stadium": 0.97,
+  "Camden Yards": 1.0,
+  "Chase Field": 1.05,
+  "Citi Field": 0.96,
+  "Citizens Bank Park": 1.01,
+  "Comerica Park": 0.97,
+  "Coors Field": 1.24,
+  "Daikin Park": 0.97,
+  "Dodger Stadium": 0.98,
+  "Fenway Park": 1.06,
+  "George M. Steinbrenner Field": 1.06,
+  "Globe Life Field": 0.98,
+  "Great American Ball Park": 1.04,
+  "Guaranteed Rate Field": 1.03,
+  "Kauffman Stadium": 1.03,
+  "Nationals Park": 0.99,
+  "Oracle Park": 0.94,
+  "PNC Park": 0.97,
+  "Petco Park": 0.95,
+  "Progressive Field": 0.97,
+  "Rate Field": 1.03,
+  "Rogers Centre": 1.0,
+  "Sutter Health Park": 1.02,
+  "T-Mobile Park": 0.92,
+  "Target Field": 0.99,
+  "Truist Park": 1.0,
+  "Wrigley Field": 1.02,
+  "Yankee Stadium": 1.03,
+  "loanDepot park": 0.95
+ },
+ "park_factors_note": "Approximate season-level run park factors; refresh from Baseball Savant.",
+ "pitchers": {
+  "527048": {
+   "ao": 95,
+   "bb": 39,
+   "era": 3.24,
+   "go": 112,
+   "hbp": 2,
+   "hr": 11,
+   "ip": 97.1,
+   "k": 75,
+   "k9": 6.93,
+   "name": "Mart\u00edn P\u00e9rez",
+   "whip": 1.17
+  },
+  "571945": {
+   "ao": 127,
+   "bb": 22,
+   "era": 5.67,
+   "go": 133,
+   "hbp": 1,
+   "hr": 26,
+   "ip": 108.0,
+   "k": 55,
+   "k9": 4.58,
+   "name": "Miles Mikolas",
+   "whip": 1.35
+  },
+  "608379": {
+   "ao": 160,
+   "bb": 38,
+   "era": 3.51,
+   "go": 127,
+   "hbp": 5,
+   "hr": 16,
+   "ip": 138.1,
+   "k": 111,
+   "k9": 7.22,
+   "name": "Michael Wacha",
+   "whip": 1.16
+  },
+  "621111": {
+   "ao": 99,
+   "bb": 44,
+   "era": 5.18,
+   "go": 109,
+   "hbp": 4,
+   "hr": 14,
+   "ip": 104.1,
+   "k": 92,
+   "k9": 7.94,
+   "name": "Walker Buehler",
+   "whip": 1.45
+  },
+  "622491": {
+   "ao": 120,
+   "bb": 32,
+   "era": 5.06,
+   "go": 92,
+   "hbp": 5,
+   "hr": 16,
+   "ip": 99.2,
+   "k": 86,
+   "k9": 7.77,
+   "name": "Luis Castillo",
+   "whip": 1.39
+  },
+  "624133": {
+   "ao": 95,
+   "bb": 28,
+   "era": 3.15,
+   "go": 91,
+   "hbp": 2,
+   "hr": 5,
+   "ip": 100.0,
+   "k": 105,
+   "k9": 9.45,
+   "name": "Ranger Suarez",
+   "whip": 1.16
+  },
+  "641927": {
+   "ao": 117,
+   "bb": 24,
+   "era": 4.45,
+   "go": 76,
+   "hbp": 2,
+   "hr": 14,
+   "ip": 87.0,
+   "k": 63,
+   "k9": 6.52,
+   "name": "Bailey Ober",
+   "whip": 1.23
+  },
+  "650911": {
+   "ao": 96,
+   "bb": 33,
+   "era": 2.61,
+   "go": 161,
+   "hbp": 4,
+   "hr": 12,
+   "ip": 144.2,
+   "k": 168,
+   "k9": 10.45,
+   "name": "Cristopher S\u00e1nchez",
+   "whip": 1.2
+  },
+  "656302": {
+   "ao": 87,
+   "bb": 51,
+   "era": 2.41,
+   "go": 88,
+   "hbp": 3,
+   "hr": 7,
+   "ip": 119.1,
+   "k": 174,
+   "k9": 13.12,
+   "name": "Dylan Cease",
+   "whip": 1.08
+  },
+  "656492": {
+   "ao": 124,
+   "bb": 30,
+   "era": 3.06,
+   "go": 137,
+   "hbp": 8,
+   "hr": 19,
+   "ip": 129.1,
+   "k": 116,
+   "k9": 8.07,
+   "name": "Foster Griffin",
+   "whip": 1.07
+  },
+  "656849": {
+   "ao": 90,
+   "bb": 40,
+   "era": 5.52,
+   "go": 126,
+   "hbp": 3,
+   "hr": 11,
+   "ip": 101.0,
+   "k": 85,
+   "k9": 7.57,
+   "name": "David Peterson",
+   "whip": 1.48
+  },
+  "664285": {
+   "ao": 106,
+   "bb": 43,
+   "era": 4.41,
+   "go": 150,
+   "hbp": 12,
+   "hr": 12,
+   "ip": 120.1,
+   "k": 98,
+   "k9": 7.33,
+   "name": "Framber Valdez",
+   "whip": 1.39
+  },
+  "669160": {
+   "ao": 109,
+   "bb": 35,
+   "era": 4.38,
+   "go": 96,
+   "hbp": 7,
+   "hr": 7,
+   "ip": 109.0,
+   "k": 106,
+   "k9": 8.75,
+   "name": "Dustin May",
+   "whip": 1.28
+  },
+  "671096": {
+   "ao": 151,
+   "bb": 59,
+   "era": 3.91,
+   "go": 110,
+   "hbp": 0,
+   "hr": 17,
+   "ip": 122.0,
+   "k": 95,
+   "k9": 7.01,
+   "name": "Andrew Abbott",
+   "whip": 1.39
+  },
+  "676083": {
+   "ao": 88,
+   "bb": 22,
+   "era": 4.58,
+   "go": 81,
+   "hbp": 1,
+   "hr": 11,
+   "ip": 78.2,
+   "k": 61,
+   "k9": 6.98,
+   "name": "Janson Junk",
+   "whip": 1.33
+  },
+  "677952": {
+   "ao": 110,
+   "bb": 31,
+   "era": 3.96,
+   "go": 121,
+   "hbp": 7,
+   "hr": 17,
+   "ip": 127.1,
+   "k": 140,
+   "k9": 9.9,
+   "name": "Braxton Ashcraft",
+   "whip": 1.16
+  },
+  "682243": {
+   "ao": 87,
+   "bb": 13,
+   "era": 2.8,
+   "go": 54,
+   "hbp": 1,
+   "hr": 12,
+   "ip": 74.0,
+   "k": 74,
+   "k9": 9.0,
+   "name": "Bryce Miller",
+   "whip": 0.92
+  },
+  "684442": {
+   "ao": 20,
+   "bb": 5,
+   "era": 4.85,
+   "go": 6,
+   "hbp": 2,
+   "hr": 3,
+   "ip": 13.0,
+   "k": 12,
+   "k9": 8.31,
+   "name": "Kohl Drake",
+   "whip": 1.46
+  },
+  "686930": {
+   "ao": 37,
+   "bb": 14,
+   "era": 4.85,
+   "go": 20,
+   "hbp": 1,
+   "hr": 5,
+   "ip": 29.2,
+   "k": 29,
+   "k9": 8.8,
+   "name": "Mason Barnett",
+   "whip": 1.31
+  },
+  "687064": {
+   "ao": 118,
+   "bb": 36,
+   "era": 3.31,
+   "go": 101,
+   "hbp": 1,
+   "hr": 11,
+   "ip": 103.1,
+   "k": 85,
+   "k9": 7.4,
+   "name": "Brandon Young",
+   "whip": 1.29
+  },
+  "690997": {
+   "ao": 95,
+   "bb": 45,
+   "era": 3.29,
+   "go": 125,
+   "hbp": 13,
+   "hr": 13,
+   "ip": 125.2,
+   "k": 148,
+   "k9": 10.6,
+   "name": "Nolan McLean",
+   "whip": 1.12
+  },
+  "696270": {
+   "ao": 57,
+   "bb": 20,
+   "era": 7.63,
+   "go": 42,
+   "hbp": 2,
+   "hr": 12,
+   "ip": 46.0,
+   "k": 37,
+   "k9": 7.24,
+   "name": "Ryan Johnson",
+   "whip": 1.59
+  }
+ },
+ "season": 2026,
+ "snapshot_utc": "2026-08-06T15:10:27Z",
+ "source": "MLB Stats API (statsapi.mlb.com), fetched 2026-08-06",
+ "teams": {
+  "108": {
+   "abbr": "LAA",
+   "l": 71,
+   "name": "Los Angeles Angels",
+   "pen_era": 4.35,
+   "ra": 552,
+   "rs": 473,
+   "w": 43,
+   "woba_14d": 0.2688
+  },
+  "109": {
+   "abbr": "AZ",
+   "l": 54,
+   "name": "Arizona Diamondbacks",
+   "pen_era": 4.22,
+   "ra": 520,
+   "rs": 527,
+   "w": 61,
+   "woba_14d": 0.3276
+  },
+  "110": {
+   "abbr": "BAL",
+   "l": 58,
+   "name": "Baltimore Orioles",
+   "pen_era": 4.09,
+   "ra": 545,
+   "rs": 515,
+   "w": 56,
+   "woba_14d": 0.2785
+  },
+  "111": {
+   "abbr": "BOS",
+   "l": 51,
+   "name": "Boston Red Sox",
+   "pen_era": 2.9,
+   "ra": 416,
+   "rs": 492,
+   "w": 62,
+   "woba_14d": 0.354
+  },
+  "112": {
+   "abbr": "CHC",
+   "l": 49,
+   "name": "Chicago Cubs",
+   "pen_era": 3.9,
+   "ra": 493,
+   "rs": 592,
+   "w": 66,
+   "woba_14d": 0.3502
+  },
+  "113": {
+   "abbr": "CIN",
+   "l": 58,
+   "name": "Cincinnati Reds",
+   "pen_era": 4.43,
+   "ra": 531,
+   "rs": 470,
+   "w": 55,
+   "woba_14d": 0.3061
+  },
+  "114": {
+   "abbr": "CLE",
+   "l": 58,
+   "name": "Cleveland Guardians",
+   "pen_era": 3.81,
+   "ra": 474,
+   "rs": 453,
+   "w": 57,
+   "woba_14d": 0.271
+  },
+  "115": {
+   "abbr": "COL",
+   "l": 70,
+   "name": "Colorado Rockies",
+   "pen_era": 4.96,
+   "ra": 662,
+   "rs": 554,
+   "w": 45,
+   "woba_14d": 0.3203
+  },
+  "116": {
+   "abbr": "DET",
+   "l": 59,
+   "name": "Detroit Tigers",
+   "pen_era": 3.86,
+   "ra": 446,
+   "rs": 515,
+   "w": 55,
+   "woba_14d": 0.3742
+  },
+  "117": {
+   "abbr": "HOU",
+   "l": 57,
+   "name": "Houston Astros",
+   "pen_era": 4.03,
+   "ra": 565,
+   "rs": 540,
+   "w": 59,
+   "woba_14d": 0.3595
+  },
+  "118": {
+   "abbr": "KC",
+   "l": 67,
+   "name": "Kansas City Royals",
+   "pen_era": 5.35,
+   "ra": 579,
+   "rs": 477,
+   "w": 48,
+   "woba_14d": 0.2941
+  },
+  "119": {
+   "abbr": "LAD",
+   "l": 46,
+   "name": "Los Angeles Dodgers",
+   "pen_era": 4.06,
+   "ra": 444,
+   "rs": 584,
+   "w": 69,
+   "woba_14d": 0.3298
+  },
+  "120": {
+   "abbr": "WSH",
+   "l": 60,
+   "name": "Washington Nationals",
+   "pen_era": 4.95,
+   "ra": 606,
+   "rs": 620,
+   "w": 56,
+   "woba_14d": 0.3239
+  },
+  "121": {
+   "abbr": "NYM",
+   "l": 66,
+   "name": "New York Mets",
+   "pen_era": 3.74,
+   "ra": 522,
+   "rs": 469,
+   "w": 49,
+   "woba_14d": 0.2992
+  },
+  "133": {
+   "abbr": "ATH",
+   "l": 69,
+   "name": "Athletics",
+   "pen_era": 5.67,
+   "ra": 649,
+   "rs": 493,
+   "w": 45,
+   "woba_14d": 0.2693
+  },
+  "134": {
+   "abbr": "PIT",
+   "l": 59,
+   "name": "Pittsburgh Pirates",
+   "pen_era": 4.28,
+   "ra": 559,
+   "rs": 586,
+   "w": 57,
+   "woba_14d": 0.2737
+  },
+  "135": {
+   "abbr": "SD",
+   "l": 56,
+   "name": "San Diego Padres",
+   "pen_era": 3.71,
+   "ra": 503,
+   "rs": 486,
+   "w": 59,
+   "woba_14d": 0.3244
+  },
+  "136": {
+   "abbr": "SEA",
+   "l": 59,
+   "name": "Seattle Mariners",
+   "pen_era": 3.73,
+   "ra": 461,
+   "rs": 458,
+   "w": 56,
+   "woba_14d": 0.3059
+  },
+  "137": {
+   "abbr": "SF",
+   "l": 67,
+   "name": "San Francisco Giants",
+   "pen_era": 4.27,
+   "ra": 535,
+   "rs": 479,
+   "w": 48,
+   "woba_14d": 0.3175
+  },
+  "138": {
+   "abbr": "STL",
+   "l": 58,
+   "name": "St. Louis Cardinals",
+   "pen_era": 4.36,
+   "ra": 509,
+   "rs": 499,
+   "w": 57,
+   "woba_14d": 0.2901
+  },
+  "139": {
+   "abbr": "TB",
+   "l": 46,
+   "name": "Tampa Bay Rays",
+   "pen_era": 4.02,
+   "ra": 469,
+   "rs": 510,
+   "w": 68,
+   "woba_14d": 0.2955
+  },
+  "140": {
+   "abbr": "TEX",
+   "l": 58,
+   "name": "Texas Rangers",
+   "pen_era": 4.31,
+   "ra": 510,
+   "rs": 477,
+   "w": 57,
+   "woba_14d": 0.3104
+  },
+  "141": {
+   "abbr": "TOR",
+   "l": 61,
+   "name": "Toronto Blue Jays",
+   "pen_era": 3.82,
+   "ra": 509,
+   "rs": 449,
+   "w": 54,
+   "woba_14d": 0.2953
+  },
+  "142": {
+   "abbr": "MIN",
+   "l": 59,
+   "name": "Minnesota Twins",
+   "pen_era": 4.93,
+   "ra": 571,
+   "rs": 535,
+   "w": 56,
+   "woba_14d": 0.2705
+  },
+  "143": {
+   "abbr": "PHI",
+   "l": 54,
+   "name": "Philadelphia Phillies",
+   "pen_era": 4.43,
+   "ra": 507,
+   "rs": 505,
+   "w": 61,
+   "woba_14d": 0.3102
+  },
+  "144": {
+   "abbr": "ATL",
+   "l": 45,
+   "name": "Atlanta Braves",
+   "pen_era": 3.42,
+   "ra": 444,
+   "rs": 557,
+   "w": 69,
+   "woba_14d": 0.3154
+  },
+  "145": {
+   "abbr": "CWS",
+   "l": 54,
+   "name": "Chicago White Sox",
+   "pen_era": 3.82,
+   "ra": 494,
+   "rs": 533,
+   "w": 59,
+   "woba_14d": 0.2932
+  },
+  "146": {
+   "abbr": "MIA",
+   "l": 57,
+   "name": "Miami Marlins",
+   "pen_era": 3.85,
+   "ra": 491,
+   "rs": 499,
+   "w": 58,
+   "woba_14d": 0.3032
+  },
+  "147": {
+   "abbr": "NYY",
+   "l": 51,
+   "name": "New York Yankees",
+   "pen_era": 3.11,
+   "ra": 441,
+   "rs": 522,
+   "w": 64,
+   "woba_14d": 0.2737
+  },
+  "158": {
+   "abbr": "MIL",
+   "l": 43,
+   "name": "Milwaukee Brewers",
+   "pen_era": 3.57,
+   "ra": 428,
+   "rs": 566,
+   "w": 71,
+   "woba_14d": 0.3294
+  }
+ }
+}

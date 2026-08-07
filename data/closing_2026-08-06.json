@@ -1,0 +1,42 @@
+{
+ "824729": {
+  "away_ml": -181,
+  "home_ml": 138,
+  "total": 15.5,
+  "over_price": 117,
+  "under_price": -160,
+  "note": "first capture was after first pitch \u2014 weak close",
+  "captured_utc": "2026-08-07T01:30:28Z",
+  "mins_to_first_pitch": -140
+ },
+ "824885": {
+  "away_ml": 512,
+  "home_ml": -791,
+  "total": 6.5,
+  "over_price": -119,
+  "under_price": -114,
+  "note": "first capture was after first pitch \u2014 weak close",
+  "captured_utc": "2026-08-07T01:30:28Z",
+  "mins_to_first_pitch": -135
+ },
+ "824080": {
+  "away_ml": 617,
+  "home_ml": -1000,
+  "total": 5.5,
+  "over_price": -113,
+  "under_price": -120,
+  "note": "first capture was after first pitch \u2014 weak close",
+  "captured_utc": "2026-08-07T01:30:28Z",
+  "mins_to_first_pitch": -110
+ },
+ "825053": {
+  "away_ml": -108,
+  "home_ml": -104,
+  "total": 9.0,
+  "over_price": -112,
+  "under_price": -108,
+  "note": "first capture was after first pitch \u2014 weak close",
+  "captured_utc": "2026-08-07T01:30:28Z",
+  "mins_to_first_pitch": 10
+ }
+}

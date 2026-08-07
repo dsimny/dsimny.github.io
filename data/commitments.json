@@ -104,6 +104,13 @@
    "snapshot_sha256": "57c66e13afdae384a119ebfd8b6e4dba40a568b3d48273e3ae0f7237cf36a310",
    "committed_utc": "2026-08-06T15:10:27Z",
    "revealed": true
+  },
+  {
+   "date": "2026-08-07",
+   "board_sha256": "18eeca32dab1d19e06ff18550b76a0121370587b12bed899c4ec93a0831e66b3",
+   "snapshot_sha256": "63cb7797ef1a6d49ca8e5d8d1ba6828a365268f09a6f79a0668552217651e70d",
+   "committed_utc": "2026-08-07T15:10:33Z",
+   "revealed": false
   }
  ]
 }

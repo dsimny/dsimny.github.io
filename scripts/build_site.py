@@ -453,17 +453,80 @@ else:
 
 # ---------------- ledger section ----------------
 agg = ledger.get("aggregates")
-graded_entries = sorted(ledger.get("entries", []), key=lambda e: e["date"], reverse=True)[:25]
+all_graded = sorted(ledger.get("entries", []), key=lambda e: e["date"], reverse=True)
+graded_entries = all_graded[:25]
 res_chip = {"WIN": '<span class="res-w">● Win</span>', "LOSS": '<span class="res-l">● Loss</span>',
             "VOID": '<span class="res-v">● Void</span>'}
+
+def close_cell(e):
+    """The pick's captured closing line and CLV, both booked by grade.py.
+    '—' is honest absence: closing-line capture began 2026-07-25, so picks
+    graded before that (and any game the capture missed) have no close to
+    show, and we never backfill one."""
+    if e.get("close_ml") is not None and e.get("clv_pts") is not None:
+        cls = "edge-pos" if e["clv_pts"] > 0 else ("edge-neg" if e["clv_pts"] < 0 else "")
+        return f'<td class="num">{e["close_ml"]:+d} <em class="{cls}">{e["clv_pts"]:+.1f} pts</em></td>'
+    return '<td class="num">—</td>'
+
 graded_rows = "".join(f'''
   <tr>
     <td>{e["date"]}</td><td>{e["game"]}</td><td>{e["pick"]}</td>
     <td class="num">{(e["edge"]*100 if e["edge"] is not None else 0):+.1f}</td>
+    {close_cell(e)}
     <td class="num">{e["units"]:g}u</td>
     <td class="num">{e["pnl"]:+.2f}u</td>
     <td>{res_chip.get(e["result"], e["result"])}</td>
   </tr>''' for e in graded_entries)
+
+# ---- performance splits, recomputed from the FULL entry list every build ----
+# Derived at render time, never stored: the append-only ledger stays the single
+# source of truth and the splits can never disagree with it.
+def bet_type_of(e):
+    return "Run line −1.5" if "run line" in e["pick"].lower() else "Moneyline"
+
+def month_label(ym):
+    d = datetime.strptime(ym, "%Y-%m")
+    return f"{d:%B} {d.year}"
+
+def split_rows(entries, keyfn, labelfn):
+    groups = {}
+    for e in entries:
+        groups.setdefault(keyfn(e), []).append(e)
+    rows = []
+    for key in sorted(groups, reverse=True):
+        g = groups[key]
+        w = sum(1 for e in g if e["result"] == "WIN")
+        l = sum(1 for e in g if e["result"] == "LOSS")
+        v = sum(1 for e in g if e["result"] == "VOID")
+        net = sum(e["pnl"] for e in g)
+        risked = sum(e["units"] for e in g if e["result"] != "VOID")
+        roi = f"{100 * net / risked:+.1f}%" if risked else "n/a"
+        rec = f"{w}-{l}" + (f"-{v}v" if v else "")
+        rows.append(f'<tr><td>{labelfn(key)}</td><td>{rec}</td>'
+                    f'<td class="num">{risked:g}u</td><td class="num">{net:+.2f}u</td>'
+                    f'<td class="num">{roi}</td></tr>')
+    return "".join(rows)
+
+def split_table(title, rows):
+    if not rows:
+        return ""
+    return f'''
+    <h2 class="sect">{title}</h2>
+    <div class="tablewrap">
+    <table class="ledger">
+      <thead><tr><th>Segment</th><th>Record</th><th>Risked</th><th>Net</th><th>ROI</th></tr></thead>
+      <tbody>{rows}</tbody>
+    </table>
+    </div>'''
+
+splits_html = (
+    split_table("By month", split_rows(all_graded, lambda e: e["date"][:7], month_label))
+    + split_table("By bet type", split_rows(all_graded, bet_type_of, lambda k: k))
+    + ('<p class="sectsub" style="margin-top:10px;">Splits are recomputed from the full '
+       'append-only ledger on every build. Weather warning applies double here: a month '
+       'or a bet type is a small slice of an already-small sample, so treat every cell '
+       'as weather until the pick count says otherwise.</p>' if all_graded else "")
+)
 # A pending row for a held play must not print the side, the price, the edge or
 # the size: between them they give the whole pick away, and this table was
 # quietly doing exactly that while the board tab held the same plays back.
@@ -475,16 +538,23 @@ def pending_row(b):
     <td>{DATE}</td><td>{b["abbr"]}</td>
     <td>{"<em>Premium Only</em>" if held else b["pick"]}</td>
     <td class="num">{"n/a" if held else f'{(b["edge"]*100 if b["edge"] is not None else 0):+.1f}'}</td>
+    <td class="num">n/a</td>
     <td class="num">{"n/a" if held else f'{b["units"]:g}u'}</td>
     <td class="num">n/a</td>
     <td><span class="pend">● Pending</span></td>
   </tr>'''
 pending_rows = "".join(pending_row(b) for b in plays)
 if agg:
+    # The CLV tile renders only once at least one graded pick actually carries
+    # a closing line (House Rule 8: never show a metric the data doesn't hold).
+    _clv = agg.get("clv") or {}
+    clv_tile = (f'''
+      <div class="tile"><span class="tl">Closing line value</span><span class="tv">{_clv["avg_clv_pts"]:+.2f}</span><span class="td">avg pts vs close · beat it {_clv["beat_close_pct"]:g}% of {_clv["graded_with_clv"]} picks</span></div>'''
+                if _clv.get("graded_with_clv") else "")
     tiles = f'''
       <div class="tile"><span class="tl">Record</span><span class="tv">{agg["record"]}</span><span class="td">graded picks</span></div>
       <div class="tile"><span class="tl">Units</span><span class="tv">{agg["units_net"]:+.2f}</span><span class="td">net P&amp;L</span></div>
-      <div class="tile"><span class="tl">ROI</span><span class="tv">{f"{agg['roi_pct']:+.1f}%" if agg["roi_pct"] is not None else "n/a"}</span><span class="td">on {agg["units_risked"]:g}u risked</span></div>
+      <div class="tile"><span class="tl">ROI</span><span class="tv">{f"{agg['roi_pct']:+.1f}%" if agg["roi_pct"] is not None else "n/a"}</span><span class="td">on {agg["units_risked"]:g}u risked</span></div>{clv_tile}
       <div class="tile"><span class="tl">Pending</span><span class="tv">{len(plays)}</span><span class="td">{B["published_units"]:g}u at risk today</span></div>'''
     strip = f'Ledger: <b>{agg["record"]}</b> · <b>{agg["units_net"]:+.2f}u</b> · opened Jul 22, 2026'
 else:
@@ -708,11 +778,13 @@ html = f'''<!DOCTYPE html>
     <div class="tiles">{tiles}</div>
     <div class="tablewrap">
     <table class="ledger">
-      <thead><tr><th>Date</th><th>Game</th><th>Pick</th><th>Edge</th><th>Units</th><th>P&amp;L</th><th>Result</th></tr></thead>
+      <thead><tr><th>Date</th><th>Game</th><th>Pick</th><th>Edge</th><th>Close · CLV</th><th>Units</th><th>P&amp;L</th><th>Result</th></tr></thead>
       <tbody>{pending_rows}{graded_rows}</tbody>
     </table>
     </div>
     <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks; anything we say about ROI before then is weather, not climate.</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:6px;"><strong>Close · CLV</strong> is the last captured pre-first-pitch line on our side and how many de-vigged probability points the market moved toward (+) or away from (−) our number after we posted. Beating the close consistently is a faster read on real edge than any month of wins. A — means no captured close for that pick: capture went live July 25, and we never backfill.</p>
+    {splits_html}
   </section>
 
   <section class="tab" id="tab-method">

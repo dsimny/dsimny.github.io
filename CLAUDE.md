@@ -250,10 +250,14 @@ with more care than the API keys, which are all replaceable.
 SITE COPY (House Rules 4 & 8): the Methodology tab was updated 2026-07-25 to match
 v0.3–v0.5 — it now describes the market blend ("We anchor to the market"), the
 stabilized ERA+FIP+regression starter rate, the real bullpen ERA, and a
-"we lean on the market by design" line in the "does NOT do" list. Deliberately NOT
-added yet (not live): CLV figures and backtest numbers. Surface CLV on the ledger
-tab only once capture-closing is running and the ledger actually carries clv_pts;
-cite backtest calibration only after a full-season run, not the preliminary window.
+"we lean on the market by design" line in the "does NOT do" list. CLV ON THE LEDGER TAB
+SHIPPED 2026-08-08 as CONDITIONAL rendering: a "Close · CLV" column per pick
+(— for picks with no captured close; never backfilled) and a CLV tile that
+renders only while aggregates.clv.graded_with_clv > 0, so the site can never
+show a CLV figure the ledger doesn't hold. Monthly + bet-type splits render
+from the full entry list at build time (derived, never stored). Still
+deliberately NOT added: backtest numbers — cite calibration only after a
+full-season run, not the preliminary window.
 
 ## Totals paper track (v0.7) — measuring before staking
 
@@ -531,10 +535,11 @@ were provided); Whop upgrade button on the site is still dormant
 
 1. Live multi-book best price via The Odds API. [SHIPPED 2026-08-06, v0.13:
    best price per side + book name; consensus median retained for de-vig/CLV.]
-2. Log opening vs closing lines → CLV tracking on the ledger. [CODE SHIPPED
-   2026-07-24: scripts/fetch_closing.py + capture-closing.yml + grade.py CLV
-   fields/aggregate. REMAINING: set up the cron-job.org triggers for
-   capture-closing, and surface CLV on the site's ledger tab (build_site.py).]
+2. Log opening vs closing lines → CLV tracking on the ledger. [DONE: capture
+   code 2026-07-24, cron-job.org triggers live (capture runs several times
+   daily), ledger-tab surfacing shipped 2026-08-08 (conditional Close · CLV
+   column + tile + monthly/bet-type splits in build_site.py). First staked
+   pick graded from here on carries its close automatically.]
 3. Statcast feeds → automate Rules 3/5/6, retire "manual review" labels.
 4. Third-party verification (Pikkit/Juice Reel) after ~1 month of record.
 5. NRFI market (activates the two dormant breakers). Then, only once the ledger

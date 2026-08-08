@@ -395,6 +395,25 @@ def weekly_audit_section(date):
                      'criteria — 100 graded picks, non-negative units, calibration inside '
                      '4 points — and nothing gets staked before then.</p>')
 
+    pickem = load_json(os.path.join(ROOT, "data", "pickem.json"), {})
+    pk_week = [d for d in pickem.get("days", []) if days[0] <= d["date"] <= days[-1]]
+    if pk_week:
+        uniq = {h for d in pk_week for h in d.get("entry_hmacs", [])}
+        seen_counts = {}
+        for d in pk_week:
+            for h in d.get("entry_hmacs", []):
+                seen_counts[h] = seen_counts.get(h, 0) + 1
+        repeat = sum(1 for c in seen_counts.values() if c >= 2)
+        entries = sum(d["n_entries"] for d in pk_week)
+        cw = sum(d["community"]["wins"] for d in pk_week)
+        cl = sum(d["community"]["losses"] for d in pk_week)
+        parts.append(
+            f'<p>The Discord pick\'em ran {len(pk_week)} day{"s" if len(pk_week) != 1 else ""}: '
+            f'{entries} entries from {len(uniq)} player{"s" if len(uniq) != 1 else ""} '
+            f'({repeat} played more than once). Community picks went {cw}-{cl} against the '
+            f'engine\'s featured sides. These are the pilot\'s honest numbers — participation '
+            f'decides whether this grows, and it publishes here either way.</p>')
+
     if len(parts) == 1:
         return ""
     return "".join(parts)

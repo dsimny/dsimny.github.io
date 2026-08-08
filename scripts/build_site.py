@@ -530,9 +530,29 @@ def split_table(title, rows):
     </table>
     </div>'''
 
+# Community pick'em, AGGREGATES ONLY by design: the site never shows a Discord
+# name or id (those live in Discord and the Worker). Renders only once the
+# pilot has graded days.
+_pickem = {}
+_pk_path = os.path.join(ROOT, "data", "pickem.json")
+if os.path.exists(_pk_path):
+    with open(_pk_path, encoding="utf-8") as f:
+        _pickem = json.load(f)
+_pa = _pickem.get("aggregates") or {}
+pickem_html = (f'''
+    <h2 class="sect">Community pick'em: Beat the Engine (Discord pilot)</h2>
+    <p class="sectsub">One featured game a day in the free Discord: ride the engine's public side
+    or fade it. Points and streaks only — nothing staked, no prizes. Individual standings live in
+    the Discord; this page carries only the aggregate record.</p>
+    <div class="tiles">
+      <div class="tile"><span class="tl">Community picks</span><span class="tv">{_pa["community_record"]}</span><span class="td">{_pa["total_entries"]} entries · {_pa["distinct_participants"]} players</span></div>
+      <div class="tile"><span class="tl">Engine's featured side</span><span class="tv">{_pa["engine_days"]}</span><span class="td">over {_pa["days_run"]} graded days</span></div>
+    </div>''' if _pa.get("days_run") else "")
+
 splits_html = (
     split_table("By month", split_rows(all_graded, lambda e: e["date"][:7], month_label))
     + split_table("By bet type", split_rows(all_graded, bet_type_of, lambda k: k))
+    + pickem_html
     + ('<p class="sectsub" style="margin-top:10px;">Splits are recomputed from the full '
        'append-only ledger on every build. Weather warning applies double here: a month '
        'or a bet type is a small slice of an already-small sample, so treat every cell '

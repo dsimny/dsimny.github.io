@@ -56,7 +56,46 @@ to Discord.
                                                         closing lines, results, postgame notes)
   scripts/post_discord.py recap                        (posts results, wins AND losses)
   scripts/post_social.py  x / facebook                 (daily record → X + FB, wins AND losses)
+  scripts/grade_pickem.py                              (pick'em: grade entries, update Worker
+                                                        standings, commit aggregates, post leaderboard)
 ```
+
+## Pick'em pilot ("Beat the Engine", built 2026-08-08 — ships DARK)
+
+Demand-validation pilot per the engagement roadmap: one featured game a day
+(free pick, else ✳ Best of Board — both already public), two buttons in the
+free Discord (ride/fade), graded overnight, points and streaks ONLY (no
+prizes — sweepstakes exposure). Native accounts get built only if this
+sustains ~100–250 recurring weekly participants; the Monday audit publishes
+the participation numbers either way.
+
+Architecture ("keep authoritative records on the site; test social behavior
+somewhere already equipped to manage people"):
+- worker/pickem/ — Cloudflare Worker, the ONLY new runtime surface: Discord
+  interactions endpoint (Ed25519-verified), D1 entries + standings tables,
+  Bearer-token /entries and /results routes. A dumb inbox/scoreboard: it
+  NEVER decides who won. If it's down, entries pause; board/ledger/site
+  untouched. Deploy checklist: worker/pickem/README.md (~30 min, user-only:
+  Discord app + wrangler + secrets).
+- scripts/post_pickem.py (morning) — announce with buttons via BOT token
+  (webhooks can't carry components). custom_id encodes side:date:lockEpoch.
+  select_featured() lives here; grade_pickem imports it so announce and
+  grading can never disagree. NOT idempotent (like the other Discord posts).
+- scripts/grade_pickem.py (nightly, after grade.py) — the LAW on locking
+  (entries stamped >= first pitch don't count, whatever the button said).
+  Grades vs the revealed board + MLB linescore (ML by winner, -1.5 RL by
+  margin>=2, VOID non-final). Pushes per-user results to the Worker (names
+  and ids live ONLY in Discord + D1), commits AGGREGATES + HMAC'd participant
+  ids to data/pickem.json (append-only, idempotent by date; HMAC key =
+  READ_TOKEN so uniques are computable in CI but not reversible publicly).
+  Offline test: --entries-file/--scores-file/--dry-run.
+- Surfaces: ledger tab shows the aggregate block only (community record vs
+  engine, entries, distinct players — NO names on the site, by decision);
+  Monday audit reports weekly entries/uniques/repeat rate.
+- Secrets (all optional — every step skips cleanly until they exist):
+  DISCORD_BOT_TOKEN, PICKEM_WORKER_URL, PICKEM_READ_TOKEN (secrets);
+  PICKEM_CHANNEL_ID (variable). Worker-side: DISCORD_PUBLIC_KEY, READ_TOKEN
+  (same value as PICKEM_READ_TOKEN).
 
 ## The Morning Line (daily blog, shipped 2026-08-07)
 

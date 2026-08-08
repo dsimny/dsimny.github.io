@@ -48,6 +48,17 @@ jobs:
         # ledger results, and postgame notes. Yesterday in ET, not UTC — the
         # run happens at 4:10 AM ET.
         run: python scripts/game_pages.py "$(TZ=America/New_York date -d yesterday +%F)"
+      - name: Grade pick'em and post the leaderboard
+        # Pulls entries from the Worker, grades against the revealed board +
+        # final score, pushes per-user results back (names stay in the Worker),
+        # commits aggregates to data/pickem.json. Skips cleanly until the
+        # Worker URL + token secrets exist.
+        env:
+          PICKEM_WORKER_URL: ${{ secrets.PICKEM_WORKER_URL }}     # optional — pick'em dark until set
+          PICKEM_READ_TOKEN: ${{ secrets.PICKEM_READ_TOKEN }}     # optional
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}     # optional
+          PICKEM_CHANNEL_ID: ${{ vars.PICKEM_CHANNEL_ID }}        # optional
+        run: python scripts/grade_pickem.py
       - name: Post results recap to Discord
         env:
           DISCORD_WEBHOOK_URL_LEDGER: ${{ secrets.DISCORD_WEBHOOK_URL_LEDGER }}   # results channel; falls back to DISCORD_WEBHOOK_URL if unset

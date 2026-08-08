@@ -86,6 +86,14 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
           SITE_URL: ${{ vars.SITE_URL }}                            # optional
         run: python scripts/post_discord.py blog
+      - name: Post the pick'em featured game
+        # "Beat the Engine": free pick or Best of Board, two buttons. Skips
+        # cleanly until the bot token + channel id secrets exist.
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}     # optional — pick'em dark until set
+          PICKEM_CHANNEL_ID: ${{ vars.PICKEM_CHANNEL_ID }}        # optional
+          SITE_URL: ${{ vars.SITE_URL }}                          # optional
+        run: python scripts/post_pickem.py
       - name: Commit board and site
         run: |
           git config user.name "openledger-bot"

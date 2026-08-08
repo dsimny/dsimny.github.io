@@ -1,0 +1,14 @@
+# Open Ledger Sports — pick'em Worker (Discord interactions endpoint + entry store).
+# Deploy:  cd worker/pickem && npx wrangler login && npx wrangler d1 create pickem
+#          (paste the database_id below) && npx wrangler d1 execute pickem --file=schema.sql --remote
+#          && npx wrangler secret put DISCORD_PUBLIC_KEY && npx wrangler secret put READ_TOKEN
+#          && npx wrangler deploy
+# Then paste the deployed URL into the Discord app's "Interactions Endpoint URL".
+name = "ols-pickem"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pickem"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"

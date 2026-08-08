@@ -1,0 +1,33 @@
+name: Worker check
+# Non-deploying validation of the pick'em Worker: JavaScript syntax, D1 schema
+# SQL, and wrangler config + bundling — all without credentials, so a broken
+# Worker is caught on push, never at launch. `wrangler deploy --dry-run`
+# bundles exactly what a real deploy would but talks to no Cloudflare API and
+# needs no account; the placeholder database_id in wrangler.toml is fine here.
+on:
+  push:
+    paths:
+      - "worker/**"
+      - ".github/workflows/worker-check.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker/pickem
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: JavaScript syntax
+        run: node --check src/index.js
+      - name: D1 schema applies cleanly
+        run: sqlite3 ":memory:" < schema.sql
+      - name: Wrangler config + bundle (dry run, no deploy)
+        run: npx --yes wrangler@4 deploy --dry-run --outdir=/tmp/pickem-dist

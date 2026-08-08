@@ -1,5 +1,10 @@
 # Pick'em Worker — launch checklist (~30 minutes, one time)
 
+> CI note: every push touching `worker/` runs the **Worker check** workflow —
+> JS syntax, schema SQL, and a no-credentials `wrangler deploy --dry-run`
+> bundle. A green check means step 2 below can't fail on syntax or config;
+> only the account-side pieces (login, D1 id, secrets) remain live-only.
+
 The pilot ships **dark**: every pipeline step skips cleanly until the secrets
 below exist, so this can sit unlaunched indefinitely. Doing these five steps
 turns it on; removing the secrets turns it off.

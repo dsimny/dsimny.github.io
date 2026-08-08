@@ -96,6 +96,11 @@ somewhere already equipped to manage people"):
   DISCORD_BOT_TOKEN, PICKEM_WORKER_URL, PICKEM_READ_TOKEN (secrets);
   PICKEM_CHANNEL_ID (variable). Worker-side: DISCORD_PUBLIC_KEY, READ_TOKEN
   (same value as PICKEM_READ_TOKEN).
+- CI: .github/workflows/worker-check.yml runs on any push touching worker/ —
+  node --check, sqlite3 schema apply, and `wrangler deploy --dry-run`
+  (bundles with no credentials). The Worker is validated on push, not at
+  launch; it's the repo's only push-triggered workflow (fires rarely, on
+  worker/ changes only — the cron-removal rationale doesn't apply to it).
 
 ## The Morning Line (daily blog, shipped 2026-08-07)
 

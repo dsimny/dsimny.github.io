@@ -44,17 +44,33 @@ def _rfc822(iso_utc):
     return dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
 
-def build_item_html(free, nice_date, analysis_html, site_url):
-    """The email/feed body for one day. Free pick only.
-
-    free is None on a no-play day, which is itself worth publishing: passing is
-    a position, and the brand says so out loud.
-    """
+def build_item_html(free, nice_date, analysis_html, site_url, daily=None):
+    """The email/feed body for one day: the free pick, else the Daily Pick
+    (v0.15 — the always-on strategy, clearly labeled 0u-proving), else the
+    honest no-play message. `daily` is the Daily Pick's BOARD ROW — public by
+    the engine's candidate rule, never a held play."""
     site = site_url or "https://openledgersports.com"
+    if free is None and daily is not None:
+        matchup = _html.escape(daily["matchup"])
+        pick = _html.escape(daily["pick"])
+        edge = (f' · edge {daily["edge"]*100:+.1f} pts vs the {daily["mkt_odds"]:+d} price'
+                if daily.get("mkt_odds") is not None else "")
+        body = (f"<p><strong>🎯 Daily Pick: {matchup}</strong><br>"
+                f"<strong>Pick:</strong> {pick} · {daily['confidence']*100:.1f}% of "
+                f"{daily['n_sims']:,} sims{edge}<br>"
+                f"<em>No play cleared the strict Qualified gates today. The Daily Pick is the "
+                f"always-on strategy's top-ranked candidate under a lower, precommitted bar — "
+                f"published at 0 units through its proving window (ends September 8) and graded "
+                f"on its own public record.</em></p>") + analysis_html
+        title = f"Daily Pick for {nice_date}: {daily['pick']}"
+        footer = (f'<p><a href="{site}">See the full board and the running record →</a></p>'
+                  f'<p style="font-size:12px;color:#888;">{LEGAL}</p>')
+        return body + footer
     if free is None:
         body = (f"<p><strong>No qualifying plays today.</strong> The engine ran the full "
                 f"slate and nothing cleared the circuit breakers and the edge gate at an "
-                f"allocatable price. We don't manufacture a pick to fill the slot. "
+                f"allocatable price — and no candidate survived the Daily Pick's eligibility "
+                f"rules either. We don't manufacture a pick to fill the slot. "
                 f"Passing is a position too.</p>")
         title = f"Free Pick for {nice_date}: no qualifying plays"
     else:
@@ -74,7 +90,7 @@ def build_item_html(free, nice_date, analysis_html, site_url):
     return body + footer
 
 
-def update(root, date, free, nice_date, analysis_html, generated_utc, site_url):
+def update(root, date, free, nice_date, analysis_html, generated_utc, site_url, daily=None):
     """Append today's item and rewrite feed.xml. Idempotent by date.
 
     Never edits an item already published for a date, so the grading rebuild the
@@ -88,14 +104,16 @@ def update(root, date, free, nice_date, analysis_html, generated_utc, site_url):
             store = json.load(f)
 
     if not any(it["date"] == date for it in store["items"]):
-        if free is None:
-            title = f"Free Pick for {nice_date}: no qualifying plays"
-        else:
+        if free is not None:
             title = f"Free Pick for {nice_date}: {free['pick']}"
+        elif daily is not None:
+            title = f"Daily Pick for {nice_date}: {daily['pick']}"
+        else:
+            title = f"Free Pick for {nice_date}: no qualifying plays"
         store["items"].append({
             "date": date,
             "title": title,
-            "html": build_item_html(free, nice_date, analysis_html, site_url),
+            "html": build_item_html(free, nice_date, analysis_html, site_url, daily=daily),
             "pubDate": _rfc822(generated_utc),
         })
         store["items"] = sorted(store["items"], key=lambda it: it["date"])[-KEEP:]

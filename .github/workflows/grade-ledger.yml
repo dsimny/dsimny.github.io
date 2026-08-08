@@ -48,6 +48,11 @@ jobs:
         # ledger results, and postgame notes. Yesterday in ET, not UTC — the
         # run happens at 4:10 AM ET.
         run: python scripts/game_pages.py "$(TZ=America/New_York date -d yesterday +%F)"
+      - name: Export training rows
+        # Point-in-time feature rows from the just-revealed board + finals,
+        # for the future challenger/calibration model. First run backfills
+        # every revealed board; nightly runs append yesterday.
+        run: python scripts/export_training_rows.py "$(TZ=America/New_York date -d yesterday +%F)"
       - name: Grade pick'em and post the leaderboard
         # Pulls entries from the Worker, grades against the revealed board +
         # final score, pushes per-user results back (names stay in the Worker),

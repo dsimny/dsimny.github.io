@@ -87,8 +87,39 @@ def build_pick_payload(date):
     nice = f"{_d:%A, %B} {_d.day}"
 
     if not plays:
+        # v0.15: the always-on Daily Pick fills the free slot when eligible —
+        # its board row is public by the engine's candidate rule (never held).
+        dp = B.get("daily_pick")
+        dpr = next((b for b in B["board"] if dp and b.get("gamePk") == dp["gamePk"]), None)
+        if dp and dpr:
+            a_sp, h_sp = dpr["awaySP"], dpr["homeSP"]
+            fields = [
+                {"name": "Pick", "value": f'**{dp["pick"]}**', "inline": True},
+                {"name": "Confidence", "value": f'{dpr["confidence"]*100:.1f}% of {dpr["n_sims"]:,} sims', "inline": True},
+                {"name": "Stake", "value": f'**0u — proving window** (through {dp["proving_until"]})', "inline": True},
+                {"name": "Edge vs price",
+                 "value": f'{dp["edge"]*100:+.1f} pts · EV {dp["ev_per_unit"]*100:+.1f}%', "inline": True},
+                {"name": "Ranking score", "value": f'{dp["score"]:.3f}', "inline": True},
+                {"name": "Projected", "value": f'{dpr["proj_away"]:g}–{dpr["proj_home"]:g}', "inline": True},
+            ]
+            embed = {
+                "title": f'🎯 Daily Pick: {dp["matchup"]} ({nice})',
+                "description": (f'{et_time(dp["utc"])} · {dp["venue"]}\n'
+                                f'{a_sp["name"]} ({a_sp["era"]:.2f} ERA) vs {h_sp["name"]} ({h_sp["era"]:.2f} ERA)\n'
+                                f'*No play cleared the strict Qualified gates today — that standard and its '
+                                f'record are unchanged. The Daily Pick is the always-on strategy: the slate\'s '
+                                f'top-ranked candidate under a lower, precommitted bar, graded on its own '
+                                f'public record. 0 units until it earns staking on the scheduled review date.*'),
+                "color": BLUE,
+                "fields": fields,
+                "footer": {"text": FOOTER},
+            }
+            if SITE:
+                embed["url"] = SITE
+            return {"username": "Open Ledger Sports", "embeds": [embed]}
         desc = ("The engine ran the full slate and nothing cleared the circuit breakers "
-                "and the edge gate at an allocatable price. We don't manufacture a pick to "
+                "and the edge gate at an allocatable price — and no candidate survived the "
+                "Daily Pick's eligibility rules either. We don't manufacture a pick to "
                 "fill the slot. **Passing is a position too.**")
         if any(b.get("best_of_board") for b in B["board"]):
             desc += ("\n\n*Members see today's ✳ Best of Board — the model's top choice that "

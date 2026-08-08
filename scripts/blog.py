@@ -268,7 +268,18 @@ def build_slate_article(date, B):
             f'<a href="{SITE}/#board">on the site</a>.</p>')
 
     free_block = ""
-    if free is not None:
+    dp = B.get("daily_pick")
+    if free is None and dp is not None:
+        free_block = (f'<h2>🎯 The Daily Pick</h2>'
+                      f'<p>No play cleared the strict Qualified gates today, so the always-on '
+                      f'strategy carries the slate: <strong>{_html.escape(dp["pick"])}</strong> — '
+                      f'{_html.escape(dp["matchup"])}, {et_time(dp["utc"])}. Edge '
+                      f'{dp["edge"]*100:+.1f} pts at the best price, ranking score '
+                      f'{dp["score"]:.3f}. <strong>0 units through the proving window</strong> '
+                      f'(ends September 8) — it grades onto <a href="{SITE}/#ledger">its own '
+                      f'public record</a>, never the Qualified ledger. Full card and analysis '
+                      f'<a href="{SITE}/#free">on the site</a>.</p>')
+    elif free is not None:
         edge_txt = (f' · {free["edge"]*100:+.1f} pts vs the {free["mkt_odds"]:+d} price'
                     if free.get("mkt_odds") is not None else "")
         free_block = (f'<h2>The free pick, in full</h2>'

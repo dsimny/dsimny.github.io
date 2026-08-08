@@ -36,6 +36,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 LEDGER = os.path.join(ROOT, "data", "ledger.json")
 TOTALS_LEDGER = os.path.join(ROOT, "data", "totals_ledger.json")  # separate PAPER track
 WATCHLIST = os.path.join(ROOT, "data", "watchlist.json")          # v0.14 watch tier — PAPER, never mixes with LEDGER
+DAILY_LEDGER = os.path.join(ROOT, "data", "daily_ledger.json")    # v0.15 Daily Pick strategy — own record, never mixes with LEDGER
 
 def american_to_b(odds):
     return 100 / (-odds) if odds < 0 else odds / 100
@@ -218,6 +219,93 @@ def fair_pick_odds(b):
     """Model fair odds for the pick side (used only if no market odds logged)."""
     return b["fair_home"] if b["pick_team_abbr"] == b["abbr"].split(" @ ")[1] else b["fair_away"]
 
+def grade_daily(date, B, scores, closing, path):
+    """Daily Pick strategy ledger (v0.15) — the always-on strategy's own
+    append-only record, SEPARATE from the qualified ledger and never mixed
+    into it. Same grading rules as the real ledger; P&L is booked two ways:
+    pnl_staked at the units actually risked (0 during the proving window) and
+    pnl_paper at the strategy's flat 0.25u basis, so the record the staking
+    review reads exists from day one. Idempotent per date."""
+    dp = B.get("daily_pick")
+    if not dp:
+        return
+    led = {"entries": []}
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            led = json.load(f)
+    if any(e["date"] == date for e in led["entries"]):
+        return
+
+    a_ab, h_ab = dp["abbr"].split(" @ ")
+    pick_is_home = dp["pick_team_abbr"] == h_ab
+    entry = {
+        "date": date, "gamePk": dp["gamePk"], "game": dp["abbr"], "pick": dp["pick"],
+        "market": dp.get("market"), "price": dp.get("price"), "book": dp.get("book"),
+        "model_p": dp.get("model_p"), "blend_p": dp.get("blend_p"),
+        "edge": dp.get("edge"), "score": dp.get("score"),
+        "units_staked": dp.get("units", 0.0), "paper_basis": 0.25, "strategy": "daily",
+    }
+    sc = scores.get(str(dp["gamePk"]))
+    if sc is None or not sc.get("final") or sc.get("away") is None:
+        entry.update(result="VOID", pnl_paper=0.0, pnl_staked=0.0,
+                     note="Game not final (postponed/suspended).")
+    else:
+        margin = (sc["home"] - sc["away"]) if pick_is_home else (sc["away"] - sc["home"])
+        won = margin > 1.5 if "run line" in dp["pick"].lower() else margin > 0
+        entry["final_score"] = f'{sc["away"]}-{sc["home"]}'
+        b_mult = american_to_b(dp["price"]) if dp.get("price") is not None else 1.0
+        if won:
+            entry.update(result="WIN", pnl_paper=round(0.25 * b_mult, 3),
+                         pnl_staked=round(entry["units_staked"] * b_mult, 3))
+        else:
+            entry.update(result="LOSS", pnl_paper=-0.25, pnl_staked=-entry["units_staked"])
+
+    # CLV, same definition as the qualified ledger: board-time consensus vs
+    # captured close for the pick side. Needs the board row for the open MLs.
+    b_row = next((b for b in B["board"] if b.get("gamePk") == dp["gamePk"]), None)
+    cl = closing.get(str(dp["gamePk"]))
+    if b_row and cl and cl.get("away_ml") is not None and cl.get("home_ml") is not None \
+            and b_row.get("mkt_away_ml") is not None and b_row.get("mkt_home_ml") is not None:
+        open_p = devig_pick_prob(b_row["mkt_away_ml"], b_row["mkt_home_ml"], pick_is_home)
+        close_p = devig_pick_prob(cl["away_ml"], cl["home_ml"], pick_is_home)
+        if open_p is not None and close_p is not None:
+            entry["open_ml"] = b_row["mkt_home_ml"] if pick_is_home else b_row["mkt_away_ml"]
+            entry["close_ml"] = cl["home_ml"] if pick_is_home else cl["away_ml"]
+            entry["clv_pts"] = round((close_p - open_p) * 100, 2)
+            entry["beat_close"] = close_p > open_p
+
+    led["entries"].append(entry)
+    ent = led["entries"]
+    wins = sum(1 for e in ent if e["result"] == "WIN")
+    losses = sum(1 for e in ent if e["result"] == "LOSS")
+    voids = sum(1 for e in ent if e["result"] == "VOID")
+    decided = wins + losses
+    paper_net = round(sum(e["pnl_paper"] for e in ent), 3)
+    paper_risked = round(0.25 * decided, 3)
+    clv_e = [e for e in ent if e.get("clv_pts") is not None]
+    led["aggregates"] = {
+        "record": f"{wins}-{losses}" + (f"-{voids}v" if voids else ""),
+        "wins": wins, "losses": losses, "voids": voids,
+        "paper_units_net": paper_net,
+        "paper_roi_pct": round(100 * paper_net / paper_risked, 2) if paper_risked else None,
+        "staked_units_net": round(sum(e["pnl_staked"] for e in ent), 3),
+        "clv": {"graded_with_clv": len(clv_e),
+                "avg_clv_pts": round(sum(e["clv_pts"] for e in clv_e) / len(clv_e), 2) if clv_e else None,
+                "beat_close_pct": round(100 * sum(1 for e in clv_e if e["clv_pts"] > 0) / len(clv_e), 1) if clv_e else None},
+        "opened": "2026-08-09",
+        "proving_until": dp.get("proving_until"),
+        "note": ("Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u "
+                 "paper basis; 0u staked through the proving window. Never mixed with the "
+                 "Qualified Plays ledger."),
+        "last_graded": date,
+    }
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(led, f, indent=1)
+    a = led["aggregates"]
+    print(f"Daily Pick: graded {date}. {a['record']}, {a['paper_units_net']:+.2f}u paper "
+          f"(0.25u basis), staked {a['staked_units_net']:+.2f}u.")
+
 def fetch_scores(date):
     import requests
     r = requests.get("https://statsapi.mlb.com/api/v1/schedule",
@@ -371,6 +459,8 @@ def main():
     grade_totals(date, B["board"], scores, closing, totals_ledger_path)
     watchlist_path = sys.argv[sys.argv.index("--watchlist") + 1] if "--watchlist" in sys.argv else WATCHLIST
     grade_watchlist(date, B.get("watch_picks") or [], scores, watchlist_path)
+    daily_path = sys.argv[sys.argv.index("--daily-ledger") + 1] if "--daily-ledger" in sys.argv else DAILY_LEDGER
+    grade_daily(date, B, scores, closing, daily_path)
 
     reveal(date, B)
 

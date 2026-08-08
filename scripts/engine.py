@@ -55,7 +55,7 @@ if not DATE:
     DATE = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 
-ENGINE_VERSION = "0.14-watchlist"
+ENGINE_VERSION = "0.15-daily-pick"
 N_SIMS = 10_000
 SEED = int(DATE.replace("-", ""))  # per-date seed: every day's run is reproducible/auditable
 STARTER_SHARE = 5.5 / 9  # share of the game credited to the starting pitcher
@@ -149,6 +149,22 @@ WATCH_EDGE_MIN = 0.01    # v0.14 edge-band watch floor: ML candidates with edge 
                          # band made visible instead of invisible. MIN_EDGE itself is
                          # unchanged; thresholds move only via the gate-study process
                          # (House Rule 9), never by loosening.
+
+# ---- Daily Pick (v0.15) — the always-on strategy; House Rule 9 amendment of
+# 2026-08-09, decided by Daniel and documented in CLAUDE.md. This is a
+# SEPARATE strategy with a SEPARATE public ledger, not a loosening: MIN_EDGE,
+# the Rule 8 cap, and qualified sizing are untouched, and the qualified record
+# is never mixed with this one. Eligibility, floor, and the staking schedule
+# are PRECOMMITTED below. The historical sweep the floor would ideally come
+# from is impossible today (no historical odds — backtest.py's documented
+# limit), so the floor is the most conservative defensible value (strictly
+# positive edge at best price) and the strategy proves itself FORWARD, in
+# public, at 0u.
+DAILY_EDGE_MIN = 0.0          # eligible only with edge STRICTLY above this at best price
+DAILY_PICK_UNITS = 0.0        # proving window: published, graded, and displayed at 0u
+DAILY_PROVING_END = "2026-09-08"  # scheduled staking review (target: flat 0.25u).
+                                  # The review happens ON this date — never early,
+                                  # never in response to a hot or cold week.
 DIVERGENCE_CAP = 0.12    # Rule 8 (Divergence Governor): if model vs de-vigged market
                          # disagreement exceeds 12 points, the market almost certainly
                          # knows something our inputs don't (lineups, injury news, form).
@@ -683,6 +699,80 @@ def main():
                                  "top remaining lean — 0 units, NOT staked, published for transparency. "
                                  "The checks above show exactly which gate it failed.")
 
+    # ---- Daily Pick (v0.15): the always-on strategy ----
+    # One pick per eligible slate at a LOWER, precommitted evidence bar than a
+    # Qualified Play, chosen by deterministic RANKING (not raw win probability
+    # — a -200 favorite can have a high win chance and still be a bad bet).
+    # Never a held play: candidates are the leans plus the would-be free pick,
+    # so this can never leak the members' board. If nothing survives the
+    # eligibility rules, the slate is a pass — one pick is a target, never a
+    # guarantee. Precommitted eligibility (2026-08-09): market odds present ·
+    # no Rule 8 hold · raw model and blend agree on the side · edge strictly
+    # positive at best price. Score weights are PROVISIONAL pending validation
+    # once decision-time odds history accumulates; they are fixed here so the
+    # selection is reproducible, and change only via version bump.
+    for b in board:
+        b["daily_pick"] = False
+    free_play = None
+    if published:
+        _plays = sorted(published, key=lambda b: -b["confidence"])
+        # Mirrors build_site.pick_free / post_discord (House Rule 2): the free
+        # pick is public, so it is the one published play the Daily Pick may be.
+        free_play = next((b for b in reversed(_plays)
+                          if not b["rule4_flag"] and not b["rule2_pivot"]),
+                         _plays[len(_plays) // 2])
+    daily_candidates = [
+        b for b in board
+        if (not b.get("published") or b is free_play)
+        and b["mkt_odds"] is not None
+        and not b["rule8_flag"]
+        and b["edge"] is not None and b["edge"] > DAILY_EDGE_MIN
+        and b["model_conf"] is not None and b["model_conf"] >= 0.5
+    ]
+
+    def daily_score(b):
+        """0.40 EV + 0.25 model/market agreement + 0.15 data completeness +
+        0.10 price quality + 0.10 starter reliability − breaker penalties.
+        Components normalized to [0,1] so the weights mean what they say."""
+        ev = min(max(b["ev_per_unit"] or 0.0, 0.0) / 0.05, 1.0)
+        agree = 1.0 - min(abs(b["divergence"] or 0.0) / DIVERGENCE_CAP, 1.0)
+        complete = (int(b.get("away_woba_14d") is not None)
+                    + int(b.get("away_pen_era") is not None and b.get("home_pen_era") is not None)
+                    + int(b.get("mkt_total") is not None)) / 3.0
+        price_q = 0.0
+        if b.get("mkt_book") and b.get("mkt_odds_consensus") is not None:
+            price_q = min(max(american_to_implied(b["mkt_odds_consensus"])
+                              - american_to_implied(b["mkt_odds"]), 0.0) / 0.02, 1.0)
+        starter = min(min(b["awaySP"]["ip"], b["homeSP"]["ip"]) / 100.0, 1.0)
+        return (0.40 * ev + 0.25 * agree + 0.15 * complete + 0.10 * price_q
+                + 0.10 * starter
+                - (0.05 if b["rule4_flag"] else 0.0)
+                - (0.03 if b["rule2_pivot"] else 0.0))
+
+    daily_pick = None
+    if daily_candidates:
+        best = max(daily_candidates, key=lambda b: (daily_score(b), b["confidence"]))
+        best["daily_pick"] = True
+        best["checks"].append(
+            f"🎯 Daily Pick (v0.15): the slate's top-ranked eligible candidate "
+            f"(score {daily_score(best):.3f}) under the always-on strategy's lower, "
+            f"precommitted bar. {DAILY_PICK_UNITS:g}u through the proving window "
+            f"(ends {DAILY_PROVING_END}); separate public ledger, never mixed with "
+            f"the Qualified record.")
+        daily_pick = {
+            "gamePk": best["gamePk"], "matchup": best["matchup"], "abbr": best["abbr"],
+            "utc": best["utc"], "venue": best["venue"],
+            "pick": best["pick"], "pick_team_abbr": best["pick_team_abbr"],
+            "market": "run_line" if "run line" in best["pick"].lower() else "moneyline",
+            "price": best["mkt_odds"], "book": best.get("mkt_book"),
+            "consensus": best.get("mkt_odds_consensus"),
+            "model_p": best["model_conf"], "blend_p": best["confidence"],
+            "edge": best["edge"], "ev_per_unit": best["ev_per_unit"],
+            "score": round(daily_score(best), 4),
+            "units": DAILY_PICK_UNITS, "strategy": "daily",
+            "proving_until": DAILY_PROVING_END,
+        }
+
     # ---- Watch List (v0.14): tracked, not staked ----
     # A WATCH pick clears SOME but not all gates, or belongs to a market still
     # in its proving period. Computed and published like real picks, at 0 units,
@@ -744,6 +834,7 @@ def main():
         "league_rate": round(league_rate, 3), "league_ra9": round(league_era, 2),
         "board": board, "scratches": scratches,
         "watch_picks": watch,
+        "daily_pick": daily_pick,
         "published_units": exposure,
         "n_published": len(published),
         "n_watch": len(watch),
@@ -774,6 +865,11 @@ def main():
         print(f'SCRATCH {s["abbr"]:<12} {s["rule"]}')
     for w in watch:
         print(f'WATCH   {w["abbr"]:<12} [{w["tag"]}] {w["pick"]:<34} model {w["model_p"]:.1%}  edge {w["edge"]*100:+.1f}  0u')
+    if daily_pick:
+        print(f'DAILY   {daily_pick["abbr"]:<12} {daily_pick["pick"]:<34} score {daily_pick["score"]:.3f}  '
+              f'edge {daily_pick["edge"]*100:+.1f}  {daily_pick["units"]:g}u (proving through {DAILY_PROVING_END})')
+    else:
+        print('DAILY   no eligible candidate — the always-on strategy passes today (target, not guarantee).')
 
 if __name__ == "__main__":
     main()

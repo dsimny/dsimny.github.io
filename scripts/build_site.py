@@ -61,6 +61,15 @@ scratches = B["scratches"]
 # v0.14 Watch List: tracked, not staked. Its paper record lives in
 # data/watchlist.json and NEVER mixes with the staked ledger in any display.
 watch = B.get("watch_picks") or []
+# v0.15 Daily Pick: the always-on strategy. DP is the board's summary object;
+# dp_row is the underlying (public by construction) board entry for the card.
+DP = B.get("daily_pick")
+dp_row = next((b for b in B["board"] if DP and b.get("gamePk") == DP["gamePk"]), None)
+daily_ledger = {"entries": [], "aggregates": None}
+_dl = os.path.join(ROOT, "data", "daily_ledger.json")
+if os.path.exists(_dl):
+    with open(_dl, encoding="utf-8") as f:
+        daily_ledger = json.load(f)
 watchlist = {"entries": [], "aggregates": None}
 _wl = os.path.join(ROOT, "data", "watchlist.json")
 if os.path.exists(_wl):
@@ -227,6 +236,7 @@ def flags_html(b):
     if b["rule4_flag"]: flags += '<span class="flag">R4 FLAG</span>'
     if b.get("rule8_flag"): flags += '<span class="flag flag-scr">R8 DIVERGENCE</span>'
     if b.get("best_of_board"): flags += '<span class="flag flag-free">✳ BEST OF BOARD</span>'
+    if b.get("daily_pick"): flags += '<span class="flag flag-free">🎯 DAILY PICK · 0u PROVING</span>'
     if free is not None and b is free: flags += '<span class="flag flag-free">★ FREE PICK</span>'
     return flags
 
@@ -452,13 +462,39 @@ if free is not None:
     {email_block}
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>
     <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a>. The whole tank is behind glass.</p>'''
+elif DP is not None and dp_row is not None:
+    # No Qualified Play cleared, but the always-on Daily Pick did: the free
+    # slot carries it, clearly labeled as the lower-bar strategy at 0u during
+    # its proving window. The card is dp_row — a lean or free-pick row, never
+    # a held play (the engine's candidate rule guarantees it).
+    d_away, d_home = dp_row["matchup"].split(" @ ")
+    free_section = f'''
+    <div class="hero">
+      <span class="kicker">🎯 Daily Pick of the Day</span>
+      <span class="kickerdate">{NICE_DATE}</span>
+      <h1>{d_away} <span class="at">@</span> {d_home}</h1>
+      <p class="sub">No play cleared the strict Qualified gates today (2-point edge, every breaker) —
+      that standard is unchanged and its record is separate. The <strong>Daily Pick</strong> is our
+      always-on strategy: the slate's top-ranked candidate under a lower, precommitted bar
+      (positive edge at the best price, model and market blend agreeing, no Rule 8 hold), published
+      every eligible slate and graded on <a href="#" data-goto="ledger">its own public record</a>.
+      It is at <strong>0 units through its proving window (ends September 8)</strong>: the staking
+      review happens on that date, never early. Ranked by score, not raw win probability — a heavy
+      favorite can be likely to win and still be a bad bet.</p>
+    </div>
+    {card(dp_row, False)}
+    <div class="analysis"><h3>Analysis</h3>{gen_analysis(dp_row)}</div>
+    {RG_BLOCK}
+    {join_block}
+    {email_block}
+    <div><button class="boardcta" data-goto="board">See the full board →</button></div>'''
 else:
     free_section = f'''
     <div class="hero">
       <span class="kicker">Free Pick of the Day</span>
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>No qualifying plays today.</h1>
-      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.{' Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all.' if any(b.get("best_of_board") for b in leans) else ''}{f' The <strong>Watch List</strong> on the board tab shows what almost made it — {len(watch)} tracked at 0 units, never staked.' if watch else ''}</p>
+      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price — and no candidate survived the Daily Pick's eligibility rules either. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.{' Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all.' if any(b.get("best_of_board") for b in leans) else ''}{f' The <strong>Watch List</strong> on the board tab shows what almost made it — {len(watch)} tracked at 0 units, never staked.' if watch else ''}</p>
       <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See today's board →</button></div>
     </div>'''
 
@@ -549,8 +585,40 @@ pickem_html = (f'''
       <div class="tile"><span class="tl">Engine's featured side</span><span class="tv">{_pa["engine_days"]}</span><span class="td">over {_pa["days_run"]} graded days</span></div>
     </div>''' if _pa.get("days_run") else "")
 
+# v0.15 Daily Pick strategy record — its own section, never merged into the
+# Qualified tiles or rows above. Renders once the strategy has graded entries.
+_da = daily_ledger.get("aggregates")
+_dent = sorted(daily_ledger.get("entries", []), key=lambda e: e["date"], reverse=True)[:15]
+daily_rows = "".join(
+    f'<tr><td>{e["date"]}</td><td>{e["game"]}</td><td>{e["pick"]}</td>'
+    f'<td class="num">{(e["edge"]*100 if e.get("edge") is not None else 0):+.1f}</td>'
+    f'{close_cell(e)}'
+    f'<td class="num">{e["pnl_paper"]:+.2f}u</td>'
+    f'<td>{res_chip.get(e["result"], e["result"])}</td></tr>'
+    for e in _dent)
+daily_html = (f'''
+    <h2 class="sect">The Daily Pick strategy (always-on, separate record)</h2>
+    <p class="sectsub">One pick per eligible slate under a lower, precommitted bar than a Qualified
+    Play: positive edge at best price, model and market blend agreeing on the side, no Rule 8 hold,
+    ranked by score. <strong>0 units staked through the proving window (ends September 8, 2026)</strong> —
+    the record below books a flat 0.25u paper basis so the scheduled staking review has evidence to
+    read. Effective date August 9, 2026; rules change only by version bump. This record never mixes
+    with the Qualified Plays ledger above.</p>
+    <div class="tiles">
+      <div class="tile"><span class="tl">Daily Pick record</span><span class="tv">{_da["record"]}</span><span class="td">{_da["paper_units_net"]:+.2f}u on the 0.25u paper basis</span></div>
+      <div class="tile"><span class="tl">Paper ROI</span><span class="tv">{f"{_da['paper_roi_pct']:+.1f}%" if _da["paper_roi_pct"] is not None else "n/a"}</span><span class="td">staked to date: {_da["staked_units_net"]:+.2f}u (0u proving)</span></div>
+      {f'<div class="tile"><span class="tl">Daily Pick CLV</span><span class="tv">{_da["clv"]["avg_clv_pts"]:+.2f}</span><span class="td">avg pts vs close · beat it {_da["clv"]["beat_close_pct"]:g}% of {_da["clv"]["graded_with_clv"]}</span></div>' if _da["clv"]["graded_with_clv"] else ''}
+    </div>
+    <div class="tablewrap">
+    <table class="ledger">
+      <thead><tr><th>Date</th><th>Game</th><th>Pick</th><th>Edge</th><th>Close · CLV</th><th>Paper P&amp;L</th><th>Result</th></tr></thead>
+      <tbody>{daily_rows}</tbody>
+    </table>
+    </div>''' if _da else "")
+
 splits_html = (
-    split_table("By month", split_rows(all_graded, lambda e: e["date"][:7], month_label))
+    daily_html
+    + split_table("By month", split_rows(all_graded, lambda e: e["date"][:7], month_label))
     + split_table("By bet type", split_rows(all_graded, bet_type_of, lambda k: k))
     + pickem_html
     + ('<p class="sectsub" style="margin-top:10px;">Splits are recomputed from the full '
@@ -900,7 +968,9 @@ print(f"Wrote {out}: {len(html):,} bytes | free pick: {free['pick'] if free else
 # uses, so it can never contain a premium play. Idempotent by date.
 import feed
 feed.update(ROOT, DATE, free,
-            NICE_DATE if free is None else f"{_date_obj:%A, %B} {_date_obj.day}",
-            gen_analysis(free) if free is not None else "",
-            B.get("generated_utc", ""), os.environ.get("SITE_URL", ""))
+            NICE_DATE if (free is None and dp_row is None) else f"{_date_obj:%A, %B} {_date_obj.day}",
+            gen_analysis(free) if free is not None else
+            (gen_analysis(dp_row) if (free is None and dp_row is not None) else ""),
+            B.get("generated_utc", ""), os.environ.get("SITE_URL", ""),
+            daily=dp_row if free is None else None)
 print("Updated feed.xml")

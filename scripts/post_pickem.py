@@ -47,13 +47,19 @@ def pick_free(plays):
 
 
 def select_featured(B):
-    """The day's featured game: free pick, else ✳ Best of Board. One source of
-    truth — grade_pickem.py imports this so announce and grading can never
-    disagree about which game the community was betting on."""
+    """The day's featured game: free pick, else the v0.15 Daily Pick, else
+    ✳ Best of Board. One source of truth — grade_pickem.py imports this so
+    announce and grading can never disagree about which game the community
+    was betting on. All three candidates are public rows by construction."""
     plays = sorted([b for b in B["board"] if b.get("published")], key=lambda b: -b["confidence"])
     free = pick_free(plays)
     if free is not None:
         return free, "free pick"
+    dp = B.get("daily_pick")
+    if dp is not None:
+        dpr = next((b for b in B["board"] if b.get("gamePk") == dp["gamePk"]), None)
+        if dpr is not None:
+            return dpr, "daily pick"
     bob = next((b for b in B["board"] if b.get("best_of_board")), None)
     if bob is not None:
         return bob, "best of board"
@@ -81,7 +87,9 @@ def build_payload(date):
         print(f"Featured game for {date} has already started — no pick'em today.")
         return None
 
-    tag = "★ today's free pick" if source == "free pick" else "✳ today's Best of Board (0u lean)"
+    tag = {"free pick": "★ today's free pick",
+           "daily pick": "🎯 today's Daily Pick (0u proving)",
+           "best of board": "✳ today's Best of Board (0u lean)"}[source]
     embed = {
         "title": f"🎯 Beat the Engine: {featured['matchup']}",
         "description": (f"{et_time(featured['utc'])} · {featured['venue']}\n"

@@ -58,7 +58,45 @@ to Discord.
   scripts/post_social.py  x / facebook                 (daily record → X + FB, wins AND losses)
   scripts/grade_pickem.py                              (pick'em: grade entries, update Worker
                                                         standings, commit aggregates, post leaderboard)
+  scripts/grade.py also →  data/daily_ledger.json      (v0.15 Daily Pick strategy record, separate)
+  scripts/export_training_rows.py → data/model/training_rows.csv  (point-in-time challenger data)
 ```
+
+## Daily Pick strategy (engine v0.15, effective 2026-08-09)
+
+The product answer to the quiet board: an ALWAYS-ON second strategy beside
+the Qualified Plays, never replacing them. engine.py selects at most one
+daily_pick per slate from the leans + the would-be free pick (NEVER a held
+play — the candidate rule protects the paywall structurally). Precommitted
+eligibility: market odds present · no Rule 8 hold · raw model and blend agree
+on the side · edge STRICTLY positive at best price. Deterministic ranking
+(daily_score: 0.40 EV + 0.25 agreement + 0.15 completeness + 0.10 price
+quality + 0.10 starter reliability − breaker penalties; weights provisional,
+fixed in code, change only by version bump). No survivor → honest pass.
+
+Staking: DAILY_PICK_UNITS = 0.0 through DAILY_PROVING_END (2026-09-08);
+grade.py's grade_daily() books every pick into data/daily_ledger.json
+(append-only, idempotent) with pnl_staked at real units AND pnl_paper at the
+flat 0.25u basis + CLV, so the scheduled review reads a real record. Surfaces:
+free tab hero on no-qualified days (labeled 🎯, 0u proving), its own ledger
+section (never merged with Qualified tiles/rows), feed/email item, Discord
+pick post, blog block, pick'em featured-game fallback (free pick → daily →
+Best of Board). Free = acquisition product per Daniel 2026-08-09; members
+keep the full board, held plays, and depth.
+
+## Challenger-model groundwork (2026-08-09)
+
+scripts/export_training_rows.py appends point-in-time feature rows to
+data/model/training_rows.csv nightly (grade workflow; first run backfills all
+revealed boards). Rows come from REVEALED boards — pregame by construction,
+so no leakage; market features are board-time consensus (decision-time), and
+closing odds are DELIBERATELY excluded from features. Label = home_won from
+MLB finals. Plan (agreed 2026-08-09): logistic calibrator first (learned
+blend replacing fixed MODEL_WEIGHT), JSON coefficients artifact (never
+pickle), chronological/walk-forward validation only, evaluated vs market /
+raw sim / current blend on Brier + log loss + calibration, promoted only
+through the Watch-List-style forward gate. Do NOT train until enough
+decision-time rows exist; do NOT randomly split games across time.
 
 ## Pick'em pilot ("Beat the Engine", built 2026-08-08 — ships DARK)
 
@@ -401,6 +439,7 @@ MEASURING it without risking the record:
 | 0.12 | Jul 29 | WOBA_TAX=0.08, sized by full-season sweep (1454 games: zeroed +0.31-run triggered-totals bias, won Brier; 12% over-corrected) |
 | 0.13 | Aug 6 | best-price odds ingestion: edge/EV/Kelly/Rule 2 at best book price w/ book names; consensus kept for de-vig + CLV |
 | 0.14 | Aug 6 | Watch List tier: watch_picks (market-proving / edge-band / R8-hold), watchlist.json paper record, site + Discord surfaces |
+| 0.15 | Aug 9 | Daily Pick strategy: always-on, separate ledger (daily_ledger.json), precommitted eligibility + deterministic ranking, 0u proving window through Sep 8 (House Rules 6/9 amended per Daniel — see below) |
 
 ## Circuit breakers (the product's identity — never weaken silently)
 
@@ -452,7 +491,14 @@ they conflict, the tighter rule wins and the conflict gets flagged to Daniel.
 5. Legal footer everywhere: analytics not a sportsbook, no bets accepted,
    21+, 1-800-GAMBLER, no-guarantee language. Do not remove or soften.
 6. If no plays clear the gates: publish "no qualifying plays — passing is a
-   position too." Never manufacture a pick. (Amended 2026-07-29, per Daniel:
+   position too." Never manufacture a pick. (Amended 2026-08-09, per Daniel:
+   the always-on DAILY PICK strategy (v0.15) may fill the free slot on
+   no-qualified days. It is NOT a manufactured Qualified Play: separate
+   strategy, separate ledger, precommitted lower bar — positive edge at best
+   price, model+blend side agreement, no Rule 8 hold — 0u through its proving
+   window, always labeled as the lower-bar strategy. When even the Daily
+   Pick's rules produce nothing, the no-play message still runs unchanged.)
+   (Earlier amendment 2026-07-29, per Daniel:
    whenever the gates leave the members channel empty — 0 published plays, or
    exactly 1 which becomes the free pick — the engine marks a ✳ Best of Board
    lean: the top non-Rule-8 lean by edge, at 0 units, failed gates printed on
@@ -480,6 +526,15 @@ they conflict, the tighter rule wins and the conflict gets flagged to Daniel.
    consensus prices — not a stuck gauge. Volume comes from better prices,
    more candidates, and better inputs, never from quietly loosening gates.
    The near-miss band is visible on the Watch List instead.)
+   (Amendment 2026-08-09, per Daniel, on the Daily Pick: DAILY_EDGE_MIN is a
+   NEW strategy's precommitted floor, not a change to any Qualified gate —
+   MIN_EDGE, the Rule 8 cap, and sizing are untouched and the records never
+   mix. The historical sweep this floor would ideally come from is impossible
+   today (no historical odds — backtest.py's limit), so the floor is the most
+   conservative defensible value (strictly positive edge at best price) and
+   the strategy proves itself FORWARD at 0u with a SCHEDULED staking review
+   (2026-09-08, target flat 0.25u). The review happens on that date only —
+   never early, never in response to a streak in either direction.)
 
 ## Config (GitHub → Settings)
 

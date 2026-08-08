@@ -77,6 +77,19 @@ are already public on the site and appear in full. The evergreen library obeys
 House Rules 4/5/8: no automation claims beyond what's live, legal footer on
 every page, copy that describes what the site actually does.
 
+MONDAY AUDIT (2026-08-08): weekly_audit_section() adds a "What we learned:
+<prev Mon–Sun>" section to Monday posts (slate AND evergreen kinds): board
+aggregates for the week (slates/sims/plays/units/watch/scratches), the staked
+ledger's graded picks with per-pick P&L, week CLV when entries carry clv_pts,
+and the watchlist paper record by tag. Reads only graded/public records;
+still-encrypted boards are skipped, so it can never discuss an unrevealed pick.
+
+RESPONSIBLE GAMBLING (2026-08-08): RG_BLOCK in build_site.py renders at the
+point of decision — after the free-pick card, atop the board tab, under the
+ledger splits — 21+, 1-800-GAMBLER, NCPG safer-sports-betting link; .rgline
+CSS. Blog page footers carry the same NCPG link via blog.py's LEGAL. Do not
+remove or soften (House Rule 5).
+
 CLV (closing-line value): fetch_closing.py re-fetches the schedule (MLB API, no
 key) plus current odds (ODDS_API_KEY) and records each game's last line BEFORE
 first pitch in data/closing_<date>.json — an already-started game is never

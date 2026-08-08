@@ -83,6 +83,16 @@ TIER_META = {
     "Pass":                       ("tier-pass", "⚪"),
 }
 
+# Responsible gambling at the point of decision, not just the footer (House
+# Rule 5, extended 2026-08-08): next to the free pick's sizing, at the top of
+# the board, and under the ledger — the three places a reader acts on. Plain
+# copy, a real resource, no legalese.
+RG_BLOCK = '''
+    <div class="rgline">🛟 <strong>Bet what you can afford to lose, or don't bet.</strong> These are
+    analytics, not a promise. 21+ only. Gambling problem? Call or text <strong>1-800-GAMBLER</strong>
+    · <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG
+    safer-betting resources and self-assessment</a>.</div>'''
+
 # ---------------- auto-generated analysis ----------------
 def gen_analysis(b):
     """Four paragraphs of pick analysis generated from the engine's numbers."""
@@ -433,6 +443,7 @@ if free is not None:
         <ul>{"".join(f"<li>{c}</li>" for c in free["checks"])}</ul>
       </details>
     </article>
+    {RG_BLOCK}
     <h2 class="sect">The rest of today's board</h2>
     <p class="sectsub">{max(len(plays)-1,0)} more plays and {len(scratches)} scratches on today's board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
     <div class="boardteasers">{teasers}</div>
@@ -654,6 +665,7 @@ html = f'''<!DOCTYPE html>
   .joinsub {{ margin-top:6px; font-size:0.83rem; color:var(--ink2); line-height:1.55; max-width:60ch; }}
   .joinbtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s1); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
   .lockednote {{ margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }}
+  .rgline {{ margin:14px 0 6px; padding:10px 14px; border:1px solid var(--ring); border-left:3px solid var(--warn); border-radius:10px; background:var(--surface); font-size:0.8rem; color:var(--ink2); line-height:1.5; }}
   .pitchers {{ display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }}
   .pitchers em {{ color:var(--muted); font-style:normal; font-size:0.75rem; }}
   .vs {{ color:var(--muted); font-size:0.7rem; }}
@@ -751,6 +763,7 @@ html = f'''<!DOCTYPE html>
         <div><b>{B["published_units"]:g}u</b> exposure (cap 10u)</div>
       </div>
     </div>
+    {RG_BLOCK}
     {commit_block}
     <h2 class="sect">Published plays: {B["published_units"]:g}u total exposure</h2>
     <p class="sectsub">The free pick is shown in full. The rest go to premium members before first pitch. Every one of them, winners and losers alike, publishes on the ledger with its full breaker log once graded.</p>
@@ -785,6 +798,7 @@ html = f'''<!DOCTYPE html>
     <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks; anything we say about ROI before then is weather, not climate.</p>
     <p style="font-size:0.78rem;color:var(--muted);margin-top:6px;"><strong>Close · CLV</strong> is the last captured pre-first-pitch line on our side and how many de-vigged probability points the market moved toward (+) or away from (−) our number after we posted. Beating the close consistently is a faster read on real edge than any month of wins. A — means no captured close for that pick: capture went live July 25, and we never backfill.</p>
     {splits_html}
+    {RG_BLOCK}
   </section>
 
   <section class="tab" id="tab-method">

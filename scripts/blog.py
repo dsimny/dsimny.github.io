@@ -52,7 +52,9 @@ SITE = (os.environ.get("SITE_URL", "").strip() or "https://openledgersports.com"
 LEGAL = ("Open Ledger Sports is an analytics publication, not a sportsbook. We accept "
          "no wagers. Nothing here is betting advice, and no outcome is guaranteed. "
          "21+ only. If you or someone you know has a gambling problem, help is "
-         "available: call or text 1-800-GAMBLER.")
+         "available: call or text 1-800-GAMBLER, or see the "
+         '<a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" '
+         'rel="noopener">NCPG\'s safer sports betting resources</a>.')
 
 
 def _rfc822(iso_utc):
@@ -277,6 +279,7 @@ def build_slate_article(date, B):
                       f'the reasoning; we don\'t stake it, and it never enters the ledger.</p>')
 
     parts = [lead,
+             weekly_audit_section(date),
              yesterday_section(date),
              '<h2>Today\'s slate, game by game</h2>',
              slate_table(board, scratches, free),
@@ -297,16 +300,111 @@ def build_slate_article(date, B):
     return title, teaser, body
 
 
+def weekly_audit_section(date):
+    """'What we learned' — Mondays only, auditing the previous Mon–Sun.
+
+    Composed entirely from graded, public records (ledger, watchlist, revealed
+    boards), so it can only ever discuss picks that already published in full.
+    A board still encrypted (or unreadable locally without the key) is simply
+    skipped — the audit reports what the public record holds, nothing more."""
+    d = datetime.strptime(date, "%Y-%m-%d")
+    if d.weekday() != 0:
+        return ""
+    days = [(d - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7, 0, -1)]
+    start_nice, end_nice = nice_date(days[0]), nice_date(days[-1])
+
+    n_slates = n_sim = n_plays = n_watch = n_scr = 0
+    units = 0.0
+    for day in days:
+        try:
+            B = crypto_box.load_dataset(ROOT, "board", day)
+        except Exception:
+            B = None   # still-encrypted board on a keyless machine: not public yet
+        if not B:
+            continue
+        n_slates += 1
+        n_sim += len(B.get("board", []))
+        n_scr += len(B.get("scratches", []))
+        n_plays += sum(1 for b in B["board"] if b.get("published"))
+        units += B.get("published_units", 0) or 0
+        n_watch += len(B.get("watch_picks") or [])
+
+    ledger = load_json(os.path.join(ROOT, "data", "ledger.json"), {"entries": []})
+    week = [e for e in ledger.get("entries", []) if days[0] <= e.get("date", "") <= days[-1]]
+    wl = load_json(os.path.join(ROOT, "data", "watchlist.json"), {"entries": []})
+    wl_week = [e for e in wl.get("entries", []) if days[0] <= e.get("date", "") <= days[-1]
+               and e.get("result")]
+
+    parts = [f'<h2>What we learned: {start_nice} – {end_nice}</h2>']
+    if n_slates:
+        parts.append(
+            f'<p>The engine ran {n_slates} slate{"s" if n_slates != 1 else ""}: {n_sim} games '
+            f'simulated, <strong>{n_plays} play{"s" if n_plays != 1 else ""} published</strong> '
+            f'({units:g}u risked), {n_watch} tracked on the watch list at 0 units, '
+            f'{n_scr} scratched by rule. Every no-play day was a decision, not an outage: '
+            f'nothing cleared the gates at an allocatable price, and the leans that failed '
+            f'are on each day\'s board with reasons.</p>')
+
+    if week:
+        w = sum(1 for e in week if e["result"] == "WIN")
+        l = sum(1 for e in week if e["result"] == "LOSS")
+        net = sum(e["pnl"] for e in week)
+        chip = {"WIN": "✅", "LOSS": "❌", "VOID": "⚪"}
+        rows = "".join(f'<li>{chip.get(e["result"], "•")} {e["date"]} · '
+                       f'{_html.escape(e["pick"])} ({e["pnl"]:+.2f}u)</li>' for e in week)
+        parts.append(f'<p>The staked ledger graded {len(week)} pick'
+                     f'{"s" if len(week) != 1 else ""}: <strong>{w}-{l}, {net:+.2f}u</strong>.</p>'
+                     f'<ul>{rows}</ul>')
+        clv_week = [e for e in week if e.get("clv_pts") is not None]
+        if clv_week:
+            avg = sum(e["clv_pts"] for e in clv_week) / len(clv_week)
+            beat = sum(1 for e in clv_week if e["clv_pts"] > 0)
+            parts.append(f'<p>Closing line value on the week: <strong>{avg:+.2f} pts</strong> '
+                         f'average across {len(clv_week)} picks with a captured close; we beat '
+                         f'the close on {beat} of {len(clv_week)}. CLV settles faster than '
+                         f'win-loss ever can — it\'s the number to watch here.</p>')
+    else:
+        tail = (' The paper records below are where a quiet week still teaches.' if wl_week
+                else ' A quiet week is still a reading: the gates are the product, and they held.')
+        parts.append(f'<p>No staked picks were graded this week — the gates held everything '
+                     f'back.{tail}</p>')
+
+    if wl_week:
+        by_tag = {}
+        for e in wl_week:
+            by_tag.setdefault(e.get("tag", "?"), []).append(e)
+        rows = []
+        for tag in sorted(by_tag):
+            g = by_tag[tag]
+            w = sum(1 for e in g if e["result"] == "WIN")
+            l = sum(1 for e in g if e["result"] == "LOSS")
+            p = sum(1 for e in g if e["result"] == "PUSH")
+            net = sum(e.get("pnl", 0) for e in g)
+            rows.append(f'<li><code>{_html.escape(tag)}</code> {w}-{l}'
+                        f'{f"-{p}p" if p else ""} · {net:+.2f}u paper</li>')
+        parts.append('<p>The watch list on paper this week (flat 1u, 0 staked, never mixed '
+                     f'into the ledger):</p><ul>{"".join(rows)}</ul>'
+                     '<p class="mut">These records accumulate toward the public promotion '
+                     'criteria — 100 graded picks, non-negative units, calibration inside '
+                     '4 points — and nothing gets staked before then.</p>')
+
+    if len(parts) == 1:
+        return ""
+    return "".join(parts)
+
+
 # ---------------- evergreen ----------------
 
-def build_evergreen_article(store):
+def build_evergreen_article(date, store):
     used = sum(1 for it in store["items"] if it.get("kind") == "evergreen")
     post = blog_evergreen.POSTS[used % len(blog_evergreen.POSTS)]
     intro = ('<p class="lede">No MLB slate today, so no board and no picks — we don\'t '
              'manufacture one for either. Off days here go to the bettor\'s bookshelf: '
              'one piece on the mechanics of this business, written once and published '
              'when the schedule goes quiet.</p>')
-    return post["title"], post["teaser"], intro + post["body"]
+    # A Monday off day still audits the week — the recap belongs to the date,
+    # not to whether baseball is played on it.
+    return post["title"], post["teaser"], intro + post["body"] + weekly_audit_section(date)
 
 
 # ---------------- pages ----------------
@@ -456,7 +554,7 @@ def main():
             kind = "slate"
             pub = B.get("generated_utc") or f"{date}T15:10:00Z"
         else:
-            title, teaser, body = build_evergreen_article(store)
+            title, teaser, body = build_evergreen_article(date, store)
             kind = "evergreen"
             pub = f"{date}T15:10:00Z"
         store["items"].append({

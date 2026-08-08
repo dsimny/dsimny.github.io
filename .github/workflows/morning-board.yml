@@ -77,6 +77,10 @@ jobs:
         # detected from the plaintext board file, which doesn't exist until
         # grading writes it.
         run: python scripts/game_pages.py
+      - name: Rebuild the odds-movement page
+        # At board time today has no captures yet, so this renders the most
+        # recent captured slate; the first capture run (~11:30 ET) flips it.
+        run: python scripts/odds_page.py
       - name: Post the blog link to Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
@@ -86,6 +90,6 @@ jobs:
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/ index.html feed.xml blog/ picks/
+          git add data/ index.html feed.xml blog/ picks/ odds/
           git diff --cached --quiet || git commit -m "Board $(date -u +%F)"
           git push

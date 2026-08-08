@@ -488,6 +488,7 @@ def page_shell(title_tag, active, inner):
     <a href="../">Today's Board</a>
     <a href="../#ledger">The Ledger</a>
     <a href="./" class="{'here' if active == 'index' else ''}">Blog</a>
+    <a href="../odds/">Odds</a>
   </nav>
 </div></header>
 <div class="wrap">

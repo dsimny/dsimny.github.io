@@ -38,7 +38,11 @@ to Discord.
   scripts/post_discord.py blog                         (blog title + teaser + link → free channel)
 
 .github/workflows/capture-closing.yml (several times/day via cron-job.org)
-  scripts/fetch_closing.py → data/closing_<date>.json  (last pre-first-pitch line per game, for CLV)
+  scripts/fetch_closing.py → data/closing_<date>.json  (last pre-first-pitch line per game, for CLV;
+                                                        since 2026-08-08 also a deduped per-game
+                                                        capture "history" + team names + first pitch)
+  scripts/odds_page.py     → odds/index.html           (line-movement page; reads ONLY closing files —
+                                                        no key, no model output, descriptive language only)
 
 .github/workflows/grade-ledger.yml   (daily 08:10 UTC)
   scripts/grade.py        → data/ledger.json           (final scores → W/L/VOID, units, ROI, CLV; APPEND-ONLY)
@@ -86,6 +90,18 @@ aggregates for the week (slates/sims/plays/units/watch/scratches), the staked
 ledger's graded picks with per-pick P&L, week CLV when entries carry clv_pts,
 and the watchlist paper record by tag. Reads only graded/public records;
 still-encrypted boards are skipped, so it can never discuss an unrevealed pick.
+
+ODDS-MOVEMENT PAGE (scripts/odds_page.py, shipped 2026-08-08): odds/index.html
+renders the consensus ML + total per game across the day's captures, from the
+"history" arrays fetch_closing.py now appends (deduped — identical captures
+collapse to one point; top-level closing fields unchanged, grade.py's CLV read
+untouched). HONESTY CONSTRAINTS, deliberate: the page reads ONLY closing_*.json
+(plus a REVEALED board for legacy matchup names) so it can never leak a held
+play and needs no key; movement is described (side + de-vigged points), never
+explained — no "sharp action" claims; the header disclaimer says captures are
+a few scheduled snapshots, not a live feed. Rebuilt by capture-closing (each
+run), morning-board, and rebuild-site. Legacy closing files (pre-history)
+render as one capture, no movement. Do not add model numbers to this page.
 
 GAME PAGES (scripts/game_pages.py, shipped 2026-08-08): one permanent URL per
 boarded game — picks/mlb/<date>/<away>-at-<home>/ — written twice by the

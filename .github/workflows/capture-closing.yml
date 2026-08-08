@@ -33,11 +33,15 @@ jobs:
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}   # required for capture; no-ops cleanly if unset
         run: python scripts/fetch_closing.py
+      - name: Rebuild the odds-movement page
+        # Reads only closing_*.json (and revealed boards for legacy names) —
+        # no key needed, nothing model-derived on the page.
+        run: python scripts/odds_page.py
       - name: Commit closing lines
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
           git pull --rebase --autostash || true   # several capture runs + the board/grade jobs share data/
-          git add data/closing_*.json
+          git add data/closing_*.json odds/
           git diff --cached --quiet || git commit -m "Closing lines $(date -u +%FT%TZ)"
           git push

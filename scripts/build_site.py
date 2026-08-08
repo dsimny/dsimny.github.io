@@ -743,6 +743,7 @@ html = f'''<!DOCTYPE html>
     <button data-tab="method">Methodology</button>
     <button data-tab="rules">The Rules</button>
     <a href="blog/">Blog</a>
+    <a href="odds/">Odds</a>
   </nav>
   <div class="ledgerstrip">{strip} · today: <b>{len(plays)}</b> plays, <b>{B["published_units"]:g}u</b> exposure</div>
 </div></header>

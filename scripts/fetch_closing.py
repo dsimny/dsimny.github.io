@@ -135,7 +135,21 @@ def main():
         if started and pk not in store:
             o = dict(o, note="first capture was after first pitch — weak close")
         mins = round((start - now).total_seconds() / 60) if start else None
+        # Capture HISTORY for the odds-movement page: every distinct pre-pitch
+        # capture, oldest first. Appended only when the numbers actually moved,
+        # so 4 identical captures stay one point. The top-level fields keep
+        # their original meaning (the LAST pre-pitch capture) — grade.py's CLV
+        # read is untouched. Names and first pitch ride along so the movement
+        # page never needs the encrypted board (this job has no key by design).
+        hist = store.get(pk, {}).get("history", [])
+        point = {k: o.get(k) for k in ("away_ml", "home_ml", "total", "over_price", "under_price")}
+        if not hist or any(hist[-1].get(k) != point[k] for k in point):
+            hist = (hist + [{**point, "captured_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ")}])[-24:]
         store[pk] = {**o,
+                     "away_name": team_names.get(g["away"]),
+                     "home_name": team_names.get(g["home"]),
+                     "utc": g["utc"],
+                     "history": hist,
                      "captured_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                      "mins_to_first_pitch": mins}
         updated += 1

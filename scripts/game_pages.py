@@ -80,6 +80,7 @@ def page_shell(title_tag, meta_desc, inner):
     <a href="/#ledger">The Ledger</a>
     <a href="/blog/">Blog</a>
     <a href="/picks/">Pick archive</a>
+    <a href="/odds/">Odds</a>
   </nav>
 </div></header>
 <div class="wrap">

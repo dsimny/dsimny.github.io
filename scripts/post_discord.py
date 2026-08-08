@@ -12,6 +12,11 @@ Two modes, wired into the two daily workflows:
          play, clearly marked as not staked.
   recap  (after nightly grading)    — posts yesterday's graded results and the
          running ledger (record, units, ROI).
+  blog   (after the morning board)  — posts the day's Morning Line title +
+         teaser + link to the free channel. Reads data/blog_items.json
+         (written by blog.py earlier in the same run), so it can only ever
+         post what the blog already publishes. Like pick/board, NOT
+         idempotent: a second morning run re-posts.
 
 Setup: Discord server -> channel -> Edit channel -> Integrations -> Webhooks ->
 New Webhook -> Copy URL -> save it as the repo secret DISCORD_WEBHOOK_URL.
@@ -297,12 +302,32 @@ def build_recap_payload(date):
         embed["url"] = SITE + "/#ledger"
     return {"username": "Open Ledger Sports", "embeds": [embed]}
 
+def build_blog_payload(date):
+    """The Morning Line link post for the free channel: title, teaser, URL.
+    Nothing is composed here — the blog item is the single source, so the
+    Discord post can never say something the published page doesn't."""
+    B = load("blog_items.json")
+    item = next((it for it in (B or {}).get("items", []) if it["date"] == date), None)
+    if item is None:
+        print(f"No blog post for {date} — nothing to post.")
+        return None
+    site = SITE or "https://openledgersports.com"
+    embed = {
+        "title": f'📰 The Morning Line: {item["title"]}',
+        "description": item["teaser"],
+        "url": f'{site}/blog/{date}.html',
+        "color": BLUE,
+        "footer": {"text": FOOTER},
+    }
+    return {"username": "Open Ledger Sports", "embeds": [embed]}
+
 # mode -> (payload builder, webhook, env var name for the skip message)
 def routes():
     return {
         "pick":  (build_pick_payload,  WEBHOOK,                    "DISCORD_WEBHOOK_URL"),
         "board": (build_board_payload, MEMBERS_WEBHOOK,            "DISCORD_WEBHOOK_URL_MEMBERS"),
         "recap": (build_recap_payload, LEDGER_WEBHOOK or WEBHOOK,  "DISCORD_WEBHOOK_URL_LEDGER"),
+        "blog":  (build_blog_payload,  WEBHOOK,                    "DISCORD_WEBHOOK_URL"),
     }
 
 STATUS_PATH = os.path.join(ROOT, "data", "post_status.json")

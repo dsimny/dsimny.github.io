@@ -33,10 +33,16 @@ jobs:
           LATEST=$(ls data/board_*.json data/board_*.enc 2>/dev/null \
                    | sed -E 's#.*board_(.*)\.(json|enc)$#\1#' | sort -u | tail -1)
           if [ -n "$LATEST" ]; then python scripts/build_site.py "$LATEST"; fi
+      - name: Re-render blog pages
+        # Adds no post; re-renders blog/ from the store and re-merges the blog
+        # items into feed.xml after build_site's pick-only rewrite above.
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/blog.py --rebuild-only
       - name: Commit site
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add index.html feed.xml data/
+          git add index.html feed.xml data/ blog/
           git diff --cached --quiet || git commit -m "Rebuild site $(date -u +%F)"
           git push

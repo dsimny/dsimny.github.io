@@ -533,6 +533,10 @@ html = f'''<!DOCTYPE html>
   nav.tabs button {{ background:none; border:none; color:var(--ink2); font:inherit; font-size:0.86rem; padding:7px 13px; border-radius:8px; cursor:pointer; }}
   nav.tabs button:hover {{ background:var(--surface2); }}
   nav.tabs button.active {{ background:var(--surface2); color:var(--ink); font-weight:650; }}
+  /* The blog is a real page, not a tab, so its nav entry is a link styled to
+     match the buttons around it. */
+  nav.tabs a {{ color:var(--ink2); font-size:0.86rem; padding:7px 13px; border-radius:8px; text-decoration:none; }}
+  nav.tabs a:hover {{ background:var(--surface2); }}
   .ledgerstrip {{ font-size:0.76rem; color:var(--muted); width:100%; padding-bottom:10px; }}
   .ledgerstrip b {{ color:var(--ink); }}
   section.tab {{ display:none; padding:10px 0 40px; }}
@@ -656,6 +660,7 @@ html = f'''<!DOCTYPE html>
     <button data-tab="ledger">The Ledger</button>
     <button data-tab="method">Methodology</button>
     <button data-tab="rules">The Rules</button>
+    <a href="blog/">Blog</a>
   </nav>
   <div class="ledgerstrip">{strip} · today: <b>{len(plays)}</b> plays, <b>{B["published_units"]:g}u</b> exposure</div>
 </div></header>

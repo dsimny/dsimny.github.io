@@ -31,6 +31,10 @@ to Discord.
   scripts/build_site.py   → index.html                 (single-file site, incl. auto-written analysis)
   scripts/post_discord.py pick                         (free pick → public channel)
   scripts/post_discord.py board                        (held plays → members channel)
+  scripts/blog.py         → blog/<date>.html + blog/index.html + data/blog_items.json
+                                                       (The Morning Line: deterministic daily post;
+                                                        merges blog items into feed.xml)
+  scripts/post_discord.py blog                         (blog title + teaser + link → free channel)
 
 .github/workflows/capture-closing.yml (several times/day via cron-job.org)
   scripts/fetch_closing.py → data/closing_<date>.json  (last pre-first-pitch line per game, for CLV)
@@ -41,9 +45,37 @@ to Discord.
                           → data/watchlist.json        (v0.14 watch tier paper record, separate; never mixes with ledger.json)
                           → data/board_<date>.json     (the reveal: .enc replaced by plaintext)
   scripts/build_site.py   → index.html                 (ledger tab refreshed)
+  scripts/blog.py --rebuild-only                       (re-renders blog/ from the store, re-merges
+                                                        blog items into feed.xml; adds NO post)
   scripts/post_discord.py recap                        (posts results, wins AND losses)
   scripts/post_social.py  x / facebook                 (daily record → X + FB, wins AND losses)
 ```
+
+## The Morning Line (daily blog, shipped 2026-08-07)
+
+One post a day at blog/<date>.html, archive at blog/ (linked from the site
+nav). scripts/blog.py composes it DETERMINISTICALLY — no LLM at run time, no
+hand edits: game days walk the slate from the SAME board build_site renders
+(yesterday's graded ledger, per-game table, "three angles" scored from the
+data, watch list); days with no MLB slate publish the next unused piece from
+the evergreen bettor-education library in scripts/blog_evergreen.py (12 pieces:
+CLV, de-vig, Kelly, park factors, variance, etc. — rotation state = count of
+evergreen items already in the store).
+
+Mechanics mirror feed.py: rendered articles persist in data/blog_items.json
+(append-only by date, KEEP=120), so ALL pages regenerate from the store alone —
+that's why grade-ledger/rebuild-site can run `blog.py --rebuild-only` while
+today's board is still encrypted. feed._write_xml always merges blog items
+(guid olsb-<date>) next to the pick items (olsp-<date>); send_email.py is
+untouched (reads feed_items.json only). post_discord.py's `blog` mode posts
+title+teaser+link to the FREE channel; like pick/board it is NOT idempotent.
+
+REDACTION RULE (House Rule 7): a held play appears in the blog as matchup +
+time ONLY — no side, price, projection, total, or probability (a projection
+plus a total is most of a pick). Free pick, leans, scratches, and watch picks
+are already public on the site and appear in full. The evergreen library obeys
+House Rules 4/5/8: no automation claims beyond what's live, legal footer on
+every page, copy that describes what the site actually does.
 
 CLV (closing-line value): fetch_closing.py re-fetches the schedule (MLB API, no
 key) plus current odds (ODDS_API_KEY) and records each game's last line BEFORE

@@ -64,10 +64,22 @@ jobs:
           RESEND_SEGMENT_ID: ${{ vars.RESEND_SEGMENT_ID }}    # optional — all-subscribers segment
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}                  # optional — defaults to picks@send.openledgersports.com
         run: python scripts/send_email.py pick
+      - name: Write The Morning Line (daily blog)
+        # Deterministic post composed from the same board the site renders —
+        # the slate on game days, the evergreen library on off days. Idempotent
+        # by date; also regenerates feed.xml with the blog item merged in.
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}   # optional — links default to the apex
+        run: python scripts/blog.py
+      - name: Post the blog link to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
+          SITE_URL: ${{ vars.SITE_URL }}                            # optional
+        run: python scripts/post_discord.py blog
       - name: Commit board and site
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/ index.html feed.xml
+          git add data/ index.html feed.xml blog/
           git diff --cached --quiet || git commit -m "Board $(date -u +%F)"
           git push

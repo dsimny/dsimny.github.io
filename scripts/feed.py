@@ -10,6 +10,13 @@ holds only what is already free.
 Items accumulate in data/feed_items.json (append-only, one per date, last 60
 kept) and feed.xml is regenerated from it. When beehiiv's RSS-to-Send is turned
 on later, it points at feed.xml and mails each new item with no further code.
+
+Since the daily blog shipped, the feed also carries one item per Morning Line
+post (title + teaser + link, guid olsb-<date>; the pick items keep olsp-<date>).
+Blog items live in data/blog_items.json (written by blog.py) and are merged in
+by _write_xml on EVERY regeneration, so whichever workflow rewrites feed.xml
+last — morning board, grading, rebuild — the blog items survive. send_email.py
+is unaffected: it reads data/feed_items.json, which stays free-pick-only.
 """
 import html as _html
 import json
@@ -17,8 +24,9 @@ import os
 from datetime import datetime, timezone
 
 CHANNEL_TITLE = "Open Ledger Sports · Free Pick of the Day"
-CHANNEL_DESC = ("One free MLB pick each morning, in full, before first pitch. "
-                "Every result on the public ledger, wins and losses alike.")
+CHANNEL_DESC = ("One free MLB pick each morning, in full, before first pitch, plus "
+                "The Morning Line — the daily blog. Every result on the public "
+                "ledger, wins and losses alike.")
 LEGAL = ("Open Ledger Sports is an analytics publication, not a sportsbook. Not "
          "betting advice. 21+. If you or someone you know has a gambling problem, "
          "call or text 1-800-GAMBLER.")
@@ -98,6 +106,31 @@ def update(root, date, free, nice_date, analysis_html, generated_utc, site_url):
     _write_xml(root, store["items"], site_url)
 
 
+def rebuild(root, site_url=""):
+    """Regenerate feed.xml from the stores without adding anything.
+
+    blog.py calls this after updating data/blog_items.json; safe from any
+    workflow at any hour because it only re-renders what is already public.
+    """
+    items_path = os.path.join(root, "data", "feed_items.json")
+    store = {"items": []}
+    if os.path.exists(items_path):
+        with open(items_path, encoding="utf-8") as f:
+            store = json.load(f)
+    _write_xml(root, store["items"], site_url)
+
+
+def _blog_items(root):
+    """The Morning Line items, as feed entries: title + teaser + link. The
+    teaser is enough for a reader/ESP; the full article lives on its page."""
+    path = os.path.join(root, "data", "blog_items.json")
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8") as f:
+        blog = json.load(f)
+    return blog.get("items", [])
+
+
 def _write_xml(root, items, site_url):
     site = (site_url or "https://openledgersports.com").rstrip("/")
     parts = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -106,12 +139,25 @@ def _write_xml(root, items, site_url):
              f"<link>{site}</link>",
              f"<description>{_html.escape(CHANNEL_DESC)}</description>",
              "<language>en-us</language>"]
-    for it in sorted(items, key=lambda i: i["date"], reverse=True):
+    entries = [
+        {"date": it["date"], "sort": (it["date"], 0), "title": it["title"],
+         "link": f"{site}/#free", "guid": f'olsp-{it["date"]}',
+         "pubDate": it["pubDate"], "html": it["html"]}
+        for it in items
+    ] + [
+        {"date": it["date"], "sort": (it["date"], 1), "title": f'The Morning Line: {it["title"]}',
+         "link": f'{site}/blog/{it["date"]}.html', "guid": f'olsb-{it["date"]}',
+         "pubDate": it["pubDate"],
+         "html": (f'<p>{_html.escape(it["teaser"])}</p>'
+                  f'<p><a href="{site}/blog/{it["date"]}.html">Read the post →</a></p>')}
+        for it in _blog_items(root)
+    ]
+    for it in sorted(entries, key=lambda i: i["sort"], reverse=True):
         parts += [
             "<item>",
             f"<title>{_html.escape(it['title'])}</title>",
-            f"<link>{site}/#free</link>",
-            f'<guid isPermaLink="false">olsp-{it["date"]}</guid>',
+            f"<link>{it['link']}</link>",
+            f'<guid isPermaLink="false">{it["guid"]}</guid>',
             f"<pubDate>{it['pubDate']}</pubDate>",
             # Both, for maximum reader/ESP compatibility: some read description,
             # some read content:encoded for the full HTML body.

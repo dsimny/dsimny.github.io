@@ -1,0 +1,28 @@
+{
+ "rows": 204,
+ "first_date": "2026-07-22",
+ "last_date": "2026-08-07",
+ "fields": [
+  "date",
+  "game_pk",
+  "first_pitch_utc",
+  "p_sim_home",
+  "p_market_home",
+  "p_blend_home",
+  "proj_home_runs",
+  "proj_away_runs",
+  "mean_total",
+  "mkt_total",
+  "park_factor",
+  "starter_stab_diff",
+  "starter_min_ip",
+  "bullpen_diff",
+  "woba_flag",
+  "wx_present",
+  "best_price_delta",
+  "engine_version",
+  "home_won"
+ ],
+ "csv_sha256": "4300bf7b401c1ce6be3ba31930b6f949f1cf7d5427472117de019963a7bed9aa",
+ "note": "Point-in-time features from REVEALED boards (built pregame by construction); label = home_won from MLB finals. Closing odds deliberately excluded from features. Chronological splits only."
+}

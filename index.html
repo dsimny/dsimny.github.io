@@ -34,6 +34,10 @@
   nav.tabs button { background:none; border:none; color:var(--ink2); font:inherit; font-size:0.86rem; padding:7px 13px; border-radius:8px; cursor:pointer; }
   nav.tabs button:hover { background:var(--surface2); }
   nav.tabs button.active { background:var(--surface2); color:var(--ink); font-weight:650; }
+  /* The blog is a real page, not a tab, so its nav entry is a link styled to
+     match the buttons around it. */
+  nav.tabs a { color:var(--ink2); font-size:0.86rem; padding:7px 13px; border-radius:8px; text-decoration:none; }
+  nav.tabs a:hover { background:var(--surface2); }
   .ledgerstrip { font-size:0.76rem; color:var(--muted); width:100%; padding-bottom:10px; }
   .ledgerstrip b { color:var(--ink); }
   section.tab { display:none; padding:10px 0 40px; }
@@ -81,6 +85,7 @@
   .joinsub { margin-top:6px; font-size:0.83rem; color:var(--ink2); line-height:1.55; max-width:60ch; }
   .joinbtn { display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s1); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }
   .lockednote { margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }
+  .rgline { margin:14px 0 6px; padding:10px 14px; border:1px solid var(--ring); border-left:3px solid var(--warn); border-radius:10px; background:var(--surface); font-size:0.8rem; color:var(--ink2); line-height:1.5; }
   .pitchers { display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }
   .pitchers em { color:var(--muted); font-style:normal; font-size:0.75rem; }
   .vs { color:var(--muted); font-size:0.7rem; }
@@ -157,6 +162,8 @@
     <button data-tab="ledger">The Ledger</button>
     <button data-tab="method">Methodology</button>
     <button data-tab="rules">The Rules</button>
+    <a href="blog/">Blog</a>
+    <a href="odds/">Odds</a>
   </nav>
   <div class="ledgerstrip">Ledger: <b>4-6</b> · <b>-2.25u</b> · opened Jul 22, 2026 · today: <b>0</b> plays, <b>0u</b> exposure</div>
 </div></header>
@@ -167,14 +174,14 @@
       <span class="kicker">Free Pick of the Day</span>
       <span class="kickerdate">Friday, August 7, 2026</span>
       <h1>No qualifying plays today.</h1>
-      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away. Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all. The <strong>Watch List</strong> on the board tab shows what almost made it — 7 tracked at 0 units, never staked.</p>
+      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price — and no candidate survived the Daily Pick's eligibility rules either. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away. Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all. The <strong>Watch List</strong> on the board tab shows what almost made it — 7 tracked at 0 units, never staked.</p>
       <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See today's board →</button></div>
     </div></section>
 
   <section class="tab" id="tab-board">
     <div class="hero">
       <h1>MLB Board: Friday, August 7, 2026</h1>
-      <p class="sub">Every game on today's slate simulated <strong>10,000 times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why.</p>
+      <p class="sub">Every game on today's slate simulated <strong>10,000 times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why. Every game also gets a <a href="picks/">permanent pick page</a> that completes once it grades.</p>
       <div class="slateline">
         <div><b>15</b> games on slate</div>
         <div><b>13</b> simulated (10,000× each)</div>
@@ -185,12 +192,17 @@
       </div>
     </div>
     
+    <div class="rgline">🛟 <strong>Bet what you can afford to lose, or don't bet.</strong> These are
+    analytics, not a promise. 21+ only. Gambling problem? Call or text <strong>1-800-GAMBLER</strong>
+    · <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG
+    safer-betting resources and self-assessment</a>.</div>
+    
     <div class="commit">
       <p class="commitlead">This board was fingerprinted before first pitch.</p>
       <p class="commitsub">SHA-256 of the full board, published 2026-08-07T15:10:33Z,
       while the picks themselves were still encrypted:</p>
       <code class="commithash">18eeca32dab1d19e06ff18550b76a0121370587b12bed899c4ec93a0831e66b3</code>
-      <p class="commitsub">The board publishes in full after grading. Hash it then and compare against the fingerprint above.
+      <p class="commitsub">The board has since been revealed: hash it yourself and compare.
       If the two match, nothing was altered once the games were underway. That is the whole guarantee, and you do not have to take our word for any of it.</p>
     </div>
     <h2 class="sect">Published plays: 0u total exposure</h2>
@@ -321,9 +333,9 @@
     </article></div>
     <div class="callout"><strong>Promotion criteria (the policy, verbatim):</strong> a market or band graduates from watch to staked only when its paper record reaches n ≥ 100 graded picks AND shows non-negative units at the prices logged AND the calibration for that segment is within 4 points. Promotion = version bump + methodology note. Demotion works the same way in reverse (a staked market that goes 100-pick negative returns to paper — also public).</div>
     <div class="tiles">
-      <div class="tile"><span class="tl">Watch record</span><span class="tv">0-0</span><span class="td">paper record — never mixed into the staked ledger</span></div>
-      <div class="tile"><span class="tl">Paper units</span><span class="tv">+0.00</span><span class="td">flat 1u paper, 0u staked</span></div>
-      <div class="tile"><span class="tl">Paper ROI</span><span class="tv">n/a</span><span class="td">on 0 tracked picks</span></div>
+      <div class="tile"><span class="tl">Watch record</span><span class="tv">3-4</span><span class="td">paper record — never mixed into the staked ledger</span></div>
+      <div class="tile"><span class="tl">Paper units</span><span class="tv">-1.23</span><span class="td">flat 1u paper, 0u staked</span></div>
+      <div class="tile"><span class="tl">Paper ROI</span><span class="tv">-17.6%</span><span class="td">on 7 tracked picks</span></div>
     </div>
     <h2 class="sect">Model leans: no allocation, logged for transparency</h2>
     <p class="sectsub">1 held by the Rule 8 Divergence Governor, 11 benched by the edge gate, and the rest below the confidence floor.</p>
@@ -934,11 +946,12 @@
       <div class="tile"><span class="tl">Pending</span><span class="tv">0</span><span class="td">0u at risk today</span></div></div>
     <div class="tablewrap">
     <table class="ledger">
-      <thead><tr><th>Date</th><th>Game</th><th>Pick</th><th>Edge</th><th>Units</th><th>P&amp;L</th><th>Result</th></tr></thead>
+      <thead><tr><th>Date</th><th>Game</th><th>Pick</th><th>Edge</th><th>Close · CLV</th><th>Units</th><th>P&amp;L</th><th>Result</th></tr></thead>
       <tbody>
   <tr>
     <td>2026-07-24</td><td>LAD @ NYM</td><td>Los Angeles Dodgers ML (-134)</td>
     <td class="num">+8.1</td>
+    <td class="num">—</td>
     <td class="num">1u</td>
     <td class="num">+0.75u</td>
     <td><span class="res-w">● Win</span></td>
@@ -946,6 +959,7 @@
   <tr>
     <td>2026-07-24</td><td>HOU @ CWS</td><td>Chicago White Sox ML (-134)</td>
     <td class="num">+6.8</td>
+    <td class="num">—</td>
     <td class="num">1u</td>
     <td class="num">-1.00u</td>
     <td><span class="res-l">● Loss</span></td>
@@ -953,6 +967,7 @@
   <tr>
     <td>2026-07-24</td><td>ATH @ MIN</td><td>Minnesota Twins ML (-141)</td>
     <td class="num">+4.0</td>
+    <td class="num">—</td>
     <td class="num">0.5u</td>
     <td class="num">-0.50u</td>
     <td><span class="res-l">● Loss</span></td>
@@ -960,6 +975,7 @@
   <tr>
     <td>2026-07-24</td><td>LAA @ SF</td><td>San Francisco Giants ML (-158)</td>
     <td class="num">+7.2</td>
+    <td class="num">—</td>
     <td class="num">0.5u</td>
     <td class="num">+0.32u</td>
     <td><span class="res-w">● Win</span></td>
@@ -967,6 +983,7 @@
   <tr>
     <td>2026-07-23</td><td>SD @ ATL</td><td>Atlanta Braves -1.5 run line</td>
     <td class="num">+7.3</td>
+    <td class="num">—</td>
     <td class="num">0.5u</td>
     <td class="num">-0.50u</td>
     <td><span class="res-l">● Loss</span></td>
@@ -974,6 +991,7 @@
   <tr>
     <td>2026-07-23</td><td>TB @ TOR</td><td>Tampa Bay Rays ML (-110)</td>
     <td class="num">+8.7</td>
+    <td class="num">—</td>
     <td class="num">0.5u</td>
     <td class="num">-0.50u</td>
     <td><span class="res-l">● Loss</span></td>
@@ -981,6 +999,7 @@
   <tr>
     <td>2026-07-23</td><td>AZ @ STL</td><td>St. Louis Cardinals ML (-120)</td>
     <td class="num">+5.9</td>
+    <td class="num">—</td>
     <td class="num">0.5u</td>
     <td class="num">-0.50u</td>
     <td><span class="res-l">● Loss</span></td>
@@ -988,6 +1007,7 @@
   <tr>
     <td>2026-07-22</td><td>BAL @ BOS</td><td>Boston Red Sox ML (-136)</td>
     <td class="num">+9.4</td>
+    <td class="num">—</td>
     <td class="num">0.5u</td>
     <td class="num">+0.37u</td>
     <td><span class="res-w">● Win</span></td>
@@ -995,6 +1015,7 @@
   <tr>
     <td>2026-07-22</td><td>NYM @ MIL</td><td>Milwaukee Brewers ML (-158)</td>
     <td class="num">+3.4</td>
+    <td class="num">—</td>
     <td class="num">0.5u</td>
     <td class="num">+0.32u</td>
     <td><span class="res-w">● Win</span></td>
@@ -1002,6 +1023,7 @@
   <tr>
     <td>2026-07-22</td><td>CIN @ SEA</td><td>Seattle Mariners ML (-155)</td>
     <td class="num">+4.3</td>
+    <td class="num">—</td>
     <td class="num">1u</td>
     <td class="num">-1.00u</td>
     <td><span class="res-l">● Loss</span></td>
@@ -1009,6 +1031,27 @@
     </table>
     </div>
     <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks; anything we say about ROI before then is weather, not climate.</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:6px;"><strong>Close · CLV</strong> is the last captured pre-first-pitch line on our side and how many de-vigged probability points the market moved toward (+) or away from (−) our number after we posted. Beating the close consistently is a faster read on real edge than any month of wins. A — means no captured close for that pick: capture went live July 25, and we never backfill.</p>
+    
+    <h2 class="sect">By month</h2>
+    <div class="tablewrap">
+    <table class="ledger">
+      <thead><tr><th>Segment</th><th>Record</th><th>Risked</th><th>Net</th><th>ROI</th></tr></thead>
+      <tbody><tr><td>July 2026</td><td>4-6</td><td class="num">6.5u</td><td class="num">-2.25u</td><td class="num">-34.7%</td></tr></tbody>
+    </table>
+    </div>
+    <h2 class="sect">By bet type</h2>
+    <div class="tablewrap">
+    <table class="ledger">
+      <thead><tr><th>Segment</th><th>Record</th><th>Risked</th><th>Net</th><th>ROI</th></tr></thead>
+      <tbody><tr><td>Run line −1.5</td><td>0-1</td><td class="num">0.5u</td><td class="num">-0.50u</td><td class="num">-100.0%</td></tr><tr><td>Moneyline</td><td>4-5</td><td class="num">6u</td><td class="num">-1.75u</td><td class="num">-29.2%</td></tr></tbody>
+    </table>
+    </div><p class="sectsub" style="margin-top:10px;">Splits are recomputed from the full append-only ledger on every build. Weather warning applies double here: a month or a bet type is a small slice of an already-small sample, so treat every cell as weather until the pick count says otherwise.</p>
+    
+    <div class="rgline">🛟 <strong>Bet what you can afford to lose, or don't bet.</strong> These are
+    analytics, not a promise. 21+ only. Gambling problem? Call or text <strong>1-800-GAMBLER</strong>
+    · <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG
+    safer-betting resources and self-assessment</a>.</div>
   </section>
 
   <section class="tab" id="tab-method">

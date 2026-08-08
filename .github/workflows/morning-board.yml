@@ -71,6 +71,12 @@ jobs:
         env:
           SITE_URL: ${{ vars.SITE_URL }}   # optional — links default to the apex
         run: python scripts/blog.py
+      - name: Build game pages (board-day versions)
+        # One permanent URL per game. Today's board is loaded via crypto_box
+        # (key in the job env) but held plays render REDACTED: reveal state is
+        # detected from the plaintext board file, which doesn't exist until
+        # grading writes it.
+        run: python scripts/game_pages.py
       - name: Post the blog link to Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
@@ -80,6 +86,6 @@ jobs:
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/ index.html feed.xml blog/
+          git add data/ index.html feed.xml blog/ picks/
           git diff --cached --quiet || git commit -m "Board $(date -u +%F)"
           git push

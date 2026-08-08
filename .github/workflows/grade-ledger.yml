@@ -43,6 +43,11 @@ jobs:
         env:
           SITE_URL: ${{ vars.SITE_URL }}   # optional
         run: python scripts/blog.py --rebuild-only
+      - name: Complete yesterday's game pages (the reveal)
+        # Regenerates the same URLs with the revealed picks, closing lines,
+        # ledger results, and postgame notes. Yesterday in ET, not UTC — the
+        # run happens at 4:10 AM ET.
+        run: python scripts/game_pages.py "$(TZ=America/New_York date -d yesterday +%F)"
       - name: Post results recap to Discord
         env:
           DISCORD_WEBHOOK_URL_LEDGER: ${{ secrets.DISCORD_WEBHOOK_URL_LEDGER }}   # results channel; falls back to DISCORD_WEBHOOK_URL if unset
@@ -70,6 +75,6 @@ jobs:
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/ index.html feed.xml blog/
+          git add data/ index.html feed.xml blog/ picks/
           git diff --cached --quiet || git commit -m "Grade $(date -u -d yesterday +%F)"
           git push

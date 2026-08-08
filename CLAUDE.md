@@ -34,6 +34,7 @@ to Discord.
   scripts/blog.py         → blog/<date>.html + blog/index.html + data/blog_items.json
                                                        (The Morning Line: deterministic daily post;
                                                         merges blog items into feed.xml)
+  scripts/game_pages.py   → picks/mlb/<date>/<slug>/   (board-day version: held plays REDACTED)
   scripts/post_discord.py blog                         (blog title + teaser + link → free channel)
 
 .github/workflows/capture-closing.yml (several times/day via cron-job.org)
@@ -47,6 +48,8 @@ to Discord.
   scripts/build_site.py   → index.html                 (ledger tab refreshed)
   scripts/blog.py --rebuild-only                       (re-renders blog/ from the store, re-merges
                                                         blog items into feed.xml; adds NO post)
+  scripts/game_pages.py <yesterday ET>                 (the reveal: same URLs re-render with picks,
+                                                        closing lines, results, postgame notes)
   scripts/post_discord.py recap                        (posts results, wins AND losses)
   scripts/post_social.py  x / facebook                 (daily record → X + FB, wins AND losses)
 ```
@@ -83,6 +86,21 @@ aggregates for the week (slates/sims/plays/units/watch/scratches), the staked
 ledger's graded picks with per-pick P&L, week CLV when entries carry clv_pts,
 and the watchlist paper record by tag. Reads only graded/public records;
 still-encrypted boards are skipped, so it can never discuss an unrevealed pick.
+
+GAME PAGES (scripts/game_pages.py, shipped 2026-08-08): one permanent URL per
+boarded game — picks/mlb/<date>/<away>-at-<home>/ — written twice by the
+pipeline and enriched IN PLACE (no preview/result URL fragmentation): the
+morning run writes the public version (free pick full; leans/scratches/watch
+with numbers; HELD plays as matchup+time+venue+tier+check-count ONLY), the
+grading run re-renders with the revealed pick, open-vs-close (with the
+capture's own weak-close caveat verbatim), ledger result + CLV, watch paper
+grades, and a deterministic postgame note. Reveal detection is STRUCTURAL:
+a date renders as revealed iff data/board_<date>.json exists in plaintext
+(written only after grade.py's fingerprint check) — so held plays stay
+redacted no matter who runs the script or when. Date index per slate +
+picks/index.html archive rebuilt from disk each run. Blog slate tables link
+every matchup to its page; board tab links the archive. --unrevealed flag
+forces board-day redaction (offline tests only). All URLs root-absolute.
 
 RESPONSIBLE GAMBLING (2026-08-08): RG_BLOCK in build_site.py renders at the
 point of decision — after the free-pick card, atop the board tab, under the

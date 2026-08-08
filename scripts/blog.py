@@ -133,12 +133,16 @@ def yesterday_section(date):
             f'<ul>{rows}</ul>' + wl_line + running)
 
 
-def slate_table(board_entries, scratches, free):
+def slate_table(date, board_entries, scratches, free):
     """Every game today, one row each. Held plays are matchup + time ONLY."""
+    # Imported lazily: game_pages imports blog for the shared page styling, so
+    # a module-level import here would be circular.
+    from game_pages import game_slug
     rows = []
     for b in sorted(board_entries, key=lambda x: x["utc"]):
         held = b.get("published") and b is not free
-        matchup = _html.escape(b["matchup"])
+        matchup = (f'<a href="/picks/mlb/{date}/{game_slug(b["matchup"])}/">'
+                   f'{_html.escape(b["matchup"])}</a>')
         if held:
             rows.append(f'<tr><td>{et_time(b["utc"])}</td><td>{matchup}</td>'
                         f'<td colspan="3"><em>Held for members — publishes in full '
@@ -153,7 +157,9 @@ def slate_table(board_entries, scratches, free):
                     f'<td>{pitchers}</td><td class="num">{b["proj_away"]:g}–{b["proj_home"]:g}</td>'
                     f'<td class="num">{b["mean_total"]:g} / {tot:g}</td></tr>')
     for s in sorted(scratches, key=lambda x: x["utc"]):
-        rows.append(f'<tr><td>{et_time(s["utc"])}</td><td>{_html.escape(s["matchup"])}</td>'
+        link = (f'<a href="/picks/mlb/{date}/{game_slug(s["matchup"])}/">'
+                f'{_html.escape(s["matchup"])}</a>')
+        rows.append(f'<tr><td>{et_time(s["utc"])}</td><td>{link}</td>'
                     f'<td colspan="3"><em>Scratched — {_html.escape(s["rule"])}: '
                     f'{_html.escape(s["reason"])}</em></td></tr>')
     return ('<div class="tablewrap"><table><thead><tr><th>First pitch</th><th>Game</th>'
@@ -161,7 +167,8 @@ def slate_table(board_entries, scratches, free):
             f'<tbody>{"".join(rows)}</tbody></table></div>'
             '<p class="mut">Projections are the engine\'s 10,000-simulation averages, already '
             'blended toward the de-vigged market. ★ marks the free pick. Held plays show no '
-            'numbers on purpose: a projection plus a total is most of a pick.</p>')
+            'numbers on purpose: a projection plus a total is most of a pick. Every matchup '
+            'links to its permanent pick page, which completes once the game grades.</p>')
 
 
 def angles_section(board_entries, free):
@@ -282,7 +289,7 @@ def build_slate_article(date, B):
              weekly_audit_section(date),
              yesterday_section(date),
              '<h2>Today\'s slate, game by game</h2>',
-             slate_table(board, scratches, free),
+             slate_table(date, board, scratches, free),
              free_block,
              angles_section(board, free),
              watch_section(watch)]

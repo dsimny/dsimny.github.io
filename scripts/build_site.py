@@ -753,7 +753,7 @@ html = f'''<!DOCTYPE html>
   <section class="tab" id="tab-board">
     <div class="hero">
       <h1>MLB Board: {NICE_DATE}</h1>
-      <p class="sub">Every game on today's slate simulated <strong>{B["n_sims"]:,} times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why.</p>
+      <p class="sub">Every game on today's slate simulated <strong>{B["n_sims"]:,} times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why. Every game also gets a <a href="picks/">permanent pick page</a> that completes once it grades.</p>
       <div class="slateline">
         <div><b>{B.get("n_slate", len(B["board"]) + len(scratches))}</b> games on slate</div>
         <div><b>{len(B["board"])}</b> simulated ({B["n_sims"]:,}× each)</div>

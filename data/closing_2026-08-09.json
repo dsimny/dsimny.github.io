@@ -309,11 +309,11 @@
   "mins_to_first_pitch": 219
  },
  "823268": {
-  "away_ml": 106,
-  "home_ml": -119,
+  "away_ml": 105,
+  "home_ml": -116,
   "total": 9.0,
-  "over_price": -110,
-  "under_price": -110,
+  "over_price": -108,
+  "under_price": -112,
   "away_name": "Houston Astros",
   "home_name": "San Diego Padres",
   "utc": "2026-08-10T00:20:00Z",
@@ -325,9 +325,17 @@
     "over_price": -110,
     "under_price": -110,
     "captured_utc": "2026-08-09T16:30:32Z"
+   },
+   {
+    "away_ml": 105,
+    "home_ml": -116,
+    "total": 9.0,
+    "over_price": -108,
+    "under_price": -112,
+    "captured_utc": "2026-08-09T22:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-09T16:30:32Z",
-  "mins_to_first_pitch": 469
+  "captured_utc": "2026-08-09T22:30:28Z",
+  "mins_to_first_pitch": 110
  }
 }

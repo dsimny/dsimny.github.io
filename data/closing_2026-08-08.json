@@ -372,11 +372,11 @@
   "mins_to_first_pitch": 99
  },
  "823102": {
-  "away_ml": 102,
-  "home_ml": -116,
+  "away_ml": 124,
+  "home_ml": -137,
   "total": 7.0,
-  "over_price": -106,
-  "under_price": -113,
+  "over_price": -115,
+  "under_price": -105,
   "away_name": "Tampa Bay Rays",
   "home_name": "Seattle Mariners",
   "utc": "2026-08-09T01:50:00Z",
@@ -388,9 +388,17 @@
     "over_price": -106,
     "under_price": -113,
     "captured_utc": "2026-08-08T16:30:30Z"
+   },
+   {
+    "away_ml": 124,
+    "home_ml": -137,
+    "total": 7.0,
+    "over_price": -115,
+    "under_price": -105,
+    "captured_utc": "2026-08-09T01:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-08T22:30:30Z",
-  "mins_to_first_pitch": 199
+  "captured_utc": "2026-08-09T01:30:28Z",
+  "mins_to_first_pitch": 20
  }
 }

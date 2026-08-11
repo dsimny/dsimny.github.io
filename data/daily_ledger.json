@@ -23,24 +23,48 @@
    "close_ml": -121,
    "clv_pts": 2.65,
    "beat_close": true
+  },
+  {
+   "date": "2026-08-10",
+   "gamePk": 823998,
+   "game": "TEX @ LAA",
+   "pick": "Los Angeles Angels ML (+104, FanDuel)",
+   "market": "moneyline",
+   "price": 104,
+   "book": "FanDuel",
+   "model_p": 0.5207,
+   "blend_p": 0.5022,
+   "edge": 0.012,
+   "score": 0.6434,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "4-1",
+   "result": "LOSS",
+   "pnl_paper": -0.25,
+   "pnl_staked": -0.0,
+   "open_ml": 102,
+   "close_ml": 122,
+   "clv_pts": -5.09,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "1-0",
+  "record": "1-1",
   "wins": 1,
-  "losses": 0,
+  "losses": 1,
   "voids": 0,
-  "paper_units_net": 0.24,
-  "paper_roi_pct": 96.0,
+  "paper_units_net": -0.01,
+  "paper_roi_pct": -2.0,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 1,
-   "avg_clv_pts": 2.65,
-   "beat_close_pct": 100.0
+   "graded_with_clv": 2,
+   "avg_clv_pts": -1.22,
+   "beat_close_pct": 50.0
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-09"
+  "last_graded": "2026-08-10"
  }
 }

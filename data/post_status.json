@@ -2,32 +2,6 @@
  "posts": [
   {
    "date": "2026-08-07",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-08-07T15:10:34Z"
-  },
-  {
-   "date": "2026-08-07",
-   "mode": "email",
-   "result": "sent",
-   "http_status": 200,
-   "detail": "8b7ba057-95a2-4a8d-b8b8-a0f20af001ec",
-   "at_utc": "2026-08-07T15:10:34Z"
-  },
-  {
-   "date": "2026-08-07",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-08-08T08:10:21Z"
-  },
-  {
-   "date": "2026-08-07",
    "mode": "x",
    "result": "nothing_to_post",
    "http_status": null,
@@ -256,6 +230,31 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-08-11T15:10:41Z"
+  },
+  {
+   "date": "2026-08-11",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-08-12T08:10:22Z"
+  },
+  {
+   "date": "2026-08-11",
+   "mode": "x",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-08-12T08:10:22Z"
+  },
+  {
+   "date": "2026-08-11",
+   "mode": "facebook",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-08-12T08:10:22Z"
   }
  ]
 }

@@ -47,24 +47,48 @@
    "close_ml": 122,
    "clv_pts": -5.09,
    "beat_close": false
+  },
+  {
+   "date": "2026-08-11",
+   "gamePk": 823264,
+   "game": "MIL @ SD",
+   "pick": "Milwaukee Brewers ML (-116, BetOnline.ag)",
+   "market": "moneyline",
+   "price": -116,
+   "book": "BetOnline.ag",
+   "model_p": 0.5711,
+   "blend_p": 0.5495,
+   "edge": 0.0125,
+   "score": 0.6259,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "2-11",
+   "result": "LOSS",
+   "pnl_paper": -0.25,
+   "pnl_staked": -0.0,
+   "open_ml": -120,
+   "close_ml": -120,
+   "clv_pts": -0.12,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "1-1",
+  "record": "1-2",
   "wins": 1,
-  "losses": 1,
+  "losses": 2,
   "voids": 0,
-  "paper_units_net": -0.01,
-  "paper_roi_pct": -2.0,
+  "paper_units_net": -0.26,
+  "paper_roi_pct": -34.67,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 2,
-   "avg_clv_pts": -1.22,
-   "beat_close_pct": 50.0
+   "graded_with_clv": 3,
+   "avg_clv_pts": -0.85,
+   "beat_close_pct": 33.3
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-10"
+  "last_graded": "2026-08-11"
  }
 }

@@ -396,11 +396,11 @@
   "mins_to_first_pitch": 195
  },
  "823917": {
-  "away_ml": 193,
+  "away_ml": 188,
   "home_ml": -225,
-  "total": 9.5,
-  "over_price": -110,
-  "under_price": -107,
+  "total": 9.0,
+  "over_price": -115,
+  "under_price": -105,
   "away_name": "Kansas City Royals",
   "home_name": "Los Angeles Dodgers",
   "utc": "2026-08-12T02:10:00Z",
@@ -420,9 +420,17 @@
     "over_price": -110,
     "under_price": -107,
     "captured_utc": "2026-08-11T22:30:27Z"
+   },
+   {
+    "away_ml": 188,
+    "home_ml": -225,
+    "total": 9.0,
+    "over_price": -115,
+    "under_price": -105,
+    "captured_utc": "2026-08-12T01:30:26Z"
    }
   ],
-  "captured_utc": "2026-08-11T22:30:27Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-08-12T01:30:26Z",
+  "mins_to_first_pitch": 40
  }
 }

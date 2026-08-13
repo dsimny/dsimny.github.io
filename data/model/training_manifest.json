@@ -1,7 +1,7 @@
 {
- "rows": 255,
+ "rows": 268,
  "first_date": "2026-07-22",
- "last_date": "2026-08-11",
+ "last_date": "2026-08-12",
  "fields": [
   "date",
   "game_pk",
@@ -23,6 +23,6 @@
   "engine_version",
   "home_won"
  ],
- "csv_sha256": "393feae5fd8e47afa826faf025ac28cd74cb5a0b506e294516c70ca78c7da5aa",
+ "csv_sha256": "ce717da532e27e23fa60dafdf2eb33ade06bdb45ebeba39d5711c1727314048b",
  "note": "Point-in-time features from REVEALED boards (built pregame by construction); label = home_won from MLB finals. Closing odds deliberately excluded from features. Chronological splits only."
 }

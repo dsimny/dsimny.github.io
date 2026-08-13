@@ -71,24 +71,48 @@
    "close_ml": -120,
    "clv_pts": -0.12,
    "beat_close": false
+  },
+  {
+   "date": "2026-08-12",
+   "gamePk": 823511,
+   "game": "SEA @ NYY",
+   "pick": "New York Yankees ML (-124, DraftKings)",
+   "market": "moneyline",
+   "price": -124,
+   "book": "DraftKings",
+   "model_p": 0.5811,
+   "blend_p": 0.5634,
+   "edge": 0.0099,
+   "score": 0.5868,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "5-10",
+   "result": "WIN",
+   "pnl_paper": 0.202,
+   "pnl_staked": 0.0,
+   "open_ml": -128,
+   "close_ml": -149,
+   "clv_pts": 3.02,
+   "beat_close": true
   }
  ],
  "aggregates": {
-  "record": "1-2",
-  "wins": 1,
+  "record": "2-2",
+  "wins": 2,
   "losses": 2,
   "voids": 0,
-  "paper_units_net": -0.26,
-  "paper_roi_pct": -34.67,
+  "paper_units_net": -0.058,
+  "paper_roi_pct": -5.8,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 3,
-   "avg_clv_pts": -0.85,
-   "beat_close_pct": 33.3
+   "graded_with_clv": 4,
+   "avg_clv_pts": 0.12,
+   "beat_close_pct": 50.0
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-11"
+  "last_graded": "2026-08-12"
  }
 }

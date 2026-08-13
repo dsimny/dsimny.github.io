@@ -146,6 +146,13 @@
    "snapshot_sha256": "f2b0b173a92683fbffbce4a0443ad91351d342cd67ab193ce130391dc5f9434c",
    "committed_utc": "2026-08-12T15:10:27Z",
    "revealed": true
+  },
+  {
+   "date": "2026-08-13",
+   "board_sha256": "f748aa5a0b2207feca99aa00442d85f48b6bc948147f5919fd0bbb046a16effe",
+   "snapshot_sha256": "c666602a174ba251b7d6eaa6c3e8c2db0960ace507d1ae55c8dd9fafc746d2b8",
+   "committed_utc": "2026-08-13T15:10:27Z",
+   "revealed": false
   }
  ]
 }

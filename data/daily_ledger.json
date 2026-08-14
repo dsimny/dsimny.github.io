@@ -95,24 +95,48 @@
    "close_ml": -149,
    "clv_pts": 3.02,
    "beat_close": true
+  },
+  {
+   "date": "2026-08-13",
+   "gamePk": 824238,
+   "game": "CLE @ DET",
+   "pick": "Detroit Tigers ML (+104, FanDuel)",
+   "market": "moneyline",
+   "price": 104,
+   "book": "FanDuel",
+   "model_p": 0.5323,
+   "blend_p": 0.5089,
+   "edge": 0.0187,
+   "score": 0.7685,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "0-3",
+   "result": "WIN",
+   "pnl_paper": 0.26,
+   "pnl_staked": 0.0,
+   "open_ml": -101,
+   "close_ml": -101,
+   "clv_pts": 0.1,
+   "beat_close": true
   }
  ],
  "aggregates": {
-  "record": "2-2",
-  "wins": 2,
+  "record": "3-2",
+  "wins": 3,
   "losses": 2,
   "voids": 0,
-  "paper_units_net": -0.058,
-  "paper_roi_pct": -5.8,
+  "paper_units_net": 0.202,
+  "paper_roi_pct": 16.16,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 4,
-   "avg_clv_pts": 0.12,
-   "beat_close_pct": 50.0
+   "graded_with_clv": 5,
+   "avg_clv_pts": 0.11,
+   "beat_close_pct": 60.0
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-12"
+  "last_graded": "2026-08-13"
  }
 }

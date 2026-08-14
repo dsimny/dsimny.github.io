@@ -162,11 +162,11 @@
   "mins_to_first_pitch": 60
  },
  "823995": {
-  "away_ml": -148,
-  "home_ml": 133,
+  "away_ml": -144,
+  "home_ml": 130,
   "total": 7.5,
-  "over_price": 100,
-  "under_price": -120,
+  "over_price": 102,
+  "under_price": -123,
   "away_name": "Texas Rangers",
   "home_name": "Los Angeles Angels",
   "utc": "2026-08-14T02:07:00Z",
@@ -186,10 +186,18 @@
     "over_price": 100,
     "under_price": -120,
     "captured_utc": "2026-08-13T22:30:27Z"
+   },
+   {
+    "away_ml": -144,
+    "home_ml": 130,
+    "total": 7.5,
+    "over_price": 102,
+    "under_price": -123,
+    "captured_utc": "2026-08-14T01:30:27Z"
    }
   ],
-  "captured_utc": "2026-08-13T22:30:27Z",
-  "mins_to_first_pitch": 217
+  "captured_utc": "2026-08-14T01:30:27Z",
+  "mins_to_first_pitch": 37
  },
  "823915": {
   "away_ml": 152,
@@ -218,7 +226,7 @@
     "captured_utc": "2026-08-13T22:30:27Z"
    }
   ],
-  "captured_utc": "2026-08-13T22:30:27Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-08-14T01:30:27Z",
+  "mins_to_first_pitch": 40
  }
 }

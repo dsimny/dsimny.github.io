@@ -831,14 +831,94 @@
    "final_score": "0-7",
    "result": "LOSS",
    "pnl": -1.0
+  },
+  {
+   "date": "2026-08-14",
+   "gamePk": 824643,
+   "game": "STL @ CHC",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.5422,
+   "edge": 0.0372,
+   "divergence": 0.053,
+   "actual_total": 3,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-14",
+   "gamePk": 823346,
+   "game": "BOS @ PIT",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-106, FanDuel)",
+   "price": -106,
+   "book": "FanDuel",
+   "model_p": 0.54,
+   "edge": 0.0254,
+   "divergence": 0.04,
+   "actual_total": 12,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-14",
+   "gamePk": 824237,
+   "game": "CWS @ DET",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8.5 (+102, LowVig.ag)",
+   "price": 102,
+   "book": "LowVig.ag",
+   "model_p": 0.5173,
+   "edge": 0.0223,
+   "divergence": 0.0381,
+   "actual_total": 14,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-14",
+   "gamePk": 824159,
+   "game": "SEA @ HOU",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.5878,
+   "edge": 0.0828,
+   "divergence": 0.0986,
+   "actual_total": 17,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-14",
+   "gamePk": 823913,
+   "game": "MIL @ LAD",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (-115, MyBookie.ag)",
+   "price": -115,
+   "book": "MyBookie.ag",
+   "model_p": 0.5563,
+   "edge": 0.0214,
+   "divergence": 0.0433,
+   "actual_total": 4,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "28-23-1p",
-  "n_graded": 52,
-  "win_pct": 54.9,
-  "paper_units_net": 2.041,
-  "paper_roi_pct": 4.0,
+  "record": "28-28-1p",
+  "n_graded": 57,
+  "win_pct": 50.0,
+  "paper_units_net": -2.959,
+  "paper_roi_pct": -5.28,
   "by_tag": {
    "R8-hold": {
     "record": "3-2",
@@ -855,11 +935,11 @@
     "paper_roi_pct": -49.0
    },
    "market-proving": {
-    "record": "24-18-1p",
-    "n_graded": 43,
-    "win_pct": 57.1,
-    "paper_units_net": 4.575,
-    "paper_roi_pct": 10.89
+    "record": "24-23-1p",
+    "n_graded": 48,
+    "win_pct": 51.1,
+    "paper_units_net": -0.425,
+    "paper_roi_pct": -0.9
    }
   },
   "by_market": {
@@ -871,14 +951,14 @@
     "paper_roi_pct": -28.16
    },
    "total": {
-    "record": "24-18-1p",
-    "n_graded": 43,
-    "win_pct": 57.1,
-    "paper_units_net": 4.575,
-    "paper_roi_pct": 10.89
+    "record": "24-23-1p",
+    "n_graded": 48,
+    "win_pct": 51.1,
+    "paper_units_net": -0.425,
+    "paper_roi_pct": -0.9
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-08-13"
+  "last_graded": "2026-08-14"
  }
 }

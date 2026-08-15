@@ -119,24 +119,48 @@
    "close_ml": -101,
    "clv_pts": 0.1,
    "beat_close": true
+  },
+  {
+   "date": "2026-08-14",
+   "gamePk": 823591,
+   "game": "WSH @ NYM",
+   "pick": "Washington Nationals ML (+106, FanDuel)",
+   "market": "moneyline",
+   "price": 106,
+   "book": "FanDuel",
+   "model_p": 0.5526,
+   "blend_p": 0.5149,
+   "edge": 0.0295,
+   "score": 0.6247,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "1-4",
+   "result": "LOSS",
+   "pnl_paper": -0.25,
+   "pnl_staked": -0.0,
+   "open_ml": 104,
+   "close_ml": 105,
+   "clv_pts": -0.12,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "3-2",
+  "record": "3-3",
   "wins": 3,
-  "losses": 2,
+  "losses": 3,
   "voids": 0,
-  "paper_units_net": 0.202,
-  "paper_roi_pct": 16.16,
+  "paper_units_net": -0.048,
+  "paper_roi_pct": -3.2,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 5,
-   "avg_clv_pts": 0.11,
-   "beat_close_pct": 60.0
+   "graded_with_clv": 6,
+   "avg_clv_pts": 0.07,
+   "beat_close_pct": 50.0
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-13"
+  "last_graded": "2026-08-14"
  }
 }

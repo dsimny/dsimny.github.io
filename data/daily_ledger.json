@@ -143,24 +143,48 @@
    "close_ml": 105,
    "clv_pts": -0.12,
    "beat_close": false
+  },
+  {
+   "date": "2026-08-15",
+   "gamePk": 824480,
+   "game": "MIA @ CIN",
+   "pick": "Miami Marlins ML (+100, BetRivers)",
+   "market": "moneyline",
+   "price": 100,
+   "book": "BetRivers",
+   "model_p": 0.5294,
+   "blend_p": 0.5135,
+   "edge": 0.0135,
+   "score": 0.5988,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "8-4",
+   "result": "WIN",
+   "pnl_paper": 0.25,
+   "pnl_staked": 0.0,
+   "open_ml": -104,
+   "close_ml": -104,
+   "clv_pts": 0.0,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "3-3",
-  "wins": 3,
+  "record": "4-3",
+  "wins": 4,
   "losses": 3,
   "voids": 0,
-  "paper_units_net": -0.048,
-  "paper_roi_pct": -3.2,
+  "paper_units_net": 0.202,
+  "paper_roi_pct": 11.54,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 6,
-   "avg_clv_pts": 0.07,
-   "beat_close_pct": 50.0
+   "graded_with_clv": 7,
+   "avg_clv_pts": 0.06,
+   "beat_close_pct": 42.9
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-14"
+  "last_graded": "2026-08-15"
  }
 }

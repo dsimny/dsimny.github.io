@@ -28,6 +28,15 @@ DISCORD_INVITE = os.environ.get("DISCORD_INVITE_URL", "").strip()
 PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
 PREMIUM_PRICE = "$30/month"
 
+# The book. Unlike the CTAs above this is a fixed product page, not a per-deploy
+# secret, so the URL lives in the source. Set BOOK_AMAZON_URL to override it —
+# that is the hook for an Associates tag (?tag=...) without touching the code.
+# Blank it and the block drops entirely, same graceful-skip pattern as the rest.
+BOOK_URL = os.environ.get("BOOK_AMAZON_URL", "https://www.amazon.com/dp/B0HFG7LWF5").strip()
+BOOK_TITLE = "Don't Trust the Screenshot"
+BOOK_AUTHOR = "D.J. Mercer"
+BOOK_PRICE = "$6.99 Kindle · $14.99 paperback"
+
 # Email capture. Set to a beehiiv form id to turn the embed (and its attribution
 # script) back on; "" drops both. Dropped 2026-07-23: beehiiv's automated
 # daily send needs a Max/Enterprise tier the empty list doesn't justify yet.
@@ -392,6 +401,28 @@ join_block = f'''
       <a class="joinbtn" href="{DISCORD_INVITE}" rel="noopener">Join the Discord</a>
     </div>''' if DISCORD_INVITE else ""
 
+# Our book, and it says so — the site's whole argument is that you should be
+# told who benefits, so an unmarked "recommendation" of our own product would
+# undercut the thesis on the page it sits on. It goes with the other CTAs rather
+# than in the footer: same argument the site makes daily, at book length, right
+# where a reader has just finished a card. Still promises no record or profit —
+# the ledger is the only claim we are entitled to make.
+book_block = f'''
+    <div class="book">
+      <p class="joinlead">📕 We wrote the book: <em>{BOOK_TITLE}</em></p>
+      <p class="joinsub">A winning screenshot proves one thing: the screenshot exists. It doesn't show the
+      losing tickets, the price that was actually available, or the risk taken. This is our standard —
+      the one this site is graded against — written out in full: converting odds into real probabilities,
+      stripping the sportsbook's margin out of a price, measuring expected value and closing-line value,
+      tracking bankroll exposure and calibration, and recognizing overfitting, survivorship bias, and a
+      sample too small to mean anything.</p>
+      <p class="joinsub">It's our book, so we make money if you buy it — say so plainly, the same way we
+      say it when we lose. Then aim it at us first: read the chapter on auditing a record, come back to
+      <a href="#" data-goto="ledger">the ledger</a>, and check whether we clear our own bar.</p>
+      <p class="joinsub">{BOOK_AUTHOR} · 304 pages · {BOOK_PRICE}.</p>
+      <a class="bookbtn" href="{BOOK_URL}" rel="noopener" target="_blank">Buy on Amazon →</a>
+    </div>''' if BOOK_URL else ""
+
 def tease(b):
     # Matchup and risk tier only. Printing confidence, edge and unit size here
     # gave away most of a held play: on a two-team game, a stated confidence
@@ -752,6 +783,10 @@ html = f'''<!DOCTYPE html>
   .joinlead {{ font-weight:700; font-size:0.98rem; }}
   .joinsub {{ margin-top:6px; font-size:0.83rem; color:var(--ink2); line-height:1.55; max-width:60ch; }}
   .joinbtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s1); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
+  /* Book CTA: reuses the join card's shape, but takes the secondary brand color
+     so it never competes with the blue Discord / green premium buttons. */
+  .book {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-left:3px solid var(--s2); border-radius:14px; background:var(--surface); }}
+  .bookbtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s2); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
   .lockednote {{ margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }}
   .rgline {{ margin:14px 0 6px; padding:10px 14px; border:1px solid var(--ring); border-left:3px solid var(--warn); border-radius:10px; background:var(--surface); font-size:0.8rem; color:var(--ink2); line-height:1.5; }}
   .pitchers {{ display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }}
@@ -837,7 +872,7 @@ html = f'''<!DOCTYPE html>
 </div></header>
 
 <div class="wrap">
-  <section class="tab active" id="tab-free">{free_section}</section>
+  <section class="tab active" id="tab-free">{free_section}{book_block}</section>
 
   <section class="tab" id="tab-board">
     <div class="hero">

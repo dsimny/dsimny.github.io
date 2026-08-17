@@ -1,0 +1,92 @@
+name: Heartbeat
+# The watchdog for the failure mode that broke the site on 2026-08-17: the
+# morning board never ran at all. The cron-job.org trigger did not fire, so no
+# workflow started, so nothing failed, so no `if: failure()` alert could ever
+# exist — and the site went on serving the 08-16 board as if it were current.
+#
+# This job asks the only question that catches that case: does a board for
+# TODAY exist in the repo? It cannot be answered from inside the board run.
+#
+# Runs at 19:00 UTC (~3 PM ET), a few hours after the 11:10 AM ET board target:
+# late enough that a slow-but-successful run has landed, early enough that
+# there is still a day left to fix it.
+#
+# ON GITHUB CRON, deliberately: the repo dropped GitHub's scheduler in
+# 2026-07-23 because it fired hours late AND each late run re-posted the free
+# pick to Discord. Neither objection applies here. This job posts nothing on a
+# healthy day, and a watchdog that runs late is still a watchdog — the whole
+# point is to catch a day where nothing ran at all, which is exactly the case a
+# second external trigger cannot be relied on to cover.
+on:
+  schedule:
+    - cron: "0 19 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Is today's board actually published?
+        id: check
+        # Written in Python rather than shell + jq on purpose: a watchdog whose
+        # check can fail open (or fail closed on a missing tool) is worse than
+        # no watchdog. This runs on the interpreter the job already installed
+        # and can be run locally against the repo, unchanged.
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, sys
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          today = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
+          # Naming verified against crypto_box.paths_for(): .enc while the board
+          # is still committed-but-unrevealed (the CI case), .json once grading
+          # reveals it or when no key is set. Accept either.
+          has_file = any(os.path.exists(f"data/board_{today}.{ext}") for ext in ("json", "enc"))
+          committed = ""
+          try:
+              with open("data/commitments.json", encoding="utf-8") as f:
+                  log = json.load(f)
+              committed = next((c.get("committed_utc", "") for c in log.get("commitments", [])
+                                if c.get("date") == today), "")
+          except (OSError, ValueError) as exc:
+              # stderr, not stdout: stdout is $GITHUB_OUTPUT here.
+              print(f"could not read commitments.json: {exc}", file=sys.stderr)
+          # A board file alone is not proof. The fingerprint in commitments.json
+          # is plaintext, is written by the same run, and is keyed by the board's
+          # own date — so the pair is the honest confirmation that today's
+          # pipeline actually finished.
+          ok = has_file and bool(committed)
+          print(f"today_et={today}")
+          print(f"committed_utc={committed}")
+          print(f"published={'yes' if ok else 'no'}")
+          PY
+          cat "$GITHUB_OUTPUT"
+      - name: Alert — no board for today
+        if: steps.check.outputs.published != 'yes'
+        env:
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
+        run: |
+          set +e
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          BOARDS="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/workflows/morning-board.yml"
+          python scripts/post_discord.py alert \
+            "**HEARTBEAT: no board published for ${{ steps.check.outputs.today_et }}.** No data/board_${{ steps.check.outputs.today_et }} file and no commitment for that date, as of ~3 PM ET.
+          The morning run either never started (cron-job.org trigger dropped, or the workflow was auto-disabled after inactivity) or died before committing. Check $BOARDS and re-run it manually if there is still time before first pitch — the engine refuses to board a game that has already started, so a late run publishes a short board rather than a dishonest one.
+          The site is already showing its staleness banner. The ledger is unaffected. Heartbeat run: $RUN_URL"
+          exit 0
+      - name: Healthy
+        if: steps.check.outputs.published == 'yes'
+        # Deliberately silent on the happy path: an alert channel that chirps
+        # every day is an alert channel nobody reads.
+        run: echo "Board for ${{ steps.check.outputs.today_et }} committed at ${{ steps.check.outputs.committed_utc }}."

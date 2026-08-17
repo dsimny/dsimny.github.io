@@ -94,3 +94,48 @@ jobs:
           git add data/ index.html feed.xml blog/ picks/
           git diff --cached --quiet || git commit -m "Grade $(date -u -d yesterday +%F)"
           git push
+
+  # Same loud-failure rule as the morning board (added 2026-08-17). A grading
+  # run that dies leaves yesterday's picks ungraded and unrevealed — House Rule 7
+  # territory — so it must reach a human the same day, not whenever someone
+  # happens to open the Actions tab.
+  alert:
+    needs: grade
+    if: ${{ always() && needs.grade.result != 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Post the failure to Discord
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
+        run: |
+          set +e
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # gh's built-in --jq, not the standalone jq binary: one less thing that
+          # can be missing on a runner and silently blank out the alert.
+          Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
+          Q_JOB='[.jobs[] | select(.name != "alert") | select(.conclusion != "success") | .id][0] // empty'
+          RUN_JOBS="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
+          STEP=$(gh api "$RUN_JOBS" --jq "$Q_STEP" 2>/dev/null)
+          JOB_ID=$(gh api "$RUN_JOBS" --jq "$Q_JOB" 2>/dev/null)
+          [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
+          : > tail.txt
+          if [ -n "$JOB_ID" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$JOB_ID/logs" > joblog.txt 2>/dev/null \
+              && tail -n 20 joblog.txt > tail.txt
+          fi
+          python scripts/post_discord.py alert \
+            "**Grading run did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          Yesterday's board may still be unrevealed and its picks ungraded. Nothing has been written to the ledger — grade.py writes nothing when it aborts — so a re-run is safe." \
+            --detail-file tail.txt
+          exit 0

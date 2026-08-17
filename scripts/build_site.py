@@ -59,6 +59,48 @@ if os.path.exists(lp):
 # work on the Linux runner but crash on Windows. Compose those parts by hand.
 _date_obj = datetime.strptime(DATE, "%Y-%m-%d")
 NICE_DATE = f"{_date_obj:%A, %B} {_date_obj.day}, {_date_obj.year}"
+SHORT_DATE = f"{_date_obj:%B} {_date_obj.day}"
+
+# ---------------- staleness (2026-08-17 incident) ----------------
+# On 2026-08-17 the morning board never ran (the cron-job.org trigger did not
+# fire, so nothing failed — nothing STARTED). The site kept serving the 08-16
+# board with no indication it was a day old: a visitor would reasonably read
+# yesterday's picks and yesterday's prices as today's. On a site whose whole
+# claim is "you see exactly what we see, when we see it", that is the worst
+# failure mode there is — worse than publishing nothing.
+#
+# So the page is now honest about its own freshness, in two independent layers:
+#   1. BUILD TIME (here): if the board being rendered is not today's ET date,
+#      the banner ships inside the HTML. Works with JavaScript off.
+#   2. PAGE LOAD (the inline script at the bottom): the same comparison runs
+#      again in the visitor's browser against the ET clock. This is the layer
+#      that catches the actual incident — a page built yesterday, correct when
+#      it was written, with nothing having rebuilt it since.
+#
+# The morning board targets 11:10 AM ET. Before that hour a stale board is the
+# ordinary overnight state (the grading run at 4:10 AM ET rebuilds the site
+# against yesterday's board, because today's does not exist yet), so the banner
+# says "not up yet". After it, the board is genuinely late or missing and the
+# banner says so. Both states carry the same do-not-bet warning, because in both
+# the prices on the page are old.
+BOARD_DUE_ET_MIN = 11 * 60 + 15         # 11:15 AM ET — a few minutes past the 11:10 target
+_now_et = datetime.now(ET)
+STALE = DATE != _now_et.strftime("%Y-%m-%d")
+OVERDUE = STALE and (_now_et.hour * 60 + _now_et.minute) >= BOARD_DUE_ET_MIN
+
+# Every phrase that implies "right now" routes through these, so a stale page
+# says the board's real date instead of quietly claiming to be current.
+TODAYS = "today's" if not STALE else f"the {SHORT_DATE}"
+TODAYS_C = "Today's" if not STALE else f"The {SHORT_DATE}"
+TODAY_ADV = "today" if not STALE else f"on {SHORT_DATE}"
+BOARD_TAB_LABEL = "Today's Board" if not STALE else f"Board · {_date_obj:%b} {_date_obj.day}"
+
+def kicker(live_label):
+    """The hero chip. When the board is stale it reads ARCHIVED instead of a
+    call to action, at build time AND (via the data attributes) on page load."""
+    arch = f"ARCHIVED — {SHORT_DATE}"
+    return (f'<span class="kicker" data-live-label="{live_label}" '
+            f'data-archived-label="{arch}">{arch if STALE else live_label}</span>')
 
 def et_time(utc_str):
     t = datetime.fromisoformat(utc_str.replace("Z", "+00:00")).astimezone(ET)
@@ -110,6 +152,37 @@ RG_BLOCK = '''
     analytics, not a promise. 21+ only. Gambling problem? Call or text <strong>1-800-GAMBLER</strong>
     · <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG
     safer-betting resources and self-assessment</a>.</div>'''
+
+# The two banner wordings. Both are rendered into the page as data attributes so
+# the inline guard can swap between them on load without a rebuild; the one that
+# was true at build time is also the element's visible text, so the banner still
+# works with JavaScript disabled.
+GENERATED_UTC = B.get("generated_utc", "unknown")
+_STALE_TAIL = (f"You're viewing the board from <strong>{DATE}</strong>, generated {GENERATED_UTC}. "
+               f"Lines have moved and games may have started — <strong>do not bet these prices.</strong>")
+STALE_MSG_OVERDUE = (f"No board published today. {_STALE_TAIL} "
+                     f"Today's board failed to publish; the ledger is unaffected.")
+STALE_MSG_PENDING = (f"Today's board isn't published yet — it posts each morning by about 11:15 AM ET. "
+                     f"{_STALE_TAIL} The ledger is unaffected.")
+stale_banner = f'''
+  <div class="stalebanner" id="stalebanner"{"" if STALE else " hidden"}
+       data-msg-overdue="{STALE_MSG_OVERDUE}" data-msg-pending="{STALE_MSG_PENDING}">
+    <span class="staleicon">⚠️</span>
+    <span class="stalemsg">{STALE_MSG_OVERDUE if OVERDUE else STALE_MSG_PENDING}</span>
+  </div>'''
+
+# House Rule 8: say what the page ACTUALLY is, not what would be tidier.
+# With no price feed the engine still simulates and still prints a fair line and
+# a tier size, but every market-derived number (edge, EV, quarter-Kelly, Rule 2's
+# price cap, Rule 8's divergence) is inactive — so the sizes on the page are the
+# confidence tier alone, never checked against a price. That is what this says.
+no_market_block = '''
+    <div class="nomarket">⚠️ <strong>Market odds unavailable this run.</strong> There was no price feed
+    when this board was built, so nothing here has been checked against a market: what follows are
+    <strong>model fair lines only</strong>. Edge, EV, quarter-Kelly sizing, Rule 2's juice cap and
+    Rule 8's divergence check all read the market and are inactive. Any unit size shown is the
+    confidence tier on its own, unpriced — a model reading, not a bet. Compare against your own book
+    before acting on anything here.</div>''' if not has_odds else ""
 
 # ---------------- auto-generated analysis ----------------
 def gen_analysis(b):
@@ -448,7 +521,7 @@ if free is not None:
                 f'{free["mkt_odds"]:+d} consensus price</span></div>') if free["mkt_odds"] is not None else ""
     free_section = f'''
     <div class="hero">
-      <span class="kicker">★ Free Pick of the Day</span>
+      {kicker("★ Free Pick of the Day")}
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>{f_away} <span class="at">@</span> {f_home}</h1>
       <p class="sub">Every day, one pick free and in full: complete analysis, unit sizing, market edge, and every circuit-breaker check. By design it's a <strong>strong play, but not our Play of the Day</strong>: the top-confidence plays go to premium members before first pitch, then publish in full, winners and losers alike, on <a href="#" data-goto="ledger">the ledger</a> once graded. Same engine, same {free["n_sims"]:,} simulations, measured against real market prices, committed to the public record before first pitch and graded on the ledger after.</p>
@@ -485,8 +558,8 @@ if free is not None:
       </details>
     </article>
     {RG_BLOCK}
-    <h2 class="sect">The rest of today's board</h2>
-    <p class="sectsub">{max(len(plays)-1,0)} more plays and {len(scratches)} scratches on today's board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
+    <h2 class="sect">The rest of {TODAYS} board</h2>
+    <p class="sectsub">{max(len(plays)-1,0)} more plays and {len(scratches)} scratches on {TODAYS} board. Leans and scratches publish in full; the held plays post with their breaker logs once graded.</p>
     <div class="boardteasers">{teasers}</div>
     {upgrade_block}
     {join_block}
@@ -501,10 +574,10 @@ elif DP is not None and dp_row is not None:
     d_away, d_home = dp_row["matchup"].split(" @ ")
     free_section = f'''
     <div class="hero">
-      <span class="kicker">🎯 Daily Pick of the Day</span>
+      {kicker("🎯 Daily Pick of the Day")}
       <span class="kickerdate">{NICE_DATE}</span>
       <h1>{d_away} <span class="at">@</span> {d_home}</h1>
-      <p class="sub">No play cleared the strict Qualified gates today (2-point edge, every breaker) —
+      <p class="sub">No play cleared the strict Qualified gates {TODAY_ADV} (2-point edge, every breaker) —
       that standard is unchanged and its record is separate. The <strong>Daily Pick</strong> is our
       always-on strategy: the slate's top-ranked candidate under a lower, precommitted bar
       (positive edge at the best price, model and market blend agreeing, no Rule 8 hold), published
@@ -522,11 +595,11 @@ elif DP is not None and dp_row is not None:
 else:
     free_section = f'''
     <div class="hero">
-      <span class="kicker">Free Pick of the Day</span>
+      {kicker("Free Pick of the Day")}
       <span class="kickerdate">{NICE_DATE}</span>
-      <h1>No qualifying plays today.</h1>
-      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price — and no candidate survived the Daily Pick's eligibility rules either. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.{' Today&#39;s ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all.' if any(b.get("best_of_board") for b in leans) else ''}{f' The <strong>Watch List</strong> on the board tab shows what almost made it — {len(watch)} tracked at 0 units, never staked.' if watch else ''}</p>
-      <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See today's board →</button></div>
+      <h1>No qualifying plays {TODAY_ADV}.</h1>
+      <p class="sub">The engine ran the full slate, and nothing cleared the circuit breakers and the edge gate at an allocatable price — and no candidate survived the Daily Pick's eligibility rules either. We don't manufacture a pick to fill the slot. <strong>Passing is a position too.</strong> The full board of leans and scratches, with reasons, is one click away.{f' {TODAYS_C} ✳ <strong>Best of Board</strong> — the model&#39;s top choice that did <em>not</em> clear the markers — is on the board at 0 units, asterisk and all.' if any(b.get("best_of_board") for b in leans) else ''}{f' The <strong>Watch List</strong> on the board tab shows what almost made it — {len(watch)} tracked at 0 units, never staked.' if watch else ''}</p>
+      <div style="margin-top:10px;"><button class="boardcta" data-goto="board">See {TODAYS} board →</button></div>
     </div>'''
 
 # ---------------- ledger section ----------------
@@ -685,14 +758,14 @@ if agg:
       <div class="tile"><span class="tl">Record</span><span class="tv">{agg["record"]}</span><span class="td">graded picks</span></div>
       <div class="tile"><span class="tl">Units</span><span class="tv">{agg["units_net"]:+.2f}</span><span class="td">net P&amp;L</span></div>
       <div class="tile"><span class="tl">ROI</span><span class="tv">{f"{agg['roi_pct']:+.1f}%" if agg["roi_pct"] is not None else "n/a"}</span><span class="td">on {agg["units_risked"]:g}u risked</span></div>{clv_tile}
-      <div class="tile"><span class="tl">Pending</span><span class="tv">{len(plays)}</span><span class="td">{B["published_units"]:g}u at risk today</span></div>'''
+      <div class="tile"><span class="tl">Pending</span><span class="tv">{len(plays)}</span><span class="td">{B["published_units"]:g}u at risk {TODAY_ADV}</span></div>'''
     strip = f'Ledger: <b>{agg["record"]}</b> · <b>{agg["units_net"]:+.2f}u</b> · opened Jul 22, 2026'
 else:
     tiles = f'''
       <div class="tile"><span class="tl">Record</span><span class="tv">0–0</span><span class="td">graded picks</span></div>
       <div class="tile"><span class="tl">Units</span><span class="tv">+0.00</span><span class="td">net P&amp;L</span></div>
       <div class="tile"><span class="tl">ROI</span><span class="tv">n/a</span><span class="td">needs graded picks</span></div>
-      <div class="tile"><span class="tl">Pending</span><span class="tv">{len(plays)}</span><span class="td">{B["published_units"]:g}u at risk today</span></div>'''
+      <div class="tile"><span class="tl">Pending</span><span class="tv">{len(plays)}</span><span class="td">{B["published_units"]:g}u at risk {TODAY_ADV}</span></div>'''
     strip = 'Ledger: <b>0–0</b> · <b>+0.00u</b> · opened Jul 22, 2026'
 
 # ---------------- page ----------------
@@ -789,6 +862,20 @@ html = f'''<!DOCTYPE html>
   .bookbtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s2); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
   .lockednote {{ margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }}
   .rgline {{ margin:14px 0 6px; padding:10px 14px; border:1px solid var(--ring); border-left:3px solid var(--warn); border-radius:10px; background:var(--surface); font-size:0.8rem; color:var(--ink2); line-height:1.5; }}
+  /* Staleness banner (2026-08-17). Uses the existing critical colour, sits above
+     every tab, and is deliberately the loudest thing on the page: a day-old board
+     read as today's is the single most damaging thing this site can do. */
+  .stalebanner {{ display:flex; gap:12px; align-items:flex-start; margin:14px 0 4px; padding:14px 16px;
+    border:1px solid var(--crit); border-left:5px solid var(--crit); border-radius:12px;
+    background:rgba(208,59,59,0.10); color:var(--ink); font-size:0.92rem; line-height:1.5; }}
+  .stalebanner[hidden] {{ display:none; }}
+  .staleicon {{ font-size:1.15rem; line-height:1.3; flex:none; }}
+  .stalemsg strong {{ color:var(--crit); }}
+  /* Archived treatment: the picks are still fully readable — nothing is hidden —
+     but they stop looking like something to act on. */
+  body.stale .freewrap .card, body.stale #tab-board .cards .card {{ opacity:0.45; filter:grayscale(0.45); }}
+  body.stale .kicker {{ color:var(--crit); }}
+  .nomarket {{ margin:14px 0 6px; padding:12px 16px; border:1px solid var(--ring); border-left:3px solid var(--serious); border-radius:10px; background:var(--surface); font-size:0.84rem; color:var(--ink2); line-height:1.55; }}
   .pitchers {{ display:flex; gap:10px; align-items:baseline; font-size:0.82rem; margin:12px 0 4px; flex-wrap:wrap; }}
   .pitchers em {{ color:var(--muted); font-style:normal; font-size:0.75rem; }}
   .vs {{ color:var(--muted); font-size:0.7rem; }}
@@ -854,30 +941,32 @@ html = f'''<!DOCTYPE html>
   footer.legal strong {{ color:var(--ink2); }}
 </style>
 </head>
-<body>
+<body class="{'stale' if STALE else ''}" data-board-date="{DATE}" data-generated-utc="{GENERATED_UTC}" data-board-due-et="{BOARD_DUE_ET_MIN}">
 <header class="site"><div class="wrap sitebar">
   <div class="wordmark"><img class="sitelogo" src="assets/logo.jpg" width="440" height="440" alt="">
     <div class="marktext"><span class="markname"><span class="open">OPEN LEDGER</span> SPORTS</span>
       <small>Every pick on the record. Every rule in public.</small></div></div>
   <nav class="tabs" role="tablist">
     <button class="active" data-tab="free">Free Pick</button>
-    <button data-tab="board">Today's Board</button>
+    <button data-tab="board" data-live-label="Today's Board" data-archived-label="Board · {_date_obj:%b} {_date_obj.day}">{BOARD_TAB_LABEL}</button>
     <button data-tab="ledger">The Ledger</button>
     <button data-tab="method">Methodology</button>
     <button data-tab="rules">The Rules</button>
     <a href="blog/">Blog</a>
     <a href="odds/">Odds</a>
   </nav>
-  <div class="ledgerstrip">{strip} · today: <b>{len(plays)}</b> plays, <b>{B["published_units"]:g}u</b> exposure</div>
+  <div class="ledgerstrip">{strip} · <span data-live-label="today" data-archived-label="on {SHORT_DATE}">{TODAY_ADV}</span>: <b>{len(plays)}</b> plays, <b>{B["published_units"]:g}u</b> exposure</div>
 </div></header>
 
 <div class="wrap">
-  <section class="tab active" id="tab-free">{free_section}{book_block}</section>
+  {stale_banner}
+  <section class="tab active" id="tab-free">{no_market_block}<div class="freewrap">{free_section}</div>{book_block}</section>
 
   <section class="tab" id="tab-board">
+    {no_market_block}
     <div class="hero">
       <h1>MLB Board: {NICE_DATE}</h1>
-      <p class="sub">Every game on today's slate simulated <strong>{B["n_sims"]:,} times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why. Every game also gets a <a href="picks/">permanent pick page</a> that completes once it grades.</p>
+      <p class="sub">Every game on {TODAYS} slate simulated <strong>{B["n_sims"]:,} times</strong>, priced against real market lines, then passed through eight risk circuit breakers. What survives gets an allocation. What doesn't, we tell you why. Every game also gets a <a href="picks/">permanent pick page</a> that completes once it grades.</p>
       <div class="slateline">
         <div><b>{B.get("n_slate", len(B["board"]) + len(scratches))}</b> games on slate</div>
         <div><b>{len(B["board"])}</b> simulated ({B["n_sims"]:,}× each)</div>
@@ -892,10 +981,10 @@ html = f'''<!DOCTYPE html>
     <h2 class="sect">Published plays: {B["published_units"]:g}u total exposure</h2>
     <p class="sectsub">The free pick is shown in full. The rest go to premium members before first pitch. Every one of them, winners and losers alike, publishes on the ledger with its full breaker log once graded.</p>
     {upgrade_block}
-    <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None today. Nothing cleared the gates. Passing is a position.</p>"}</div>
+    <div class="cards">{"".join(card(b, True) if b is free else locked_card(b) for b in plays) or "<p class='sectsub'>None {TODAY_ADV}. Nothing cleared the gates. Passing is a position.</p>"}</div>
     <h2 class="sect">Watch List: tracked, not staked</h2>
     <p class="sectsub">A watch pick clears some but not all gates, or belongs to a market still in its proving period. Each is computed, published, and graded exactly like a real pick — at 0 units, on a separate paper record that never mixes with the staked ledger.</p>
-    <div class="cards">{"".join(watch_card(w) for w in watch) or "<p class='sectsub'>No watch picks today.</p>"}</div>
+    <div class="cards">{"".join(watch_card(w) for w in watch) or "<p class='sectsub'>No watch picks {TODAY_ADV}.</p>"}</div>
     <div class="callout"><strong>Promotion criteria (the policy, verbatim):</strong> a market or band graduates from watch to staked only when its paper record reaches n ≥ 100 graded picks AND shows non-negative units at the prices logged AND the calibration for that segment is within 4 points. Promotion = version bump + methodology note. Demotion works the same way in reverse (a staked market that goes 100-pick negative returns to paper — also public).</div>
     {f"""<div class="tiles">
       <div class="tile"><span class="tl">Watch record</span><span class="tv">{watchlist["aggregates"]["record"]}</span><span class="td">paper record — never mixed into the staked ledger</span></div>
@@ -919,7 +1008,7 @@ html = f'''<!DOCTYPE html>
       <tbody>{pending_rows}{graded_rows}</tbody>
     </table>
     </div>
-    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing today's pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks; anything we say about ROI before then is weather, not climate.</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;">Showing {TODAYS} pending picks and the last 25 graded. A meaningful sample is 500–1,000 picks; anything we say about ROI before then is weather, not climate.</p>
     <p style="font-size:0.78rem;color:var(--muted);margin-top:6px;"><strong>Close · CLV</strong> is the last captured pre-first-pitch line on our side and how many de-vigged probability points the market moved toward (+) or away from (−) our number after we posted. Beating the close consistently is a faster read on real edge than any month of wins. A — means no captured close for that pick: capture went live July 25, and we never backfill.</p>
     {splits_html}
     {RG_BLOCK}
@@ -989,6 +1078,41 @@ html = f'''<!DOCTYPE html>
   }}));
   const hash = location.hash.replace("#", "");
   if (["free","board","ledger","method","rules"].includes(hash)) goTab(hash);
+
+  // ---- freshness guard (2026-08-17 incident) ----
+  // The site is static, so the build-time staleness check is frozen at the
+  // moment the page was written. That is exactly the case that bit us: a page
+  // built yesterday, correct when written, still being served today because
+  // nothing rebuilt it. So the comparison runs again here, on every page load,
+  // against the VISITOR's clock in America/New_York.
+  //
+  // Every string this touches was generated by the build; nothing here reads
+  // user input, a query string, or the network.
+  (function () {{
+    var body = document.body, el = document.getElementById("stalebanner");
+    if (!el) return;
+    var now = new Date();
+    var todayET = new Intl.DateTimeFormat("en-CA", {{ timeZone: "America/New_York",
+      year: "numeric", month: "2-digit", day: "2-digit" }}).format(now);
+    var hm = new Intl.DateTimeFormat("en-GB", {{ timeZone: "America/New_York",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23" }}).format(now);
+    var minsET = (parseInt(hm.slice(0, 2), 10) % 24) * 60 + parseInt(hm.slice(3, 5), 10);
+    var stale = body.dataset.boardDate !== todayET;
+    var dueET = parseInt(body.dataset.boardDueEt, 10);
+
+    body.classList.toggle("stale", stale);
+    el.hidden = !stale;
+    if (stale) {{
+      el.querySelector(".stalemsg").innerHTML =
+        minsET >= dueET ? el.dataset.msgOverdue : el.dataset.msgPending;
+    }}
+    // Labels swap in BOTH directions: a page built stale that is somehow being
+    // read on its own board date must not keep shouting ARCHIVED either.
+    document.querySelectorAll("[data-archived-label]").forEach(function (n) {{
+      var want = stale ? n.dataset.archivedLabel : n.dataset.liveLabel;
+      if (want && n.textContent !== want) n.textContent = want;
+    }});
+  }})();
   // Email capture is embedded by its provider's own script when enabled.
 </script>
 </body>

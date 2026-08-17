@@ -45,3 +45,52 @@ jobs:
           git add data/closing_*.json odds/
           git diff --cached --quiet || git commit -m "Closing lines $(date -u +%FT%TZ)"
           git push
+
+  # Same loud-failure rule as the board and grading runs (added 2026-08-17).
+  # Lower stakes than those two — a missed capture costs precision on one
+  # window's close, not a board or a ledger entry — but a silent failure is
+  # still a silent failure, and this job is the one that had actually been
+  # failing unnoticed: the 2026-08-16 22:30 UTC run died at "Commit closing
+  # lines" (a push race on the shared data/ directory) and told nobody.
+  # The message says what it really costs so three-a-day alerting can never
+  # train anyone to ignore the channel.
+  alert:
+    needs: capture
+    if: ${{ always() && needs.capture.result != 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Post the failure to Discord
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
+        run: |
+          set +e
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # gh's built-in --jq, not the standalone jq binary: one less thing that
+          # can be missing on a runner and silently blank out the alert.
+          Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
+          Q_JOB='[.jobs[] | select(.name != "alert") | select(.conclusion != "success") | .id][0] // empty'
+          RUN_JOBS="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
+          STEP=$(gh api "$RUN_JOBS" --jq "$Q_STEP" 2>/dev/null)
+          JOB_ID=$(gh api "$RUN_JOBS" --jq "$Q_JOB" 2>/dev/null)
+          [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
+          : > tail.txt
+          if [ -n "$JOB_ID" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$JOB_ID/logs" > joblog.txt 2>/dev/null \
+              && tail -n 20 joblog.txt > tail.txt
+          fi
+          python scripts/post_discord.py alert \
+            "**Closing-line capture did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          Impact is limited: games whose first pitch falls before the next capture keep an earlier line as their close, so their CLV is measured against a slightly stale number. No board, ledger or site content is affected, and the capture file is append-only — the next run picks up where this one stopped. If this repeats, look at the commit step: several capture runs share data/ with the board and grading jobs and can lose a push race." \
+            --detail-file tail.txt
+          exit 0

@@ -51,10 +51,51 @@ def parse_utc(s):
         return None
 
 
+# This job runs several times a day, so it is the bulk of the Odds API spend —
+# 3 captures/day against the board's 1. Any honest credit budget has to count it,
+# so it reads and logs the same balance headers fetch_data.py does. Kept as a
+# local copy rather than an import: this script deliberately never imports the
+# committed morning pipeline (see the module docstring). If you change one,
+# eyeball the other.
+ODDS_MARKETS = os.environ.get("ODDS_MARKETS", "h2h,totals").strip()
+ODDS_REGIONS = os.environ.get("ODDS_REGIONS", "us").strip()
+CREDIT_LOG_KEEP = 60
+
+
+def record_credits(credits):
+    """Append a plaintext credit reading to data/odds_credits.json. Never raises."""
+    path = os.path.join(ROOT, "data", "odds_credits.json")
+    try:
+        log = {"readings": []}
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                log = json.load(f)
+        log["readings"] = (log.get("readings", []) + [credits])[-CREDIT_LOG_KEEP:]
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(log, f, indent=1)
+    except Exception as exc:
+        print(f"NOTE: could not record odds credits: {exc}")
+
+
 def fetch_market_odds(games, team_names, key):
     """Median h2h + totals across US books, keyed by gamePk. Mirrors fetch_data.py."""
-    events = get("https://api.the-odds-api.com/v4/sports/baseball_mlb/odds",
-                 apiKey=key, regions="us", markets="h2h,totals", oddsFormat="american")
+    r = requests.get("https://api.the-odds-api.com/v4/sports/baseball_mlb/odds", timeout=30,
+                     params={"apiKey": key, "regions": ODDS_REGIONS,
+                             "markets": ODDS_MARKETS, "oddsFormat": "american"})
+    def _int(name):
+        try:
+            return int(r.headers.get(name))
+        except (TypeError, ValueError):
+            return None
+    credits = {"remaining": _int("x-requests-remaining"), "used": _int("x-requests-used"),
+               "last_call_cost": _int("x-requests-last"), "markets": ODDS_MARKETS,
+               "regions": ODDS_REGIONS, "http_status": r.status_code, "source": "fetch_closing",
+               "read_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+    print(f"Odds API credits: {credits['remaining']} remaining, {credits['used']} used "
+          f"(markets [{ODDS_MARKETS}], regions [{ODDS_REGIONS}]).")
+    record_credits(credits)
+    r.raise_for_status()          # AFTER the headers: a 401/429 still reports the balance
+    events = r.json()
     by_name = {(ev["away_team"], ev["home_team"]): ev for ev in events}
     odds = {}
     for g in games:

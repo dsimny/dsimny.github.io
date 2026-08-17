@@ -61,6 +61,90 @@ def get(url, **params):
     r.raise_for_status()
     return r.json()
 
+# ---- The Odds API budget (2026-08-17) ----------------------------------------
+# The free tier is 500 credits a month and the /odds endpoint bills ONE CREDIT
+# PER MARKET PER REGION per call — so this string is the run's price tag, not a
+# preference. "h2h,totals" over one region costs 2 credits a call. Adding
+# spreads would cost 50% more for a market nothing is staked on today.
+#
+# Credits were NOT the cause of the 2026-08-17 outage (the morning workflow never
+# started at all), but the run was flying blind on them: nothing logged, nothing
+# stored, no warning before exhaustion. Now every run records what it spent and
+# what is left. The arithmetic and the upgrade rule live in CLAUDE.md.
+ODDS_URL = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
+ODDS_MARKETS = os.environ.get("ODDS_MARKETS", "h2h,totals").strip()
+ODDS_REGIONS = os.environ.get("ODDS_REGIONS", "us").strip()
+CREDITS_LOW = 50          # warn below this, with ~5 days of headroom left at 8/day
+
+def fetch_odds(key, credits_out):
+    """The odds call. Returns the events; fills credits_out with the balance.
+
+    The Odds API reports the running balance on every response, including the
+    error ones. credits_out is filled BEFORE raise_for_status, so the readings
+    that matter most — the 401 that says the key died, the 429 that says the
+    month is spent — survive the exception instead of being lost with it.
+    """
+    r = requests.get(ODDS_URL, timeout=30, params={
+        "apiKey": key, "regions": ODDS_REGIONS,
+        "markets": ODDS_MARKETS, "oddsFormat": "american"})
+    def _int(name):
+        try:
+            return int(r.headers.get(name))
+        except (TypeError, ValueError):
+            return None
+    credits_out.update({
+        "remaining": _int("x-requests-remaining"),
+        "used": _int("x-requests-used"),
+        "last_call_cost": _int("x-requests-last"),
+        "markets": ODDS_MARKETS, "regions": ODDS_REGIONS,
+        "http_status": r.status_code, "source": "fetch_data",
+        "read_utc": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    })
+    r.raise_for_status()
+    return r.json()
+
+
+CREDIT_LOG_KEEP = 60
+
+def record_credits(credits):
+    """Append the reading to data/odds_credits.json, IN THE CLEAR.
+
+    The snapshot carries the same numbers, but the snapshot is encrypted until
+    grading reveals it — so it cannot be what makes the balance "visible in the
+    repo". This file can, and it costs nothing: no picks, no model output, just
+    a counter and a timestamp.
+    """
+    path = os.path.join(ROOT, "data", "odds_credits.json")
+    try:
+        log = {"readings": []}
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                log = json.load(f)
+        log["readings"] = (log.get("readings", []) + [credits])[-CREDIT_LOG_KEEP:]
+        log["note"] = ("The Odds API bills one credit per market per region per call. "
+                       "Free tier: 500/month. See CLAUDE.md for the budget and the "
+                       "decision rule for upgrading.")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(log, f, indent=1)
+    except Exception as exc:                 # telemetry must never sink the board
+        print(f"NOTE: could not record odds credits: {exc}")
+
+
+def alert_low_credits(remaining):
+    """Tell a human BEFORE the feed dies, not after. Best-effort, like every
+    other alerting path: it can never fail the fetch."""
+    try:
+        import post_discord
+        post_discord.post_alert([
+            f"**Odds API credits low: {remaining} remaining.** At roughly "
+            f"8 credits/day (1 board call + 3 closing captures, {ODDS_MARKETS} "
+            f"over {ODDS_REGIONS}) that is about {remaining // 8} days of feed left. "
+            f"When it runs out the board still publishes — model fair lines only, "
+            f"no market gates and no staked plays priced — and the site says so."])
+    except Exception as exc:
+        print(f"NOTE: could not send the low-credit alert: {exc}")
+
 def _payout(o):
     """Net decimal payout per 1u staked. Higher = better for the bettor, which is
     what 'best price' means: -105 beats -120, +130 beats +110."""
@@ -357,18 +441,36 @@ def main():
             g["wx"] = None
 
     # ---- Odds (optional): The Odds API — median consensus + best price (v0.13) ----
-    odds, odds_source = {}, None
+    # DEGRADE, NEVER DIE. Quota exhaustion, a revoked key, a 429, a timeout — all
+    # of it lands in the same place: a warning, an empty odds dict, and a board
+    # that still publishes. A missing price feed should cost us picks, never the
+    # whole board. The site says plainly what it is showing when this happens.
+    odds, odds_source, odds_credits = {}, None, {}
     key = os.environ.get("ODDS_API_KEY")
     if key:
         try:
-            events = get("https://api.the-odds-api.com/v4/sports/baseball_mlb/odds",
-                         apiKey=key, regions="us", markets="h2h,totals", oddsFormat="american")
+            events = fetch_odds(key, odds_credits)
             odds = consolidate_odds(events, games, teams)
             odds_source = (f"The Odds API, US books: consensus = median, plus best price per side "
-                           f"with book, fetched {datetime.utcnow().isoformat()}Z")
+                           f"with book, markets {ODDS_MARKETS}, "
+                           f"fetched {datetime.utcnow().isoformat()}Z")
+            print(f"Odds: fetched markets [{ODDS_MARKETS}] over regions [{ODDS_REGIONS}] "
+                  f"for {len(odds)} games.")
         except Exception as e:  # odds are optional — never sink the board over them
-            print(f"WARNING: odds fetch failed ({e}); engine will run without market gates.")
+            print(f"WARNING: odds fetch failed ({e}); the board will publish with MODEL FAIR "
+                  f"LINES ONLY — no market gates, no priced edges. The site says so.")
             odds, odds_source = {}, None
+        # Runs whether the call succeeded or failed: a 401 or a 429 still reports
+        # the balance, and that reading is exactly the one worth keeping.
+        if odds_credits:
+            rem, used = odds_credits.get("remaining"), odds_credits.get("used")
+            print(f"Odds API credits: {rem if rem is not None else '?'} remaining, "
+                  f"{used if used is not None else '?'} used this period, "
+                  f"this call cost {odds_credits.get('last_call_cost', '?')}.")
+            record_credits(odds_credits)
+            if rem is not None and rem < CREDITS_LOW:
+                print(f"WARNING: odds credits below {CREDITS_LOW}.")
+                alert_low_credits(rem)
     else:
         print("NOTE: no ODDS_API_KEY set — running without market odds (edge/Kelly/Rule 8 inactive).")
 
@@ -381,6 +483,8 @@ def main():
         "league_pitching": league_pitching,
         "league_woba_14d": league_woba_14d,
         "odds_source": odds_source,
+        "odds_credits": odds_credits or None,
+        "odds_markets": ODDS_MARKETS if key else None,
         "odds": odds,
         "park_factors_note": "Approximate season-level run park factors; refresh from Baseball Savant.",
         "park_factors": PARK_FACTORS,

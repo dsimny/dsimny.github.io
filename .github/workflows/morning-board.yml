@@ -35,6 +35,12 @@ jobs:
       - name: Fetch data
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}   # optional — board runs without it
+          # Only used to warn when The Odds API balance drops under the floor.
+          # An exhausted feed no longer surprises us: the board still publishes,
+          # with model fair lines and no market gates, and the site says so.
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
         run: python scripts/fetch_data.py
       - name: Run engine (10,000 sims/game + circuit breakers)
         run: python scripts/engine.py
@@ -101,3 +107,56 @@ jobs:
           git add data/ index.html feed.xml blog/ picks/ odds/
           git diff --cached --quiet || git commit -m "Board $(date -u +%F)"
           git push
+
+  # A failed morning run has to reach a human the same day. Before 2026-08-17
+  # nothing did: the board job could go red (or, that day, never start at all)
+  # and the only trace was a line in the Actions tab nobody was watching, while
+  # the site quietly kept serving the previous day's picks.
+  #
+  # This job covers the "it ran and broke" half. The "it never started" half is
+  # structurally uncatchable here — a job that never starts cannot fail — and is
+  # covered by heartbeat.yml instead.
+  alert:
+    needs: board
+    # always() so this still fires when the board job is CANCELLED or killed by
+    # the runner, not only when a step exits non-zero.
+    if: ${{ always() && needs.board.result != 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read           # naming the failing step + reading its log tail
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Post the failure to Discord
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
+        run: |
+          # Every lookup below is best-effort: an alert that says less is fine,
+          # an alert that fails to send is not. Hence set +e and the || true.
+          set +e
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # gh's built-in --jq, not the standalone jq binary: one less thing that
+          # can be missing on a runner and silently blank out the alert.
+          Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
+          Q_JOB='[.jobs[] | select(.name != "alert") | select(.conclusion != "success") | .id][0] // empty'
+          RUN_JOBS="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
+          STEP=$(gh api "$RUN_JOBS" --jq "$Q_STEP" 2>/dev/null)
+          JOB_ID=$(gh api "$RUN_JOBS" --jq "$Q_JOB" 2>/dev/null)
+          [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
+          : > tail.txt
+          if [ -n "$JOB_ID" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$JOB_ID/logs" > joblog.txt 2>/dev/null \
+              && tail -n 20 joblog.txt > tail.txt
+          fi
+          python scripts/post_discord.py alert \
+            "**Morning board did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          Today's board may not have published. The site shows its staleness banner until a board for today lands; the ledger is untouched." \
+            --detail-file tail.txt
+          exit 0

@@ -17,6 +17,14 @@ Two modes, wired into the two daily workflows:
          (written by blog.py earlier in the same run), so it can only ever
          post what the blog already publishes. Like pick/board, NOT
          idempotent: a second morning run re-posts.
+  alert  (on workflow failure, and from heartbeat.yml) — posts an ops alert:
+         a free-text message plus an optional log tail. Added after the
+         2026-08-17 incident, when the morning board never ran and NOTHING
+         told a human: the workflow could not fail, because it never started.
+         A failed run has to be loud. This mode is deliberately the most
+         defensive path in the file — it swallows every exception and always
+         exits 0, because an alerting path that can itself break a run is
+         worse than no alerting path at all.
 
 Setup: Discord server -> channel -> Edit channel -> Integrations -> Webhooks ->
 New Webhook -> Copy URL -> save it as the repo secret DISCORD_WEBHOOK_URL.
@@ -27,9 +35,11 @@ No webhook configured? The script exits 0 with a note — it never fails a run.
 Run:  python scripts/post_discord.py pick  [YYYY-MM-DD] [--dry-run]
       python scripts/post_discord.py board [YYYY-MM-DD] [--dry-run]
       python scripts/post_discord.py recap [YYYY-MM-DD] [--dry-run]
+      python scripts/post_discord.py alert "message" [--detail-file log.txt] [--dry-run]
 """
 import json, os, sys
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 import crypto_box
@@ -44,6 +54,11 @@ MEMBERS_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_MEMBERS", "")
 # Falls back to the free-pick webhook if unset, so nothing breaks before the
 # channel exists.
 LEDGER_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_LEDGER", "")
+# Ops alerts. An admin channel is the right home, but the members channel is a
+# perfectly good fallback: a visible failure is on-brand for this site, not
+# something to hide. Falls back again to the free channel so an alert always
+# has somewhere to land.
+ALERT_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_ALERTS", "")
 SITE = os.environ.get("SITE_URL", "").rstrip("/")
 
 MAX_EMBEDS = 10   # Discord's hard limit per message
@@ -352,6 +367,88 @@ def build_blog_payload(date):
     }
     return {"username": "Open Ledger Sports", "embeds": [embed]}
 
+# ---------------- ops alerting ----------------
+# Every webhook this file posts to comes out of the environment, so the host is
+# checked before anything is sent. A misconfigured (or swapped) variable must
+# fail closed rather than POST the contents of a CI log somewhere else.
+DISCORD_HOSTS = ("discord.com", "www.discord.com", "discordapp.com",
+                 "ptb.discord.com", "canary.discord.com")
+
+def webhook_host_ok(url):
+    try:
+        host = (urlparse(url).hostname or "").lower()
+    except Exception:
+        return False
+    return host in DISCORD_HOSTS
+
+
+def build_alert_payload(message, detail=""):
+    """One red embed: what broke, where to look, and the tail of the error.
+
+    Deliberately plain. Nobody reads an alert for tone; they read it for the
+    run URL.
+    """
+    desc = message.strip()[:3500] or "A scheduled job reported a failure."
+    fields = []
+    if detail.strip():
+        # Actions masks secrets in its own logs before we ever see them, but the
+        # tail is still clipped hard: an alert is a pointer to the run, not a
+        # replacement for reading it.
+        tail = detail.strip()[-1000:]
+        fields.append({"name": "Last lines", "value": f"```\n{tail}\n```"[:1024]})
+    return {
+        "username": "Open Ledger Sports",
+        "embeds": [{
+            "title": "🚨 Pipeline alert",
+            "description": desc,
+            "color": RED,
+            "fields": fields,
+            "footer": {"text": "Open Ledger Sports ops · the board, ledger and site are "
+                               "unaffected unless the message says otherwise"},
+        }],
+    }
+
+
+def post_alert(args, dry=False):
+    """Send an ops alert. NEVER raises, NEVER exits non-zero.
+
+    Called from `if: failure()` steps and from the heartbeat, i.e. from places
+    that are already having a bad day. If this function could fail it would turn
+    one broken job into two and still tell nobody.
+    """
+    try:
+        message = args[0] if args else "A scheduled job failed."
+        detail = ""
+        if "--detail-file" in sys.argv:
+            i = sys.argv.index("--detail-file")
+            if i + 1 < len(sys.argv):
+                try:
+                    with open(sys.argv[i + 1], encoding="utf-8", errors="replace") as f:
+                        detail = f.read()
+                except OSError as exc:
+                    print(f"NOTE: could not read detail file: {exc}")
+        payload = build_alert_payload(message, detail)
+        if dry:
+            print(json.dumps(payload, indent=2))
+            return
+        webhook = ALERT_WEBHOOK or MEMBERS_WEBHOOK or WEBHOOK
+        if not webhook:
+            print("NOTE: no DISCORD_WEBHOOK_URL_ALERTS / _MEMBERS / _URL set — "
+                  "alert not sent. The failure is still in the Actions log.")
+            return
+        if not webhook_host_ok(webhook):
+            print("WARNING: alert webhook is not a discord.com URL — refusing to send.")
+            return
+        import requests
+        r = requests.post(webhook, json=payload, timeout=30)
+        if r.status_code >= 300:
+            print(f"WARNING: alert post failed ({r.status_code}): {r.text[:300]}")
+        else:
+            print("Alert posted to Discord.")
+    except Exception as exc:                      # alerting must never break a run
+        print(f"NOTE: alert could not be posted: {exc}")
+
+
 # mode -> (payload builder, webhook, env var name for the skip message)
 def routes():
     return {
@@ -399,6 +496,19 @@ def record(mode, date, result, status=None, detail="", channel_id=""):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     mode = args[0] if args else "pick"
+
+    # Handled before the routing table: an alert takes a message, not a date,
+    # and must never raise its way out of this process.
+    if mode == "alert":
+        # --detail-file's VALUE is an argument too; drop it from the message.
+        msg_args = list(args[1:])
+        if "--detail-file" in sys.argv:
+            i = sys.argv.index("--detail-file")
+            if i + 1 < len(sys.argv) and sys.argv[i + 1] in msg_args:
+                msg_args.remove(sys.argv[i + 1])
+        post_alert([" ".join(msg_args)] if msg_args else [], dry="--dry-run" in sys.argv)
+        return
+
     table = routes()
     if mode not in table:
         print(f"Unknown mode {mode!r}. Use one of: {', '.join(table)}.")

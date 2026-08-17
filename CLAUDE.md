@@ -60,7 +60,82 @@ to Discord.
                                                         standings, commit aggregates, post leaderboard)
   scripts/grade.py also →  data/daily_ledger.json      (v0.15 Daily Pick strategy record, separate)
   scripts/export_training_rows.py → data/model/training_rows.csv  (point-in-time challenger data)
+
+.github/workflows/heartbeat.yml     (GitHub cron, daily 19:00 UTC / ~3 PM ET)
+  checks data/board_<today ET>.{json,enc} + a commitments.json entry for that date
+  → scripts/post_discord.py alert    ONLY when today's board is missing (silent otherwise)
+
+morning-board.yml, grade-ledger.yml and capture-closing.yml each carry a second
+job, `alert`, that runs on `always() && needs.<job>.result != 'success'` and posts
+the failing step name, the run URL and the last 20 log lines to Discord.
 ```
+
+## Never serve a stale board silently (2026-08-17 incident)
+
+WHAT HAPPENED: the morning board did not publish. The cron-job.org trigger for
+11:10 AM ET never fired, so no workflow ran — the Actions history shows no
+Morning board run at 15:10 UTC that day, only a manual one at 17:04 UTC that
+went fully green. Grading ran normally at 08:10 UTC. Nothing failed, because
+nothing STARTED, so no `if: failure()` alert could ever have caught it. For
+~6 hours the site served the 2026-08-16 board with no indication it was a day
+old: a visitor would reasonably have read yesterday's picks and yesterday's
+prices as today's. On a site whose whole claim is "you see exactly what we see,
+when we see it", that is worse than publishing nothing.
+
+THE RULE THIS ENCODES: the site must always be honest about its own freshness,
+and a failed run must be loud. Both halves are now structural.
+
+FRESHNESS (build_site.py). Two independent layers, because the site is static
+and a build-time check freezes at the moment the page was written — which is
+exactly what bit us:
+- Build time: `STALE = DATE != today ET`. Stale renders the banner into the
+  HTML, adds `class="stale"` to `<body>`, swaps the hero chip to
+  `ARCHIVED — <date>`, renames the board tab to `Board · <Mon D>`, and routes
+  every "today's"/"today" phrase through `TODAYS` / `TODAY_ADV` so the page
+  states the board's real date instead of implying currency. Works with JS off.
+- Page load: an inline guard re-runs the same comparison against the VISITOR's
+  America/New_York clock, using `<body data-board-date>`. This is the layer that
+  catches the actual incident — a page built yesterday, correct when written,
+  never rebuilt. It toggles `.stale`, un-hides the banner, and swaps every
+  `data-live-label` / `data-archived-label` pair in both directions.
+- TWO WORDINGS, one honest each: before 11:15 AM ET (`BOARD_DUE_ET_MIN`) the
+  banner says the board isn't up YET — the 4:10 AM ET grading run legitimately
+  rebuilds the site against yesterday's board, and calling that a failure would
+  be crying wolf every morning. After it, it says the board failed to publish.
+  Both carry the same do-not-bet warning, because in both the prices are old.
+- Stale de-emphasises the free/daily-pick cards and the board tab's cards to 45%
+  opacity. It NEVER hides them: House Rule 7 is that held plays are held, not
+  hidden, and an archived board stays fully readable.
+- Zero visual change on the happy path: the banner ships `hidden`, `<body>` has
+  no `stale` class, all copy reads "today's" as before.
+
+LOUD FAILURE. Three layers, because they catch different things:
+- `alert` job in morning-board.yml, grade-ledger.yml and capture-closing.yml —
+  `always() && result != 'success'`, so it also fires on a CANCELLED or
+  runner-killed job, not just a non-zero step. Reads the failing step name and
+  the last 20 log lines via `gh api --jq` (gh's built-in jq, not the standalone
+  binary) and posts them with the run URL. Each message states that job's REAL
+  blast radius — a missed capture costs one window's CLV precision, not a board
+  — because an alert channel that treats everything as an emergency gets muted.
+  capture-closing was added because it was already failing unnoticed: its
+  2026-08-16 22:30 UTC run died at the commit step (a push race on the shared
+  data/ directory) and nothing said so.
+- heartbeat.yml — the watchdog for "nothing ran", which the above can NEVER
+  catch. Daily 19:00 UTC on GitHub's own cron: the 2026-07-23 reasons for
+  dropping GitHub cron (fires late, re-posts Discord) do not apply to a job that
+  posts nothing on a healthy day and whose whole purpose is to notice a missing
+  run. Its check is Python, not shell+jq, so a missing tool can't turn it into a
+  false alarm; it wants BOTH a board file for today ET and a commitments.json
+  entry for that date.
+- `post_discord.py alert "<msg>" [--detail-file f]` — swallows every exception
+  and always exits 0 (an alerting path that can break a run is worse than none),
+  and validates the webhook host against discord.com before sending, so a
+  swapped env var can't POST a CI log somewhere else. Webhook order:
+  DISCORD_WEBHOOK_URL_ALERTS → _MEMBERS → the free channel. A visible failure is
+  on-brand; do not soften or suppress these.
+
+NOT DONE, deliberately: a missed day stays missed. No board is ever backfilled
+for a day the pipeline skipped — the banner IS how a missed day is communicated.
 
 ## Daily Pick strategy (engine v0.15, effective 2026-08-09)
 
@@ -236,6 +311,72 @@ the site lives in the account bio. Do not re-add SITE to the X post. Until
 credits are funded, the X step records "failed" 402 each night (harmless; the
 board, ledger, site, Discord and email are all unaffected). Facebook has no
 such cost — Meta's Graph API is not metered — so its post keeps the link.
+
+## The Odds API: tier, credit budget, and when to upgrade (2026-08-17)
+
+TIER IN USE: the FREE tier — 500 credits per calendar month, one key
+(ODDS_API_KEY). The `/v4/sports/.../odds` endpoint bills ONE CREDIT PER MARKET
+PER REGION PER CALL. So the markets string is a price tag, not a preference.
+
+THE ACTUAL BUDGET, counted from the code and the run history:
+
+| caller | markets × regions | calls/day | credits/day |
+|---|---|---|---|
+| fetch_data.py (morning board) | h2h,totals × us = 2 | 1 | 2 |
+| fetch_closing.py (capture-closing) | h2h,totals × us = 2 | 3 | 6 |
+| **total** | | **4** | **8** |
+
+8/day ≈ 250/month against a 500 cap — roughly 50% headroom. Two things eat it
+fast, and neither may be done casually: adding a market (spreads would be +50%
+across BOTH callers, not just the board) or adding capture runs (each new
+cron-job.org trigger is +2/day ≈ +60/month).
+
+SPREADS ARE NOT FETCHED, and adding them was considered and declined here:
+nothing is staked on spreads today, so it would be a 50% budget increase for a
+market with no product surface. F5 and any other future market gets the same
+test. If a market IS added later and the budget gets tight, the lever is
+CADENCE, not deletion: fetch the staked markets every run and the extra market
+on a reduced schedule (e.g. the morning call only). Every run now logs which
+markets it fetched, so that decision can be checked against reality.
+
+VISIBILITY (this is what the 08-17 review actually added — the credits were
+never the cause, but the run was flying blind on them):
+- Both callers read `x-requests-remaining` / `x-requests-used` /
+  `x-requests-last` and print them.
+- Both append the reading to `data/odds_credits.json`, IN THE CLEAR. The
+  snapshot carries the same numbers under `odds_credits`, but the snapshot is
+  encrypted until grading, so it cannot be what makes the balance visible in the
+  repo. The plaintext log can, and it leaks nothing: a counter and a timestamp.
+- The reading is captured BEFORE `raise_for_status`, so a 401 (dead key) or 429
+  (month spent) — the readings that matter most — survive the exception.
+- Below 50 remaining, fetch_data posts a Discord alert. ~5 days of headroom at
+  8/day, so it never arrives as a surprise.
+
+DEGRADE, NEVER DIE: any odds failure (quota, 401, 429, timeout, garbage) is
+caught, logged, and the board publishes anyway with an empty odds dict. The site
+then renders a "Market odds unavailable this run" notice on the free and board
+tabs saying these are model fair lines only and that edge / EV / quarter-Kelly /
+Rule 2 / Rule 8 all read the market and are inactive. A missing price feed costs
+us picks, never the whole board.
+
+KNOWN GAP, flagged 2026-08-17, NOT fixed here because it is a gate change:
+with `mkt_odds is None` the engine's edge gate and Rule 8 both no-op (`edge is
+None`), so `risk_tier()` still assigns units and the board STILL PUBLISHES
+STAKED PLAYS priced off the model fair line, which then enter the real ledger.
+The site copy above is written to describe that truthfully rather than claim a
+no-stake behaviour the code does not have (House Rule 4/8). Whether a no-odds
+day should instead publish zero staked plays is a real product decision — it
+touches sizing, so per House Rule 9 it ships as a version bump, not a patch.
+
+DECISION RULE FOR UPGRADING TO THE PAID TIER: upgrade when any ONE of these is
+true, and not before —
+1. Two consecutive months close above 400 credits used (i.e. under 20% headroom).
+2. A market with a real product surface (spreads, F5, NRFI) ships and its
+   markets push the projected monthly spend over 450.
+3. The low-credit alert fires in a month where the feed actually ran dry, i.e.
+   a board published without prices because of quota.
+Until then the free tier is correctly sized and the money stays unspent. Do not
+upgrade "to be safe" — `data/odds_credits.json` is the evidence, so check it.
 
 ## Backtest harness (scripts/backtest.py) — measure the model, tune the knobs
 
@@ -543,6 +684,10 @@ they conflict, the tighter rule wins and the conflict gets flagged to Daniel.
   - ODDS_API_KEY (optional; without it edge/Kelly/Rules 2+8 inactive, site says so)
   - DISCORD_WEBHOOK_URL (optional; free pick → public channel)
   - DISCORD_WEBHOOK_URL_MEMBERS (optional; held plays → members channel)
+  - DISCORD_WEBHOOK_URL_ALERTS (optional; ops/admin channel for pipeline failure
+    alerts, the heartbeat, and the low-credit warning. Unset → alerts fall back
+    to the members channel, then the free channel. Set this: a members channel
+    is a fine fallback but a poor permanent home for ops noise.)
   - RESEND_API_KEY (optional; daily free-pick email — skipped when unset)
   - X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_SECRET (optional; all
     four required to post the daily record to X — OAuth 1.0a User Context)

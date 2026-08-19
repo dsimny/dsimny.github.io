@@ -1,0 +1,333 @@
+{
+ "823342": {
+  "away_ml": 140,
+  "home_ml": -157,
+  "total": 8.0,
+  "over_price": -118,
+  "under_price": -103,
+  "note": "first capture was after first pitch \u2014 weak close",
+  "away_name": "Detroit Tigers",
+  "home_name": "Pittsburgh Pirates",
+  "utc": "2026-08-19T16:35:00Z",
+  "history": [
+   {
+    "away_ml": 140,
+    "home_ml": -157,
+    "total": 8.0,
+    "over_price": -118,
+    "under_price": -103,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 5
+ },
+ "823587": {
+  "away_ml": -137,
+  "home_ml": 122,
+  "total": 8.5,
+  "over_price": -115,
+  "under_price": -105,
+  "away_name": "San Diego Padres",
+  "home_name": "New York Mets",
+  "utc": "2026-08-19T17:10:00Z",
+  "history": [
+   {
+    "away_ml": -137,
+    "home_ml": 122,
+    "total": 8.5,
+    "over_price": -115,
+    "under_price": -105,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 40
+ },
+ "823664": {
+  "away_ml": -110,
+  "home_ml": 100,
+  "total": 8.5,
+  "over_price": -117,
+  "under_price": -103,
+  "away_name": "Atlanta Braves",
+  "home_name": "Minnesota Twins",
+  "utc": "2026-08-19T17:40:00Z",
+  "history": [
+   {
+    "away_ml": -110,
+    "home_ml": 100,
+    "total": 8.5,
+    "over_price": -117,
+    "under_price": -103,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 70
+ },
+ "824640": {
+  "away_ml": 128,
+  "home_ml": -145,
+  "total": 7.5,
+  "over_price": -112,
+  "under_price": -108,
+  "away_name": "Chicago White Sox",
+  "home_name": "Chicago Cubs",
+  "utc": "2026-08-19T18:20:00Z",
+  "history": [
+   {
+    "away_ml": 128,
+    "home_ml": -145,
+    "total": 7.5,
+    "over_price": -112,
+    "under_price": -108,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 110
+ },
+ "824722": {
+  "away_ml": 142,
+  "home_ml": -160,
+  "total": 8.0,
+  "over_price": -114,
+  "under_price": -106,
+  "away_name": "Arizona Diamondbacks",
+  "home_name": "Boston Red Sox",
+  "utc": "2026-08-19T20:10:00Z",
+  "history": [
+   {
+    "away_ml": 142,
+    "home_ml": -160,
+    "total": 8.0,
+    "over_price": -114,
+    "under_price": -106,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 220
+ },
+ "823424": {
+  "away_ml": 111,
+  "home_ml": -124,
+  "total": 9.0,
+  "over_price": -105,
+  "under_price": -112,
+  "away_name": "Miami Marlins",
+  "home_name": "Philadelphia Phillies",
+  "utc": "2026-08-19T22:05:00Z",
+  "history": [
+   {
+    "away_ml": 111,
+    "home_ml": -124,
+    "total": 9.0,
+    "over_price": -105,
+    "under_price": -112,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 335
+ },
+ "824801": {
+  "away_ml": -118,
+  "home_ml": 106,
+  "total": 9.0,
+  "over_price": -118,
+  "under_price": 100,
+  "away_name": "New York Yankees",
+  "home_name": "Baltimore Orioles",
+  "utc": "2026-08-19T22:35:00Z",
+  "history": [
+   {
+    "away_ml": -118,
+    "home_ml": 106,
+    "total": 9.0,
+    "over_price": -118,
+    "under_price": 100,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 365
+ },
+ "824394": {
+  "away_ml": 190,
+  "home_ml": -220,
+  "total": 7.5,
+  "over_price": -106,
+  "under_price": -113,
+  "away_name": "San Francisco Giants",
+  "home_name": "Cleveland Guardians",
+  "utc": "2026-08-19T22:40:00Z",
+  "history": [
+   {
+    "away_ml": 190,
+    "home_ml": -220,
+    "total": 7.5,
+    "over_price": -106,
+    "under_price": -113,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 370
+ },
+ "824476": {
+  "away_ml": 130,
+  "home_ml": -148,
+  "total": 8.5,
+  "over_price": -105,
+  "under_price": -115,
+  "away_name": "St. Louis Cardinals",
+  "home_name": "Cincinnati Reds",
+  "utc": "2026-08-19T22:40:00Z",
+  "history": [
+   {
+    "away_ml": 130,
+    "home_ml": -148,
+    "total": 8.5,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 370
+ },
+ "822937": {
+  "away_ml": 175,
+  "home_ml": -200,
+  "total": 7.5,
+  "over_price": 100,
+  "under_price": -122,
+  "away_name": "Toronto Blue Jays",
+  "home_name": "Tampa Bay Rays",
+  "utc": "2026-08-19T22:40:00Z",
+  "history": [
+   {
+    "away_ml": 175,
+    "home_ml": -200,
+    "total": 7.5,
+    "over_price": 100,
+    "under_price": -122,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 370
+ },
+ "824076": {
+  "away_ml": 141,
+  "home_ml": -160,
+  "total": 8.5,
+  "over_price": -118,
+  "under_price": -102,
+  "away_name": "Athletics",
+  "home_name": "Kansas City Royals",
+  "utc": "2026-08-19T23:40:00Z",
+  "history": [
+   {
+    "away_ml": 141,
+    "home_ml": -160,
+    "total": 8.5,
+    "over_price": -118,
+    "under_price": -102,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 430
+ },
+ "823748": {
+  "away_ml": 107,
+  "home_ml": -118,
+  "total": 7.0,
+  "over_price": -115,
+  "under_price": -105,
+  "away_name": "Seattle Mariners",
+  "home_name": "Milwaukee Brewers",
+  "utc": "2026-08-19T23:40:00Z",
+  "history": [
+   {
+    "away_ml": 107,
+    "home_ml": -118,
+    "total": 7.0,
+    "over_price": -115,
+    "under_price": -105,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 430
+ },
+ "822860": {
+  "away_ml": 118,
+  "home_ml": -131,
+  "total": 7.5,
+  "over_price": -114,
+  "under_price": -105,
+  "away_name": "Washington Nationals",
+  "home_name": "Texas Rangers",
+  "utc": "2026-08-20T00:05:00Z",
+  "history": [
+   {
+    "away_ml": 118,
+    "home_ml": -131,
+    "total": 7.5,
+    "over_price": -114,
+    "under_price": -105,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 455
+ },
+ "824155": {
+  "away_ml": 135,
+  "home_ml": -155,
+  "total": 8.5,
+  "over_price": -115,
+  "under_price": -105,
+  "away_name": "Los Angeles Angels",
+  "home_name": "Houston Astros",
+  "utc": "2026-08-20T00:10:00Z",
+  "history": [
+   {
+    "away_ml": 135,
+    "home_ml": -155,
+    "total": 8.5,
+    "over_price": -115,
+    "under_price": -105,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 460
+ },
+ "824318": {
+  "away_ml": -193,
+  "home_ml": 174,
+  "total": 11.5,
+  "over_price": -102,
+  "under_price": -118,
+  "away_name": "Los Angeles Dodgers",
+  "home_name": "Colorado Rockies",
+  "utc": "2026-08-20T00:40:00Z",
+  "history": [
+   {
+    "away_ml": -193,
+    "home_ml": 174,
+    "total": 11.5,
+    "over_price": -102,
+    "under_price": -118,
+    "captured_utc": "2026-08-19T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-08-19T16:30:24Z",
+  "mins_to_first_pitch": 490
+ }
+}

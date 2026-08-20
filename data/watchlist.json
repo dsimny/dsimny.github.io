@@ -1519,14 +1519,126 @@
    "actual_total": 13,
    "result": "WIN",
    "pnl": 0.909
+  },
+  {
+   "date": "2026-08-19",
+   "gamePk": 823587,
+   "game": "SD @ NYM",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8.5 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.537,
+   "edge": 0.032,
+   "divergence": 0.0478,
+   "actual_total": 6,
+   "result": "WIN",
+   "pnl": 0.98
+  },
+  {
+   "date": "2026-08-19",
+   "gamePk": 823424,
+   "game": "MIA @ PHI",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 9 (-109, LowVig.ag)",
+   "price": -109,
+   "book": "LowVig.ag",
+   "model_p": 0.5497,
+   "edge": 0.0282,
+   "divergence": 0.0389,
+   "actual_total": 5,
+   "result": "WIN",
+   "pnl": 0.917
+  },
+  {
+   "date": "2026-08-19",
+   "gamePk": 824476,
+   "game": "STL @ CIN",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8.5 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.5582,
+   "edge": 0.0532,
+   "divergence": 0.069,
+   "actual_total": 9,
+   "result": "WIN",
+   "pnl": 0.98
+  },
+  {
+   "date": "2026-08-19",
+   "gamePk": 822937,
+   "game": "TOR @ TB",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (+107, LowVig.ag)",
+   "price": 107,
+   "book": "LowVig.ag",
+   "model_p": 0.5371,
+   "edge": 0.054,
+   "divergence": 0.0641,
+   "actual_total": 13,
+   "result": "WIN",
+   "pnl": 1.07
+  },
+  {
+   "date": "2026-08-19",
+   "gamePk": 823748,
+   "game": "SEA @ MIL",
+   "market": "moneyline",
+   "tag": "edge-band",
+   "pick": "Milwaukee Brewers ML (-118, DraftKings)",
+   "price": -118,
+   "book": "DraftKings",
+   "model_p": 0.5522,
+   "edge": 0.0109,
+   "divergence": 0.0419,
+   "final_score": "7-5",
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-19",
+   "gamePk": 822860,
+   "game": "WSH @ TEX",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (-107, BetRivers)",
+   "price": -107,
+   "book": "BetRivers",
+   "model_p": 0.5657,
+   "edge": 0.0488,
+   "divergence": 0.0559,
+   "actual_total": 6,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-19",
+   "gamePk": 824318,
+   "game": "LAD @ COL",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 11.5 (+101, LowVig.ag)",
+   "price": 101,
+   "book": "LowVig.ag",
+   "model_p": 0.5553,
+   "edge": 0.0578,
+   "divergence": 0.0736,
+   "actual_total": 10,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "52-42-1p",
-  "n_graded": 95,
-  "win_pct": 55.3,
-  "paper_units_net": 4.17,
-  "paper_roi_pct": 4.44,
+  "record": "56-45-1p",
+  "n_graded": 102,
+  "win_pct": 55.4,
+  "paper_units_net": 5.117,
+  "paper_roi_pct": 5.07,
   "by_tag": {
    "R8-hold": {
     "record": "7-2",
@@ -1536,37 +1648,37 @@
     "paper_roi_pct": 15.56
    },
    "edge-band": {
-    "record": "4-4",
-    "n_graded": 8,
-    "win_pct": 50.0,
-    "paper_units_net": 0.022,
-    "paper_roi_pct": 0.27
+    "record": "4-5",
+    "n_graded": 9,
+    "win_pct": 44.4,
+    "paper_units_net": -0.978,
+    "paper_roi_pct": -10.87
    },
    "market-proving": {
-    "record": "41-36-1p",
-    "n_graded": 78,
-    "win_pct": 53.2,
-    "paper_units_net": 2.748,
-    "paper_roi_pct": 3.57
+    "record": "45-38-1p",
+    "n_graded": 84,
+    "win_pct": 54.2,
+    "paper_units_net": 4.695,
+    "paper_roi_pct": 5.66
    }
   },
   "by_market": {
    "moneyline": {
-    "record": "11-6",
-    "n_graded": 17,
-    "win_pct": 64.7,
-    "paper_units_net": 1.422,
-    "paper_roi_pct": 8.36
+    "record": "11-7",
+    "n_graded": 18,
+    "win_pct": 61.1,
+    "paper_units_net": 0.422,
+    "paper_roi_pct": 2.34
    },
    "total": {
-    "record": "41-36-1p",
-    "n_graded": 78,
-    "win_pct": 53.2,
-    "paper_units_net": 2.748,
-    "paper_roi_pct": 3.57
+    "record": "45-38-1p",
+    "n_graded": 84,
+    "win_pct": 54.2,
+    "paper_units_net": 4.695,
+    "paper_roi_pct": 5.66
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-08-18"
+  "last_graded": "2026-08-19"
  }
 }

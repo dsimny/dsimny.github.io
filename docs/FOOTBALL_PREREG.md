@@ -1,11 +1,17 @@
 # Football (NFL) — pre-registration, fb-v0.1
 
-STATUS: DRAFT, not yet frozen. Nothing in this document has been run against
-data. It is written first on purpose: every threshold below is chosen before
-seeing a single football result, so that no number in it can be a post-hoc
-rationalisation. Freeze = this file committed with `frozen:` set to a date and
-the version-history row added. After the freeze, changes ship as fb-v0.2 with a
-new clean test season, never as an edit in place.
+STATUS: DRAFT, not yet frozen. It was written first on purpose: every threshold
+below was chosen before seeing a single football result, so that no number in it
+can be a post-hoc rationalisation. Freeze = this file committed with `frozen:`
+set to a date and the version-history row added. After the freeze, changes ship
+as fb-v0.2 with a new clean test season, never as an edit in place.
+
+WHAT HAS BEEN RUN (updated as work lands, so this header never overstates the
+document's innocence): as of 2026-08-20 the as-of engine and the Elo grid have
+been fitted and scored on 2015–2024. Section 7 now carries an observed result —
+a grid boundary hit — recorded rather than acted on. The holdout season has
+never been loaded; asof.py refuses to hand it out while `frozen:` reads NOT YET.
+Everything else below remains untouched by data.
 
 frozen: NOT YET
 
@@ -126,6 +132,23 @@ sportsbook number is inspected at any point during parameter fitting.
 - **Opponent-adjusted ridge efficiency** — offense/defense effects,
   possession-weighted, mean-zero centered.
 
+GRID BOUNDARY, observed 2026-08-20, DELIBERATELY NOT ACTED ON. The first run of
+the pre-registered grid selected `hfa = 30`, which is the LOWEST value in the
+grid — a boundary hit, meaning the true optimum may lie below the range we
+declared. (This is plausible on the football: NFL home-field advantage has
+genuinely fallen, and 30 Elo points is only about 1.1 points of spread.)
+
+The grid is NOT being widened to chase it. Extending a search because the first
+pass landed on an edge is fitting the search to the answer, and it is exactly
+what a pre-registered grid exists to prevent. The boundary hit is recorded here
+as a candidate change for fb-v0.2, which would carry its own clean test season.
+Anyone who later finds `hfa` below 30 in this repo should be able to trace it to
+a version bump, not to a quiet edit.
+
+Mitigating context, also recorded now rather than after the fact: the entire
+128-combination grid spans only 0.63466 to 0.66506 in tune log loss. The knobs
+barely matter. Whatever value Elo has is not hiding in the parameter search.
+
 GAME MODEL. Ridge over rating differences plus a site indicator, producing a
 predicted margin and a predicted total.
 
@@ -218,3 +241,4 @@ upgrade is therefore rule-driven, not preference-driven, and
 | version | date (2026) | change |
 |---|---|---|
 | fb-v0.1 | Aug 20 | pre-registration drafted; nothing fitted, nothing run |
+| fb-v0.1 | Aug 20 | as-of engine + leakage guard + holdout lock; Elo grid fitted on 2015-2021, validated once on 2022-2024: log loss 0.63437 vs 0.68600 always-home. Holdout never loaded. |

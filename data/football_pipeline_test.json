@@ -1,0 +1,511 @@
+{
+  "_warning": "PLUMBING TEST ONLY. This file records pipeline behaviour on real games - team mapping, the as-of clock, status transitions, score capture. It is NOT a betting record and contains no model output. Preseason results are uninformative about the model by construction (playing time is a coaching decision invisible to ratings fitted on regular-season football), so nothing here may ever be promoted into ledger.json or the football paper ledger. Archive or delete this file; never merge it.",
+  "captures": [
+    {
+      "captured_utc": "2026-08-20T23:08:50Z",
+      "dates": "20260815-20260824",
+      "errors": [],
+      "n_errors": 0,
+      "n_events": 23,
+      "n_new": 23,
+      "n_updated": 0,
+      "seasontype": "preseason"
+    },
+    {
+      "captured_utc": "2026-08-20T23:09:01Z",
+      "dates": "20260821",
+      "errors": [],
+      "n_errors": 0,
+      "n_events": 3,
+      "n_new": 0,
+      "n_updated": 3,
+      "seasontype": "preseason"
+    }
+  ],
+  "created_utc": "2026-08-20T23:08:51Z",
+  "games": {
+    "401873279": {
+      "away": "DAL",
+      "away_score": 17,
+      "completed": true,
+      "espn_id": "401873279",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "SEA",
+      "home_score": 7,
+      "kickoff_utc": "2026-08-16T00:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-16T04:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_FINAL",
+      "status_history": [
+        {
+          "status": "STATUS_FINAL",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-15T00:00:00Z"
+    },
+    "401873280": {
+      "away": "MIN",
+      "away_score": 13,
+      "completed": true,
+      "espn_id": "401873280",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "NYG",
+      "home_score": 10,
+      "kickoff_utc": "2026-08-15T17:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-15T21:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_FINAL",
+      "status_history": [
+        {
+          "status": "STATUS_FINAL",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-14T17:00:00Z"
+    },
+    "401873281": {
+      "away": "JAX",
+      "away_score": 24,
+      "completed": true,
+      "espn_id": "401873281",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "NO",
+      "home_score": 20,
+      "kickoff_utc": "2026-08-15T20:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-16T00:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_FINAL",
+      "status_history": [
+        {
+          "status": "STATUS_FINAL",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-14T20:00:00Z"
+    },
+    "401873282": {
+      "away": "CAR",
+      "away_score": 14,
+      "completed": true,
+      "espn_id": "401873282",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "BUF",
+      "home_score": 29,
+      "kickoff_utc": "2026-08-15T17:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-15T21:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_FINAL",
+      "status_history": [
+        {
+          "status": "STATUS_FINAL",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-14T17:00:00Z"
+    },
+    "401873283": {
+      "away": "LA",
+      "away_score": 20,
+      "completed": true,
+      "espn_id": "401873283",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "KC",
+      "home_score": 12,
+      "kickoff_utc": "2026-08-15T20:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-16T00:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_FINAL",
+      "status_history": [
+        {
+          "status": "STATUS_FINAL",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-14T20:00:00Z"
+    },
+    "401873284": {
+      "away": "PHI",
+      "away_score": 7,
+      "completed": true,
+      "espn_id": "401873284",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "BAL",
+      "home_score": 24,
+      "kickoff_utc": "2026-08-15T23:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-16T03:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_FINAL",
+      "status_history": [
+        {
+          "status": "STATUS_FINAL",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-14T23:00:00Z"
+    },
+    "401873285": {
+      "away": "SF",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873285",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "LAC",
+      "home_score": null,
+      "kickoff_utc": "2026-08-21T02:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-21T06:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-20T02:00:00Z"
+    },
+    "401873286": {
+      "away": "LV",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873286",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "HOU",
+      "home_score": null,
+      "kickoff_utc": "2026-08-21T00:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-21T04:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-20T00:00:00Z"
+    },
+    "401873287": {
+      "away": "CAR",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873287",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "JAX",
+      "home_score": null,
+      "kickoff_utc": "2026-08-21T23:30:00Z",
+      "last_seen_utc": "2026-08-20T23:09:01Z",
+      "result_available_at_utc": "2026-08-22T03:30:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-20T23:30:00Z"
+    },
+    "401873288": {
+      "away": "NYJ",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873288",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "PIT",
+      "home_score": null,
+      "kickoff_utc": "2026-08-21T23:00:00Z",
+      "last_seen_utc": "2026-08-20T23:09:01Z",
+      "result_available_at_utc": "2026-08-22T03:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-20T23:00:00Z"
+    },
+    "401873289": {
+      "away": "CHI",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873289",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "CIN",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T23:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-23T03:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T23:00:00Z"
+    },
+    "401873290": {
+      "away": "NO",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873290",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "LA",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T20:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-23T00:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T20:00:00Z"
+    },
+    "401873291": {
+      "away": "BAL",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873291",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "MIN",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T17:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-22T21:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T17:00:00Z"
+    },
+    "401873292": {
+      "away": "NYG",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873292",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "MIA",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T20:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-23T00:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T20:00:00Z"
+    },
+    "401873293": {
+      "away": "PHI",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873293",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "NE",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T23:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-23T03:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T23:00:00Z"
+    },
+    "401873294": {
+      "away": "BUF",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873294",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "CLE",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T17:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-22T21:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T17:00:00Z"
+    },
+    "401873295": {
+      "away": "ATL",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873295",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "IND",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T17:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-22T21:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T17:00:00Z"
+    },
+    "401873296": {
+      "away": "KC",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873296",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "TB",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T23:30:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-23T03:30:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T23:30:00Z"
+    },
+    "401873297": {
+      "away": "SEA",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873297",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "TEN",
+      "home_score": null,
+      "kickoff_utc": "2026-08-24T00:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-24T04:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-23T00:00:00Z"
+    },
+    "401873601": {
+      "away": "WAS",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873601",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "DET",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T16:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-22T20:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T16:00:00Z"
+    },
+    "401873613": {
+      "away": "GB",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401873613",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "DEN",
+      "home_score": null,
+      "kickoff_utc": "2026-08-22T01:00:00Z",
+      "last_seen_utc": "2026-08-20T23:09:01Z",
+      "result_available_at_utc": "2026-08-22T05:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-21T01:00:00Z"
+    },
+    "401874101": {
+      "away": "DAL",
+      "away_score": null,
+      "completed": false,
+      "espn_id": "401874101",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "ARI",
+      "home_score": null,
+      "kickoff_utc": "2026-08-23T02:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-23T06:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_SCHEDULED",
+      "status_history": [
+        {
+          "status": "STATUS_SCHEDULED",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-22T02:00:00Z"
+    },
+    "401874393": {
+      "away": "CLE",
+      "away_score": 10,
+      "completed": true,
+      "espn_id": "401874393",
+      "first_seen_utc": "2026-08-20T23:08:50Z",
+      "home": "CHI",
+      "home_score": 34,
+      "kickoff_utc": "2026-08-15T17:00:00Z",
+      "last_seen_utc": "2026-08-20T23:08:50Z",
+      "result_available_at_utc": "2026-08-15T21:00:00Z",
+      "seasontype": "preseason",
+      "status": "STATUS_FINAL",
+      "status_history": [
+        {
+          "status": "STATUS_FINAL",
+          "utc": "2026-08-20T23:08:50Z"
+        }
+      ],
+      "t_minus_24_utc": "2026-08-14T17:00:00Z"
+    }
+  }
+}

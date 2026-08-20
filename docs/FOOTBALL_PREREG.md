@@ -63,8 +63,11 @@ WHAT PRESEASON IS FOR. Real gradeable games with real prices on a small slate:
 
 - team-id mapping across nflverse / ESPN / The Odds API
 - the as-of clock for a weekly sport (kickoff-relative, not morning-relative)
-- football settlement mechanics: spread and total PUSH on the number, moneyline
-  cannot push, and every push books at 0
+- football settlement mechanics: spread and total PUSH on the number, and the
+  moneyline ALSO pushes, because NFL regular-season games can end tied (13 ties
+  in the 4,363 games since 2010, 0.30%). "The moneyline cannot push" is true in
+  baseball and false here; it was written into an earlier draft of this document
+  from MLB intuition and caught by the settlement selftest. Every push books at 0.
 - CLV capture at a T−24 that lands mid-week
 - measured Odds API credit burn, replacing an estimate with a reading
 
@@ -147,7 +150,10 @@ TIERING, enforced in code:
 De-vig proportionally. Build the consensus from OBSERVED lines only — never
 interpolate a line nobody offered. Expected value is settlement-aware: pushes
 are valued at zero, not as half-wins, and the push mass at 3 and 7 is material
-enough that ignoring it is a real error, not a rounding one.
+enough that ignoring it is a real error, not a rounding one. Measured on our own
+2010-2025 games: |margin| = 3 occurs in 14.60% of games and |margin| = 7 in
+8.71%, against 5.02% at 4 and 5.07% at 10. Those two spikes are the whole reason
+the key-number variant exists, and they are derived from football results alone.
 
 ## 9. Validation plan
 

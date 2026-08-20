@@ -5,3 +5,6 @@ venv/
 # backtest.py's point-in-time snapshot cache — derived, re-fetchable, and would
 # otherwise be swept into CI's `git add data/`. Not part of the public ledger.
 data/backtest/
+
+# Local secrets for football scripts (ODDS_API_KEY). NEVER commit a key.
+.env.local

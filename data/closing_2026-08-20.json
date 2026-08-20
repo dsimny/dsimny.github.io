@@ -133,11 +133,11 @@
   "mins_to_first_pitch": 100
  },
  "824802": {
-  "away_ml": -108,
+  "away_ml": -110,
   "home_ml": -103,
   "total": 7.5,
-  "over_price": -112,
-  "under_price": -108,
+  "over_price": 100,
+  "under_price": -120,
   "away_name": "New York Yankees",
   "home_name": "Baltimore Orioles",
   "utc": "2026-08-20T22:35:00Z",
@@ -149,17 +149,25 @@
     "over_price": -112,
     "under_price": -108,
     "captured_utc": "2026-08-20T16:30:22Z"
+   },
+   {
+    "away_ml": -110,
+    "home_ml": -103,
+    "total": 7.5,
+    "over_price": 100,
+    "under_price": -120,
+    "captured_utc": "2026-08-20T22:30:23Z"
    }
   ],
-  "captured_utc": "2026-08-20T16:30:22Z",
-  "mins_to_first_pitch": 365
+  "captured_utc": "2026-08-20T22:30:23Z",
+  "mins_to_first_pitch": 5
  },
  "822861": {
-  "away_ml": 149,
-  "home_ml": -168,
+  "away_ml": 156,
+  "home_ml": -178,
   "total": 7.5,
-  "over_price": -108,
-  "under_price": -110,
+  "over_price": -103,
+  "under_price": -115,
   "away_name": "Washington Nationals",
   "home_name": "Texas Rangers",
   "utc": "2026-08-21T00:05:00Z",
@@ -171,14 +179,22 @@
     "over_price": -108,
     "under_price": -110,
     "captured_utc": "2026-08-20T16:30:22Z"
+   },
+   {
+    "away_ml": 156,
+    "home_ml": -178,
+    "total": 7.5,
+    "over_price": -103,
+    "under_price": -115,
+    "captured_utc": "2026-08-20T22:30:23Z"
    }
   ],
-  "captured_utc": "2026-08-20T16:30:22Z",
-  "mins_to_first_pitch": 455
+  "captured_utc": "2026-08-20T22:30:23Z",
+  "mins_to_first_pitch": 95
  },
  "824153": {
-  "away_ml": 162,
-  "home_ml": -180,
+  "away_ml": 163,
+  "home_ml": -181,
   "total": 8.5,
   "over_price": -105,
   "under_price": -115,
@@ -193,9 +209,17 @@
     "over_price": -105,
     "under_price": -115,
     "captured_utc": "2026-08-20T16:30:22Z"
+   },
+   {
+    "away_ml": 163,
+    "home_ml": -181,
+    "total": 8.5,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-08-20T22:30:23Z"
    }
   ],
-  "captured_utc": "2026-08-20T16:30:22Z",
-  "mins_to_first_pitch": 460
+  "captured_utc": "2026-08-20T22:30:23Z",
+  "mins_to_first_pitch": 100
  }
 }

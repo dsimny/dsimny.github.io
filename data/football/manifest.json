@@ -1,0 +1,22 @@
+{
+  "ingests": [
+    {
+      "source": "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv",
+      "sha256": "8a637edea303a9169d1a43e06b5cda9bba69e1bd809c0679de00ed6766ee50ad",
+      "bytes": 2177174,
+      "source_rows": 7548,
+      "kept_rows": 4635,
+      "min_season": 2010,
+      "fetched_utc": "2026-08-20T22:02:31Z"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv",
+      "sha256": "8a637edea303a9169d1a43e06b5cda9bba69e1bd809c0679de00ed6766ee50ad",
+      "bytes": 2177174,
+      "source_rows": 7548,
+      "kept_rows": 4635,
+      "min_season": 2010,
+      "fetched_utc": "2026-08-20T22:03:07Z"
+    }
+  ]
+}

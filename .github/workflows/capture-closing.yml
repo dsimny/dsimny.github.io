@@ -42,7 +42,13 @@ jobs:
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
           git pull --rebase --autostash || true   # several capture runs + the board/grade jobs share data/
-          git add data/closing_*.json odds/
+          # odds_credits.json too: fetch_closing.py writes a credit reading every
+          # run, but without staging it here the runner is torn down and the
+          # reading is lost. This job spends 6 of the 8 daily credits (3 runs x 2)
+          # and only morning-board's 2 were reaching the repo, so the committed
+          # log recorded the account balance without ever showing which caller
+          # was spending it. Counters and timestamps only — no key material.
+          git add data/closing_*.json data/odds_credits.json odds/
           git diff --cached --quiet || git commit -m "Closing lines $(date -u +%FT%TZ)"
           git push
 

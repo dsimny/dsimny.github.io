@@ -343,7 +343,15 @@ VISIBILITY (this is what the 08-17 review actually added — the credits were
 never the cause, but the run was flying blind on them):
 - Both callers read `x-requests-remaining` / `x-requests-used` /
   `x-requests-last` and print them.
-- Both append the reading to `data/odds_credits.json`, IN THE CLEAR. The
+- Both append the reading to `data/odds_credits.json`, IN THE CLEAR. WRITING IT
+  IS NOT ENOUGH — the workflow must also STAGE it, or the runner is torn down
+  and the reading is lost. morning-board and grade-ledger stage it via their
+  broad `git add data/`; capture-closing lists paths explicitly and so names it
+  explicitly (fixed 2026-08-20 — before that, capture-closing was spending 6 of
+  the 8 daily credits and none of its readings reached the repo, so the log
+  showed the balance without ever showing which caller moved it). Any new odds
+  caller must stage this file too.
+- The
   snapshot carries the same numbers under `odds_credits`, but the snapshot is
   encrypted until grading, so it cannot be what makes the balance visible in the
   repo. The plaintext log can, and it leaks nothing: a counter and a timestamp.

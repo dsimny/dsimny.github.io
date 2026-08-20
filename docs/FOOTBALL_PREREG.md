@@ -7,11 +7,12 @@ set to a date and the version-history row added. After the freeze, changes ship
 as fb-v0.2 with a new clean test season, never as an edit in place.
 
 WHAT HAS BEEN RUN (updated as work lands, so this header never overstates the
-document's innocence): as of 2026-08-20 the as-of engine and the Elo grid have
-been fitted and scored on 2015–2024. Section 7 now carries an observed result —
-a grid boundary hit — recorded rather than acted on. The holdout season has
-never been loaded; asof.py refuses to hand it out while `frozen:` reads NOT YET.
-Everything else below remains untouched by data.
+document's innocence): as of 2026-08-20 the as-of engine, the Elo grid and the
+opponent-adjusted ridge have all been fitted and scored on 2015–2024. Section 7
+now carries two observed results — both grid boundary hits — recorded rather
+than acted on. The holdout season has never been loaded; asof.py refuses to hand
+it out while `frozen:` reads NOT YET. Sections 8 through 11 (market comparison,
+the validation plan, the review date and the budget) remain untouched by data.
 
 frozen: NOT YET
 
@@ -149,6 +150,15 @@ Mitigating context, also recorded now rather than after the fact: the entire
 128-combination grid spans only 0.63466 to 0.66506 in tune log loss. The knobs
 barely matter. Whatever value Elo has is not hiding in the parameter search.
 
+SECOND GRID BOUNDARY, observed 2026-08-20, ALSO NOT ACTED ON. The ridge grid
+selected `lam = 100`, the HIGHEST penalty in the declared range. Same rule as the
+Elo boundary above: not widened, recorded as a candidate for fb-v0.2.
+
+Unlike the Elo case this one is immaterial, and saying so now prevents it being
+treated as important later: the penalty moves tune RMSE from 13.2616 at lam = 1
+to 13.2486 at lam = 100, a span of 0.013 points. The ridge is essentially
+insensitive to it. `half_life` was interior (180 days beat both 90 and 365).
+
 GAME MODEL. Ridge over rating differences plus a site indicator, producing a
 predicted margin and a predicted total.
 
@@ -242,3 +252,4 @@ upgrade is therefore rule-driven, not preference-driven, and
 |---|---|---|
 | fb-v0.1 | Aug 20 | pre-registration drafted; nothing fitted, nothing run |
 | fb-v0.1 | Aug 20 | as-of engine + leakage guard + holdout lock; Elo grid fitted on 2015-2021, validated once on 2022-2024: log loss 0.63437 vs 0.68600 always-home. Holdout never loaded. |
+| fb-v0.1 | Aug 20 | pbp aggregation (8,156 team-games) + opponent-adjusted ridge; validated once on 2022-2024: margin RMSE 12.968 vs 13.778 predict-the-mean, log loss 0.64058. Holdout never loaded. |

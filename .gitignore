@@ -8,3 +8,8 @@ data/backtest/
 
 # Local secrets for football scripts (ODDS_API_KEY). NEVER commit a key.
 .env.local
+
+# nflverse play-by-play cache: ~20MB/season, ~300MB total. Re-fetchable from
+# versioned release URLs; the sha256 of each season IS committed in
+# data/football/pbp_manifest.json so upstream rebuilds are still detectable.
+data/football/raw/pbp/

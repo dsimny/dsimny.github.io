@@ -76,14 +76,85 @@ def frozen_date():
     return None
 
 
+HOLDOUT_LEDGER = os.path.join(FB, "holdout_evaluations.json")
+
+# Set only by claim_holdout(), only for the duration of one process.
+_HOLDOUT_CLAIMED = False
+
+
+def holdout_evaluations():
+    if not os.path.exists(HOLDOUT_LEDGER):
+        return []
+    with io.open(HOLDOUT_LEDGER, encoding="utf-8") as f:
+        return json.load(f)["evaluations"]
+
+
+def claim_holdout(purpose, note=""):
+    """Burn the single permitted holdout evaluation. Irreversible.
+
+    Freezing the pre-registration unlocks the holdout, which would otherwise
+    trade one protection for none: nothing about a `frozen:` date stops the
+    season being scored twice, and a holdout scored twice is a tuning set. So
+    the second gate is this append-only ledger. The FIRST call records the
+    evaluation and returns; every later call raises, permanently.
+
+    There is deliberately no --force. Recovering from a genuine mistake means
+    starting fb-v0.2 with a new test season, which is the correct remedy and is
+    supposed to be expensive.
+    """
+    global _HOLDOUT_CLAIMED
+    if frozen_date() is None:
+        raise HoldoutLocked(
+            "cannot claim the holdout while the pre-registration reads "
+            "`frozen: NOT YET`. Freeze and commit the methodology first.")
+    prior = holdout_evaluations()
+    if prior:
+        p = prior[0]
+        raise HoldoutLocked(
+            f"the {HOLDOUT} holdout has already been evaluated, on "
+            f"{p.get('claimed_utc')} for: {p.get('purpose')!r}.\n"
+            "It is a ONE-SHOT test and it has been spent. Evaluating it again "
+            "would make it a tuning set retroactively, and the earlier number "
+            "would stop meaning what it claimed to mean.\n"
+            "The correct next step is fb-v0.2 with its own clean test season.")
+
+    import subprocess
+    try:
+        sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+                             capture_output=True, text=True,
+                             timeout=10).stdout.strip() or None
+    except Exception:
+        sha = None
+
+    entry = {
+        "claimed_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "season": HOLDOUT, "purpose": purpose, "note": note,
+        "prereg_frozen": frozen_date(), "methodology_commit": sha,
+    }
+    os.makedirs(os.path.dirname(HOLDOUT_LEDGER), exist_ok=True)
+    with io.open(HOLDOUT_LEDGER, "w", encoding="utf-8", newline="\n") as f:
+        json.dump({
+            "_note": ("Append-only record of holdout evaluations. The holdout may "
+                      "be evaluated exactly once; claim_holdout() refuses every "
+                      "call after the first. Deleting this file to get another "
+                      "attempt does not undo having seen the answer - it only "
+                      "hides it, which is worse."),
+            "evaluations": prior + [entry],
+        }, f, indent=2)
+    _HOLDOUT_CLAIMED = True
+    return entry
+
+
 def assert_season_allowed(season, purpose="fit"):
-    """Refuse the holdout until the methodology is frozen and committed."""
+    """Refuse the holdout unless frozen AND claimed in this process."""
     season = int(season)
     if season <= DEV[1]:
         return
     if season >= LIVE:
         return                                  # live season is forward-only
-    if season == HOLDOUT and frozen_date() is None:
+    if season != HOLDOUT:
+        return
+    if frozen_date() is None:
         raise HoldoutLocked(
             f"season {HOLDOUT} is the one-shot holdout and the pre-registration "
             f"still reads `frozen: NOT YET` (purpose: {purpose}).\n"
@@ -91,6 +162,15 @@ def assert_season_allowed(season, purpose="fit"):
             "docs/FOOTBALL_PREREG.md, commit it, THEN evaluate - exactly once.\n"
             "This lock is deliberate. A holdout you can peek at is not a holdout."
         )
+    if not _HOLDOUT_CLAIMED:
+        raise HoldoutLocked(
+            f"season {HOLDOUT} is frozen-unlocked but NOT claimed in this run "
+            f"(purpose: {purpose}).\n"
+            "Call asof.claim_holdout(purpose=...) first. That burns the single "
+            "permitted evaluation and records it in "
+            f"{os.path.relpath(HOLDOUT_LEDGER, ROOT)}.\n"
+            "Requiring an explicit claim means the holdout can never be loaded "
+            "as a side effect of a script someone ran to check something else.")
 
 
 # --- loading ----------------------------------------------------------------

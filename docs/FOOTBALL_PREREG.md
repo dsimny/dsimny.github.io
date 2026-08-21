@@ -1,21 +1,32 @@
 # Football (NFL) — pre-registration, fb-v0.1
 
-STATUS: DRAFT, not yet frozen. It was written first on purpose: every threshold
-below was chosen before seeing a single football result, so that no number in it
-can be a post-hoc rationalisation. Freeze = this file committed with `frozen:`
-set to a date and the version-history row added. After the freeze, changes ship
-as fb-v0.2 with a new clean test season, never as an edit in place.
+STATUS: FROZEN 2026-08-20. Every threshold below was chosen before seeing a
+single football result, and the market-blind models were fitted and validated
+before this stamp. From here, changes ship as fb-v0.2 with a new clean test
+season — never as an edit in place. If you are reading a modified version of
+this section without a version bump beside it, something has gone wrong.
 
-WHAT HAS BEEN RUN (updated as work lands, so this header never overstates the
-document's innocence): as of 2026-08-20 the as-of engine, the Elo grid, the
-opponent-adjusted ridge and the game model have all been fitted and scored on
-2015–2024. Section 7 now carries observed results — two grid boundary hits, the
-measured key-number profile, and one known limitation — recorded rather than
-acted on. The holdout season has never been loaded; asof.py refuses to hand
-it out while `frozen:` reads NOT YET. Sections 8 through 11 (market comparison,
-the validation plan, the review date and the budget) remain untouched by data.
+WHAT THE FREEZE DOES. It unlocks the 2025 holdout for its single evaluation, and
+nothing else. It is deliberately being applied BEFORE any price has been looked
+at, so the methodology cannot have been shaped by what the market turns out to
+have done — which is the entire reason the sequencing runs in this order.
 
-frozen: NOT YET
+WHAT HAS BEEN RUN AS OF THE FREEZE. The as-of engine, the Elo grid, the
+opponent-adjusted ridge and the game model are fitted and scored on 2015–2024.
+Section 7 carries their observed results — two grid boundary hits, the measured
+key-number profile, and one known limitation — all recorded rather than acted
+on. Section 8 (market comparison) has never been run: no price has been read by
+any of this code. The holdout has never been loaded.
+
+AT THE MOMENT OF FREEZING, the honest summary of the market-blind work is that
+the models are ordinary. Elo 0.63437 log loss on VALIDATE, the full game model
+0.63454 with margin RMSE 12.892, and the total model beating a league-mean
+baseline by 0.21 points. Combining two rating families performs about the same
+as Elo alone. None of that is a finding about the market; it is the baseline
+against which the market comparison will be read, and it is written down before
+that comparison so it cannot be revised afterwards.
+
+frozen: 2026-08-20
 
 ## 1. What this is, and what it is not
 
@@ -90,7 +101,7 @@ nothing uninformative is allowed into it.
 
 | source | use | key | notes |
 |---|---|---|---|
-| nflverse | 2015–2025 games, plays, schedules | none | historical fit + validation |
+| nflverse | 2010–2026 games + play-by-play | none | burn-in, fit, validation, holdout, 2026 schedule |
 | ESPN public API | 2026 live schedule, scores, status | none | grading + slate |
 | The Odds API | live prices | ODDS_API_KEY | `americanfootball_nfl`, `americanfootball_nfl_preseason` |
 | The Odds API historical | T−24 backtest 2020–2024 | same | 10× credits per market per region |
@@ -99,7 +110,13 @@ RULES.
 
 - Nothing is fabricated or inferred. Missing data is recorded as MISSING and the
   affected check reads "manual review", never "passed" (House Rule 4).
-- Every raw artifact is stored content-addressed with a manifest.
+- Every raw artifact is stored content-addressed with a manifest. ONE EXCEPTION,
+  recorded rather than quietly taken: nflverse play-by-play is ~20MB a season and
+  ~300MB across the window, which does not belong in a repo GitHub Pages serves.
+  Those seasons are cached gitignored and only their sha256s are committed, in
+  `data/football/pbp_manifest.json`. We therefore cannot rebuild from the repo
+  alone, but we CAN detect that a season was rebuilt upstream — which is the
+  failure that would actually corrupt a fit.
 - Injuries: if 2026 injury data is not wired, the model does not adjust for
   injuries and the cards SAY SO. It is never silently treated as "healthy".
 
@@ -212,9 +229,16 @@ the key-number variant exists, and they are derived from football results alone.
 
 | seasons | role |
 |---|---|
-| 2015–2024 | development. Fit, tune, argue here. Walk-forward only — never random splits, which leak the future through the season. |
-| 2025 | HOLDOUT. Locked until this document is frozen and committed. Evaluated EXACTLY ONCE. A failed holdout is never retuned in place; it becomes fb-v0.2 with its own clean test season. |
+| 2010–2014 | BURN-IN. Builds ratings so the first scored season measures skill rather than convergence. Never scored. |
+| 2015–2021 | TUNE. Every grid is scored here and every winner is selected here. In-sample for the search, and reported as such. |
+| 2022–2024 | VALIDATE. The selected configuration is scored here ONCE, having never influenced selection. This is the honest pre-holdout estimate. |
+| 2025 | HOLDOUT. Unlocked by the 2026-08-20 freeze. Evaluated EXACTLY ONCE — enforced by `asof.claim_holdout()` against an append-only ledger, not by memory. A failed holdout is never retuned in place; it becomes fb-v0.2 with its own clean test season. |
 | 2026 | prospective forward test, live, at 0 units. |
+
+Walk-forward only, at every level — never random splits, which leak the future
+through the season. The TUNE/VALIDATE division inside development exists because
+selecting on a set and then reporting that set's score is the commonest way a
+rating model flatters itself; both numbers are always printed and labelled.
 
 ## 10. Pre-committed gates and the review date
 
@@ -274,3 +298,4 @@ upgrade is therefore rule-driven, not preference-driven, and
 | fb-v0.1 | Aug 20 | as-of engine + leakage guard + holdout lock; Elo grid fitted on 2015-2021, validated once on 2022-2024: log loss 0.63437 vs 0.68600 always-home. Holdout never loaded. |
 | fb-v0.1 | Aug 20 | pbp aggregation (8,156 team-games) + opponent-adjusted ridge; validated once on 2022-2024: margin RMSE 12.968 vs 13.778 predict-the-mean, log loss 0.64058. Holdout never loaded. |
 | fb-v0.1 | Aug 20 | game model: margin from elo_diff + ridge_edge, total from ridge_sum, out-of-fold PMFs with the key-number variant. VALIDATE margin RMSE 12.892, log loss 0.63454, PMF log score +0.0925 over plain normal. Holdout never loaded. |
+| **fb-v0.1** | **Aug 20** | **FROZEN.** Methodology committed before any price was read. Holdout unlocked for one evaluation, gated by `asof.claim_holdout()` against an append-only ledger. |

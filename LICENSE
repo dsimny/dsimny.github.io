@@ -1,0 +1,65 @@
+Copyright (c) 2026 Daniel Simny. All rights reserved.
+
+This repository is PUBLIC BUT NOT OPEN SOURCE.
+
+It is public because the product requires it to be. Open Ledger Sports publishes
+a SHA-256 commitment for every board before the games are played, and reveals
+the full board afterwards, win or lose. That record is only worth something if
+anyone can check it. Publishing the repository is how the claim is made
+verifiable rather than merely asserted.
+
+Publishing it is not a grant of rights to the code.
+
+
+WHAT YOU MAY DO
+
+  - Read anything here.
+  - Verify anything here. Recompute the commitment hashes in
+    data/commitments.json against the revealed boards, audit data/ledger.json,
+    check that the published record matches what the code actually does. This
+    is encouraged. It is the entire point.
+  - Quote or cite it, with attribution, for commentary, journalism, teaching or
+    research.
+  - Fork it within GitHub. GitHub's Terms of Service grant that to every user of
+    a public repository and this licence does not pretend to override them.
+    Forking is not permission to USE what you forked beyond the above.
+
+
+WHAT YOU MAY NOT DO WITHOUT WRITTEN PERMISSION
+
+  - Run this code, in whole or in part, to produce picks, predictions, ratings
+    or odds analysis, for yourself or for anyone else.
+  - Copy, adapt or translate any part of it into another project, including a
+    reimplementation in another language that is derived from this source.
+  - Redistribute it, host it, or offer it as a service.
+  - Use it commercially in any form.
+
+"Any part" includes the model in scripts/, the circuit-breaker logic, the
+commit-and-reveal mechanism, the site templates, and the written content in
+blog/ and the site copy.
+
+
+THE DATA
+
+data/ledger.json, data/commitments.json and the revealed boards are published as
+a factual record for verification. Facts are not owned. You may cite the record,
+check it, and report on it. You may not present it as your own, and you may not
+use it to imply an endorsement, affiliation or partnership that does not exist.
+
+
+NO WARRANTY
+
+THE SOFTWARE AND THE PUBLISHED ANALYSIS ARE PROVIDED "AS IS", WITHOUT WARRANTY
+OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+Nothing here is betting advice, and nothing here is a sportsbook. This is
+analytics published for research and entertainment. No bets are accepted. 21+.
+If gambling stops being fun, call 1-800-GAMBLER.
+
+
+PERMISSION
+
+For any use beyond the above, ask: dsimny@gmail.com

@@ -368,6 +368,25 @@ no-stake behaviour the code does not have (House Rule 4/8). Whether a no-odds
 day should instead publish zero staked plays is a real product decision — it
 touches sizing, so per House Rule 9 it ships as a version bump, not a patch.
 
+TIER HISTORY — the rule fired once, and was reverted (2026-08-20).
+Upgraded free -> 100K ($59) under rule #2: the NFL football track needed spreads
+plus a one-time historical T-24 pull that no free allowance could cover. Spent
+10,713 credits (357 historical snapshots at 30 each, plus a probe and live
+preseason captures). The pull answered its question - the market beat the model
+on all three markets in all three seasons, see docs/FOOTBALL_RESULT_T24.md - so
+the football track was shelved and the account went straight back to FREE.
+
+Two things worth keeping from that episode. The rule worked exactly as written:
+a real product surface needed a market, the projected spend cleared 450, the
+upgrade happened for a stated reason and ended when the reason did. And ~89,000
+paid credits went unused, because a monthly allowance does not carry over - if a
+future upgrade happens for a one-time pull, do the pull and anything else worth
+pulling in the SAME billing period.
+
+MLB alone runs ~250/month against the free 500, so the free tier is correctly
+sized again. It has no room for a second market or extra capture runs, which is
+precisely what the rule below is for.
+
 DECISION RULE FOR UPGRADING TO THE PAID TIER: upgrade when any ONE of these is
 true, and not before —
 1. Two consecutive months close above 400 credits used (i.e. under 20% headroom).

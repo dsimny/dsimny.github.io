@@ -13,3 +13,9 @@ data/backtest/
 # versioned release URLs; the sha256 of each season IS committed in
 # data/football/pbp_manifest.json so upstream rebuilds are still detectable.
 data/football/raw/pbp/
+
+# Historical odds snapshots: 71MB across 357 files. Re-fetchable from The Odds
+# API historical endpoint (at 30 credits each), and the derived comparison in
+# data/football/market_compare.json IS committed. They must not land in a repo
+# GitHub Pages serves, and morning-board.yml stages with a broad `git add data/`.
+data/football/odds/hist/

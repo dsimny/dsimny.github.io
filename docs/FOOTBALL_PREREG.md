@@ -7,10 +7,11 @@ set to a date and the version-history row added. After the freeze, changes ship
 as fb-v0.2 with a new clean test season, never as an edit in place.
 
 WHAT HAS BEEN RUN (updated as work lands, so this header never overstates the
-document's innocence): as of 2026-08-20 the as-of engine, the Elo grid and the
-opponent-adjusted ridge have all been fitted and scored on 2015–2024. Section 7
-now carries two observed results — both grid boundary hits — recorded rather
-than acted on. The holdout season has never been loaded; asof.py refuses to hand
+document's innocence): as of 2026-08-20 the as-of engine, the Elo grid, the
+opponent-adjusted ridge and the game model have all been fitted and scored on
+2015–2024. Section 7 now carries observed results — two grid boundary hits, the
+measured key-number profile, and one known limitation — recorded rather than
+acted on. The holdout season has never been loaded; asof.py refuses to hand
 it out while `frozen:` reads NOT YET. Sections 8 through 11 (market comparison,
 the validation plan, the review date and the budget) remain untouched by data.
 
@@ -170,6 +171,25 @@ functions with a key-number variant. Key-number weights for |margin| of 3, 7 and
 0 are derived from historical football margins ALONE — never fitted to make the
 model agree or disagree with a line.
 
+MEASURED, 2026-08-20. The profile built from TUNE margins alone puts its six
+largest multipliers on +3, −3, +7, −7, +14 and −6 — every one a real football
+key number, with no tail artefacts, and nothing about it derived from a price.
+On VALIDATE the variant improves PMF log score by +0.0925 over a plain normal.
+
+It barely moves the WIN probability (0.63454 → 0.63456 log loss), and that is
+expected rather than disappointing: the key numbers are near-symmetric, so they
+redistribute mass without moving P(home wins). The gain is in the PMF, which is
+what a spread or total actually settles against.
+
+KNOWN LIMITATION, recorded not tuned away. P(tie) is still overstated: 1.44%
+against an empirical 0.23%. The profile moves it the right way (a plain normal
+says 2.77%) but `KEY_SHRINK = 0.75` caps how far any single outcome may travel,
+and pushing that constant purely to fix the tie would be tuning a global knob
+against one cell. It affects moneyline push pricing only, and it is a candidate
+for fb-v0.2. The same under-correction applies at 3 (1.10% modelled vs 1.51%
+empirical) and 6 (0.59% vs 0.76%) — the variant is deliberately conservative and
+does not fully close the gap in either direction.
+
 ## 8. Market comparison (only after the model is frozen)
 
 TIERING, enforced in code:
@@ -253,3 +273,4 @@ upgrade is therefore rule-driven, not preference-driven, and
 | fb-v0.1 | Aug 20 | pre-registration drafted; nothing fitted, nothing run |
 | fb-v0.1 | Aug 20 | as-of engine + leakage guard + holdout lock; Elo grid fitted on 2015-2021, validated once on 2022-2024: log loss 0.63437 vs 0.68600 always-home. Holdout never loaded. |
 | fb-v0.1 | Aug 20 | pbp aggregation (8,156 team-games) + opponent-adjusted ridge; validated once on 2022-2024: margin RMSE 12.968 vs 13.778 predict-the-mean, log loss 0.64058. Holdout never loaded. |
+| fb-v0.1 | Aug 20 | game model: margin from elo_diff + ridge_edge, total from ridge_sum, out-of-fold PMFs with the key-number variant. VALIDATE margin RMSE 12.892, log loss 0.63454, PMF log score +0.0925 over plain normal. Holdout never loaded. |

@@ -1631,21 +1631,101 @@
    "actual_total": 10,
    "result": "LOSS",
    "pnl": -1.0
+  },
+  {
+   "date": "2026-08-20",
+   "gamePk": 824474,
+   "game": "STL @ CIN",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 9 (-108, MyBookie.ag)",
+   "price": -108,
+   "book": "MyBookie.ag",
+   "model_p": 0.5816,
+   "edge": 0.0624,
+   "divergence": 0.0783,
+   "actual_total": 19,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-20",
+   "gamePk": 824074,
+   "game": "ATH @ KC",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8 (-113, LowVig.ag)",
+   "price": -113,
+   "book": "LowVig.ag",
+   "model_p": 0.5511,
+   "edge": 0.0206,
+   "divergence": 0.0403,
+   "actual_total": 8,
+   "result": "PUSH",
+   "pnl": 0.0
+  },
+  {
+   "date": "2026-08-20",
+   "gamePk": 822861,
+   "game": "WSH @ TEX",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (-107, LowVig.ag)",
+   "price": -107,
+   "book": "LowVig.ag",
+   "model_p": 0.5531,
+   "edge": 0.0362,
+   "divergence": 0.0531,
+   "actual_total": 2,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-20",
+   "gamePk": 822861,
+   "game": "WSH @ TEX",
+   "market": "moneyline",
+   "tag": "R8-hold",
+   "pick": "Texas Rangers ML (-158, DraftKings)",
+   "price": -158,
+   "book": "DraftKings",
+   "model_p": 0.5261,
+   "edge": -0.0863,
+   "divergence": -0.1444,
+   "final_score": "0-2",
+   "result": "WIN",
+   "pnl": 0.633
+  },
+  {
+   "date": "2026-08-20",
+   "gamePk": 824153,
+   "game": "LAA @ HOU",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8.5 (-113, LowVig.ag)",
+   "price": -113,
+   "book": "LowVig.ag",
+   "model_p": 0.5592,
+   "edge": 0.0287,
+   "divergence": 0.0484,
+   "actual_total": 21,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "56-45-1p",
-  "n_graded": 102,
-  "win_pct": 55.4,
-  "paper_units_net": 5.117,
-  "paper_roi_pct": 5.07,
+  "record": "57-48-2p",
+  "n_graded": 107,
+  "win_pct": 54.3,
+  "paper_units_net": 2.75,
+  "paper_roi_pct": 2.62,
   "by_tag": {
    "R8-hold": {
-    "record": "7-2",
-    "n_graded": 9,
-    "win_pct": 77.8,
-    "paper_units_net": 1.4,
-    "paper_roi_pct": 15.56
+    "record": "8-2",
+    "n_graded": 10,
+    "win_pct": 80.0,
+    "paper_units_net": 2.033,
+    "paper_roi_pct": 20.33
    },
    "edge-band": {
     "record": "4-5",
@@ -1655,30 +1735,30 @@
     "paper_roi_pct": -10.87
    },
    "market-proving": {
-    "record": "45-38-1p",
-    "n_graded": 84,
-    "win_pct": 54.2,
-    "paper_units_net": 4.695,
-    "paper_roi_pct": 5.66
+    "record": "45-41-2p",
+    "n_graded": 88,
+    "win_pct": 52.3,
+    "paper_units_net": 1.695,
+    "paper_roi_pct": 1.97
    }
   },
   "by_market": {
    "moneyline": {
-    "record": "11-7",
-    "n_graded": 18,
-    "win_pct": 61.1,
-    "paper_units_net": 0.422,
-    "paper_roi_pct": 2.34
+    "record": "12-7",
+    "n_graded": 19,
+    "win_pct": 63.2,
+    "paper_units_net": 1.055,
+    "paper_roi_pct": 5.55
    },
    "total": {
-    "record": "45-38-1p",
-    "n_graded": 84,
-    "win_pct": 54.2,
-    "paper_units_net": 4.695,
-    "paper_roi_pct": 5.66
+    "record": "45-41-2p",
+    "n_graded": 88,
+    "win_pct": 52.3,
+    "paper_units_net": 1.695,
+    "paper_roi_pct": 1.97
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-08-19"
+  "last_graded": "2026-08-20"
  }
 }

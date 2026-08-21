@@ -263,24 +263,48 @@
    "close_ml": 140,
    "clv_pts": -4.23,
    "beat_close": false
+  },
+  {
+   "date": "2026-08-20",
+   "gamePk": 824474,
+   "game": "STL @ CIN",
+   "pick": "St. Louis Cardinals ML (-106, DraftKings)",
+   "market": "moneyline",
+   "price": -106,
+   "book": "DraftKings",
+   "model_p": 0.541,
+   "blend_p": 0.5239,
+   "edge": 0.0094,
+   "score": 0.6094,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "10-9",
+   "result": "WIN",
+   "pnl_paper": 0.236,
+   "pnl_staked": 0.0,
+   "open_ml": -109,
+   "close_ml": -109,
+   "clv_pts": -0.24,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "7-4",
-  "wins": 7,
+  "record": "8-4",
+  "wins": 8,
   "losses": 4,
   "voids": 0,
-  "paper_units_net": 0.66,
-  "paper_roi_pct": 24.0,
+  "paper_units_net": 0.896,
+  "paper_roi_pct": 29.87,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 11,
-   "avg_clv_pts": -0.48,
-   "beat_close_pct": 36.4
+   "graded_with_clv": 12,
+   "avg_clv_pts": -0.46,
+   "beat_close_pct": 33.3
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-19"
+  "last_graded": "2026-08-20"
  }
 }

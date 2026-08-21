@@ -130,10 +130,35 @@ def normalise(payload, requested, markets, regions):
     }
 
 
+NET_RETRIES = 4
+NET_BACKOFF = 3.0          # seconds, doubling
+
+
 def fetch_one(stamp, key, markets, regions, floor):
-    r = requests.get(API, timeout=60, params={
-        "apiKey": key, "regions": regions, "markets": markets,
-        "oddsFormat": "american", "date": stamp})
+    # Transient network failure must not end a 357-call job. The first run of
+    # this pull died on a ConnectionResetError at snapshot 111 - no fault of the
+    # API, just a dropped socket - and resuming worked, but a job that needs
+    # babysitting through a blip is a job that will be abandoned half-done.
+    # HTTP errors are deliberately NOT retried here: a 401 or 429 is a real
+    # answer about the key or the quota, and hammering it is the wrong response.
+    last = None
+    for attempt in range(NET_RETRIES):
+        try:
+            r = requests.get(API, timeout=60, params={
+                "apiKey": key, "regions": regions, "markets": markets,
+                "oddsFormat": "american", "date": stamp})
+            break
+        except requests.RequestException as e:
+            last = e
+            if attempt == NET_RETRIES - 1:
+                raise SystemExit(
+                    f"network failure at {stamp} after {NET_RETRIES} attempts: {e}\n"
+                    "Snapshots already fetched are on disk; re-running resumes "
+                    "from where this stopped and costs nothing for them.")
+            wait = NET_BACKOFF * (2 ** attempt)
+            print(f"    network hiccup at {stamp} ({type(e).__name__}), "
+                  f"retry {attempt + 1}/{NET_RETRIES - 1} in {wait:.0f}s")
+            time.sleep(wait)
 
     def _int(n):
         try:

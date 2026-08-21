@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """
-Open Ledger Sports — historical T-24 odds pull, 2020-2024 (fb-v0.1).
+Open Ledger Sports — historical T-24 odds pull (fb-v0.1).
 
 The first code in this project that reads a price. Everything upstream of it -
 ingest, as-of engine, Elo, ridge, game model - was fitted and frozen without one.
 
-WHAT IT FETCHES. For every distinct hour in which some 2020-2024 game sat exactly
-24 hours from kickoff, one historical snapshot of the whole NFL board. 575 such
-slots exist across the five seasons. Snapshots return the entire slate, so cost
-scales with TIMESTAMPS, not games - and coarsening the slots barely helps
-(4-hour buckets save 2% and cost up to 3.7h of drift), so the slots stay hourly.
+WHAT IT FETCHES. For every distinct hour in which some game sat exactly 24 hours
+from kickoff, one historical snapshot of the whole NFL board. Snapshots return
+the entire slate, so cost scales with TIMESTAMPS, not games - and coarsening the
+slots barely helps (4-hour buckets save 2% of them and cost up to 3.7h of drift
+from the real decision moment), so the slots stay hourly.
+
+DEFAULT RANGE 2022-2024: 357 slots, 854 games, 10,710 credits. See the note on
+DEFAULT_SEASONS for why 2020-2021 are excluded rather than merely cheap to skip.
 
 COST. Historical requests bill 10x: 10 x markets x regions. At h2h,spreads,totals
-across us that is 30 credits a snapshot, 575 snapshots, 17,250 credits.
+across us that is 30 credits a snapshot.
 
-RESUMABLE, BECAUSE A 575-CALL JOB WILL FAIL PARTWAY. Every snapshot is written
+RESUMABLE, BECAUSE A LONG JOB WILL FAIL PARTWAY. Every snapshot is written
 to its own file and an existing file is skipped without a call, so a re-run
 costs nothing for work already done. Interrupt it freely.
 
@@ -27,10 +30,10 @@ API says it returned, both recorded. That is what makes them eligible for a
 T-24 comparison at all; the same prices without those stamps would be Tier C.
 
 Run:
-  python scripts/football/fetch_historical_odds.py --probe        # 1 call, 30 credits
-  python scripts/football/fetch_historical_odds.py --plan         # 0 calls, shows the job
-  python scripts/football/fetch_historical_odds.py                # the full pull
-  python scripts/football/fetch_historical_odds.py --limit 20     # first 20 remaining
+  python scripts/football/fetch_historical_odds.py --plan      # 0 calls, shows the job
+  python scripts/football/fetch_historical_odds.py --probe     # 1 call, 30 credits
+  python scripts/football/fetch_historical_odds.py             # 2022-2024, 10,710
+  python scripts/football/fetch_historical_odds.py --limit 20  # first 20 remaining
 """
 import argparse, io, json, os, sys, time
 from datetime import datetime, timezone
@@ -49,16 +52,22 @@ CREDIT_LOG = os.path.join(ROOT, "data", "odds_credits.json")
 INDEX = os.path.join(FB, "odds", "hist_index.json")
 API = "https://api.the-odds-api.com/v4/historical/sports/americanfootball_nfl/odds"
 
-SEASONS = list(range(2020, 2025))
+# 2022-2024 by default, NOT 2020-2024. 2020 and 2021 sit inside the model's TUNE
+# window, so the model was fitted on them: scoring it against the market there
+# flatters the model in exactly the direction that would turn a null result into
+# an apparent signal. Those two seasons are also 6,540 credits. They can still be
+# pulled deliberately with --seasons 2020-2021, and market_compare.py labels any
+# TUNE season in-sample and keeps it out of the headline.
+DEFAULT_SEASONS = "2022-2024"
 
 
 def iso(dt):
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def slots():
+def slots(seasons):
     """Distinct hours in which some game sat at T-24, ascending."""
-    games = asof.load_games(seasons=SEASONS, purpose="historical odds pull")
+    games = asof.load_games(seasons=seasons, purpose="historical odds pull")
     out = {}
     for g in games:
         t = g["_t24"].replace(minute=0, second=0, microsecond=0)
@@ -149,6 +158,8 @@ def fetch_one(stamp, key, markets, regions, floor):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--seasons", default=DEFAULT_SEASONS,
+                    help="inclusive range, e.g. 2022-2024 (default) or 2020-2021")
     ap.add_argument("--markets", default="h2h,spreads,totals")
     ap.add_argument("--regions", default="us")
     ap.add_argument("--limit", type=int, default=0, help="stop after N new snapshots")
@@ -159,14 +170,16 @@ def main():
     ap.add_argument("--sleep", type=float, default=0.2)
     args = ap.parse_args()
 
-    by_slot, games = slots()
+    a, _, b = args.seasons.partition("-")
+    seasons = list(range(int(a), int(b or a) + 1))
+    by_slot, games = slots(seasons)
     os.makedirs(SNAPS, exist_ok=True)
     done = [s for s in by_slot if os.path.exists(snap_path(s))]
     todo = [s for s in by_slot if not os.path.exists(snap_path(s))]
     per_call = 10 * len([m for m in args.markets.split(",") if m]) * \
         len([r for r in args.regions.split(",") if r])
 
-    print(f"seasons {SEASONS[0]}-{SEASONS[-1]}   {len(games):,} games   "
+    print(f"seasons {seasons[0]}-{seasons[-1]}   {len(games):,} games   "
           f"{len(by_slot)} distinct T-24 hours")
     print(f"markets {args.markets}  regions {args.regions}  "
           f"-> {per_call} credits per snapshot (historical bills 10x)")
@@ -211,7 +224,7 @@ def main():
     idx = {"_note": ("Which T-24 hour each game maps to. Built from games.csv, "
                      "not from the odds payloads, so a missing snapshot shows up "
                      "as a missing match rather than silently dropping a game."),
-           "seasons": SEASONS, "markets": args.markets, "regions": args.regions,
+           "seasons": seasons, "markets": args.markets, "regions": args.regions,
            "slots": {s: by_slot[s] for s in by_slot}}
     with io.open(INDEX, "w", encoding="utf-8", newline="\n") as f:
         json.dump(idx, f, indent=1, sort_keys=True)

@@ -2,32 +2,6 @@
  "posts": [
   {
    "date": "2026-08-17",
-   "mode": "email",
-   "result": "failed",
-   "http_status": 422,
-   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
-   "at_utc": "2026-08-17T17:05:25Z"
-  },
-  {
-   "date": "2026-08-17",
-   "mode": "blog",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-08-17T17:05:26Z"
-  },
-  {
-   "date": "2026-08-17",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-08-18T08:10:24Z"
-  },
-  {
-   "date": "2026-08-17",
    "mode": "x",
    "result": "nothing_to_post",
    "http_status": null,
@@ -256,6 +230,31 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-08-21T15:10:30Z"
+  },
+  {
+   "date": "2026-08-21",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-08-22T08:10:23Z"
+  },
+  {
+   "date": "2026-08-21",
+   "mode": "x",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-08-22T08:10:23Z"
+  },
+  {
+   "date": "2026-08-21",
+   "mode": "facebook",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-08-22T08:10:23Z"
   }
  ]
 }

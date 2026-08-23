@@ -311,24 +311,48 @@
    "close_ml": -105,
    "clv_pts": -2.41,
    "beat_close": false
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 823509,
+   "game": "TOR @ NYY",
+   "pick": "New York Yankees ML (-104, FanDuel)",
+   "market": "moneyline",
+   "price": -104,
+   "book": "FanDuel",
+   "model_p": 0.5242,
+   "blend_p": 0.5121,
+   "edge": 0.0023,
+   "score": 0.4975,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "4-3",
+   "result": "LOSS",
+   "pnl_paper": -0.25,
+   "pnl_staked": -0.0,
+   "open_ml": -105,
+   "close_ml": -105,
+   "clv_pts": -0.12,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "8-5",
+  "record": "8-6",
   "wins": 8,
-  "losses": 5,
+  "losses": 6,
   "voids": 0,
-  "paper_units_net": 0.646,
-  "paper_roi_pct": 19.88,
+  "paper_units_net": 0.396,
+  "paper_roi_pct": 11.31,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 13,
-   "avg_clv_pts": -0.61,
-   "beat_close_pct": 30.8
+   "graded_with_clv": 14,
+   "avg_clv_pts": -0.58,
+   "beat_close_pct": 28.6
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-21"
+  "last_graded": "2026-08-22"
  }
 }

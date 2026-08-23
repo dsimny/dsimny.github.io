@@ -1823,21 +1823,149 @@
    "final_score": "5-6",
    "result": "LOSS",
    "pnl": -1.0
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 823509,
+   "game": "TOR @ NYY",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 6.5 (-118, MyBookie.ag)",
+   "price": -118,
+   "book": "MyBookie.ag",
+   "model_p": 0.5901,
+   "edge": 0.0488,
+   "divergence": 0.0684,
+   "actual_total": 7,
+   "result": "WIN",
+   "pnl": 0.847
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 823743,
+   "game": "ATL @ MIL",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-110, BetRivers)",
+   "price": -110,
+   "book": "BetRivers",
+   "model_p": 0.5778,
+   "edge": 0.054,
+   "divergence": 0.057,
+   "actual_total": 5,
+   "result": "WIN",
+   "pnl": 0.909
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 823831,
+   "game": "WSH @ MIA",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (-113, LowVig.ag)",
+   "price": -113,
+   "book": "LowVig.ag",
+   "model_p": 0.5644,
+   "edge": 0.0339,
+   "divergence": 0.0536,
+   "actual_total": 6,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 822858,
+   "game": "LAA @ TEX",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.5679,
+   "edge": 0.0629,
+   "divergence": 0.0787,
+   "actual_total": 3,
+   "result": "WIN",
+   "pnl": 0.98
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 824073,
+   "game": "DET @ KC",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8.5 (-107, LowVig.ag)",
+   "price": -107,
+   "book": "LowVig.ag",
+   "model_p": 0.5588,
+   "edge": 0.0419,
+   "divergence": 0.0588,
+   "actual_total": 4,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 823910,
+   "game": "PIT @ LAD",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (-106, MyBookie.ag)",
+   "price": -106,
+   "book": "MyBookie.ag",
+   "model_p": 0.5743,
+   "edge": 0.0597,
+   "divergence": 0.0743,
+   "actual_total": 7,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 823910,
+   "game": "PIT @ LAD",
+   "market": "moneyline",
+   "tag": "R8-hold",
+   "pick": "Los Angeles Dodgers ML (-245, FanDuel)",
+   "price": -245,
+   "book": "FanDuel",
+   "model_p": 0.4211,
+   "edge": -0.0899,
+   "divergence": -0.1531,
+   "final_score": "3-4",
+   "result": "WIN",
+   "pnl": 0.408
+  },
+  {
+   "date": "2026-08-22",
+   "gamePk": 825044,
+   "game": "CIN @ AZ",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-105, Bovada)",
+   "price": -105,
+   "book": "Bovada",
+   "model_p": 0.5322,
+   "edge": 0.02,
+   "divergence": 0.0311,
+   "actual_total": 16,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "59-53-2p",
-  "n_graded": 114,
-  "win_pct": 52.7,
-  "paper_units_net": -0.9,
-  "paper_roi_pct": -0.8,
+  "record": "63-57-2p",
+  "n_graded": 122,
+  "win_pct": 52.5,
+  "paper_units_net": -1.756,
+  "paper_roi_pct": -1.46,
   "by_tag": {
    "R8-hold": {
-    "record": "9-2",
-    "n_graded": 11,
-    "win_pct": 81.8,
-    "paper_units_net": 2.498,
-    "paper_roi_pct": 22.71
+    "record": "10-2",
+    "n_graded": 12,
+    "win_pct": 83.3,
+    "paper_units_net": 2.906,
+    "paper_roi_pct": 24.22
    },
    "edge-band": {
     "record": "4-6",
@@ -1847,30 +1975,30 @@
     "paper_roi_pct": -19.78
    },
    "market-proving": {
-    "record": "46-45-2p",
-    "n_graded": 93,
-    "win_pct": 50.5,
-    "paper_units_net": -1.42,
-    "paper_roi_pct": -1.56
+    "record": "49-49-2p",
+    "n_graded": 100,
+    "win_pct": 50.0,
+    "paper_units_net": -2.684,
+    "paper_roi_pct": -2.74
    }
   },
   "by_market": {
    "moneyline": {
-    "record": "13-8",
-    "n_graded": 21,
-    "win_pct": 61.9,
-    "paper_units_net": 0.52,
-    "paper_roi_pct": 2.48
+    "record": "14-8",
+    "n_graded": 22,
+    "win_pct": 63.6,
+    "paper_units_net": 0.928,
+    "paper_roi_pct": 4.22
    },
    "total": {
-    "record": "46-45-2p",
-    "n_graded": 93,
-    "win_pct": 50.5,
-    "paper_units_net": -1.42,
-    "paper_roi_pct": -1.56
+    "record": "49-49-2p",
+    "n_graded": 100,
+    "win_pct": 50.0,
+    "paper_units_net": -2.684,
+    "paper_roi_pct": -2.74
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-08-21"
+  "last_graded": "2026-08-22"
  }
 }

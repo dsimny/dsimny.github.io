@@ -185,6 +185,39 @@ def fetch_one(stamp, key, markets, regions, floor):
     return r.json(), rem, used, cost
 
 
+def write_index(by_slot, seasons, markets, regions):
+    """Write hist_index.json, MERGING with whatever is already there.
+
+    Two bugs lived here. The index was rebuilt from only the seasons in the
+    current run, so pulling 2025 deleted the 2022-2024 index while leaving all
+    357 of their snapshots on disk -- prices intact, map to them gone, and
+    market_compare.py reads the map. And the early-return path for an already
+    complete pull returned before writing at all, so the obvious repair
+    (re-run across every season) silently did nothing. A resumable tool has to
+    converge on a correct index from any starting point, including "no work".
+    """
+    prior = {}
+    if os.path.exists(INDEX):
+        try:
+            with io.open(INDEX, encoding="utf-8") as f:
+                prior = json.load(f)
+        except ValueError:
+            prior = {}        # corrupt index: rebuild rather than inherit junk
+    slots = dict(prior.get("slots") or {})
+    slots.update({s: by_slot[s] for s in by_slot})
+    seasons = sorted(set(prior.get("seasons") or []) | set(seasons))
+    idx = {"_note": ("Which T-24 hour each game maps to. Built from games.csv, "
+                     "not from the odds payloads, so a missing snapshot shows up "
+                     "as a missing match rather than silently dropping a game. "
+                     "Cumulative across runs: a pull for one season merges into "
+                     "the existing index instead of replacing it."),
+           "seasons": seasons, "markets": markets,
+           "regions": regions, "slots": slots}
+    with io.open(INDEX, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(idx, f, indent=1, sort_keys=True)
+    return idx
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seasons", default=DEFAULT_SEASONS,
@@ -219,6 +252,9 @@ def main():
         return 0
     if not todo:
         print("\nnothing to fetch - every slot already on disk.")
+        # Still write it: this is the path a repair run takes.
+        write_index(by_slot, seasons, args.markets, args.regions)
+        print(f"refreshed {os.path.relpath(INDEX, ROOT)}")
         return 0
 
     key = localenv.require("ODDS_API_KEY")
@@ -250,13 +286,7 @@ def main():
                     "http_status": 200, "source": "football_historical",
                     "read_utc": iso(datetime.now(timezone.utc))})
 
-    idx = {"_note": ("Which T-24 hour each game maps to. Built from games.csv, "
-                     "not from the odds payloads, so a missing snapshot shows up "
-                     "as a missing match rather than silently dropping a game."),
-           "seasons": seasons, "markets": args.markets, "regions": args.regions,
-           "slots": {s: by_slot[s] for s in by_slot}}
-    with io.open(INDEX, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(idx, f, indent=1, sort_keys=True)
+    write_index(by_slot, seasons, args.markets, args.regions)
 
     print(f"\nfetched {len(todo)} snapshots, ~{spent:,} credits, "
           f"{rem} remaining")

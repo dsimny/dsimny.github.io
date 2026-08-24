@@ -1,0 +1,310 @@
+{
+ "_spec": "docs/FOOTBALL_PREREG_V02.md (frozen 2026-08-24)",
+ "seasons": [
+  2022,
+  2023,
+  2024
+ ],
+ "market": "moneyline (h2h)",
+ "staleness_min": 15,
+ "min_books": 5,
+ "arms": {
+  "tier1": {
+   "summary": {
+    "live_2022": {
+     "n": 284,
+     "record": "111-171-2p",
+     "ev_mean_pct": 0.7087396597192352,
+     "ev_positive_share": 57.04225352112676,
+     "clv_mean_pts": 0.014143257140630246,
+     "clv_positive_share": 57.04225352112676,
+     "realised_roi_pct": -5.070993781033489,
+     "mean_overround_pts": 4.05924799092132,
+     "mean_books_at_best": 2.612676056338028
+    },
+    "live_2023": {
+     "n": 285,
+     "record": "96-189",
+     "ev_mean_pct": -1.3459974895035491,
+     "ev_positive_share": 34.73684210526316,
+     "clv_mean_pts": -0.5543683897572026,
+     "clv_positive_share": 34.3859649122807,
+     "realised_roi_pct": -5.217000171043665,
+     "mean_overround_pts": 4.340289560942948,
+     "mean_books_at_best": 4.684210526315789
+    },
+    "live_2024": {
+     "n": 259,
+     "record": "82-177",
+     "ev_mean_pct": -2.639955850883668,
+     "ev_positive_share": 24.324324324324323,
+     "clv_mean_pts": -0.9853405875719299,
+     "clv_positive_share": 24.324324324324323,
+     "realised_roi_pct": -16.016706031663436,
+     "mean_overround_pts": 4.397622706790351,
+     "mean_books_at_best": 2.9073359073359075
+    },
+    "live_ALL": {
+     "n": 828,
+     "record": "289-537-2p",
+     "ev_mean_pct": -1.0459852494288875,
+     "ev_positive_share": 39.130434782608695,
+     "clv_mean_pts": -0.4941805775772869,
+     "clv_positive_share": 39.009661835748794,
+     "realised_roi_pct": -8.54508954681375,
+     "mean_overround_pts": 4.26182757892403,
+     "mean_books_at_best": 3.417874396135266
+    },
+    "null_2022": {
+     "n": 284,
+     "record": "134-148-2p",
+     "ev_mean_pct": 0.06206417176137487,
+     "ev_positive_share": 43.66197183098591,
+     "clv_mean_pts": -0.21410682941061993,
+     "clv_positive_share": 43.66197183098591,
+     "realised_roi_pct": -3.6709913357301502,
+     "mean_overround_pts": 4.05924799092132,
+     "mean_books_at_best": 3.619718309859155
+    },
+    "null_2023": {
+     "n": 285,
+     "record": "133-152",
+     "ev_mean_pct": -1.8282251764415423,
+     "ev_positive_share": 24.210526315789473,
+     "clv_mean_pts": -1.0371680940322472,
+     "clv_positive_share": 23.859649122807017,
+     "realised_roi_pct": -5.66652508082589,
+     "mean_overround_pts": 4.340289560942948,
+     "mean_books_at_best": 5.207017543859649
+    },
+    "null_2024": {
+     "n": 259,
+     "record": "141-118",
+     "ev_mean_pct": -2.5241684990834625,
+     "ev_positive_share": 18.91891891891892,
+     "clv_mean_pts": -1.3097920009138453,
+     "clv_positive_share": 18.91891891891892,
+     "realised_roi_pct": -3.2751402717051876,
+     "mean_overround_pts": 4.397622706790351,
+     "mean_books_at_best": 2.888030888030888
+    },
+    "null_ALL": {
+     "n": 828,
+     "record": "408-418-2p",
+     "ev_mean_pct": -1.3975574779809492,
+     "ev_positive_share": 29.22705314009662,
+     "clv_mean_pts": -0.8401393412904499,
+     "clv_positive_share": 29.106280193236714,
+     "realised_roi_pct": -4.234036857191286,
+     "mean_overround_pts": 4.26182757892403,
+     "mean_books_at_best": 3.9371980676328504
+    }
+   },
+   "excluded": {
+    "no_t24_snap": 0,
+    "no_close_snap": 0,
+    "too_few_books": 26,
+    "no_result": 0
+   },
+   "stale_rate_pct": 0.0
+  },
+  "tier2": {
+   "summary": {
+    "live_2022": {
+     "n": 273,
+     "record": "104-167-2p",
+     "ev_mean_pct": -2.1981755558756473,
+     "ev_positive_share": 30.76923076923077,
+     "clv_mean_pts": -0.8680222721928236,
+     "clv_positive_share": 30.76923076923077,
+     "realised_roi_pct": -1.6933238894597842,
+     "mean_overround_pts": 3.874546426817781,
+     "mean_books_at_best": 4.373626373626373
+    },
+    "live_2023": {
+     "n": 240,
+     "record": "77-163",
+     "ev_mean_pct": -2.406900153950799,
+     "ev_positive_share": 26.25,
+     "clv_mean_pts": -0.895753304671431,
+     "clv_positive_share": 26.25,
+     "realised_roi_pct": -7.520650540140228,
+     "mean_overround_pts": 3.787866270762197,
+     "mean_books_at_best": 3.675
+    },
+    "live_2024": {
+     "n": 221,
+     "record": "58-163",
+     "ev_mean_pct": -3.641486880076438,
+     "ev_positive_share": 17.647058823529413,
+     "clv_mean_pts": -1.2553306922295284,
+     "clv_positive_share": 17.647058823529413,
+     "realised_roi_pct": -26.886148792539622,
+     "mean_overround_pts": 3.7535430718336884,
+     "mean_books_at_best": 3.7013574660633486
+    },
+    "live_ALL": {
+     "n": 734,
+     "record": "239-493-2p",
+     "ev_mean_pct": -2.7009898694811123,
+     "ev_positive_share": 25.340599455040874,
+     "clv_mean_pts": -0.9937043002895232,
+     "clv_positive_share": 25.340599455040874,
+     "realised_roi_pct": -11.184022390473341,
+     "mean_overround_pts": 3.809771251198129,
+     "mean_books_at_best": 3.9427792915531334
+    },
+    "null_2022": {
+     "n": 273,
+     "record": "129-142-2p",
+     "ev_mean_pct": -2.415770410413293,
+     "ev_positive_share": 21.245421245421245,
+     "clv_mean_pts": -1.2823256902597466,
+     "clv_positive_share": 21.245421245421245,
+     "realised_roi_pct": -11.187572414048752,
+     "mean_overround_pts": 3.874546426817781,
+     "mean_books_at_best": 4.706959706959707
+    },
+    "null_2023": {
+     "n": 240,
+     "record": "121-119",
+     "ev_mean_pct": -2.185157794823744,
+     "ev_positive_share": 22.083333333333332,
+     "clv_mean_pts": -1.199086690978993,
+     "clv_positive_share": 22.083333333333332,
+     "realised_roi_pct": -2.260548759737004,
+     "mean_overround_pts": 3.787866270762197,
+     "mean_books_at_best": 3.8208333333333333
+    },
+    "null_2024": {
+     "n": 221,
+     "record": "112-109",
+     "ev_mean_pct": -2.692836167928397,
+     "ev_positive_share": 16.742081447963802,
+     "clv_mean_pts": -1.318038126042504,
+     "clv_positive_share": 16.289592760180994,
+     "realised_roi_pct": -10.733861964516626,
+     "mean_overround_pts": 3.7535430718336884,
+     "mean_books_at_best": 3.9547511312217196
+    },
+    "null_ALL": {
+     "n": 734,
+     "record": "362-370-2p",
+     "ev_mean_pct": -2.423787446747552,
+     "ev_positive_share": 20.16348773841962,
+     "clv_mean_pts": -1.2658612331488592,
+     "clv_positive_share": 20.02724795640327,
+     "realised_roi_pct": -8.13204695576344,
+     "mean_overround_pts": 3.809771251198129,
+     "mean_books_at_best": 4.190735694822888
+    }
+   },
+   "excluded": {
+    "no_t24_snap": 0,
+    "no_close_snap": 0,
+    "too_few_books": 120,
+    "no_result": 0
+   },
+   "stale_rate_pct": 0.010694043417816277
+  },
+  "tier1_2025_subset": {
+   "summary": {
+    "live_2022": {
+     "n": 257,
+     "record": "83-172-2p",
+     "ev_mean_pct": -2.128537890140162,
+     "ev_positive_share": 26.848249027237355,
+     "clv_mean_pts": -0.7899864302426514,
+     "clv_positive_share": 26.848249027237355,
+     "realised_roi_pct": -15.296808966861681,
+     "mean_overround_pts": 3.9966822631277985,
+     "mean_books_at_best": 3.105058365758755
+    },
+    "live_2023": {
+     "n": 280,
+     "record": "93-187",
+     "ev_mean_pct": -2.497383138672005,
+     "ev_positive_share": 25.0,
+     "clv_mean_pts": -0.9567006160229461,
+     "clv_positive_share": 25.0,
+     "realised_roi_pct": -7.250410972911834,
+     "mean_overround_pts": 4.333739033139537,
+     "mean_books_at_best": 3.0714285714285716
+    },
+    "live_2024": {
+     "n": 259,
+     "record": "82-177",
+     "ev_mean_pct": -2.639955850883668,
+     "ev_positive_share": 24.324324324324323,
+     "clv_mean_pts": -0.9853405875719299,
+     "clv_positive_share": 24.324324324324323,
+     "realised_roi_pct": -16.016706031663436,
+     "mean_overround_pts": 4.397622706790351,
+     "mean_books_at_best": 2.9073359073359075
+    },
+    "live_ALL": {
+     "n": 796,
+     "record": "258-536-2p",
+     "ev_mean_pct": -2.4246860326294635,
+     "ev_positive_share": 25.376884422110553,
+     "clv_mean_pts": -0.9121933382411008,
+     "clv_positive_share": 25.376884422110553,
+     "realised_roi_pct": -12.700655576758287,
+     "mean_overround_pts": 4.245701698444241,
+     "mean_books_at_best": 3.028894472361809
+    },
+    "null_2022": {
+     "n": 257,
+     "record": "122-133-2p",
+     "ev_mean_pct": -2.066387503493344,
+     "ev_positive_share": 21.78988326848249,
+     "clv_mean_pts": -1.0697006605304495,
+     "clv_positive_share": 21.40077821011673,
+     "realised_roi_pct": -10.660904457600548,
+     "mean_overround_pts": 3.9966822631277985,
+     "mean_books_at_best": 3.1945525291828796
+    },
+    "null_2023": {
+     "n": 280,
+     "record": "142-138",
+     "ev_mean_pct": -2.428956268527564,
+     "ev_positive_share": 20.357142857142858,
+     "clv_mean_pts": -1.3128674900103956,
+     "clv_positive_share": 20.357142857142858,
+     "realised_roi_pct": -1.436027907895979,
+     "mean_overround_pts": 4.333739033139537,
+     "mean_books_at_best": 3.1892857142857145
+    },
+    "null_2024": {
+     "n": 259,
+     "record": "130-129",
+     "ev_mean_pct": -2.4593954828912303,
+     "ev_positive_share": 18.146718146718147,
+     "clv_mean_pts": -1.2709396220697036,
+     "clv_positive_share": 18.146718146718147,
+     "realised_roi_pct": -6.888657586098885,
+     "mean_overround_pts": 4.397622706790351,
+     "mean_books_at_best": 2.9613899613899615
+    },
+    "null_ALL": {
+     "n": 796,
+     "record": "394-400-2p",
+     "ev_mean_pct": -2.3217999669024323,
+     "ev_positive_share": 20.100502512562816,
+     "clv_mean_pts": -1.220715237531771,
+     "clv_positive_share": 19.974874371859297,
+     "realised_roi_pct": -6.188571073635461,
+     "mean_overround_pts": 4.245701698444241,
+     "mean_books_at_best": 3.1168341708542715
+    }
+   },
+   "excluded": {
+    "no_t24_snap": 0,
+    "no_close_snap": 0,
+    "too_few_books": 58,
+    "no_result": 0
+   },
+   "stale_rate_pct": 0.0
+  }
+ }
+}

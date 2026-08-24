@@ -42,7 +42,32 @@ jobs:
           DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
         run: python scripts/fetch_data.py
+
+      - name: Read season state
+        id: season
+        # fetch_data.py has just written data/season_state.json (it writes it on
+        # every run, in every state). Everything below keys off this one value
+        # rather than each script re-deriving "are there games today" from the
+        # schedule API — one reading, one answer, no chance of two steps
+        # disagreeing halfway through a morning.
+        #
+        # 'active' is the only state where a board exists, so it is the only
+        # state where the engine runs or anything gets posted. On 'break' and
+        # 'offseason' fetch_data wrote no snapshot at all, so an unguarded
+        # engine step would not merely be pointless, it would fail the run and
+        # fire the alert job every morning.
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import sys
+          sys.path.insert(0, "scripts")
+          import season
+          st = season.read(".") or {"state": season.ACTIVE}
+          print(f"state={st['state']}")
+          PY
+          cat "$GITHUB_OUTPUT"
+
       - name: Run engine (10,000 sims/game + circuit breakers)
+        if: steps.season.outputs.state == 'active'
         run: python scripts/engine.py
       - name: Build site
         env:
@@ -50,16 +75,19 @@ jobs:
           WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}   # optional — upgrade button omitted when unset
         run: python scripts/build_site.py
       - name: Post free pick to Discord
+        if: steps.season.outputs.state == 'active'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
           SITE_URL: ${{ vars.SITE_URL }}                            # optional
         run: python scripts/post_discord.py pick
       - name: Post held plays to the members channel
+        if: steps.season.outputs.state == 'active'
         env:
           DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # optional
           SITE_URL: ${{ vars.SITE_URL }}                                            # optional
         run: python scripts/post_discord.py board
       - name: Email the free pick to subscribers
+        if: steps.season.outputs.state == 'active'
         # Reads data/feed_items.json (written by Build site above), so the email
         # is byte-for-byte the free pick. Unlike the Discord posts this is
         # idempotent: it records "sent" in data/post_status.json and refuses to
@@ -71,6 +99,7 @@ jobs:
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}                  # optional — defaults to picks@send.openledgersports.com
         run: python scripts/send_email.py pick
       - name: Write The Morning Line (daily blog)
+        if: steps.season.outputs.state != 'offseason'
         # Deterministic post composed from the same board the site renders —
         # the slate on game days, the evergreen library on off days. Idempotent
         # by date; also regenerates feed.xml with the blog item merged in.
@@ -78,6 +107,7 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL }}   # optional — links default to the apex
         run: python scripts/blog.py
       - name: Build game pages (board-day versions)
+        if: steps.season.outputs.state == 'active'
         # One permanent URL per game. Today's board is loaded via crypto_box
         # (key in the job env) but held plays render REDACTED: reveal state is
         # detected from the plaintext board file, which doesn't exist until
@@ -88,11 +118,13 @@ jobs:
         # recent captured slate; the first capture run (~11:30 ET) flips it.
         run: python scripts/odds_page.py
       - name: Post the blog link to Discord
+        if: steps.season.outputs.state != 'offseason'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}   # optional
           SITE_URL: ${{ vars.SITE_URL }}                            # optional
         run: python scripts/post_discord.py blog
       - name: Post the pick'em featured game
+        if: steps.season.outputs.state == 'active'
         # "Beat the Engine": free pick or Best of Board, two buttons. Skips
         # cleanly until the bot token + channel id secrets exist.
         env:

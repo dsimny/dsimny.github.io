@@ -46,7 +46,29 @@ jobs:
           from datetime import datetime
           from zoneinfo import ZoneInfo
 
+          sys.path.insert(0, "scripts")
+          import season
+
           today = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
+
+          # OFFSEASON. Without this the watchdog fires every single day from the
+          # end of the regular season until spring — five months of a daily
+          # "no board published" alarm that is not describing a fault. An alert
+          # channel that chirps daily is an alert channel nobody reads, which
+          # would cost us the one alarm that matters on the day it finally does.
+          #
+          # is_offseason() only returns True for a FRESH reading. A stale state
+          # file is NOT treated as an offseason: a pipeline that quietly stopped
+          # writing state looks exactly like one that stopped writing boards, and
+          # that is precisely the failure this job exists to catch. Silence is
+          # earned by a morning run that ran today, never by an old file.
+          st = season.read(".")
+          if season.is_offseason(st, today):
+              print(f"today_et={today}")
+              print(f"committed_utc=")
+              print("published=offseason")
+              print(f"season_last_game={st.get('last_game_date') or 'unknown'}", file=sys.stderr)
+              raise SystemExit(0)
           # Naming verified against crypto_box.paths_for(): .enc while the board
           # is still committed-but-unrevealed (the CI case), .json once grading
           # reveals it or when no key is set. Accept either.
@@ -71,7 +93,9 @@ jobs:
           PY
           cat "$GITHUB_OUTPUT"
       - name: Alert — no board for today
-        if: steps.check.outputs.published != 'yes'
+        # '== no', not '!= yes': the third value is 'offseason', and that one is
+        # a healthy silence, not a missing board.
+        if: steps.check.outputs.published == 'no'
         env:
           DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
           DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
@@ -85,6 +109,14 @@ jobs:
           The morning run either never started (cron-job.org trigger dropped, or the workflow was auto-disabled after inactivity) or died before committing. Check $BOARDS and re-run it manually if there is still time before first pitch — the engine refuses to board a game that has already started, so a late run publishes a short board rather than a dishonest one.
           The site is already showing its staleness banner. The ledger is unaffected. Heartbeat run: $RUN_URL"
           exit 0
+      - name: Offseason — nothing to watch
+        if: steps.check.outputs.published == 'offseason'
+        # Silent, like the healthy path. The morning run still executes daily
+        # through the offseason (it is what refreshes season_state.json), so if
+        # the pipeline dies out of season the state goes stale within three days
+        # and this job starts alerting again on its own.
+        run: echo "Offseason as of ${{ steps.check.outputs.today_et }} — no board expected."
+
       - name: Healthy
         if: steps.check.outputs.published == 'yes'
         # Deliberately silent on the happy path: an alert channel that chirps

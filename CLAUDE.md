@@ -137,6 +137,75 @@ LOUD FAILURE. Three layers, because they catch different things:
 NOT DONE, deliberately: a missed day stays missed. No board is ever backfilled
 for a day the pipeline skipped — the banner IS how a missed day is communicated.
 
+## The offseason (season_state.json, added 2026-08-24)
+
+THE CLIFF. `fetch_data.py` filters the slate to `gameType == "R"`, so the board
+goes empty the morning after the last regular-season game — and stays empty
+through the postseason, which that filter also excludes. For MLB 2026 the last
+regular-season day is **2026-09-27**. Before this change nothing in the pipeline
+knew that: the morning run would publish an empty board, the blog would post
+daily into nothing, `heartbeat.yml` would alert EVERY DAY for five months, and
+the site's staleness banner would tell visitors that today's board "failed to
+publish" when in fact baseball was simply over. The last of those is a House
+Rule 8 violation on a five-month timer, and the heartbeat one would have burned
+the alert channel that has to still mean something in April.
+
+`scripts/season.py` is the single source of truth. Three states, derived from
+the schedule API and NEVER from a hardcoded date (same reasoning as
+`docs/FOOTBALL_PREREG.md` §11 on capture windows — a calendar constant here
+would be wrong the first time MLB moved a schedule and nothing would notice):
+
+- `active` — games today. The happy path, byte-for-byte unchanged.
+- `break` — none today, some within 21 days. A pause: the site says so and the
+  blog runs its evergreen off-day piece, exactly as it already did.
+- `offseason` — none today, none on the horizon. Season complete.
+
+`fetch_data.py` writes `data/season_state.json` on EVERY run, in the clear (it
+leaks nothing — a date and a word), then returns early when the slate is empty.
+The early return sits BEFORE the Odds API call on purpose: an empty slate that
+fell through would bill 2 credits a day for a slate with no games in it, ~60 a
+month, in exactly the months the free tier has to cover something else.
+
+FRESHNESS IS THE CONTRACT. `is_offseason()` returns True only for a reading less
+than three days old. A stale state file is NOT an offseason — a pipeline that
+quietly stopped writing state looks identical to one that stopped writing
+boards, and that is the failure `heartbeat.yml` exists to catch. Silence is
+earned by a morning run that ran today, never by an old file. This is why the
+morning workflow still runs daily all winter: it is what keeps the state fresh,
+so if the pipeline dies out of season the watchdog wakes up on its own within
+three days.
+
+WHAT EACH PIECE DOES OUT OF SEASON:
+- `morning-board.yml` — reads the state into a step output; the engine and every
+  posting step (Discord, email, pick'em, game pages) are gated to `active`. The
+  blog and its Discord link are gated to "not offseason", so break days keep
+  their evergreen post. `build_site.py` and `odds_page.py` still run.
+- `build_site.py` — falls back to the last board of the season and reuses the
+  existing ARCHIVED machinery rather than adding a second page: cards
+  de-emphasised but fully readable (House Rule 7), board tab renamed to its real
+  date, every "today's" routed through `TODAYS`. The one thing that path gets
+  wrong is the banner, so there is a third wording — season complete, final
+  record, prices are dead — on a grey palette, not the red one. Red has to keep
+  meaning "something broke".
+- OFFSEASON is read from the season state, NOT inferred from a missing board.
+  `grade-ledger.yml` rebuilds the site every morning against the LATEST revealed
+  board, so out of season it always finds one; an inferred flag would stay false
+  and let that nightly rebuild overwrite the season-complete page with "today's
+  board failed to publish" every day. This was a real bug caught in testing.
+- `heartbeat.yml` — a third output value, `offseason`, silent like the healthy
+  path. The alert now fires on `== 'no'`, not `!= 'yes'`.
+- `fetch_closing.py` — already correct before this change: it returns before the
+  odds call when the slate has no regular-season games. No credits burn.
+- `grade.py` — already correct: it returns when there is no board to grade, so
+  the final day's picks still grade normally on the first offseason morning.
+
+KNOWN, NOT FIXED HERE: `blog.py` picks its evergreen piece with
+`used % len(POSTS)`, so after 12 off-days it silently recycles from the top.
+Harmless at the current rate of in-season off days, and the offseason gate keeps
+a five-month run from exposing it, but it will repeat eventually. Fixing it
+means deciding what the blog should do when the library is exhausted, which is
+an editorial call, not a code one.
+
 ## Daily Pick strategy (engine v0.15, effective 2026-08-09)
 
 The product answer to the quiet board: an ALWAYS-ON second strategy beside

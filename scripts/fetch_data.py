@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 import requests
 
 import crypto_box
+import season
 
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
@@ -254,6 +255,28 @@ def main():
     sched = get(f"{MLB}/schedule", sportId=1, date=DATE, hydrate="probablePitcher")
     games_raw = sched["dates"][0]["games"] if sched.get("dates") else []
     games_raw = [g for g in games_raw if g.get("gameType") == "R"]  # regular season only
+
+    # ---- Season state: the offseason guard (see scripts/season.py) ----
+    # Written on EVERY run, including the happy path, because heartbeat.yml
+    # trusts an offseason reading only while it is fresh. Placed here on purpose:
+    # before the standings/pitcher calls and, critically, before the Odds API
+    # call below. An empty slate that fell through to that call would bill 2
+    # credits a day for a slate with no games in it — ~60 a month, spent on
+    # nothing, in the months when the free tier has to cover football instead.
+    state = season.write(ROOT, season.classify(DATE, get, games_today=games_raw))
+    if not games_raw:
+        if state["state"] == season.OFFSEASON:
+            last = state.get("last_game_date") or "unknown"
+            print(f"[{DATE}] OFFSEASON — no regular-season games today and none "
+                  f"within {season.LOOKAHEAD_DAYS} days (last game: {last}). "
+                  f"No snapshot, no odds call, no board. The site renders its "
+                  f"season-complete state and the ledger stands as final.")
+        else:
+            print(f"[{DATE}] No games on the slate; next regular-season date is "
+                  f"{state.get('resumes')}. No snapshot and no odds call today — "
+                  f"the site says there are no games and the blog runs its "
+                  f"evergreen off-day piece.")
+        return
 
     # ---- Teams (abbreviations) ----
     teams_resp = get(f"{MLB}/teams", sportId=1, season=SEASON)

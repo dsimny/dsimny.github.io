@@ -36,7 +36,7 @@ Run:
   python scripts/football/fetch_historical_odds.py --limit 20  # first 20 remaining
 """
 import argparse, io, json, os, sys, time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import requests
 
@@ -65,8 +65,21 @@ def iso(dt):
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def slots(seasons):
-    """Distinct hours in which some game sat at T-24, ascending."""
+def slots(seasons, at="t24"):
+    """Distinct hours to snapshot, ascending, mapped to the games they serve.
+
+    at="t24"   — the hour each game sat 24h from kickoff. fb-v0.1's question.
+    at="close" — the hour before each game kicks off, floored. fb-v0.2 needs a
+                 CLOSING consensus (section 8 step 5) and the T-24 grid does not
+                 supply one: median distance from the last T-24-grid snapshot to
+                 kickoff is 17 hours. See docs/FOOTBALL_PREREG_V02.md section 11a.
+
+    kickoff-1h floored to the hour is the closest a snapshot can sit to a close
+    without risking a price taken after the game has started. It is deliberately
+    NOT kickoff itself.
+    """
+    if at not in ("t24", "close"):
+        raise ValueError(f"unknown slot mode {at!r}")
     # schedule_only: this job needs kickoff hours and game ids, nothing else.
     # It is also what lets the HOLDOUT season be priced without burning the
     # one-shot evaluation on a calendar lookup. See asof.assert_season_allowed.
@@ -74,7 +87,8 @@ def slots(seasons):
                             schedule_only=True)
     out = {}
     for g in games:
-        t = g["_t24"].replace(minute=0, second=0, microsecond=0)
+        base = g["_t24"] if at == "t24" else g["_kickoff"] - timedelta(hours=1)
+        t = base.replace(minute=0, second=0, microsecond=0)
         out.setdefault(iso(t), []).append(g["game_id"])
     return dict(sorted(out.items())), games
 
@@ -185,7 +199,7 @@ def fetch_one(stamp, key, markets, regions, floor):
     return r.json(), rem, used, cost
 
 
-def write_index(by_slot, seasons, markets, regions):
+def write_index(by_slot, seasons, markets, regions, at="t24"):
     """Write hist_index.json, MERGING with whatever is already there.
 
     Two bugs lived here. The index was rebuilt from only the seasons in the
@@ -203,7 +217,12 @@ def write_index(by_slot, seasons, markets, regions):
                 prior = json.load(f)
         except ValueError:
             prior = {}        # corrupt index: rebuild rather than inherit junk
-    slots = dict(prior.get("slots") or {})
+    # The two grids are kept in SEPARATE keys. They are different questions -
+    # "the hour we could have bet" vs "the hour the market last spoke" - and a
+    # game appears in both, so merging them into one map would silently make
+    # each game look like it had two decision moments.
+    key = "slots" if at == "t24" else "close_slots"
+    slots = dict(prior.get(key) or {})
     slots.update({s: by_slot[s] for s in by_slot})
     seasons = sorted(set(prior.get("seasons") or []) | set(seasons))
     idx = {"_note": ("Which T-24 hour each game maps to. Built from games.csv, "
@@ -212,7 +231,9 @@ def write_index(by_slot, seasons, markets, regions):
                      "Cumulative across runs: a pull for one season merges into "
                      "the existing index instead of replacing it."),
            "seasons": seasons, "markets": markets,
-           "regions": regions, "slots": slots}
+           "regions": regions,
+           "slots": slots if at == "t24" else (prior.get("slots") or {}),
+           "close_slots": slots if at == "close" else (prior.get("close_slots") or {})}
     with io.open(INDEX, "w", encoding="utf-8", newline="\n") as f:
         json.dump(idx, f, indent=1, sort_keys=True)
     return idx
@@ -229,20 +250,24 @@ def main():
                     help="stop if remaining credits fall below this")
     ap.add_argument("--probe", action="store_true", help="one snapshot, then stop")
     ap.add_argument("--plan", action="store_true", help="no calls; show the job")
+    ap.add_argument("--at", choices=("t24", "close"), default="t24",
+                    help="t24 = the decision moment (fb-v0.1); "
+                         "close = kickoff-1h, the closing consensus fb-v0.2 needs")
     ap.add_argument("--sleep", type=float, default=0.2)
     args = ap.parse_args()
 
     a, _, b = args.seasons.partition("-")
     seasons = list(range(int(a), int(b or a) + 1))
-    by_slot, games = slots(seasons)
+    by_slot, games = slots(seasons, at=args.at)
     os.makedirs(SNAPS, exist_ok=True)
     done = [s for s in by_slot if os.path.exists(snap_path(s))]
     todo = [s for s in by_slot if not os.path.exists(snap_path(s))]
     per_call = 10 * len([m for m in args.markets.split(",") if m]) * \
         len([r for r in args.regions.split(",") if r])
 
+    label = "T-24" if args.at == "t24" else "closing (kickoff-1h)"
     print(f"seasons {seasons[0]}-{seasons[-1]}   {len(games):,} games   "
-          f"{len(by_slot)} distinct T-24 hours")
+          f"{len(by_slot)} distinct {label} hours")
     print(f"markets {args.markets}  regions {args.regions}  "
           f"-> {per_call} credits per snapshot (historical bills 10x)")
     print(f"already on disk {len(done)}   remaining {len(todo)}   "
@@ -253,7 +278,7 @@ def main():
     if not todo:
         print("\nnothing to fetch - every slot already on disk.")
         # Still write it: this is the path a repair run takes.
-        write_index(by_slot, seasons, args.markets, args.regions)
+        write_index(by_slot, seasons, args.markets, args.regions, at=args.at)
         print(f"refreshed {os.path.relpath(INDEX, ROOT)}")
         return 0
 
@@ -286,7 +311,7 @@ def main():
                     "http_status": 200, "source": "football_historical",
                     "read_utc": iso(datetime.now(timezone.utc))})
 
-    write_index(by_slot, seasons, args.markets, args.regions)
+    write_index(by_slot, seasons, args.markets, args.regions, at=args.at)
 
     print(f"\nfetched {len(todo)} snapshots, ~{spent:,} credits, "
           f"{rem} remaining")

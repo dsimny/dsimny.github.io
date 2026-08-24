@@ -137,6 +137,39 @@ LOUD FAILURE. Three layers, because they catch different things:
 NOT DONE, deliberately: a missed day stays missed. No board is ever backfilled
 for a day the pipeline skipped — the banner IS how a missed day is communicated.
 
+## Football fb-v0.2 — the price hypothesis (drafted 2026-08-24, NOT FROZEN)
+
+fb-v0.1 is closed: the market-blind model lost to the de-vigged consensus 9/9
+(`docs/FOOTBALL_RESULT_T24.md`). Do not reopen it by adding features.
+
+fb-v0.2 asks a DIFFERENT question — not "can we out-forecast the market" but
+"is the BEST available price at T-24 better than the market's own closing fair
+value, after vig and execution constraints". Spec: `docs/FOOTBALL_PREREG_V02.md`.
+
+READ THAT FILE BEFORE TOUCHING ANY OF THIS. Three things in it are easy to get
+wrong and expensive to get wrong late:
+
+- **CLV is NOT the gate.** Shopping for the best price posts positive CLV almost
+  by construction (an extreme compared against a central tendency). The gate is
+  EXPECTED VALUE against the de-vigged CLOSING consensus, with a random-side null
+  arm running beside the live arm to prove the machinery, not the edge.
+- **The book tiers are pre-declared** and partition all 23 observed books with
+  none left over. Only Tier 1 (US-regulated) may satisfy a gate; Tier 2
+  (offshore) is always reported and never gates. Re-cutting the book set after
+  seeing results is the obvious way to overfit this and is ruled out in advance.
+- **The holdout lock covers v0.2 as of 2026-08-24.** `asof.py` used to hardcode
+  `PREREG = docs/FOOTBALL_PREREG.md`, which already reads `frozen: 2026-08-20` —
+  so the 2025 holdout stood unlocked for a spec still being written, with nothing
+  erroring to say so. It now carries a `SPECS` registry and refuses
+  `claim_holdout()` while ANY spec on disk reads `frozen: NOT YET`, for every
+  purpose. Adding a future spec means adding it to `asof.SPECS`; a spec the
+  registry does not know about is a spec the lock does not check.
+
+BLOCKED ON A PURCHASE: the holdout is the 2025 season and there are no 2025
+prices on disk (the purchased window ends 2025-02-08, the end of the 2024
+season). ~3,600 credits. The paid tier is live with ~89,287 remaining and the
+allowance does not carry over.
+
 ## The offseason (season_state.json, added 2026-08-24)
 
 THE CLIFF. `fetch_data.py` filters the slate to `gameType == "R"`, so the board

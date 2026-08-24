@@ -26,9 +26,17 @@ Thursday night inform Sunday (result Thu ~23:30, Sunday's T-24 is Saturday) whil
 correctly refusing to let Sunday early inform Sunday late.
 
 HOLDOUT LOCK. 2025 is the one-shot holdout. This module refuses to hand it out
-while docs/FOOTBALL_PREREG.md still says `frozen: NOT YET`. The lock lives in
-code rather than in discipline because the whole value of a holdout is that it
-cannot be peeked at, and "I'll remember not to" is not a mechanism.
+while ANY pre-registration in `SPECS` that exists on disk still says
+`frozen: NOT YET`. The lock lives in code rather than in discipline because the
+whole value of a holdout is that it cannot be peeked at, and "I'll remember not
+to" is not a mechanism.
+
+Widened 2026-08-24, from one hardcoded path to the SPECS registry. The single
+path was correct while one spec existed and silently stopped being correct when
+fb-v0.2 was drafted: v0.1's file already reads `frozen: 2026-08-20`, so the
+holdout was unlocked for a question whose methodology was still being written.
+Nothing errored — the guard just quietly stopped covering the thing it guarded,
+which is the most dangerous way for a safety check to fail.
 
 Run: python scripts/football/asof.py     (self-test on the real data)
 """
@@ -40,6 +48,27 @@ FB = os.path.join(ROOT, "data", "football")
 GAMES = os.path.join(FB, "games.csv")
 AVAIL = os.path.join(FB, "column_availability.json")
 PREREG = os.path.join(ROOT, "docs", "FOOTBALL_PREREG.md")
+
+# Every pre-registration that governs this holdout, newest last. PREREG above is
+# kept as the v0.1 name so existing callers of frozen_date() are unaffected.
+#
+# WHY A REGISTRY AND NOT ONE PATH. The original lock read exactly one file, which
+# was correct while exactly one spec existed. It stopped being correct the moment
+# fb-v0.2 was drafted: v0.1's file already reads `frozen: 2026-08-20`, so
+# frozen_date() returned a date and the holdout was unlocked for a v0.2 question
+# whose methodology was still being written. That is precisely the hole a holdout
+# lock exists to close, and it had opened silently — nothing errored, nothing
+# warned, the guard simply stopped covering the thing being guarded.
+#
+# A spec that does not exist on disk is not a gate. A spec that exists and says
+# NOT YET locks the holdout for EVERY purpose, not just its own: an unfrozen spec
+# in the repo means the methodology is still moving, and spending a one-shot test
+# while anything is still moving is the failure mode, whatever the stated reason.
+SPECS = [
+    {"name": "fb-v0.1", "path": PREREG},
+    {"name": "fb-v0.2", "path": os.path.join(ROOT, "docs", "FOOTBALL_PREREG_V02.md")},
+]
+SPEC_NAMES = [s["name"] for s in SPECS]
 
 BURN_IN = (2010, 2014)
 DEV = (2015, 2024)
@@ -63,17 +92,40 @@ def parse_utc(s):
 
 # --- the holdout lock -------------------------------------------------------
 
-def frozen_date():
-    """The `frozen:` value from the pre-registration, or None if not frozen."""
-    if not os.path.exists(PREREG):
+def frozen_date(path=PREREG):
+    """The `frozen:` value from a pre-registration, or None if not frozen.
+
+    Defaults to the v0.1 spec so every existing caller behaves exactly as before.
+    """
+    if not os.path.exists(path):
         return None
-    with io.open(PREREG, encoding="utf-8") as f:
+    with io.open(path, encoding="utf-8") as f:
         for line in f:
             m = re.match(r"^frozen:\s*(.+?)\s*$", line)
             if m:
                 v = m.group(1).strip()
                 return None if v.upper().startswith("NOT") else v
     return None
+
+
+def spec_status():
+    """[(name, relpath, frozen_date_or_None, exists)] for every known spec."""
+    out = []
+    for s in SPECS:
+        exists = os.path.exists(s["path"])
+        out.append((s["name"], os.path.relpath(s["path"], ROOT),
+                    frozen_date(s["path"]) if exists else None, exists))
+    return out
+
+
+def unfrozen_specs():
+    """Specs that EXIST on disk but are not frozen. Empty list means clear.
+
+    A missing spec is not counted: v0.3 does not lock anything until somebody
+    writes it down. An existing one that reads NOT YET does.
+    """
+    return [(name, rel) for name, rel, frozen, exists in spec_status()
+            if exists and frozen is None]
 
 
 HOLDOUT_LEDGER = os.path.join(FB, "holdout_evaluations.json")
@@ -89,7 +141,7 @@ def holdout_evaluations():
         return json.load(f)["evaluations"]
 
 
-def claim_holdout(purpose, note=""):
+def claim_holdout(purpose, note="", spec=None):
     """Burn the single permitted holdout evaluation. Irreversible.
 
     Freezing the pre-registration unlocks the holdout, which would otherwise
@@ -107,6 +159,27 @@ def claim_holdout(purpose, note=""):
         raise HoldoutLocked(
             "cannot claim the holdout while the pre-registration reads "
             "`frozen: NOT YET`. Freeze and commit the methodology first.")
+
+    # EVERY known spec must be frozen, not just v0.1's. See the SPECS comment.
+    pending = unfrozen_specs()
+    if pending:
+        listing = "\n".join(f"  - {name}: {rel} reads `frozen: NOT YET`"
+                            for name, rel in pending)
+        raise HoldoutLocked(
+            f"cannot claim the {HOLDOUT} holdout: a pre-registration governing "
+            f"this holdout is still unfrozen.\n{listing}\n"
+            "An unfrozen spec in the repo means the methodology is still moving, "
+            "and the holdout is a ONE-SHOT test. Spending it now would measure a "
+            "method that can still be changed afterwards, which is what a holdout "
+            "is supposed to make impossible.\n"
+            "Freeze and commit that file first, THEN claim - exactly once.")
+
+    if spec is not None and spec not in SPEC_NAMES:
+        raise HoldoutLocked(
+            f"unknown spec {spec!r}. Known specs: {', '.join(SPEC_NAMES)}. "
+            "Add it to asof.SPECS so its freeze state is actually checked, "
+            "rather than passing a name nothing verifies.")
+
     prior = holdout_evaluations()
     if prior:
         p = prior[0]
@@ -129,6 +202,14 @@ def claim_holdout(purpose, note=""):
     entry = {
         "claimed_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "season": HOLDOUT, "purpose": purpose, "note": note,
+        "spec": spec,
+        # The freeze date of EVERY spec at the moment of the claim, not just the
+        # one named. If a later reader has to judge whether this evaluation was
+        # honest, the question is what the whole methodology looked like when it
+        # was spent - and that has to be recorded here, because the files
+        # themselves can be edited afterwards and this ledger cannot.
+        "specs_frozen": {name: frozen for name, _rel, frozen, exists in spec_status()
+                         if exists},
         "prereg_frozen": frozen_date(), "methodology_commit": sha,
     }
     os.makedirs(os.path.dirname(HOLDOUT_LEDGER), exist_ok=True)

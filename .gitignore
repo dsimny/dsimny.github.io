@@ -5,3 +5,21 @@ venv/
 # backtest.py's point-in-time snapshot cache — derived, re-fetchable, and would
 # otherwise be swept into CI's `git add data/`. Not part of the public ledger.
 data/backtest/
+
+# Local secrets (ODDS_API_KEY and friends). NEVER commit a key. This repo is
+# public and serves GitHub Pages from it, so an accidental `git add .` here is
+# a published credential, not a private mistake.
+.env.local
+.env
+
+# Football working data that must not land in a public repo. Both were already
+# excluded on the football branch; main needs them too, because CI's commit step
+# is `git add data/` and these directories sit under data/. Without these rules a
+# single local commit on main publishes them.
+#   - odds/hist/  : PAID historical snapshots from The Odds API. Redistributing a
+#                   paid feed is not ours to do, and it is ~357 files.
+#   - raw/pbp/    : ~300MB of nflverse play-by-play. Cached, re-fetchable, and
+#                   detectable via data/football/pbp_manifest.json if rebuilt
+#                   upstream, which is the failure that would actually matter.
+data/football/odds/hist/
+data/football/raw/pbp/

@@ -1,6 +1,8 @@
 # Football — pre-registration, fb-v0.2 (the price hypothesis)
 
-STATUS: **NOT FROZEN.** `frozen: NOT YET`
+STATUS: **FROZEN 2026-08-24.** Every threshold, book tier, filter and gate below
+was chosen before any of them was scored. From here, changes ship as fb-v0.3 with
+a new clean test season -- never as an edit in place.
 
 This document is the methodology for a NEW question, written before that
 question has been scored. fb-v0.1 is closed and is not reopened here: its
@@ -10,16 +12,19 @@ Nothing below tries to make that model better. Adding an injury feed or weather
 to a model that trails a 15-book consensus by 0.025 log loss is the sunk-cost
 reflex the v0.1 priority order exists to prevent, and it is still prevented.
 
-WHAT MUST HAPPEN BEFORE THIS IS FROZEN. Two things, in this order, and the
-freeze stamp is dishonest without both:
+BOTH FREEZE CONDITIONS WERE MET BEFORE THE STAMP.
 
-1. **Buy the 2025-season historical odds** (section 11). The holdout is the 2025
-   season and there are currently NO 2025 prices on disk — the purchased window
-   ends 2025-02-08, the end of the 2024 season. A price hypothesis with no
-   holdout prices has no holdout. This must happen while the paid tier is live.
-2. **Daniel reads and accepts sections 4, 5 and 10** — the hypothesis, the
-   tautology guard, and the gates. Section 5 in particular changes what counts
-   as a pass, and it should be argued with before it is frozen, not after.
+1. **2025-season historical odds purchased** 2026-08-24 — 123 snapshots, 3,690
+   credits, via the schedule-only holdout read described in section 9. Holdout
+   RESULTS were never loaded and the one-shot evaluation is unspent.
+2. **Daniel read and accepted sections 4, 5 and 10** and instructed the freeze
+   on 2026-08-24.
+
+WHAT HAS BEEN RUN AS OF THE FREEZE. Nothing in section 8. No side has been
+selected, no EV computed, no arm scored, on any season. The only price work that
+predates this stamp is the dispersion characterisation disclosed in section 0 and
+the book-set count in section 6, both recorded before the freeze precisely so
+they cannot be presented afterwards as findings.
 
 WHAT THE FREEZE DOES. The `frozen:` line at the bottom of THIS file gates the
 2025 holdout, and does so in code as of 2026-08-24.
@@ -34,7 +39,7 @@ nothing warned — the guard simply stopped covering the thing it guarded, which
 is the most dangerous way for a safety check to fail: it still looks present.
 
 `asof.py` now carries a `SPECS` registry and refuses `claim_holdout()` while ANY
-spec that exists on disk reads `frozen: NOT YET` — for every purpose, not just
+spec that exists on disk reads `frozen: 2026-08-24` — for every purpose, not just
 that spec's own. An unfrozen spec in the repo means the methodology is still
 moving, and spending a one-shot test while anything is still moving is the
 failure mode whatever the stated reason. Verified 2026-08-24: with this file
@@ -393,12 +398,58 @@ Live 2026 capture is unchanged from v0.1 section 11: ~155 credits/month, weekly
 cadence driven by each game's real kickoff minus 24h, never by a weekday
 assumption.
 
+## 11a. ERRATUM, 2026-08-24 — the purchased data cannot execute section 8 yet
+
+Found immediately after the freeze, before any arm was scored. Recorded here in
+full rather than quietly fixed, because an erratum a reader cannot see is worse
+than the mistake.
+
+**THE GAP.** Section 8 step 5 says to rebuild the de-vigged consensus "from the
+last pre-kickoff snapshot". The purchased snapshots sit on a T−24 grid — they
+were bought for fb-v0.1, whose question was entirely about the T−24 price — so
+for most games the latest available snapshot is nowhere near kickoff:
+
+| distance from last available snapshot to kickoff | share of 2022–24 games |
+|---|---|
+| within 6 h | 12.9% |
+| within 12 h | 12.9% |
+| within 24 h | 86.7% |
+| median | 17.0 h |
+
+So for ~87% of games there is no closing price in this dataset at all, and the
+EV gate — the ONLY gate, per section 5 — cannot be computed for them.
+
+**WHY THE 12.9% CANNOT SIMPLY BE SCORED INSTEAD.** Those are the games whose
+kickoff happens to coincide with some other game's T−24 hour, i.e. games in the
+busiest scheduling windows. Scoring only them would select on a schedule
+property correlated with market attention and liquidity, and would answer a
+different question than the one frozen above while looking like an answer to
+this one.
+
+**WHAT IS BEING DONE.** Buying one snapshot per distinct kickoff hour, floored
+to the hour at kickoff − 1h (the closest a snapshot can sit to a close without
+risking an in-play price): 462 new slots across 2022–2025, 13,860 credits.
+
+**WHAT IS NOT CHANGING.** No hypothesis, no gate, no threshold, no book tier, no
+staleness window, no minimum-book count, no decision tree. Section 8 already
+specified a closing consensus; this purchase makes that instruction executable
+rather than altering it. Had it changed any of them after the freeze, the honest
+remedy would have been fb-v0.3 with a new test season, and that is still the
+remedy for any change that touches the method itself.
+
+**WHOSE MISTAKE.** The sequencing error was mine: the snapshot-to-kickoff
+distance was checkable from the 2022–24 files at any point before either the
+2025 purchase or the freeze, and checking it after both meant the 2025 pull went
+out without its closing half and the freeze stamp went on a spec that could not
+yet be run. The corrected purchase covers 2025 as well, so the holdout is not
+left short.
+
 ## 12. Version history
 
 | version | date (2026) | change |
 |---|---|---|
-| fb-v0.2 | Aug 24 | pre-registration drafted. Hypothesis, tautology guard, book tiers, staleness rule and gates declared. Prior dispersion look disclosed in section 0. Nothing scored, holdout never loaded, `frozen: NOT YET` pending the 2025 odds purchase. |
+| fb-v0.2 | Aug 24 | pre-registration drafted. Hypothesis, tautology guard, book tiers, staleness rule and gates declared. Prior dispersion look disclosed in section 0. Nothing scored, holdout never loaded, `frozen: 2026-08-24` pending the 2025 odds purchase. |
 | fb-v0.2 | Aug 24 | 2025-season odds purchased (123 snapshots, 3,690 credits) via a new schedule-only read that reaches the holdout season's KICKOFF TIMES without claiming the holdout — the alternative was burning the one-shot evaluation on a calendar lookup. Holdout results still locked and still unspent. Purchase revealed the book set is not stable across the window (23 books -> 11; Tier 1 15 -> 6); `fanatics` classified into Tier 1 and the consequences pre-committed in section 6, before the freeze. |
 | fb-v0.2 | Aug 24 | holdout lock widened from one hardcoded path to the `asof.SPECS` registry, restoring the freeze gate this document had silently lost. Claim now refused while ANY existing spec reads NOT YET; ledger records the claiming spec and every spec's freeze date. Verified against the refusal AND success paths, the latter against a redirected temp ledger so the real holdout stayed unspent. |
 
-frozen: NOT YET
+frozen: 2026-08-24

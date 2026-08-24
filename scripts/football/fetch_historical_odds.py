@@ -67,7 +67,11 @@ def iso(dt):
 
 def slots(seasons):
     """Distinct hours in which some game sat at T-24, ascending."""
-    games = asof.load_games(seasons=seasons, purpose="historical odds pull")
+    # schedule_only: this job needs kickoff hours and game ids, nothing else.
+    # It is also what lets the HOLDOUT season be priced without burning the
+    # one-shot evaluation on a calendar lookup. See asof.assert_season_allowed.
+    games = asof.load_games(seasons=seasons, purpose="historical odds pull",
+                            schedule_only=True)
     out = {}
     for g in games:
         t = g["_t24"].replace(minute=0, second=0, microsecond=0)

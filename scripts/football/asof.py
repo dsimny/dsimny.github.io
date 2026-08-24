@@ -226,14 +226,35 @@ def claim_holdout(purpose, note="", spec=None):
     return entry
 
 
-def assert_season_allowed(season, purpose="fit"):
-    """Refuse the holdout unless frozen AND claimed in this process."""
+def assert_season_allowed(season, purpose="fit", schedule_only=False):
+    """Refuse the holdout unless frozen AND claimed in this process.
+
+    ONE NARROW EXCEPTION: schedule_only. A holdout protects RESULTS and anything
+    derived from them. Kickoff times are not that — the NFL publishes the
+    schedule months before a snap is played, so "which hour was this game 24
+    hours from kickoff" is knowable, and known, long in advance. Reading it
+    reveals nothing about who won and cannot influence a fit.
+
+    This exists because without it the holdout could not be USED at all. Buying
+    the 2025 T-24 prices requires knowing which hours to ask for, and the only
+    other route was claim_holdout() — which would burn the single permitted
+    evaluation to fetch a schedule, before any methodology was frozen. Trading
+    the one-shot test for a calendar is a far worse outcome than this exception.
+
+    The exception is kept honest by SCHEDULE_COLUMNS in load_games(): the rows
+    returned contain scheduling fields ONLY, on an allowlist, so nothing here
+    hands back a score even if a caller asks for one. It also does NOT set
+    _HOLDOUT_CLAIMED, so a schedule read can never be a step toward a quiet
+    result read later in the same process.
+    """
     season = int(season)
     if season <= DEV[1]:
         return
     if season >= LIVE:
         return                                  # live season is forward-only
     if season != HOLDOUT:
+        return
+    if schedule_only:
         return
     if frozen_date() is None:
         raise HoldoutLocked(
@@ -261,11 +282,38 @@ def load_availability():
         return json.load(f)["columns"]
 
 
-def load_games(seasons=None, played_only=True, purpose="fit"):
-    """Games as dicts, kickoff/T-24 parsed. Enforces the holdout lock."""
+# Columns a SCHEDULE-ONLY read may return. Everything else is dropped, including
+# columns that look harmless: this is an allowlist, not a blocklist, so a new
+# nflverse column arrives excluded rather than silently exposed.
+#
+# The test each one passes: was this published before kickoff, and does it say
+# nothing about how the game went? Scores, `result`, `total` and `overtime` are
+# outcomes. `temp` and `wind` are game-time observations. The two
+# `*_available_at_utc` stamps describe when results landed. QBs, coaches and
+# referees are excluded not because they leak but because a T-24 odds pull does
+# not need them, and the narrowest allowlist that does the job is the one worth
+# defending.
+SCHEDULE_COLUMNS = frozenset({
+    "game_id", "season", "game_type", "week", "gameday", "weekday", "gametime",
+    "away_team", "home_team", "location", "stadium", "stadium_id", "roof",
+    "surface", "div_game", "kickoff_utc", "t_minus_24_utc",
+})
+
+
+def load_games(seasons=None, played_only=True, purpose="fit", schedule_only=False):
+    """Games as dicts, kickoff/T-24 parsed. Enforces the holdout lock.
+
+    schedule_only=True returns SCHEDULE_COLUMNS and nothing else, and is the only
+    way to touch the holdout season without burning the one-shot evaluation. See
+    assert_season_allowed() for why that is sound rather than a loophole.
+    """
+    if schedule_only:
+        # Whether a game has a score is itself a result, so the played filter is
+        # not available in this mode. A T-24 pull wants every scheduled game.
+        played_only = False
     if seasons is not None:
         for s in seasons:
-            assert_season_allowed(s, purpose=purpose)
+            assert_season_allowed(s, purpose=purpose, schedule_only=schedule_only)
     rows = []
     with io.open(GAMES, encoding="utf-8") as f:
         for r in csv.DictReader(f):
@@ -273,12 +321,22 @@ def load_games(seasons=None, played_only=True, purpose="fit"):
             if seasons is not None and s not in seasons:
                 continue
             if seasons is None:
-                assert_season_allowed(s, purpose=purpose)
+                assert_season_allowed(s, purpose=purpose, schedule_only=schedule_only)
             if played_only and not r["home_score"]:
                 continue
             if not r["kickoff_utc"]:
                 # No kickoff time means no T-24, so there is no honest decision
                 # moment. Skipped rather than assumed (1999 only; none in range).
+                continue
+            if schedule_only:
+                # Drop to the allowlist BEFORE deriving anything, so no result
+                # field is ever present on the row a caller receives.
+                r = {k: v for k, v in r.items() if k in SCHEDULE_COLUMNS}
+                r["_season"] = s
+                r["_t24"] = parse_utc(r["t_minus_24_utc"])
+                r["_kickoff"] = parse_utc(r["kickoff_utc"])
+                r["_schedule_only"] = True
+                rows.append(r)
                 continue
             r["_season"] = s
             r["_t24"] = parse_utc(r["t_minus_24_utc"])

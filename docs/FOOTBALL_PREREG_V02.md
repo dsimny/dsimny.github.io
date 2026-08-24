@@ -213,7 +213,7 @@ this hypothesis, so the sets are fixed here and both are always reported.
 - **Tier 1 — US-regulated (PRIMARY, and the only tier a gate may be met on):**
   `draftkings`, `fanduel`, `betmgm`, `williamhill_us`, `betrivers`, `superbook`,
   `pointsbetus`, `twinspires`, `barstool`, `wynnbet`, `sugarhouse`, `unibet_us`,
-  `circasports`, `foxbet`, `betfair`.
+  `circasports`, `foxbet`, `betfair`, `fanatics`.
 - **Tier 2 — offshore and other (REPORTED, never a gate):** `betonlineag`,
   `lowvig`, `betus`, `mybookieag`, `bovada`, `gtbets`, `intertops`, `unibet`.
 
@@ -224,6 +224,47 @@ carry a large share of the observed dispersion. An edge that exists only in Tier
 act on it, limits are unknown, and House Rule 5's legal footer sits awkwardly
 beside a recommendation to use an unregulated book. If the edge lives only
 there, that is the finding, and it gets published as that.
+
+**THE BOOK SET IS NOT STABLE ACROSS THE VALIDATION WINDOW, and this was found
+before the freeze rather than during scoring.** The 2025 odds were purchased
+2026-08-24 and the book landscape had consolidated hard:
+
+| | 2022–2024 | 2025 |
+|---|---|---|
+| distinct books quoting | 23 | 11 |
+| of which Tier 1 | 15 | 6 |
+
+`fanatics` is new in 2025 (1,640 quotes) and is added to Tier 1 above — it is a
+US-regulated book. Thirteen books present in 2022–2024 do not quote in 2025 at
+all: `barstool`, `betfair`, `circasports`, `foxbet`, `gtbets`, `intertops`,
+`pointsbetus`, `sugarhouse`, `superbook`, `twinspires`, `unibet`, `unibet_us`,
+`wynnbet`. That is real-world consolidation, not a data fault — several of those
+brands were acquired or withdrew from the US market in that window.
+
+WHY THIS MATTERS AND WHAT IT CHANGES. Best-of-N dispersion is mechanically a
+function of N. The section 0 measurement (+1.27 points) was taken across 23
+books; the holdout season offers 11, and only 6 in the tier that may satisfy a
+gate. A smaller edge in 2025 is therefore the EXPECTED result even if the market
+behaves identically, and it must not be read as the hypothesis failing to
+generalise across time when it may only be failing to generalise across N.
+
+Three consequences, all pre-committed here:
+
+1. **N is reported alongside every EV figure**, per season and per tier. An EV
+   number without its book count is not interpretable in this study.
+2. **The TUNE/VALIDATE seasons are additionally scored on a 6-book Tier-1
+   subset** — the books that survive into 2025 (`draftkings`, `fanduel`,
+   `betmgm`, `williamhill_us`, `betrivers`, plus `fanatics` where present) — so
+   there is a like-for-like comparison against the holdout instead of only a
+   23-book-vs-11-book one. This is a second reported arm, not a replacement:
+   the full-set numbers are still primary for TUNE and VALIDATE.
+3. **The section 6 minimum of 5 eligible books is now close to binding in 2025**
+   for Tier 1, which has 6. The share of sides excluded by that filter is
+   reported per season, and if it exceeds 25% the result reads "manual review"
+   under the existing House Rule 4 clause rather than "passed".
+
+Nothing above is a gate change. The gate is still Tier-1 EV against the
+de-vigged closing consensus, unchanged from section 10.
 
 **STALENESS RULE, pre-committed:** a book's quote is eligible only if its
 `last_update` is within **15 minutes** of the snapshot timestamp. A stale quote
@@ -357,6 +398,7 @@ assumption.
 | version | date (2026) | change |
 |---|---|---|
 | fb-v0.2 | Aug 24 | pre-registration drafted. Hypothesis, tautology guard, book tiers, staleness rule and gates declared. Prior dispersion look disclosed in section 0. Nothing scored, holdout never loaded, `frozen: NOT YET` pending the 2025 odds purchase. |
+| fb-v0.2 | Aug 24 | 2025-season odds purchased (123 snapshots, 3,690 credits) via a new schedule-only read that reaches the holdout season's KICKOFF TIMES without claiming the holdout — the alternative was burning the one-shot evaluation on a calendar lookup. Holdout results still locked and still unspent. Purchase revealed the book set is not stable across the window (23 books -> 11; Tier 1 15 -> 6); `fanatics` classified into Tier 1 and the consequences pre-committed in section 6, before the freeze. |
 | fb-v0.2 | Aug 24 | holdout lock widened from one hardcoded path to the `asof.SPECS` registry, restoring the freeze gate this document had silently lost. Claim now refused while ANY existing spec reads NOT YET; ledger records the claiming spec and every spec's freeze date. Verified against the refusal AND success paths, the latter against a redirected temp ledger so the real holdout stayed unspent. |
 
 frozen: NOT YET

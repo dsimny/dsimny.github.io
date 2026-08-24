@@ -119,6 +119,34 @@ def paths_for(root, kind, date):
     return base + ".json", base + ".enc"
 
 
+def latest_board_date(root, before=None):
+    """The most recent date with a board file, or None.
+
+    Used by the offseason path in build_site.py, which has to render the last
+    board of the season for months after it was played. Accepts either
+    extension for the same reason heartbeat.yml does: .enc while a board is
+    committed-but-unrevealed, .json once grading reveals it.
+
+    `before` is inclusive of everything strictly earlier, so a caller asking on
+    a dateless morning gets the last real board rather than nothing.
+    """
+    d = os.path.join(root, "data")
+    if not os.path.isdir(d):
+        return None
+    dates = set()
+    for name in os.listdir(d):
+        for ext in (".json", ".enc"):
+            if name.startswith("board_") and name.endswith(ext):
+                stamp = name[len("board_"):-len(ext)]
+                # Guard the slice: a stray data/board_notes.json must not become
+                # a date and silently win the max() below.
+                if len(stamp) == 10 and stamp[4] == "-" and stamp[7] == "-":
+                    dates.add(stamp)
+    if before:
+        dates = {s for s in dates if s < before}
+    return max(dates) if dates else None
+
+
 def save_dataset(root, kind, date, obj):
     """Write board/snapshot encrypted when a key is present, plaintext when not.
 

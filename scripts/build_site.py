@@ -12,6 +12,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import crypto_box
+import season
 
 ET = ZoneInfo("America/New_York")
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ET).strftime("%Y-%m-%d")
@@ -46,6 +47,36 @@ beehiiv_attribution = ('<script type="text/javascript" async src="https://subscr
                        if BEEHIIV_FORM_ID else "")
 
 B = crypto_box.load_dataset(ROOT, "board", DATE)
+
+# OFFSEASON. The regular season ends and fetch_data.py stops writing snapshots,
+# so from the next morning there is no board for today and never will be until
+# spring. Without this the build would hard-exit every day, failing the workflow
+# and firing the alert job daily for five months — the boy-who-cried-wolf
+# failure the 2026-08-17 review was written to prevent, arriving on a timer.
+#
+# What we do instead is deliberately NOT a new page: we fall back to the last
+# board of the season and reuse the archived-board machinery that already
+# exists. That path already de-emphasises the cards, renames the board tab to
+# its real date, routes every "today's" through TODAYS, and keeps the ledger
+# fully browsable (House Rule 7 — held plays are held, not hidden, and an
+# archived board stays readable). The ONLY thing it gets wrong out of the box is
+# the banner, which would announce that today's board "failed to publish". It
+# did not fail; the season ended. That sentence is the whole reason this block
+# exists, and House Rule 8 is why it could not be left alone.
+# OFFSEASON is read from the season state, NOT inferred from "was a board
+# missing". The two come apart in grade-ledger.yml, which rebuilds the site
+# every morning against the LATEST revealed board rather than against today —
+# so out of season it always finds a board, and an inferred flag would stay
+# false and let that nightly rebuild overwrite the season-complete page with
+# "today's board failed to publish" every single day.
+SEASON_STATE = season.read(ROOT)
+OFFSEASON = season.is_offseason(SEASON_STATE)
+if B is None and OFFSEASON:
+    last = crypto_box.latest_board_date(ROOT, before=DATE)
+    if last:
+        DATE = last
+        B = crypto_box.load_dataset(ROOT, "board", DATE)
+
 if B is None:
     raise SystemExit(f"No board for {DATE}. Run engine.py first.")
 COMMITMENT = crypto_box.commitment_for(ROOT, DATE)
@@ -98,7 +129,7 @@ BOARD_TAB_LABEL = "Today's Board" if not STALE else f"Board · {_date_obj:%b} {_
 def kicker(live_label):
     """The hero chip. When the board is stale it reads ARCHIVED instead of a
     call to action, at build time AND (via the data attributes) on page load."""
-    arch = f"ARCHIVED — {SHORT_DATE}"
+    arch = "SEASON COMPLETE" if OFFSEASON else f"ARCHIVED — {SHORT_DATE}"
     return (f'<span class="kicker" data-live-label="{live_label}" '
             f'data-archived-label="{arch}">{arch if STALE else live_label}</span>')
 
@@ -164,11 +195,33 @@ STALE_MSG_OVERDUE = (f"No board published today. {_STALE_TAIL} "
                      f"Today's board failed to publish; the ledger is unaffected.")
 STALE_MSG_PENDING = (f"Today's board isn't published yet — it posts each morning by about 11:15 AM ET. "
                      f"{_STALE_TAIL} The ledger is unaffected.")
+# The third wording. The other two both mean "something should have happened and
+# did not", which is why they both carry a do-not-bet warning and a ⚠️. This one
+# means "nothing was supposed to happen", so it says that plainly and drops the
+# alarm — but it keeps the price warning, because the board on the page really is
+# months old and its numbers really are dead.
+_agg = (ledger.get("aggregates") or {}) if isinstance(ledger, dict) else {}
+_final_record = _agg.get("record")
+_final_roi = _agg.get("roi_pct")
+_final_line = ""
+if _final_record:
+    _final_line = f"The season finished <strong>{_final_record}</strong>"
+    if isinstance(_final_roi, (int, float)):
+        _final_line += f" at {_final_roi:+.2f}% ROI"
+    _final_line += ", and the full record stays on the Ledger tab. "
+STALE_MSG_OFFSEASON = (
+    f"<strong>The season is complete.</strong> There are no games to board, so no board is "
+    f"published — this is the final board of the season, from <strong>{DATE}</strong>. "
+    f"{_final_line}"
+    f"Its prices are long closed — <strong>do not bet these prices.</strong> "
+    f"Picks resume when the next regular season starts.")
+
 stale_banner = f'''
-  <div class="stalebanner" id="stalebanner"{"" if STALE else " hidden"}
-       data-msg-overdue="{STALE_MSG_OVERDUE}" data-msg-pending="{STALE_MSG_PENDING}">
-    <span class="staleicon">⚠️</span>
-    <span class="stalemsg">{STALE_MSG_OVERDUE if OVERDUE else STALE_MSG_PENDING}</span>
+  <div class="stalebanner{' offseason' if OFFSEASON else ''}" id="stalebanner"{"" if STALE else " hidden"}
+       data-msg-overdue="{STALE_MSG_OVERDUE}" data-msg-pending="{STALE_MSG_PENDING}"
+       data-msg-offseason="{STALE_MSG_OFFSEASON}">
+    <span class="staleicon">{'🏁' if OFFSEASON else '⚠️'}</span>
+    <span class="stalemsg">{STALE_MSG_OFFSEASON if OFFSEASON else (STALE_MSG_OVERDUE if OVERDUE else STALE_MSG_PENDING)}</span>
   </div>'''
 
 # House Rule 8: say what the page ACTUALLY is, not what would be tidier.
@@ -869,6 +922,10 @@ html = f'''<!DOCTYPE html>
     border:1px solid var(--crit); border-left:5px solid var(--crit); border-radius:12px;
     background:rgba(208,59,59,0.10); color:var(--ink); font-size:0.92rem; line-height:1.5; }}
   .stalebanner[hidden] {{ display:none; }}
+  /* Offseason is not a fault, so it does not get the alarm palette. The red
+     banner means "something broke"; five months of red would teach visitors to
+     ignore the colour that has to still mean something in April. */
+  .stalebanner.offseason {{ background:rgba(120,130,150,0.12); border-color:rgba(120,130,150,0.35); }}
   .staleicon {{ font-size:1.15rem; line-height:1.3; flex:none; }}
   .stalemsg strong {{ color:var(--crit); }}
   /* Archived treatment: the picks are still fully readable — nothing is hidden —
@@ -941,7 +998,7 @@ html = f'''<!DOCTYPE html>
   footer.legal strong {{ color:var(--ink2); }}
 </style>
 </head>
-<body class="{'stale' if STALE else ''}" data-board-date="{DATE}" data-generated-utc="{GENERATED_UTC}" data-board-due-et="{BOARD_DUE_ET_MIN}">
+<body class="{'stale' if STALE else ''}" data-board-date="{DATE}" data-generated-utc="{GENERATED_UTC}" data-board-due-et="{BOARD_DUE_ET_MIN}" data-offseason="{'1' if OFFSEASON else ''}">
 <header class="site"><div class="wrap sitebar">
   <div class="wordmark"><img class="sitelogo" src="assets/logo.jpg" width="440" height="440" alt="">
     <div class="marktext"><span class="markname"><span class="open">OPEN LEDGER</span> SPORTS</span>
@@ -1103,8 +1160,14 @@ html = f'''<!DOCTYPE html>
     body.classList.toggle("stale", stale);
     el.hidden = !stale;
     if (stale) {{
-      el.querySelector(".stalemsg").innerHTML =
-        minsET >= dueET ? el.dataset.msgOverdue : el.dataset.msgPending;
+      // Offseason wins over the clock. The overdue wording ("today's board
+      // failed to publish") is false out of season no matter what time it is,
+      // and this guard is the layer that runs in the VISITOR's browser hours
+      // after the build — so without this check the page would talk itself back
+      // into the wrong sentence on every load.
+      el.querySelector(".stalemsg").innerHTML = body.dataset.offseason
+        ? el.dataset.msgOffseason
+        : (minsET >= dueET ? el.dataset.msgOverdue : el.dataset.msgPending);
     }}
     // Labels swap in BOTH directions: a page built stale that is somehow being
     // read on its own board date must not keep shouting ARCHIVED either.

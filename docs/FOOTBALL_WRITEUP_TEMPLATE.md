@@ -107,17 +107,25 @@ not, because no number says that.
 
 > **North Carolina @ TCU** — Saturday 12:00 ET
 >
-> Eleven books are pricing this. De-vigged consensus: TCU 73.1%, North Carolina
-> 26.9%.
+> Eleven books are pricing this, six of them regulated. De-vigged consensus:
+> TCU 73.1%, North Carolina 26.9%.
 >
-> Best available: North Carolina +265 at a regulated book, matched or within a
-> point at 4 of 6. Bovada shows +265 offshore; we do not price off books most
-> readers cannot use.
+> Best available: North Carolina +265 at BetRivers, matched or within a point at
+> 5 of 6 regulated books. Bovada shows the same +265 offshore, so pricing off
+> regulated books costs nothing here.
 >
 > Consensus overround is 4.64 points; at the best numbers it is 2.27. Shopping
 > this game halves what you pay to play it.
 
 Every figure above is on disk. No adjective survives that a number does not.
+
+A NOTE ON HOW THIS EXAMPLE WAS CORRECTED, because it is the failure mode the
+whole template exists to prevent. The first draft said "4 of 6" and implied the
+regulated price gave something up. Both were wrong: the real capture has 5 of 6
+regulated books at or within a point, and the best regulated price TIES the best
+offshore one. The draft numbers were plausible, specific, and produced without
+looking — which is exactly what section 1 bans. Check the data even when the
+sentence sounds right.
 
 ## 6. ZERO-ACTION POST — kept nearly intact
 

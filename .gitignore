@@ -18,4 +18,12 @@ data/football/raw/pbp/
 # API historical endpoint (at 30 credits each), and the derived comparison in
 # data/football/market_compare.json IS committed. They must not land in a repo
 # GitHub Pages serves, and morning-board.yml stages with a broad `git add data/`.
+# NOTE the distinction, because the two look alike and are not:
+#   hist/        IGNORED. The bulk historical pull -- 942 files bought from the
+#                paid 10x endpoint. Redistributing a paid feed from a public
+#                Pages repo is not ours to do. Backed up outside git.
+#   ncaaf_*.json / nfl_*.json  COMMITTED (not listed here). One live capture,
+#                1 credit each, and they are the EVIDENCE for every graded
+#                entry. A ledger whose prices cannot be re-checked is not an
+#                auditable ledger, and auditability is the product.
 data/football/odds/hist/

@@ -26,14 +26,17 @@ still encrypted.
 
 Run:  python scripts/blog.py [YYYY-MM-DD]       write today's post + all pages
       python scripts/blog.py --rebuild-only     re-render pages from the store
+      python scripts/blog.py --post FILE        publish a hand-written piece today
                                                 (adds nothing; any workflow may
                                                 run it at any hour)
 Idempotent by date: an existing item is never rewritten, so a second morning
 run re-renders identical pages and adds nothing.
 """
 import html as _html
+import io
 import json
 import os
+import re
 import sys
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -578,8 +581,58 @@ def render_all(store):
     print(f'Rendered {len(store["items"])} post page(s) + blog/index.html')
 
 
+def load_one_off(path):
+    """Read a hand-written post: metadata in HTML comments, body below.
+
+    THE FORMAT is deliberately a valid HTML file rather than JSON or front
+    matter, so a draft can be opened in a browser and read exactly as it will
+    publish:
+
+        <!-- title: We built a football model. It doesn't beat the market. -->
+        <!-- teaser: Two independent tests, both negative, published in full. -->
+        <p>...</p>
+
+    WHY THIS EXISTS. blog.py had two paths: a slate post on game days and the
+    evergreen rotation on off days. Neither can publish a specific piece on a
+    specific day. Appending an announcement to blog_evergreen.POSTS would work
+    mechanically and surface it on some arbitrary future off day, which is the
+    wrong behaviour for anything time-sensitive.
+
+    FAILS LOUD on a missing title or teaser rather than substituting a default.
+    A post published with a placeholder headline is worse than a post that did
+    not publish, because the first is public before anyone notices.
+    """
+    with io.open(path, encoding="utf-8") as f:
+        text = f.read()
+    meta, body = {}, []
+    for line in text.splitlines():
+        m = re.match(r"\s*<!--\s*(title|teaser)\s*:\s*(.+?)\s*-->\s*$", line)
+        if m and m.group(1) not in meta:
+            meta[m.group(1)] = m.group(2)
+        else:
+            body.append(line)
+    missing = [k for k in ("title", "teaser") if not meta.get(k)]
+    if missing:
+        raise SystemExit(
+            f"{path}: missing {', '.join(missing)}. Add them as HTML comments at "
+            "the top, e.g. <!-- title: ... -->. Refusing to publish with a "
+            "placeholder.")
+    html_body = "\n".join(body).strip()
+    if not html_body:
+        raise SystemExit(f"{path}: no body below the metadata comments.")
+    return meta["title"], meta["teaser"], html_body
+
+
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    argv = sys.argv[1:]
+    one_off = None
+    if "--post" in argv:
+        i = argv.index("--post")
+        if i + 1 >= len(argv):
+            raise SystemExit("--post needs a file path")
+        one_off = argv[i + 1]
+        argv = argv[:i] + argv[i + 2:]
+    args = [a for a in argv if not a.startswith("--")]
     rebuild_only = "--rebuild-only" in sys.argv
     date = args[0] if args else datetime.now(ET).strftime("%Y-%m-%d")
 
@@ -587,7 +640,14 @@ def main():
 
     if not rebuild_only and not any(it["date"] == date for it in store["items"]):
         B = crypto_box.load_dataset(ROOT, "board", date)
-        if B is not None and (B.get("board") or B.get("scratches")):
+        if one_off:
+            # A named piece outranks both automatic paths for this date. The
+            # slate post is not lost - it simply does not run, and the board it
+            # would have described is still published on the site itself.
+            title, teaser, body = load_one_off(one_off)
+            kind = "feature"
+            pub = f"{date}T15:10:00Z"
+        elif B is not None and (B.get("board") or B.get("scratches")):
             title, teaser, body = build_slate_article(date, B)
             kind = "slate"
             pub = B.get("generated_utc") or f"{date}T15:10:00Z"

@@ -88,6 +88,45 @@ NCAA FBS is included on the same terms, and the 5-book floor is what keeps the
 Saturday slate honest — thin-market games are named and skipped rather than
 written up on two quotes.
 
+## 3a. Season type — capture preseason, NEVER grade it
+
+`FOOTBALL_PREREG_V02.md`'s predecessor settled this for the model and it carries
+over to the product unchanged: **preseason tests the PIPELINE and nothing else.**
+Preseason is a different population, not a smaller sample of the same one.
+Playing time is a coaching decision, the market prices exactly that variable, and
+we do not observe it — so a preseason result is uninformative by construction.
+
+The failure this prevents is specific and quiet. ESPN's NFL scoreboard returns
+preseason games alongside regular-season ones, and nothing in the capture path
+distinguishes them. Wire NFL grading without this filter and preseason entries
+book into the football ledger looking exactly like real ones. House Rule 1 makes
+that ledger permanent, which is precisely why nothing uninformative may enter it.
+
+**ALLOWLIST, NOT BLOCKLIST.** The gradeable set is named positively:
+
+- ESPN `event["season"]["type"] == 2` (`slug: "regular-season"`) — GRADEABLE.
+- Everything else — preseason, all-star, anything unrecognised — is REFUSED.
+
+Verified 2026-08-25 against the live endpoint: the 2026-09-10 NFL opener returns
+`{'year': 2026, 'type': 2, 'slug': 'regular-season'}`. An allowlist is used
+because a blocklist on `type == 1` would silently grade any NEW type value ESPN
+introduces, and the direction of that error is a corrupted permanent ledger.
+Postseason (`type 3`) is deliberately NOT in the allowlist yet: it needs its own
+decision about whether a neutral-site, layoff-affected market is the same product,
+and that decision has not been made.
+
+**CAPTURE preseason anyway, and label it.** A preseason capture is a free
+rehearsal of the whole capture path against real games and real prices — exactly
+what the pre-registration says preseason is for. `capture_schedule.py` and
+`fetch_odds.py` therefore do NOT filter by season type; only grading does. The
+split is: capture everything, grade only what is informative.
+
+WHERE THIS IS ENFORCED. `grade_football.py` refuses any game whose season type is
+not on the allowlist, by the same "recorded, never silently dropped" rule as the
+rest of section 3 — the audit line reads NOT REGULAR SEASON. It is unimplemented
+while grading is NCAAF-only; it must land in the same change that wires NFL
+grading, and before the 2026-09-09 opener.
+
 ## 4. THE SELECTION RULE (precommitted)
 
 Ranked in this order, computed only from layer 1:

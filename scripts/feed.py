@@ -163,7 +163,12 @@ def _write_xml(root, items, site_url):
          "pubDate": it["pubDate"], "html": it["html"]}
         for it in items
     ] + [
-        {"date": it["date"], "sort": (it["date"], 1), "title": f'The Morning Line: {it["title"]}',
+        {"date": it["date"], "sort": (it["date"], 1),
+         # Only the daily slate column carries the Morning Line name. A feature
+         # post is not an edition of it and must not be filed as one.
+         "title": (f'The Morning Line: {it["title"]}'
+                   if it.get("kind", "slate") in ("slate", "evergreen")
+                   else it["title"]),
          "link": f'{site}/blog/{it["date"]}.html', "guid": f'olsb-{it["date"]}',
          "pubDate": it["pubDate"],
          "html": (f'<p>{_html.escape(it["teaser"])}</p>'

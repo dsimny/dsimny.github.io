@@ -532,8 +532,23 @@ def page_shell(title_tag, active, inner):
 </html>'''
 
 
+# What each post kind calls itself. A MAPPING rather than an if/else chain so a
+# kind added later cannot silently inherit another kind's label -- which is
+# exactly what happened to the first feature post, published under "The Morning
+# Line · Off-day desk" because the old expression treated everything that was
+# not a slate post as off-day filler.
+KICKERS = {
+    "slate": "The Morning Line",
+    "evergreen": "The Morning Line · Off-day desk",
+    "feature": "Open Ledger Sports · Feature",
+}
+# The Morning Line is the DAILY SLATE column. Only those kinds carry its name,
+# in the post kicker and in the feed title alike.
+MORNING_LINE_KINDS = ("slate", "evergreen")
+
+
 def render_post_page(item):
-    kicker = "The Morning Line" if item["kind"] == "slate" else "The Morning Line · Off-day desk"
+    kicker = KICKERS.get(item.get("kind"), "Open Ledger Sports")
     inner = (f'<article>'
              f'<span class="kicker">{kicker}</span>'
              f'<span class="postdate">{nice_date(item["date"])}</span>'
@@ -550,7 +565,7 @@ def render_index(items):
     cards = "".join(
         f'<a class="idxcard" href="{it["date"]}.html">'
         f'<span class="d">{nice_date(it["date"])}'
-        f'{" · off-day desk" if it["kind"] == "evergreen" else ""}</span>'
+        f'{" · off-day desk" if it["kind"] == "evergreen" else (" · feature" if it.get("kind") == "feature" else "")}</span>'
         f'<span class="t">{_html.escape(it["title"])}</span>'
         f'<span class="z">{_html.escape(it["teaser"])}</span></a>'
         for it in sorted(items, key=lambda i: i["date"], reverse=True))

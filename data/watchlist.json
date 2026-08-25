@@ -2127,14 +2127,110 @@
    "actual_total": 8,
    "result": "WIN",
    "pnl": 0.935
+  },
+  {
+   "date": "2026-08-24",
+   "gamePk": 823828,
+   "game": "BOS @ MIA",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 7 (+105, Bovada)",
+   "price": 105,
+   "book": "Bovada",
+   "model_p": 0.54,
+   "edge": 0.0522,
+   "divergence": 0.0595,
+   "actual_total": 6,
+   "result": "WIN",
+   "pnl": 1.05
+  },
+  {
+   "date": "2026-08-24",
+   "gamePk": 822695,
+   "game": "COL @ WSH",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8 (-110, LowVig.ag)",
+   "price": -110,
+   "book": "LowVig.ag",
+   "model_p": 0.5928,
+   "edge": 0.069,
+   "divergence": 0.083,
+   "actual_total": 16,
+   "result": "WIN",
+   "pnl": 0.909
+  },
+  {
+   "date": "2026-08-24",
+   "gamePk": 824557,
+   "game": "TEX @ CWS",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.5297,
+   "edge": 0.0247,
+   "divergence": 0.0405,
+   "actual_total": 13,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-24",
+   "gamePk": 824557,
+   "game": "TEX @ CWS",
+   "market": "moneyline",
+   "tag": "edge-band",
+   "pick": "Chicago White Sox ML (-126, FanDuel)",
+   "price": -126,
+   "book": "FanDuel",
+   "model_p": 0.5726,
+   "edge": 0.015,
+   "divergence": 0.0379,
+   "final_score": "11-2",
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-24",
+   "gamePk": 823260,
+   "game": "PIT @ SD",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (+100, Bovada)",
+   "price": 100,
+   "book": "Bovada",
+   "model_p": 0.522,
+   "edge": 0.022,
+   "divergence": 0.0328,
+   "actual_total": 5,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-24",
+   "gamePk": 823097,
+   "game": "PHI @ SEA",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 6.5 (-115, BetRivers)",
+   "price": -115,
+   "book": "BetRivers",
+   "model_p": 0.5637,
+   "edge": 0.0288,
+   "divergence": 0.0355,
+   "actual_total": 11,
+   "result": "WIN",
+   "pnl": 0.87
   }
  ],
  "aggregates": {
-  "record": "70-60-3p",
-  "n_graded": 133,
-  "win_pct": 53.8,
-  "paper_units_net": 0.891,
-  "paper_roi_pct": 0.69,
+  "record": "73-63-3p",
+  "n_graded": 139,
+  "win_pct": 53.7,
+  "paper_units_net": 0.72,
+  "paper_roi_pct": 0.53,
   "by_tag": {
    "R8-hold": {
     "record": "12-2",
@@ -2144,37 +2240,37 @@
     "paper_roi_pct": 26.85
    },
    "edge-band": {
-    "record": "5-6",
-    "n_graded": 11,
-    "win_pct": 45.5,
-    "paper_units_net": -1.016,
-    "paper_roi_pct": -9.24
+    "record": "5-7",
+    "n_graded": 12,
+    "win_pct": 41.7,
+    "paper_units_net": -2.016,
+    "paper_roi_pct": -16.8
    },
    "market-proving": {
-    "record": "53-52-3p",
-    "n_graded": 108,
-    "win_pct": 50.5,
-    "paper_units_net": -1.852,
-    "paper_roi_pct": -1.76
+    "record": "56-54-3p",
+    "n_graded": 113,
+    "win_pct": 50.9,
+    "paper_units_net": -1.023,
+    "paper_roi_pct": -0.93
    }
   },
   "by_market": {
    "moneyline": {
-    "record": "17-8",
-    "n_graded": 25,
-    "win_pct": 68.0,
-    "paper_units_net": 2.743,
-    "paper_roi_pct": 10.97
+    "record": "17-9",
+    "n_graded": 26,
+    "win_pct": 65.4,
+    "paper_units_net": 1.743,
+    "paper_roi_pct": 6.7
    },
    "total": {
-    "record": "53-52-3p",
-    "n_graded": 108,
-    "win_pct": 50.5,
-    "paper_units_net": -1.852,
-    "paper_roi_pct": -1.76
+    "record": "56-54-3p",
+    "n_graded": 113,
+    "win_pct": 50.9,
+    "paper_units_net": -1.023,
+    "paper_roi_pct": -0.93
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-08-23"
+  "last_graded": "2026-08-24"
  }
 }

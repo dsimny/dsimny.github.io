@@ -54,10 +54,31 @@ In MLB the markers are model-derived (edge gates, circuit breakers). Football ha
 no model edge, so football markers are about COVERAGE QUALITY, not value. A game
 is covered when, at its T−24 capture:
 
-- at least **5 eligible books** quote the moneyline, and
+- at least **5 eligible books** quote the moneyline — ANY tier, see below, and
 - every quote used is within **15 minutes** of the snapshot (staleness filter,
   carried over from `FOOTBALL_PREREG_V02.md` section 6), and
-- the game has a resolvable kickoff time and both teams resolve to known ids.
+- the game has a resolvable kickoff time and both teams resolve to known ids, and
+- the recommended price is available at a **Tier-1 (US-regulated) book**,
+  corroborated by at least 2 Tier-1 books (section 4 step 2).
+
+**MEASUREMENT AND ACTION HAVE DIFFERENT BOOK REQUIREMENTS, and conflating them
+was a real defect caught before launch.** They are different jobs:
+
+- The **de-vigged consensus** is a MEASUREMENT of where the market sits. More
+  books make it more accurate, and an offshore book's price is perfectly good
+  market information. So consensus is built from every eligible book, any tier.
+- The **recommended price** is an ACTION. It has to be a number a reader can
+  actually take. `FOOTBALL_PREREG_V02.md` section 6 already barred Tier 2 from
+  satisfying a gate for exactly this reason, and the first live run picked
+  `bovada` — a price most of the audience cannot use, sitting next to House
+  Rule 5's legal footer.
+
+Restricting BOTH to Tier 1 would have been the obvious fix and the wrong one:
+only six Tier-1 books quote football at all, so a 5-book Tier-1 floor cuts NCAAF
+coverage from 42 games to 27 and makes NFL coverage depend on all five available
+books quoting every game. Measured on the first live captures, splitting the
+requirement keeps **42 of 42 NCAAF and 16 of 16 NFL** covered games while
+guaranteeing every recommendation is takeable and corroborated.
 
 A game failing any of these is listed as **NO MARKET**, never silently dropped.
 Section 6's rule applies: if the share excluded exceeds 25% in a week, the page
@@ -85,9 +106,11 @@ OVERROUND at best prices:
 This is the toll you pay to play that game at the best numbers available. Rank
 games ascending. Lowest = tightest market = cleanest play.
 
-**Step 2 — corroboration guard.** Discard any game whose chosen side's best
-price is offered by fewer than **2 books** at or within 1 implied-probability
-point of it.
+**Step 2 — corroboration guard, Tier 1 only.** The best price considered is the
+best price at a **Tier-1 book**. Discard any game whose chosen side's best
+Tier-1 price is offered by fewer than **2 Tier-1 books** at or within 1
+implied-probability point of it. Offshore prices inform the consensus and may be
+mentioned in the writeup as market colour; they are never the recommendation.
 
 This guard exists because of a measured failure, and the reason is recorded so
 nobody removes it later as noise: fb-v0.2's rule selected the single largest

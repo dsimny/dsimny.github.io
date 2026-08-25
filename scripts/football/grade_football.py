@@ -49,6 +49,7 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import espn_ncaaf                                   # noqa: E402
+from price_test import TIER1, TIER2                 # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 FB = os.path.join(ROOT, "data", "football")
@@ -136,8 +137,17 @@ def fair(q, a, b):
     return None if tot <= 0 else {a: ia / tot, b: ib / tot, "_ovr": tot - 1.0}
 
 
-def best(q, team):
-    ps = [(v[team], bk) for bk, v in q.items() if team in v]
+def best(q, team, tier1_only=True):
+    """Best price for a side.
+
+    tier1_only because measurement and action need different book sets: the
+    consensus wants breadth and an offshore price is fine market information,
+    but a RECOMMENDATION has to be a number the reader can actually take. The
+    first live capture picked bovada, which most of the audience cannot use.
+    See docs/FOOTBALL_PIPELINE.md section 3.
+    """
+    ps = [(v[team], bk) for bk, v in q.items()
+          if team in v and (not tier1_only or bk in TIER1)]
     if not ps:
         return None
     price, book = max(ps, key=lambda x: x[0])
@@ -210,9 +220,19 @@ def build(sport, snaps, results):
         if not f24 or not fcl:
             skipped.append((r["away"], r["home"], "NO MARKET (consensus not computable)"))
             continue
+        # Consensus already used every eligible book; the price must be Tier 1.
         ba, bh = best(q24, r["away"]), best(q24, r["home"])
         if not ba or not bh:
-            skipped.append((r["away"], r["home"], "NO MARKET (no best price)"))
+            skipped.append((r["away"], r["home"],
+                            "NO TAKEABLE PRICE (no Tier-1 book quoting)"))
+            continue
+        unclassified = sorted({b for b in q24 if b not in TIER1 and b not in TIER2})
+        if unclassified:
+            # Fail loud: an unknown book is neither takeable nor known-offshore,
+            # and guessing which would be exactly the wrong instinct.
+            skipped.append((r["away"], r["home"],
+                            f"UNCLASSIFIED BOOK(S) {unclassified} - add them to a "
+                            f"tier in price_test.py before this game can be graded"))
             continue
 
         # section 4 step 1

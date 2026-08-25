@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>We built a football model. It doesn&#x27;t beat the market. — Open Ledger Sports</title>
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="shortcut icon" href="../favicon.ico">
+<style>
+  :root { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --surface2:#222220;
+    --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --ring:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926; --good:#0ca30c; --crit:#d03b3b; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--page); color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.6; }
+  a { color:var(--s1); }
+  .wrap { max-width:780px; margin:0 auto; padding:0 20px; }
+  header.site { position:sticky; top:0; z-index:10; background:rgba(13,13,13,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--grid); }
+  .sitebar { display:flex; align-items:center; gap:14px; padding:12px 0; flex-wrap:wrap; }
+  .sitelogo { width:38px; height:38px; border-radius:50%; }
+  .markname { font-weight:800; letter-spacing:0.04em; font-size:0.98rem; }
+  .markname .open { color:var(--s1); }
+  .marksub { display:block; font-weight:500; font-size:0.6rem; letter-spacing:0.14em; color:var(--muted); text-transform:uppercase; }
+  .navlinks { margin-left:auto; display:flex; gap:14px; font-size:0.84rem; }
+  .navlinks a { color:var(--ink2); text-decoration:none; padding:6px 10px; border-radius:8px; }
+  .navlinks a:hover { background:var(--surface2); }
+  .navlinks a.here { background:var(--surface2); color:var(--ink); font-weight:650; }
+  article { padding:26px 0 30px; }
+  .kicker { display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:5px 12px; border-radius:99px; margin-bottom:10px; }
+  .postdate { display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink2); margin-bottom:14px; }
+  h1 { font-size:1.55rem; line-height:1.2; letter-spacing:-0.01em; margin-bottom:14px; }
+  h2 { font-size:1.02rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted); margin:26px 0 10px; }
+  h3 { font-size:0.98rem; margin:20px 0 8px; }
+  p { color:var(--ink2); margin-bottom:12px; }
+  p strong, li strong { color:var(--ink); }
+  .lede { font-size:1.02rem; color:var(--ink2); }
+  .mut { font-size:0.82rem; color:var(--muted); }
+  ul { margin:0 0 12px 20px; color:var(--ink2); }
+  li { margin-bottom:7px; }
+  code { background:var(--surface2); border:1px solid var(--ring); border-radius:6px; padding:1px 6px; font-size:0.8em; }
+  .tablewrap { overflow-x:auto; margin-bottom:10px; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; background:var(--surface); border:1px solid var(--ring); border-radius:12px; overflow:hidden; }
+  th { text-align:left; font-size:0.64rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); padding:9px 10px; border-bottom:1px solid var(--grid); }
+  td { padding:8px 10px; border-bottom:1px solid var(--grid); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  td.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  td em { color:var(--muted); }
+  .backline { margin:20px 0; font-size:0.86rem; }
+  .idx { padding:26px 0 30px; }
+  .idxcard { display:block; background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:16px 18px; margin-bottom:12px; text-decoration:none; }
+  .idxcard:hover { border-color:var(--s1); }
+  .idxcard .d { font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+  .idxcard .t { display:block; color:var(--ink); font-weight:700; margin:4px 0 6px; font-size:1.02rem; }
+  .idxcard .z { display:block; color:var(--ink2); font-size:0.86rem; }
+  footer.legal { border-top:1px solid var(--grid); padding:22px 0 40px; margin-top:10px; }
+  footer.legal p { font-size:0.75rem; color:var(--muted); max-width:90ch; }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap sitebar">
+  <img class="sitelogo" src="../assets/logo.jpg" width="440" height="440" alt="">
+  <div><span class="markname"><span class="open">OPEN LEDGER</span> SPORTS</span>
+    <small class="marksub">The Morning Line · the daily blog</small></div>
+  <nav class="navlinks">
+    <a href="../">Today's Board</a>
+    <a href="../#ledger">The Ledger</a>
+    <a href="./" class="">Blog</a>
+    <a href="../odds/">Odds</a>
+  </nav>
+</div></header>
+<div class="wrap">
+<article><span class="kicker">The Morning Line · Off-day desk</span><span class="postdate">Wednesday, August 26, 2026</span><h1>We built a football model. It doesn&#x27;t beat the market.</h1><p>Baseball season is ending, so we spent the last stretch building a football
+model. It does not work. We are publishing the whole thing anyway, because a
+ledger that only shows the wins is not a ledger.</p>
+
+<p>Two tests. Both negative. Here is what happened.</p>
+
+<h3>Test one: can the model out-forecast the market?</h3>
+
+<p>We built a market-blind NFL model — Elo plus an opponent-adjusted efficiency
+ridge, fitted on 2010&ndash;2021, validated once on 2022&ndash;2024. Market-blind
+means it never saw a sportsbook number while it was being fitted. Then we bought
+three seasons of historical prices and asked one question: at the moment we could
+actually have bet, 24 hours before kickoff, does the model beat the market?</p>
+
+<p>No. On every market, in every season. Nine out of nine.</p>
+
+<p>On the moneyline across 852 games, the model scored 0.63434 in log loss. The
+market scored <strong>0.60908</strong>. Lower is better, so the market won by
+0.025 — roughly the distance between our model and a fifteen-book consensus that
+has priced injuries, weather, line movement and everything else we never
+ingested.</p>
+
+<p>Losing head-to-head does not by itself prove a model is worthless. A weak
+model can still add something on top of a strong one. So we tested that too, and
+the model's contribution was statistically indistinguishable from zero on all
+three markets. That test was <em>in-sample</em>, which biases it in the model's
+favour. Even with a thumb on the scale, it added nothing.</p>
+
+<p>The model is not broken, incidentally. Against football baselines it is
+perfectly ordinary — it beats always-pick-the-home-team comfortably. It knows
+real things about football. The market already knows all of them, a day before
+kickoff, and more besides.</p>
+
+<h3>Test two: forget forecasting. Can we just get a better price?</h3>
+
+<p>That first result kills one idea, not every idea. Beating the market's opinion
+and beating the market's <em>price</em> are different problems. You do not need a
+better forecast to profit from a better number.</p>
+
+<p>And the numbers are genuinely different across books. Measuring 23 books over
+12,462 prices, the best available number beat the consensus median by
+<strong>1.27 percentage points</strong> of implied probability on average. Sixty
+percent of the time it cleared a full point. That is real dispersion, and it is
+free money if it clears the vig.</p>
+
+<p>So we pre-registered a second test before running it — hypothesis, filters,
+book list, and the exact bar it had to clear, all written down and frozen first —
+bought the closing prices we were missing, and ran it.</p>
+
+<p>It does not clear the vig. Expected value came out <strong>&minus;1.05%</strong>
+overall and <strong>&minus;2.64%</strong> in the season we had held back for
+validation.</p>
+
+<h3>Why we believe the number</h3>
+
+<p>This is the part that convinced us, and it is arithmetic anyone can check.</p>
+
+<p>The measured overround on these markets — the house's cut — is
+<strong>4.26 points</strong>, or about 2.13 per side. Shopping for the best price
+recovers 1.27 of that. Which leaves roughly 0.9 points of vig still being paid.
+Measured expected value: &minus;1.05%.</p>
+
+<p><strong>The result is the vig.</strong> Line shopping recovers about half of
+it and no more. Not a mysterious edge that failed to appear — a toll, measured,
+that we did not fully escape.</p>
+
+<p>One more check mattered. We ran a control arm alongside the real one: same
+pipeline, side chosen by a coin flip. It won 49.3% of the time against a
+predicted 49.7%. If our price maths were broken, that is where it would have
+shown up first and loudest. It held.</p>
+
+<h3>What we got wrong</h3>
+
+<p>Our own pre-registration made a prediction that turned out backwards, and
+since we wrote it down in advance we are stuck reporting it.</p>
+
+<p>We expected closing line value to look <em>good</em> even while expected value
+looked bad — because shopping for the best of many books should beat a consensus
+almost automatically. It did not. CLV came out <strong>negative</strong>.</p>
+
+<p>The reason is worth knowing if you shop lines yourself. Our rule chose the side
+where one book disagreed most with everyone else. That book is usually not
+clever; it is slow. Its number drifts back toward consensus before kickoff. So
+hunting the biggest outlier means systematically buying the price most likely to
+move against you.</p>
+
+<p>We would not have found that without the control arm, and we would not have
+had to admit it without the pre-registration. Both earned their keep.</p>
+
+<h3>What football will actually be here</h3>
+
+<p>Not picks sold as an edge. We have now tested that claim twice, by two
+different mechanisms, and it failed twice.</p>
+
+<p>What we will publish is the full slate with real reasoning on every game that
+carries a real market — how many books are pricing it, where the consensus sits
+once the vig is stripped out, what the best available number is and who has it,
+and how much you are paying to play. Plus one play a week we would actually act
+on, chosen by a rule fixed in advance and published before kickoff.</p>
+
+<p>It is graded in public, win or lose, at zero units, in its own ledger. And it
+comes with no claim of positive expectation, because we do not have one and will
+not pretend otherwise. If that ever changes it will be because a new test with its
+own pre-registration says so, in public, before we sell anything on it.</p>
+
+<p>What we can honestly say is narrower and still useful: on that play, the toll
+to enter is about a quarter of what the raw consensus charges. That is execution,
+not prediction. It is what is left when you have measured everything else and been
+honest about the answer.</p>
+
+<h3>The point</h3>
+
+<p>Passing is a position. We say that on days when nothing on the board clears our
+gates. This time it applied to an entire sport, a model, and two months of work.</p>
+
+<p>Both write-ups are in the repository in full, with the code to reproduce them.
+Neither has a number in it we would not show you.</p><p class="backline"><a href="./">← All posts</a> · <a href="../">Today's board</a> · <a href="../feed.xml">Subscribe (RSS)</a></p></article>
+<footer class="legal"><p>Open Ledger Sports is an analytics publication, not a sportsbook. We accept no wagers. Nothing here is betting advice, and no outcome is guaranteed. 21+ only. If you or someone you know has a gambling problem, help is available: call or text 1-800-GAMBLER, or see the <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG's safer sports betting resources</a>.</p></footer>
+</div>
+</body>
+</html>

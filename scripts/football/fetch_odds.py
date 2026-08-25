@@ -49,6 +49,34 @@ API = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
 SPORT_KEYS = {
     "preseason": "americanfootball_nfl_preseason",
     "nfl": "americanfootball_nfl",
+    "ncaaf": "americanfootball_ncaaf",
+}
+
+# IDENTITY MODE PER SPORT, and the distinction is deliberate rather than lazy.
+#
+#   "canonical" — every team name is resolved through teams.py to a franchise
+#                 key, and an unresolvable name ABORTS the run. Correct for NFL,
+#                 where 32 franchises are derived from games.csv and a mismapped
+#                 team is a corrupted rating producing confident wrong numbers.
+#
+#   "verbatim"  — team names are stored EXACTLY as the API returned them, with
+#                 the API's own event id, and NO canonical key is claimed.
+#
+# NCAA FBS is verbatim because teams.py knows 32 NFL franchises and nothing
+# else: ~134 FBS programmes plus their FCS opponents would abort every call.
+# The honest options were to build an FBS registry (needs a results source we
+# have not chosen yet) or to admit we have no canonical identity for this sport
+# and record that fact in the snapshot. This is the second.
+#
+# It is safe for CAPTURE because the selection rule in docs/FOOTBALL_PIPELINE.md
+# works entirely off the odds payload -- best price, consensus, effective
+# overround -- and never needs a franchise key. It is NOT sufficient for
+# GRADING, which must join prices to results. Nothing may grade an NCAAF play
+# until that join exists; see the note in main().
+IDENTITY = {
+    "preseason": "canonical",
+    "nfl": "canonical",
+    "ncaaf": "verbatim",
 }
 
 
@@ -71,7 +99,7 @@ def record_credits(credits):
         print(f"NOTE: could not record odds credits: {exc}")
 
 
-def normalise(events, captured_utc, sport_key):
+def normalise(events, captured_utc, sport_key, identity="canonical"):
     """Odds API events -> our shape, with every book's price kept.
 
     We keep EVERY book rather than collapsing to a consensus here. De-vigging
@@ -81,12 +109,18 @@ def normalise(events, captured_utc, sport_key):
     """
     out, unmatched = [], set()
     for ev in events:
-        try:
-            away = from_name(ev["away_team"], source="odds-api")
-            home = from_name(ev["home_team"], source="odds-api")
-        except UnknownTeam as e:
-            unmatched.add(str(e))
-            continue
+        if identity == "verbatim":
+            # No canonical key is claimed. The raw strings and the API event id
+            # are what we have, and the snapshot says so, so nothing downstream
+            # can mistake these for resolved franchises.
+            away, home = ev["away_team"], ev["home_team"]
+        else:
+            try:
+                away = from_name(ev["away_team"], source="odds-api")
+                home = from_name(ev["home_team"], source="odds-api")
+            except UnknownTeam as e:
+                unmatched.add(str(e))
+                continue
         books = []
         for bk in ev.get("bookmakers", []):
             markets = {}
@@ -106,6 +140,8 @@ def normalise(events, captured_utc, sport_key):
             "commence_time": ev.get("commence_time"),
             "away": away,
             "home": home,
+            "away_raw": ev["away_team"],
+            "home_raw": ev["home_team"],
             "books": books,
             "n_books": len(books),
         })
@@ -115,18 +151,29 @@ def normalise(events, captured_utc, sport_key):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sport", default="preseason", choices=sorted(SPORT_KEYS))
-    ap.add_argument("--markets", default="h2h,spreads,totals")
+    # h2h ONLY by default, and this is a budget decision with a number behind
+    # it. Live odds bill markets x regions per call. The selection rule in
+    # docs/FOOTBALL_PIPELINE.md sections 3-4 uses the moneyline and nothing
+    # else, so h2h is sufficient. At three markets an NCAAF + NFL season of
+    # T-24 and closing captures runs ~620 credits/month, which does not fit
+    # the 500 free tier; at h2h it is ~208 and does. Spreads and totals are a
+    # narrative nicety that triples the bill - pass --markets explicitly if
+    # that trade is being made deliberately.
+    ap.add_argument("--markets", default="h2h")
     ap.add_argument("--regions", default="us")
     ap.add_argument("--dry-run", action="store_true",
                     help="show the call and its credit cost; spend nothing")
     args = ap.parse_args()
 
     sport_key = SPORT_KEYS[args.sport]
+    identity = IDENTITY[args.sport]
     n_markets = len([m for m in args.markets.split(",") if m.strip()])
     n_regions = len([r for r in args.regions.split(",") if r.strip()])
     cost = n_markets * n_regions
 
     print(f"sport   {sport_key}")
+    print(f"ident   {identity}" + ("  (no canonical team keys claimed for this sport)"
+                                  if identity == "verbatim" else ""))
     print(f"markets {args.markets}  regions {args.regions}")
     print(f"cost    {cost} credits ({n_markets} markets x {n_regions} regions)")
 
@@ -176,7 +223,7 @@ def main():
         print("ODDS FETCH FAILED: response was not JSON. Nothing written.")
         return 1
 
-    rows, unmatched = normalise(events, iso(stamp), sport_key)
+    rows, unmatched = normalise(events, iso(stamp), sport_key, identity)
 
     if unmatched:
         print(f"\nABORTING: {len(unmatched)} unmatched team name(s).")
@@ -198,6 +245,16 @@ def main():
                        "timestamp exists."),
         "captured_utc": iso(stamp),
         "sport_key": sport_key,
+        # Recorded in the snapshot, not just in the log, so a later reader can
+        # never assume `away`/`home` are franchise keys when they are raw API
+        # strings. Anything that grades off this file must check it.
+        "identity": identity,
+        "_identity_note": (
+            "canonical: away/home are teams.py franchise keys, verified, "
+            "unresolvable names aborted the run. "
+            "verbatim: away/home are the API's own strings and NO canonical key "
+            "is claimed - sufficient for price capture and the selection rule, "
+            "NOT sufficient for grading, which needs a results join."),
         "markets": args.markets,
         "regions": args.regions,
         "credits": credits,

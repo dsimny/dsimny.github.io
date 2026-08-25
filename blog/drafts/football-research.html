@@ -1,35 +1,6 @@
-# Blog post draft — the football research
+<!-- title: We built a football model. It doesn't beat the market. -->
+<!-- teaser: Two independent tests, both negative, published in full. What we spent, what we found, what we got wrong, and what football will actually be here. -->
 
-**Status: DRAFT, not published.** Body below is HTML in the same shape as
-`scripts/blog_evergreen.py` entries (`slug` / `title` / `teaser` / `body`), so it
-can drop straight into the blog machinery.
-
-**Publishing note.** `blog.py --post FILE` publishes a hand-written piece
-for today, outranking both automatic paths. The ready-to-publish copy of this
-post lives at `blog/drafts/football-research.html` — a valid HTML file with its
-title and teaser in comments, so it can be opened in a browser and read exactly
-as it will publish.
-
-To publish:
-
-    python scripts/blog.py --post blog/drafts/football-research.html
-
-That appends it to `data/blog_items.json` as kind `feature`, renders the post
-page and index, and regenerates `feed.xml` — the same path every other post
-takes. Publishing on a game day means the slate post does not run for that date;
-the board itself is unaffected and still on the site.
-
----
-
-- **slug:** `we-built-a-football-model-it-does-not-beat-the-market`
-- **title:** We built a football model. It doesn't beat the market.
-- **teaser:** Two independent tests, both negative, published in full. Here is
-  what we spent, what we found, what we got wrong, and what football will
-  actually be on this site.
-
----
-
-```html
 <p>Baseball season is ending, so we spent the last stretch building a football
 model. It does not work. We are publishing the whole thing anyway, because a
 ledger that only shows the wins is not a ledger.</p>
@@ -147,4 +118,3 @@ gates. This time it applied to an entire sport, a model, and two months of work.
 
 <p>Both write-ups are in the repository in full, with the code to reproduce them.
 Neither has a number in it we would not show you.</p>
-```

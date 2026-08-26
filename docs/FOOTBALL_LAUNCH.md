@@ -86,7 +86,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | C | **NFL grading DONE 2026-08-26** — `espn_nfl.py`, the season-type allowlist, `--sport nfl`, and `selftest_allowlist.py` | Beat the 2026-09-10 deadline. Two real bugs found and fixed on the way; see below. |
 | D | `data/football/football_ledger.json` does not exist | First entry is permanent under House Rule 1. Create it deliberately, not as a side effect of a test run. |
 | E | **Layer 2 BUILT 2026-08-26** — `writeup.py` + `selftest_writeup.py` | Claude via the Messages API, with the numeral validator enforced. Needs `ANTHROPIC_API_KEY` set before it can generate; the round-trip is unproven until then. |
-| F | No site surface: `build_site.py` is MLB-only, single-file | No football page, no football ledger view, no fp-v0.1 copy. |
+| F | **Site surface BUILT 2026-08-26** — `page.py` + `selftest_page.py` | `/football/` hub and `/football/<week>/`. Redacted before grading, full after. Still to wire: a link from the MLB home page and a rebuild step in CI. |
 | G | No football Discord delivery | `post_discord.py board` mode is MLB-shaped. |
 | H | Football workflows: **capture DONE** (`football-capture.yml`, 2026-08-26) — board and grade runs still missing | Capture is the half with the unrecoverable deadline. It is inert until pushed. |
 | I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
@@ -414,6 +414,49 @@ The options, none of them free:
 RECOMMENDATION: option 2. It matches how the captures actually arrive, keeps the
 NFL eligible, and still yields exactly one committed play. It needs a spec bump
 before it is real.
+
+### F — the site surface — BUILT 2026-08-26
+
+`scripts/football/page.py` writes `/football/` (the record, and every week) and
+`/football/<week>/` (one slate). `selftest_page.py` renders both states and
+asserts the redaction holds.
+
+**A FINDING THAT SHAPED THE WHOLE PAGE, and it was not in the plan.** The
+selection rule is public and deterministic: rank 1 is the lowest effective
+overround, and the side is the one furthest above de-vigged fair. Both are
+computed from exactly the fields a full-slate writeup prints. **Measured on the
+live capture: given the 32 covered games' data blocks, recomputing the rule
+reproduces rank 1 and its side exactly.** So publishing every covered game's
+numbers before kickoff does not hint at the premium play — it hands it over, and
+a paywall over that is theatre.
+
+This is the same failure `PLAN-paid-tier.md` names for the MLB engine ("the
+engine is public and deterministic... anyone can re-run it"), and it bites harder
+here because the football rule is arithmetic rather than a simulation.
+
+So the full slate IS the members' product — which is not a paywall bolted on,
+it is what fp-v0.1 section 5 already said members buy: timing and the full
+slate. Before grading the public page carries the free play in full, the
+coverage summary, the complete NO MARKET list with reasons, and the premium play
+as **matchup and kickoff only** (House Rule 7's redaction — no side, no price,
+no probability, and 0 units stated). After grading, the same URL reveals
+everything.
+
+The reveal is driven by the commitment log, not by a person deciding weekly.
+Withholding a pick before kickoff is the product; withholding it after is fraud,
+so that switch must not be a judgement call.
+
+The NO MARKET list is public in **both** states. It is the proof of no
+cherry-picking and it leaks nothing: a game we could not cover is a game we have
+no play on.
+
+TESTED: legal footer and the no-claim paragraph present in both states, all four
+barred phrases absent, and the redacted page proven not to contain the premium
+play's side, price, book, or either overround figure. One false alarm on the
+first run — the leak check matched `max-width:100%` in the stylesheet and
+reported the premium price as leaked. The test now strips CSS before checking,
+for the same reason the numeral validator exempts "one": a test that cries wolf
+gets loosened.
 
 ## 7. What this plan may NOT be used to justify
 

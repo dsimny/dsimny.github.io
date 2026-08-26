@@ -183,6 +183,48 @@ product IS, not about how it performed. It ships as a version bump with its
 reasoning and its measured consequence attached, which is the process House
 Rule 9 prescribes. After week 1 books its first entry, this door closes.
 
+**Step 0b — WHEN the play is chosen (fp-v0.3, decided 2026-08-26).**
+
+Each game is evaluated at ITS OWN T−24, so the week's full field never exists at
+one moment: a Sunday NFL game's T−24 lands Saturday, after most of the college
+slate has kicked off. **There is no instant at which every T−24 exists and no
+game has started.** That is arithmetic, not a defect, and it follows directly
+from step 0's single pool.
+
+THE RULE, in two parts:
+
+1. **COMMIT PER GAME, at its own T−24.** The first time a game becomes evaluable
+   its layer-1 block is fingerprinted and the hash published, append-only. That
+   evaluation is then frozen: a later capture never revises it. This is what
+   makes the eventual play a commitment rather than a running opinion.
+2. **CHOOSE PER WEEK, at a precommitted DECISION MOMENT D.** At D, rank every
+   game committed so far that has not kicked off, and assign premium and free
+   per step 4. One play per week, chosen once.
+
+**D = SATURDAY 14:00 US/EASTERN**, stated in Eastern rather than UTC because the
+rest of the project is (and because a UTC constant would silently shift the
+window by an hour when DST ends mid-season).
+
+THE CONSEQUENCE, stated because it is not obvious and it constrains the product.
+A game is eligible at D only if its T−24 has passed (kickoff − 24h ≤ D) and it
+has not started (kickoff > D). Those two conditions are one condition:
+
+    D < kickoff ≤ D + 24h
+
+**The eligible pool is always the next 24 hours of football, and choosing D is
+choosing which 24 hours.** Saturday 2pm ET was chosen because its window —
+Saturday 2pm ET through Sunday 2pm ET — is the one that genuinely spans both
+sports: the bulk of the college Saturday slate (afternoon and evening) plus the
+NFL's Sunday 1pm ET block, which is its largest. It is the window that makes
+step 0's combined pool mean something rather than quietly reverting to
+one-sport-per-week.
+
+WHAT IT EXCLUDES, and this is accepted rather than hidden: Saturday's noon-ET
+college games, and the NFL's 4pm ET, Sunday-night, Thursday and Monday games.
+Those still get full layer-2 coverage and still appear on the board; they are
+simply not eligible to BE the one committed play. A product that promised
+otherwise would have to publish a play after its own kickoff.
+
 **Step 1 — market quality.** For each covered game compute the EFFECTIVE
 OVERROUND at best prices:
 
@@ -285,3 +327,4 @@ precisely when the temptation peaks.
 |---|---|---|
 | fp-v0.1 | Aug 24 | Adopted. Three layers, coverage markers, the effective-overround selection rule with its corroboration guard, free/premium split under House Rules 2 and 7, own ledger at 0u. No expectation claim made. |
 | fp-v0.2 | Aug 26 | Section 4 step 0: ONE combined NFL + NCAA FBS slate, so one premium play a week rather than one per sport. Measured consequence recorded — college takes rank 1 most weeks on volume, not quality — along with the limit that no NCAA FBS price history exists to characterise it on. Decided before week 1 and before any football result existed; no rule was moved in response to a result. |
+| fp-v0.3 | Aug 26 | Section 4 step 0b: commit per game at its own T−24 (append-only, evaluation frozen), choose per week at a precommitted decision moment D = Saturday 14:00 US/Eastern. Closes the gap that fp-v0.2 opened — the week's full field never exists at one instant, so without a stated D the play could silently change after being committed. Records the consequence that the eligible pool is always `D < kickoff ≤ D+24h`, and names what that excludes. Still before week 1 and before any result. |

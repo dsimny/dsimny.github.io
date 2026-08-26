@@ -29,25 +29,32 @@ the market maths lives in market.py and knows no sport at all. Adding a league
 should be adding a row, not editing logic. See docs/FOOTBALL_LAUNCH.md s.9.
 
 ------------------------------------------------------------------------------
-OPEN POLICY QUESTION, deliberately NOT decided in code
+COMMIT PER GAME, CHOOSE PER WEEK (spec section 4 step 0b, fp-v0.3)
 ------------------------------------------------------------------------------
-WHEN is the week's play chosen? Each game is evaluated at ITS OWN T-24, so the
-week's full field does not exist at any single moment: a Sunday NFL game's T-24
-lands on Saturday, by which time most of Saturday's college slate has kicked
-off. There is NO instant at which every T-24 exists and no game has started.
+Each game is evaluated at ITS OWN T-24, so the week's full field never exists at
+one moment: a Sunday NFL game's T-24 lands Saturday, after most of the college
+slate has kicked off. There is NO instant at which every T-24 exists and no game
+has started. The rule that resolves it:
 
-So this script takes a DECISION MOMENT (--asof, default now) and ranks the games
-that, at that moment, both have a usable T-24 capture and have not yet kicked
-off. The moment is recorded in the board. Choosing the policy - a fixed weekly
-time, or the first run that reaches some field size - is a product decision like
-the pricing one, and it belongs in the spec before week 1 rather than in a
-default here. Until it is set, `--asof` makes the choice explicit and auditable
-rather than accidental.
+  1. COMMIT PER GAME. The first time a game becomes evaluable, its layer-1 block
+     is fingerprinted into game_commitments.json, append-only. That evaluation
+     is then FROZEN - a later capture never revises it. This is what makes the
+     eventual play a commitment rather than a running opinion.
+  2. CHOOSE PER WEEK at the DECISION MOMENT D = Saturday 14:00 US/Eastern.
+     At D, rank every game committed so far that has not kicked off.
+
+THE POOL IS ALWAYS THE NEXT 24 HOURS. A game is eligible at D only if its T-24
+has passed and it has not started, and those two conditions collapse to
+`D < kickoff <= D+24h`. Saturday 2pm ET is chosen because that window spans the
+college afternoon/evening slate AND the NFL's Sunday 1pm ET block - the one
+window where the combined pool means something. Everything outside it still gets
+full coverage on the board; it is simply not eligible to BE the committed play.
 
 Run:
   python scripts/football/board.py --dry-run
   python scripts/football/board.py --week 2026-09-01 --dry-run
-  python scripts/football/board.py                      # writes .enc + commitment
+  python scripts/football/board.py --commit-only    # freeze new T-24s, choose nothing
+  python scripts/football/board.py                  # commits, and selects once past D
 """
 import argparse
 import io
@@ -55,6 +62,7 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -65,6 +73,15 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 FB = os.path.join(ROOT, "data", "football")
 ODDS_DIR = os.path.join(FB, "odds")
 COMMITMENTS = os.path.join(FB, "commitments.json")
+GAME_COMMITMENTS = os.path.join(FB, "game_commitments.json")
+
+# Decision moment: Saturday 14:00 US/Eastern (spec s.4 step 0b).
+# EASTERN, NOT UTC, and not by accident: the rest of the project is Eastern, and
+# a UTC constant would silently shift the eligible window by an hour when DST
+# ends mid-season - moving which games can be the play, without anyone deciding.
+DECISION_TZ = "America/New_York"
+DECISION_WEEKDAY = 5      # Monday=0 ... Saturday=5
+DECISION_HOUR = 14
 
 # Per-sport config. Everything sport-specific lives here; nothing below reads a
 # sport name. `label` is what a member sees, so it is a name and not a key.
@@ -83,9 +100,94 @@ def board_paths(week):
             os.path.join(FB, f"board_{week}.enc"))
 
 
+def decision_moment(week):
+    """D for a slate week: the Saturday inside it, at 14:00 Eastern, as UTC.
+
+    The week is Tuesday-anchored, so its Saturday is Tuesday + 4 days.
+    """
+    tue = datetime.strptime(week, "%Y-%m-%d").date() + timedelta(days=4)
+    assert tue.weekday() == DECISION_WEEKDAY, f"{week} + 4d is not a Saturday"
+    local = datetime(tue.year, tue.month, tue.day, DECISION_HOUR,
+                     tzinfo=ZoneInfo(DECISION_TZ))
+    return local.astimezone(timezone.utc)
+
+
+def game_key(g):
+    """Identity of a game for commitment purposes. Kickoff is included because a
+    rescheduled game is a different market, not the same one moved."""
+    return f"{g['sport']}|{g['matchup']}|{g['kickoff_utc']}"
+
+
+def load_game_commitments():
+    if os.path.exists(GAME_COMMITMENTS):
+        with io.open(GAME_COMMITMENTS, encoding="utf-8") as f:
+            return json.load(f)
+    return {"_note": ("Per-game commitments, append-only (spec s.4 step 0b). "
+                      "Each game's layer-1 block is fingerprinted the first time "
+                      "it becomes evaluable at its own T-24, and NEVER revised - "
+                      "a later capture does not get to change an evaluation that "
+                      "has already been published. This is what makes the weekly "
+                      "play a commitment rather than a running opinion."),
+            "games": {}}
+
+
+def commit_games(covered, now, write=True):
+    """Freeze any newly-evaluable game. Returns (store, n_new).
+
+    APPEND-ONLY. A game already present keeps its original fingerprint and its
+    original layer-1 numbers; if a later capture would evaluate it differently,
+    the earlier commitment stands and the difference is recorded rather than
+    applied. Rewriting a published fingerprint is the one thing this file exists
+    to prevent.
+    """
+    store = load_game_commitments()
+    games, new = store["games"], 0
+    for g in covered:
+        k = game_key(g)
+        block = {kk: g[kk] for kk in sorted(g) if kk not in
+                 ("rank", "tier", "committed_utc", "commitment_sha", "restated")}
+        sha = crypto_box.sha256_of(block)
+        if k in games:
+            if games[k]["sha256"] != sha:
+                # Recorded, never applied. Seeing this means a later capture
+                # disagrees with the frozen evaluation - which is information,
+                # not licence to update.
+                games[k].setdefault("later_disagreements", [])
+                if sha not in games[k]["later_disagreements"]:
+                    games[k]["later_disagreements"].append(sha)
+            g["committed_utc"] = games[k]["committed_utc"]
+            g["commitment_sha"] = games[k]["sha256"]
+            g["restated"] = games[k]["sha256"] != sha
+            continue
+        games[k] = {"sha256": sha, "committed_utc": market.iso(now),
+                    "kickoff_utc": g["kickoff_utc"], "sport": g["sport"],
+                    "matchup": g["matchup"]}
+        g["committed_utc"] = games[k]["committed_utc"]
+        g["commitment_sha"] = sha
+        g["restated"] = False
+        new += 1
+    if write and new:
+        with io.open(GAME_COMMITMENTS, "w", encoding="utf-8") as f:
+            json.dump(store, f, indent=1, sort_keys=True)
+    return store, new
+
+
 def collect(sport, snaps, week, asof):
     """(covered, excluded) for one sport's games in one slate week."""
     covered, excluded = [], []
+
+    # A BOARD MAY NEVER READ A CAPTURE THAT HAS NOT HAPPENED YET. Without this
+    # the builder evaluates a Sunday game at the decision moment using Saturday
+    # night's capture, which is a look-ahead: it would publish an evaluation
+    # nobody could have made at the time, and the commitment would be a fiction.
+    # Caught by the self-test showing identical coverage three days before the
+    # decision moment and at it - the field should GROW as captures land.
+    #
+    # It is also what enforces the upper half of the eligible window. A game
+    # kicking off more than 24h after D has no capture at or before D that is
+    # within T-24 tolerance, so it cannot be covered at D - which is why the
+    # eligible set below needs only the `kickoff > D` half of the rule.
+    snaps = [s for s in snaps if s[0] <= asof]
     if not snaps:
         return covered, excluded
 
@@ -106,10 +208,10 @@ def collect(sport, snaps, week, asof):
             continue
         matchup = f"{away} @ {home}"
 
-        if kick <= asof:
-            excluded.append((sport, matchup, "already kicked off at the decision moment"))
-            continue
-
+        # NOTE: a game that has already kicked off is NOT excluded here. Under
+        # fp-v0.3 its evaluation is still committed at its own T-24 and it still
+        # gets layer-2 coverage; it is only barred from BEING the play, which is
+        # a selection concern and is applied in build().
         t24, _close = market.pick_snapshots(snaps, kick)
         if not t24:
             excluded.append((sport, matchup, "NO MARKET (no capture before kickoff)"))
@@ -145,7 +247,7 @@ def collect(sport, snaps, week, asof):
     return covered, excluded
 
 
-def build(sports, week, asof):
+def build(sports, week, asof, commit=True):
     covered, excluded = [], []
     for sport in sports:
         snaps = market.load_snapshots(sport, ODDS_DIR)
@@ -153,18 +255,35 @@ def build(sports, week, asof):
         covered += c
         excluded += e
 
-    # ONE pool, both sports (fp-v0.2).
+    # Step 0b part 1: freeze every newly-evaluable game at its own T-24.
+    _store, n_new = commit_games(covered, asof, write=commit)
+
+    # ONE pool, both sports (fp-v0.2), ranked for display regardless of
+    # eligibility - the whole covered slate is the product.
     ranked = market.rank(covered)
-    premium, free = market.assign(ranked)
     for i, g in enumerate(ranked, 1):
         g["rank"] = i
-        g["tier"] = "premium" if i == 1 else ("free" if i == 2 else "slate")
+        g["tier"] = "slate"
+
+    # Step 0b part 2: choose at D, from games committed and not yet kicked off.
+    D = decision_moment(week)
+    eligible = [g for g in ranked if market.parse_utc(g["kickoff_utc"]) > D]
+    premium = free = None
+    if asof >= D:
+        premium, free = market.assign(market.rank(eligible))
+        for g, tier in ((premium, "premium"), (free, "free")):
+            if g:
+                g["tier"] = tier
 
     total = len(covered) + len(excluded)
     share = (len(excluded) / total) if total else 0.0
     return {
         "slate_week": week,
-        "decision_moment_utc": market.iso(asof),
+        "decision_moment_utc": market.iso(D),
+        "decision_made": asof >= D,
+        "asof_utc": market.iso(asof),
+        "n_eligible_at_decision": len(eligible),
+        "n_newly_committed": n_new,
         "generated_utc": market.iso(market.now_utc()),
         "sports": list(sports),
         "n_covered": len(covered),
@@ -212,9 +331,18 @@ def record_commitment(week, board_sha, committed_utc):
 
 def render(b):
     out = []
-    out.append(f"slate week {b['slate_week']}   decision moment {b['decision_moment_utc']}")
+    out.append(f"slate week {b['slate_week']}   asof {b['asof_utc']}")
+    out.append(f"  decision moment D = {b['decision_moment_utc']} (Sat 14:00 ET) -> "
+               f"{'REACHED' if b['decision_made'] else 'NOT YET'}")
     out.append(f"  {b['n_covered']} covered | {b['n_excluded']} excluded "
                f"({b['excluded_share']*100:.1f}%) -> {b['coverage_status'].upper()}")
+    out.append(f"  {b['n_newly_committed']} newly committed at their T-24 | "
+               f"{b['n_eligible_at_decision']} eligible to be the play "
+               f"(kickoff after D)")
+    if not b["decision_made"]:
+        out.append("\n  No play chosen yet: the decision moment has not arrived. "
+                   "Games keep\n  committing at their own T-24 until it does.")
+        return "\n".join(out + _slate_tail(b))
     for tier, g in (("PREMIUM", b["premium"]), ("FREE", b["free"])):
         if not g:
             out.append(f"\n  {tier}: no qualifying game (House Rule 6 - passing is a position)")
@@ -230,6 +358,11 @@ def render(b):
             f" ({g['t24_hours_before_kickoff']}h out)"
             + (f"\n      offshore colour: {off['price']:+d} at {off['book']} (never the play)"
                if off else ""))
+    return "\n".join(out + _slate_tail(b))
+
+
+def _slate_tail(b):
+    out = []
     rest = [g for g in b["games"] if g["tier"] == "slate"]
     if rest:
         out.append(f"\n  rest of the covered slate ({len(rest)}), by market tightness:")
@@ -244,7 +377,7 @@ def render(b):
             out.append(f"    {nm['matchup']:<44} {nm['reason']}")
         if len(b["no_market"]) > 8:
             out.append(f"    ... and {len(b['no_market'])-8} more")
-    return "\n".join(out)
+    return out
 
 
 def main():
@@ -254,6 +387,8 @@ def main():
     ap.add_argument("--week", help="slate week (Tuesday, YYYY-MM-DD); default from --asof")
     ap.add_argument("--asof", help="decision moment, ISO UTC; default now")
     ap.add_argument("--dry-run", action="store_true", help="print, write nothing")
+    ap.add_argument("--commit-only", action="store_true",
+                    help="freeze newly-evaluable games at their T-24; never select")
     args = ap.parse_args()
 
     asof = market.parse_utc(args.asof) if args.asof else market.now_utc()
@@ -265,11 +400,21 @@ def main():
         if s not in SPORTS:
             raise SystemExit(f"unknown sport {s!r}; known: {sorted(SPORTS)}")
 
-    b = build(sports, week, asof)
+    b = build(sports, week, asof, commit=not args.dry_run)
     print(render(b))
 
     if args.dry_run:
         print("\n(--dry-run: nothing written, no commitment made)")
+        return 0
+    if b["n_newly_committed"]:
+        print(f"\nfroze {b['n_newly_committed']} game(s) at their T-24 in "
+              f"{os.path.relpath(GAME_COMMITMENTS, ROOT)}")
+    if args.commit_only:
+        print("(--commit-only: no selection made)")
+        return 0
+    if not b["decision_made"]:
+        print(f"\nDecision moment {b['decision_moment_utc']} not reached; "
+              f"no play selected. Nothing else to write.")
         return 0
     if not b["premium"]:
         print("\nNo qualifying game: nothing to commit. Passing is a position.")

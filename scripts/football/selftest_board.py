@@ -78,16 +78,24 @@ try:
     board.ODDS_DIR = odds
     print(f"fixture: {n_caps} captures (one per distinct kickoff, each at that game's T-24)\n")
 
-    moments = [("Wed, before anything kicks",  "2026-09-09T12:00:00Z"),
-               ("Sat morning",                 "2026-09-12T14:00:00Z"),
-               ("Sun 11:00Z, NFL Sunday T-24s in", "2026-09-13T11:00:00Z")]
+    D = board.decision_moment(WEEK)
+    print(f"decision moment D = {market.iso(D)} (Sat 14:00 ET)")
+    print()
+    moments = [("Wed - well before D",   D - timedelta(days=3)),
+               ("1h before D",           D - timedelta(hours=1)),
+               ("D exactly",             D),
+               ("6h after D",            D + timedelta(hours=6))]
     boards = []
-    for label, iso in moments:
-        b = board.build(["nfl", "ncaaf"], WEEK, market.parse_utc(iso))
+    for label, when in moments:
+        # commit=False: a self-test must never write to the real append-only
+        # per-game commitment store.
+        b = board.build(["nfl", "ncaaf"], WEEK, when, commit=False)
         boards.append((label, b))
         prem = b["premium"]
-        print(f"--- decision moment: {label} ({iso}) ---")
-        print(f"    {b['n_covered']} covered / {b['n_excluded']} excluded -> {b['coverage_status']}")
+        print(f"--- {label} ({market.iso(when)}) ---")
+        print(f"    {b['n_covered']} covered / {b['n_excluded']} excluded"
+              f" | {b['n_eligible_at_decision']} eligible"
+              f" | decision {'MADE' if b['decision_made'] else 'pending'}")
         if prem:
             print(f"    premium: {prem['league']:<9} {prem['matchup']:<34} "
                   f"eff {prem['eff_overround_pts']:.2f}  {prem['side']} {prem['best_price']:+d} "
@@ -100,9 +108,30 @@ try:
             print("    premium: none (no qualifying game)")
         print()
 
-    # ---- assertions on the richest board ----
-    b = max((x[1] for x in boards), key=lambda x: x["n_covered"])
     fails = []
+
+    # ---- fp-v0.3 step 0b: nothing is chosen before D, something is at D ----
+    for label, bb in boards:
+        made = bb["decision_made"]
+        should = market.parse_utc(bb["asof_utc"]) >= D
+        if made != should:
+            fails.append(f"{label}: decision_made={made}, expected {should}")
+        if not made and (bb["premium"] or bb["free"]):
+            fails.append(f"{label}: a play was chosen before the decision moment")
+        # Eligibility is exactly the next 24h of football.
+        for g in bb["games"]:
+            k = market.parse_utc(g["kickoff_utc"])
+            elig = D < k <= D + timedelta(hours=24)
+            if made and g["tier"] in ("premium", "free") and not elig:
+                fails.append(f"{label}: {g['matchup']} chosen but not in (D, D+24h]")
+
+    # ---- per-game commitments are issued and frozen ----
+    b = [bb for _, bb in boards if bb["decision_made"]][-1]
+    for g in b["games"]:
+        if not g.get("commitment_sha") or not g.get("committed_utc"):
+            fails.append(f"uncommitted game on the board: {g['matchup']}")
+        if g.get("restated"):
+            fails.append(f"a frozen evaluation was restated: {g['matchup']}")
 
     if not b["premium"]:
         fails.append("no premium play on the richest board")
@@ -129,7 +158,7 @@ try:
     # (2026-09-01, 90 games) unioned with the NFL week above - asserting the
     # ranking is SPORT-BLIND rather than that any given week has both.
     ncaaf_wk = board.build(["ncaaf"], "2026-09-01",
-                           market.parse_utc("2026-08-31T00:00:00Z"))
+                           board.decision_moment("2026-09-01"), commit=False)
     pooled = market.rank(b["games"] + ncaaf_wk["games"])
     sports_in = {g["sport"] for g in pooled}
     if len(sports_in) < 2:
@@ -183,7 +212,10 @@ try:
                "books_at_best", "fair_side", "offshore_best", "move_pts",
                "clv_pts", "sport", "league", "matchup", "away", "home",
                "kickoff_utc", "t24_capture", "t24_hours_before_kickoff",
-               "rank", "tier"}
+               "rank", "tier",
+               # fp-v0.3 commitment metadata. Board bookkeeping, not market
+               # numbers - layer 2 must not narrate these either.
+               "commitment_sha", "committed_utc", "restated"}
     extra = set(prem) - ALLOWED
     if extra:
         fails.append(f"board game carries unexpected fields: {sorted(extra)}")

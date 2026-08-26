@@ -31,12 +31,40 @@ name: Capture football lines
 # window. Trading credits we have for windows we cannot get back is the right
 # way round.
 #
-# ON GITHUB CRON, same reasoning as heartbeat.yml. The two objections that moved
-# the board run to external triggers were lateness and that a late run re-posted
-# the free pick. The second does not apply - this job posts nothing. The first is
-# handled by --eager plus an hourly cadence rather than by pretending it is not
-# real. Hourly external triggers would be ~720 cron-job.org firings a month to
-# configure; that is not a better trade.
+# TRIGGERING: EXTERNAL DISPATCH IS PRIMARY, GITHUB CRON IS THE BACKSTOP.
+#
+# This was originally shipped on GitHub cron alone, citing heartbeat.yml as
+# precedent. THAT WAS THE WRONG PRECEDENT and the error is recorded here rather
+# than quietly fixed, because the reasoning is the useful part. heartbeat is a
+# WATCHDOG: it asks once a day whether a board exists, and a watchdog that runs
+# late is still a watchdog. Both PRODUCTION jobs deliberately do not use GitHub
+# cron at all -
+#
+#     morning-board.yml    on: workflow_dispatch: {}   only
+#     capture-closing.yml  on: workflow_dispatch: {}   only
+#
+# - and morning-board says why in its own comment: GitHub's cron was removed
+# 2026-07-23 for firing hours late. Measured 2026-08-26, the picture is:
+#     heartbeat (schedule)      9/9 fired, consistently 15-23 min late
+#     morning-board (dispatch)  15:10:08, 15:10:08, 15:10:08 - to the second
+#     capture-closing (dispatch) 01:30:10, 22:30:10, 16:30:11
+#     THIS JOB (schedule)       registered, active, ZERO runs after 45 minutes
+#
+# --eager mitigates lateness. It cannot mitigate a run that never happens, and
+# this is the one job in the repo whose missed window is unrecoverable. So it
+# gets the mechanism the repo already trusts for work that must actually occur.
+#
+# ACTION REQUIRED IN DANIEL'S cron-job.org ACCOUNT (no code change - the
+# workflow_dispatch trigger below is already declared): add an HOURLY entry
+# hitting this workflow's dispatch endpoint, exactly like the existing
+# morning-board and capture-closing entries.
+#     POST https://api.github.com/repos/dsimny/dsimny.github.io/actions/
+#          workflows/football-capture.yml/dispatches      body {"ref":"main"}
+#
+# THE SCHEDULE BELOW STAYS as a second, independent trigger. Two triggers cannot
+# double-spend: the second run finds the window already satisfied by the first
+# and fires no call. For an unrecoverable job, redundancy at a cost of zero
+# credits is the right trade.
 #
 # A MISSING ODDS_API_KEY FAILS THIS RUN, on purpose, and this is a deliberate
 # departure from the MLB jobs where a missing key no-ops cleanly. There the cost

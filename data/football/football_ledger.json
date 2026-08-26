@@ -1,0 +1,6 @@
+{
+ "_note": "Football record, append-only (House Rule 1). ZERO UNITS throughout - pnl_per_unit is what one unit WOULD have returned, not money risked. Makes no expectation claim; see docs/FOOTBALL_PIPELINE.md section 1. Never mixed with ledger.json, daily_ledger.json, totals_ledger.json or watchlist.json.",
+ "entries": [],
+ "created_utc": "2026-08-26T13:25:43Z",
+ "_created_note": "Created deliberately and EMPTY on 2026-08-26, per docs/FOOTBALL_LAUNCH.md gap D - not as a side effect of a test run. Under House Rule 1 the first entry is permanent, so the file exists before anything can append to it by accident. An empty entries list means no football week has been graded yet; it does not mean a week was graded and produced nothing."
+}

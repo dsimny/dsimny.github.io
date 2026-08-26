@@ -1,0 +1,43 @@
+{
+ "_note": "Characterisation of the FIXED selection rule in docs/FOOTBALL_PIPELINE.md section 4. Not a gate. The rule does not change in response to these numbers.",
+ "seasons": [
+  2022,
+  2023,
+  2024
+ ],
+ "summaries": [
+  {
+   "tier": "premium",
+   "n": 65,
+   "record": "23-42",
+   "win_pct": 35.38461538461539,
+   "ev_pct": -1.1956561008464348,
+   "clv_pts": -0.4936467889927698,
+   "roi_pct": -11.692559899117276,
+   "mean_eff_overround_pts": 1.1074161970542962,
+   "mean_corroboration": 2.8153846153846156
+  },
+  {
+   "tier": "free",
+   "n": 62,
+   "record": "23-39",
+   "win_pct": 37.096774193548384,
+   "ev_pct": -0.46730845365744395,
+   "clv_pts": -0.2806533230368678,
+   "roi_pct": 2.883171048816546,
+   "mean_eff_overround_pts": 1.4662021999862476,
+   "mean_corroboration": 3.467741935483871
+  },
+  {
+   "tier": "all-cands",
+   "n": 632,
+   "record": "204-426-2p",
+   "win_pct": 32.38095238095238,
+   "ev_pct": -1.6864961675102441,
+   "clv_pts": -0.6708461088894784,
+   "roi_pct": -11.470421146830905,
+   "mean_eff_overround_pts": 2.009684968981613,
+   "mean_corroboration": 4.167721518987341
+  }
+ ]
+}

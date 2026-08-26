@@ -137,6 +137,39 @@ LOUD FAILURE. Three layers, because they catch different things:
 NOT DONE, deliberately: a missed day stays missed. No board is ever backfilled
 for a day the pipeline skipped — the banner IS how a missed day is communicated.
 
+## Football fb-v0.2 — the price hypothesis (drafted 2026-08-24, NOT FROZEN)
+
+fb-v0.1 is closed: the market-blind model lost to the de-vigged consensus 9/9
+(`docs/FOOTBALL_RESULT_T24.md`). Do not reopen it by adding features.
+
+fb-v0.2 asks a DIFFERENT question — not "can we out-forecast the market" but
+"is the BEST available price at T-24 better than the market's own closing fair
+value, after vig and execution constraints". Spec: `docs/FOOTBALL_PREREG_V02.md`.
+
+READ THAT FILE BEFORE TOUCHING ANY OF THIS. Three things in it are easy to get
+wrong and expensive to get wrong late:
+
+- **CLV is NOT the gate.** Shopping for the best price posts positive CLV almost
+  by construction (an extreme compared against a central tendency). The gate is
+  EXPECTED VALUE against the de-vigged CLOSING consensus, with a random-side null
+  arm running beside the live arm to prove the machinery, not the edge.
+- **The book tiers are pre-declared** and partition all 23 observed books with
+  none left over. Only Tier 1 (US-regulated) may satisfy a gate; Tier 2
+  (offshore) is always reported and never gates. Re-cutting the book set after
+  seeing results is the obvious way to overfit this and is ruled out in advance.
+- **The holdout lock covers v0.2 as of 2026-08-24.** `asof.py` used to hardcode
+  `PREREG = docs/FOOTBALL_PREREG.md`, which already reads `frozen: 2026-08-20` —
+  so the 2025 holdout stood unlocked for a spec still being written, with nothing
+  erroring to say so. It now carries a `SPECS` registry and refuses
+  `claim_holdout()` while ANY spec on disk reads `frozen: NOT YET`, for every
+  purpose. Adding a future spec means adding it to `asof.SPECS`; a spec the
+  registry does not know about is a spec the lock does not check.
+
+BLOCKED ON A PURCHASE: the holdout is the 2025 season and there are no 2025
+prices on disk (the purchased window ends 2025-02-08, the end of the 2024
+season). ~3,600 credits. The paid tier is live with ~89,287 remaining and the
+allowance does not carry over.
+
 ## The offseason (season_state.json, added 2026-08-24)
 
 THE CLIFF. `fetch_data.py` filters the slate to `gameType == "R"`, so the board
@@ -444,6 +477,25 @@ The site copy above is written to describe that truthfully rather than claim a
 no-stake behaviour the code does not have (House Rule 4/8). Whether a no-odds
 day should instead publish zero staked plays is a real product decision — it
 touches sizing, so per House Rule 9 it ships as a version bump, not a patch.
+
+TIER HISTORY — the rule fired once, and was reverted (2026-08-20).
+Upgraded free -> 100K ($59) under rule #2: the NFL football track needed spreads
+plus a one-time historical T-24 pull that no free allowance could cover. Spent
+10,713 credits (357 historical snapshots at 30 each, plus a probe and live
+preseason captures). The pull answered its question - the market beat the model
+on all three markets in all three seasons, see docs/FOOTBALL_RESULT_T24.md - so
+the football track was shelved and the account went straight back to FREE.
+
+Two things worth keeping from that episode. The rule worked exactly as written:
+a real product surface needed a market, the projected spend cleared 450, the
+upgrade happened for a stated reason and ended when the reason did. And ~89,000
+paid credits went unused, because a monthly allowance does not carry over - if a
+future upgrade happens for a one-time pull, do the pull and anything else worth
+pulling in the SAME billing period.
+
+MLB alone runs ~250/month against the free 500, so the free tier is correctly
+sized again. It has no room for a second market or extra capture runs, which is
+precisely what the rule below is for.
 
 DECISION RULE FOR UPGRADING TO THE PAID TIER: upgrade when any ONE of these is
 true, and not before —

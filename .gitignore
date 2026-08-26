@@ -16,10 +16,21 @@ data/backtest/
 # excluded on the football branch; main needs them too, because CI's commit step
 # is `git add data/` and these directories sit under data/. Without these rules a
 # single local commit on main publishes them.
-#   - odds/hist/  : PAID historical snapshots from The Odds API. Redistributing a
-#                   paid feed is not ours to do, and it is ~357 files.
-#   - raw/pbp/    : ~300MB of nflverse play-by-play. Cached, re-fetchable, and
-#                   detectable via data/football/pbp_manifest.json if rebuilt
-#                   upstream, which is the failure that would actually matter.
+#
+# NOTE the distinction below, because the two look alike and are not:
+#   data/football/odds/hist/   IGNORED. The bulk historical pull — PAID snapshots
+#                bought from The Odds API's historical endpoint. Redistributing a
+#                paid feed from a public Pages repo is not ours to do, and it is
+#                ~357 files / 71MB. Backed up outside git (see the SPORTS
+#                WAGERING hub); re-acquiring costs real money.
+#   data/football/odds/ncaaf_*.json, nfl_*.json   COMMITTED (not listed here).
+#                One live capture, 1 credit each, and they are the EVIDENCE for
+#                every graded entry. A ledger whose prices cannot be re-checked
+#                is not an auditable ledger, and auditability is the product.
+#   data/football/raw/pbp/     IGNORED. ~20MB/season, ~300MB of nflverse
+#                play-by-play. Re-fetchable from versioned release URLs, and the
+#                sha256 of each season IS committed in
+#                data/football/pbp_manifest.json — so an upstream rebuild, which
+#                is the failure that would actually matter, stays detectable.
 data/football/odds/hist/
 data/football/raw/pbp/

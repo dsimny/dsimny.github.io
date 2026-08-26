@@ -171,6 +171,36 @@
    "read_utc": "2026-08-24T16:30:25Z"
   },
   {
+   "remaining": 89229,
+   "used": 10771,
+   "last_call_cost": 30,
+   "markets": "h2h,spreads,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_historical",
+   "read_utc": "2026-08-24T18:14:22Z"
+  },
+  {
+   "remaining": 85569,
+   "used": 14431,
+   "last_call_cost": 30,
+   "markets": "h2h,spreads,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_historical",
+   "read_utc": "2026-08-24T18:17:20Z"
+  },
+  {
+   "remaining": 71709,
+   "used": 28291,
+   "last_call_cost": 30,
+   "markets": "h2h,spreads,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_historical",
+   "read_utc": "2026-08-24T18:44:52Z"
+  },
+  {
    "remaining": 71707,
    "used": 28293,
    "last_call_cost": 2,
@@ -189,6 +219,26 @@
    "http_status": 200,
    "source": "fetch_closing",
    "read_utc": "2026-08-25T01:35:23Z"
+  },
+  {
+   "remaining": 71704,
+   "used": 28296,
+   "last_call_cost": 1,
+   "markets": "h2h",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_fetch_odds:ncaaf",
+   "read_utc": "2026-08-25T03:08:33Z"
+  },
+  {
+   "remaining": 71703,
+   "used": 28297,
+   "last_call_cost": 1,
+   "markets": "h2h",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_fetch_odds:nfl",
+   "read_utc": "2026-08-25T03:08:47Z"
   },
   {
    "remaining": 71701,

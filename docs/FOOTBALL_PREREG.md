@@ -1,0 +1,301 @@
+# Football (NFL) — pre-registration, fb-v0.1
+
+STATUS: FROZEN 2026-08-20. Every threshold below was chosen before seeing a
+single football result, and the market-blind models were fitted and validated
+before this stamp. From here, changes ship as fb-v0.2 with a new clean test
+season — never as an edit in place. If you are reading a modified version of
+this section without a version bump beside it, something has gone wrong.
+
+WHAT THE FREEZE DOES. It unlocks the 2025 holdout for its single evaluation, and
+nothing else. It is deliberately being applied BEFORE any price has been looked
+at, so the methodology cannot have been shaped by what the market turns out to
+have done — which is the entire reason the sequencing runs in this order.
+
+WHAT HAS BEEN RUN AS OF THE FREEZE. The as-of engine, the Elo grid, the
+opponent-adjusted ridge and the game model are fitted and scored on 2015–2024.
+Section 7 carries their observed results — two grid boundary hits, the measured
+key-number profile, and one known limitation — all recorded rather than acted
+on. Section 8 (market comparison) has never been run: no price has been read by
+any of this code. The holdout has never been loaded.
+
+AT THE MOMENT OF FREEZING, the honest summary of the market-blind work is that
+the models are ordinary. Elo 0.63437 log loss on VALIDATE, the full game model
+0.63454 with margin RMSE 12.892, and the total model beating a league-mean
+baseline by 0.21 points. Combining two rating families performs about the same
+as Elo alone. None of that is a finding about the market; it is the baseline
+against which the market comparison will be read, and it is written down before
+that comparison so it cannot be revised afterwards.
+
+frozen: 2026-08-20
+
+## 1. What this is, and what it is not
+
+A second sport for Open Ledger Sports, built on the same rig (commit/reveal,
+append-only ledger, CLV capture, grading, circuit breakers, house rules) and a
+completely new engine. Nothing from the MLB Monte Carlo transfers: that model is
+wOBA-, pitcher- and run-distribution-shaped, and football has none of those.
+
+It ships as a PAPER TRACK at 0 units. It does not enter `data/ledger.json`, it
+does not size stakes, and it does not produce a bet recommendation. The question
+it exists to answer is narrow and falsifiable:
+
+> Does a market-blind football model add anything at the price we could actually
+> have taken — the T−24 line — over and above the market itself?
+
+The honest prior is NO. The prior research on this framework found the market
+beat every pure model in every season tested at the closing line. This build is
+not an attempt to overturn that; it is an attempt to measure it correctly at the
+one moment the earlier work could not measure, and to report the answer either
+way. "NO QUALIFYING SIGNAL" is a result, not a failure.
+
+## 2. Priority order (never reversed)
+
+DATA INTEGRITY → NO LEAKAGE → PROBABILITY ACCURACY → CALIBRATION
+→ CLOSING-LINE VALUE → EXPECTED VALUE → (staking is out of scope for v0.1)
+
+A 53% model that beats the closing line is worth more than a 60% model that got
+there by variance. Any conflict between two levels is resolved in favour of the
+earlier one, always.
+
+## 3. Scope of v0.1
+
+IN: NFL regular season, 2026. Markets: spread, total, moneyline.
+
+OUT: NCAA FBS — phase 2. Separate data source, separate rating dynamics, its own
+pre-registration and its own holdout. It is NOT added by widening this one.
+
+OUT: player props, live betting, parlays, and any staking or sizing whatsoever.
+
+## 4. The preseason decision (settled 2026-08-20)
+
+Preseason games are used to test the PIPELINE and for nothing else.
+
+WHY NOT THE MODEL. Preseason is a different population, not a smaller sample of
+the same one. Playing time is a coaching decision — starters take 0–15 snaps and
+which ones sit is unobservable to any rating fitted on regular-season football.
+Worse, the preseason market prices exactly that variable: lines move on
+playing-time reports, the one input the model structurally does not have. A test
+where we are systematically on the wrong side of the only live variable cannot
+produce an informative pass OR an informative fail, so it cannot be a gate.
+
+WHAT PRESEASON IS FOR. Real gradeable games with real prices on a small slate:
+
+- team-id mapping across nflverse / ESPN / The Odds API
+- the as-of clock for a weekly sport (kickoff-relative, not morning-relative)
+- football settlement mechanics: spread and total PUSH on the number, and the
+  moneyline ALSO pushes, because NFL regular-season games can end tied (13 ties
+  in the 4,363 games since 2010, 0.30%). "The moneyline cannot push" is true in
+  baseball and false here; it was written into an earlier draft of this document
+  from MLB intuition and caught by the settlement selftest. Every push books at 0.
+- CLV capture at a T−24 that lands mid-week
+- measured Odds API credit burn, replacing an estimate with a reading
+
+RULE. Preseason rows are written to `data/football_pipeline_test.json` and
+NOWHERE else. They never touch `ledger.json`, `daily_ledger.json`,
+`totals_ledger.json`, `watchlist.json`, or the football paper ledger. That file
+is labelled a plumbing test in its own header and is deleted or archived, never
+promoted. House Rule 1 makes the real ledger permanent; that is exactly why
+nothing uninformative is allowed into it.
+
+## 5. Data foundation
+
+| source | use | key | notes |
+|---|---|---|---|
+| nflverse | 2010–2026 games + play-by-play | none | burn-in, fit, validation, holdout, 2026 schedule |
+| ESPN public API | 2026 live schedule, scores, status | none | grading + slate |
+| The Odds API | live prices | ODDS_API_KEY | `americanfootball_nfl`, `americanfootball_nfl_preseason` |
+| The Odds API historical | T−24 backtest 2020–2024 | same | 10× credits per market per region |
+
+RULES.
+
+- Nothing is fabricated or inferred. Missing data is recorded as MISSING and the
+  affected check reads "manual review", never "passed" (House Rule 4).
+- Every raw artifact is stored content-addressed with a manifest. ONE EXCEPTION,
+  recorded rather than quietly taken: nflverse play-by-play is ~20MB a season and
+  ~300MB across the window, which does not belong in a repo GitHub Pages serves.
+  Those seasons are cached gitignored and only their sha256s are committed, in
+  `data/football/pbp_manifest.json`. We therefore cannot rebuild from the repo
+  alone, but we CAN detect that a season was rebuilt upstream — which is the
+  failure that would actually corrupt a fit.
+- Injuries: if 2026 injury data is not wired, the model does not adjust for
+  injuries and the cards SAY SO. It is never silently treated as "healthy".
+
+## 6. As-of semantics (the leakage guard)
+
+Three clocks, never blurred:
+
+- `event_time` — when the thing happened
+- `available_at` — when we could first have known it
+- `ingested_at` — when we actually stored it
+
+Football-specific availability, pre-committed:
+
+- game result: kickoff + 4h (games end; no 12h lag needed)
+- box / advanced stats: kickoff + 36h
+- injury report: the NFL practice-report schedule (Wed/Thu/Fri), taken at
+  published time, never backfilled to earlier in the week
+- the model's decision moment: T−24 before that game's own kickoff
+
+A fail-closed guard raises if any input to a T−24 feature carries an
+`available_at` later than that game's T−24. It raises. It does not warn and
+continue.
+
+## 7. Model spec (market-blind — frozen before any price is read)
+
+RATINGS, two independent families, both fitted on football data only. No
+sportsbook number is inspected at any point during parameter fitting.
+
+- **Elo** — tuned on a pre-registered grid (k, HFA, season-carryover regression
+  to mean, margin-of-victory multiplier). The carryover coefficient is a grid
+  parameter, not a judgement call made in September.
+- **Opponent-adjusted ridge efficiency** — offense/defense effects,
+  possession-weighted, mean-zero centered.
+
+GRID BOUNDARY, observed 2026-08-20, DELIBERATELY NOT ACTED ON. The first run of
+the pre-registered grid selected `hfa = 30`, which is the LOWEST value in the
+grid — a boundary hit, meaning the true optimum may lie below the range we
+declared. (This is plausible on the football: NFL home-field advantage has
+genuinely fallen, and 30 Elo points is only about 1.1 points of spread.)
+
+The grid is NOT being widened to chase it. Extending a search because the first
+pass landed on an edge is fitting the search to the answer, and it is exactly
+what a pre-registered grid exists to prevent. The boundary hit is recorded here
+as a candidate change for fb-v0.2, which would carry its own clean test season.
+Anyone who later finds `hfa` below 30 in this repo should be able to trace it to
+a version bump, not to a quiet edit.
+
+Mitigating context, also recorded now rather than after the fact: the entire
+128-combination grid spans only 0.63466 to 0.66506 in tune log loss. The knobs
+barely matter. Whatever value Elo has is not hiding in the parameter search.
+
+SECOND GRID BOUNDARY, observed 2026-08-20, ALSO NOT ACTED ON. The ridge grid
+selected `lam = 100`, the HIGHEST penalty in the declared range. Same rule as the
+Elo boundary above: not widened, recorded as a candidate for fb-v0.2.
+
+Unlike the Elo case this one is immaterial, and saying so now prevents it being
+treated as important later: the penalty moves tune RMSE from 13.2616 at lam = 1
+to 13.2486 at lam = 100, a span of 0.013 points. The ridge is essentially
+insensitive to it. `half_life` was interior (180 days beat both 90 and 365).
+
+GAME MODEL. Ridge over rating differences plus a site indicator, producing a
+predicted margin and a predicted total.
+
+UNCERTAINTY. From walk-forward OUT-OF-FOLD residuals only. In-sample residuals
+are never used; they understate spread and would manufacture edge everywhere.
+
+DISCRETISATION. Margin and total are converted to discrete probability mass
+functions with a key-number variant. Key-number weights for |margin| of 3, 7 and
+0 are derived from historical football margins ALONE — never fitted to make the
+model agree or disagree with a line.
+
+MEASURED, 2026-08-20. The profile built from TUNE margins alone puts its six
+largest multipliers on +3, −3, +7, −7, +14 and −6 — every one a real football
+key number, with no tail artefacts, and nothing about it derived from a price.
+On VALIDATE the variant improves PMF log score by +0.0925 over a plain normal.
+
+It barely moves the WIN probability (0.63454 → 0.63456 log loss), and that is
+expected rather than disappointing: the key numbers are near-symmetric, so they
+redistribute mass without moving P(home wins). The gain is in the PMF, which is
+what a spread or total actually settles against.
+
+KNOWN LIMITATION, recorded not tuned away. P(tie) is still overstated: 1.44%
+against an empirical 0.23%. The profile moves it the right way (a plain normal
+says 2.77%) but `KEY_SHRINK = 0.75` caps how far any single outcome may travel,
+and pushing that constant purely to fix the tie would be tuning a global knob
+against one cell. It affects moneyline push pricing only, and it is a candidate
+for fb-v0.2. The same under-correction applies at 3 (1.10% modelled vs 1.51%
+empirical) and 6 (0.59% vs 0.76%) — the variant is deliberately conservative and
+does not fully close the gap in either direction.
+
+## 8. Market comparison (only after the model is frozen)
+
+TIERING, enforced in code:
+
+- **Tier A** — timestamped first-party snapshot. Eligible for CLV.
+- **Tier B** — provider data with incomplete timing. Diagnostics only.
+- **Tier C** — reference-only. STRUCTURALLY incapable of producing CLV, and the
+  code refuses to compute CLV from it rather than computing a number that would
+  look fine and mean nothing.
+
+De-vig proportionally. Build the consensus from OBSERVED lines only — never
+interpolate a line nobody offered. Expected value is settlement-aware: pushes
+are valued at zero, not as half-wins, and the push mass at 3 and 7 is material
+enough that ignoring it is a real error, not a rounding one. Measured on our own
+2010-2025 games: |margin| = 3 occurs in 14.60% of games and |margin| = 7 in
+8.71%, against 5.02% at 4 and 5.07% at 10. Those two spikes are the whole reason
+the key-number variant exists, and they are derived from football results alone.
+
+## 9. Validation plan
+
+| seasons | role |
+|---|---|
+| 2010–2014 | BURN-IN. Builds ratings so the first scored season measures skill rather than convergence. Never scored. |
+| 2015–2021 | TUNE. Every grid is scored here and every winner is selected here. In-sample for the search, and reported as such. |
+| 2022–2024 | VALIDATE. The selected configuration is scored here ONCE, having never influenced selection. This is the honest pre-holdout estimate. |
+| 2025 | HOLDOUT. Unlocked by the 2026-08-20 freeze. Evaluated EXACTLY ONCE — enforced by `asof.claim_holdout()` against an append-only ledger, not by memory. A failed holdout is never retuned in place; it becomes fb-v0.2 with its own clean test season. |
+| 2026 | prospective forward test, live, at 0 units. |
+
+Walk-forward only, at every level — never random splits, which leak the future
+through the season. The TUNE/VALIDATE division inside development exists because
+selecting on a set and then reporting that set's score is the commonest way a
+rating model flatters itself; both numbers are always printed and labelled.
+
+## 10. Pre-committed gates and the review date
+
+Nothing is staked in v0.1, so the only gate that matters is the one deciding
+whether this graduates to a staked strategy at all. It is set now.
+
+**REVIEW DATE: 2026-11-17**, after 10 completed NFL weeks (~155 games). On that
+date only. Never early, never in response to a streak in either direction — that
+is precisely when the temptation peaks (House Rule 9).
+
+READ: `data/football_paper_ledger.json` aggregates — average CLV in points,
+beat-close %, calibration (reliability curve + Brier), record.
+
+DECISION TREE, pre-committed:
+
+- CLV convincingly positive AND calibration holds → propose a staked strategy as
+  fb-v0.2, with a gate study and its own holdout. Not before.
+- CLV ≈ 0 → the T−24 football market is efficient for this model. Report it,
+  publish it, and the honest move is to stop — not to add features until
+  something looks like it works.
+- CLV negative → the model is worse than the market at the moment of the bet.
+  Report that too, on the site, in the Morning Line.
+
+A 10-week sample cannot settle ROI and this document does not pretend it can. It
+CAN move CLV meaningfully, which is why CLV is the read and record is not.
+
+## 11. Odds budget
+
+Football is a WEEKLY sport; the MLB daily cadence is the wrong shape. Captures
+cluster on game days (Thu / Sun / Mon, plus late-season Sat), with the T−24
+capture scheduled per game rather than per morning.
+
+The cadence must be driven by the actual schedule, never by a hardcoded weekday
+pattern. 2026 is the proof: Week 1 opens on WEDNESDAY Sept 9 (Seahawks–Patriots),
+there is a Thursday Sept 10 game in Australia, and international kickoffs land at
+hours no US-weekday assumption survives. The scheduler reads each game's real
+kickoff and subtracts 24h. Any capture window derived from "it's Sunday" is a bug.
+
+Live NFL projection: 3 markets × 1 region (us) × ~12 calls/week
+= ~36 credits/week ≈ **155/month**, on top of MLB's ~250/month through October.
+
+Historical backtest 2020–2024 (one-time): a snapshot returns the whole slate, so
+cost scales with TIMESTAMPS, not games. ~6 timestamps/week × 18 weeks × 5
+seasons × 3 markets × 10 credits ≈ **16,200 credits**, plus ~540 for historical
+`/events` calls at 1 credit each.
+
+This exceeds the 500-credit free tier and trips the pre-committed upgrade rule #2
+(a market with a real product surface pushing projected spend over 450). The
+upgrade is therefore rule-driven, not preference-driven, and
+`data/odds_credits.json` remains the evidence.
+
+## 12. Football engine version history
+
+| version | date (2026) | change |
+|---|---|---|
+| fb-v0.1 | Aug 20 | pre-registration drafted; nothing fitted, nothing run |
+| fb-v0.1 | Aug 20 | as-of engine + leakage guard + holdout lock; Elo grid fitted on 2015-2021, validated once on 2022-2024: log loss 0.63437 vs 0.68600 always-home. Holdout never loaded. |
+| fb-v0.1 | Aug 20 | pbp aggregation (8,156 team-games) + opponent-adjusted ridge; validated once on 2022-2024: margin RMSE 12.968 vs 13.778 predict-the-mean, log loss 0.64058. Holdout never loaded. |
+| fb-v0.1 | Aug 20 | game model: margin from elo_diff + ridge_edge, total from ridge_sum, out-of-fold PMFs with the key-number variant. VALIDATE margin RMSE 12.892, log loss 0.63454, PMF log score +0.0925 over plain normal. Holdout never loaded. |
+| **fb-v0.1** | **Aug 20** | **FROZEN.** Methodology committed before any price was read. Holdout unlocked for one evaluation, gated by `asof.claim_holdout()` against an append-only ledger. |

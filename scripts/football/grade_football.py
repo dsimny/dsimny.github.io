@@ -49,6 +49,7 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import espn_ncaaf                                   # noqa: E402
+import espn_nfl                                     # noqa: E402
 import market                                       # noqa: E402
 from market import (TIER1, TIER2, MIN_BOOKS, STALENESS_MIN,   # noqa: E402,F401
                     MIN_CORROBORATION, IDEAL_T24_H, MAX_CLOSE_H, T24_TOLERANCE_H,
@@ -78,10 +79,53 @@ def load_snapshots(sport):
     return market.load_snapshots(sport, ODDS_DIR)
 
 
+# PER-SPORT CONFIG. Everything that differs between leagues is a row here;
+# nothing below branches on a sport name.
+#
+#   results    the module that owns that sport's outcomes
+#   keyfn      the join key, or None where both sides already share an identity.
+#              NFL captures and espn_nfl.py both carry teams.py franchise keys,
+#              so `==` is exact there. College carries display strings from two
+#              feeds that disagree on orthography, so it needs espn_ncaaf's
+#              normaliser. MEASURED 2026-08-26 on the live store: without it, 7
+#              of 99 results failed the join, 4 of them fully gradeable
+#              (Hawai'i, San Jose State, Sam Houston) - games that WERE priced,
+#              recorded as "absent from a capture".
+#   gradeable  the SEASON-TYPE ALLOWLIST (spec section 3a). Positive naming: a
+#              season type not on the list is refused, including values ESPN has
+#              not invented yet. A blocklist would silently grade any new type,
+#              and the direction of that error is a corrupted permanent ledger.
+#
+# BOTH SPORTS CARRY AN ALLOWLIST. College has no preseason, which makes it easy
+# to assume it needs no filter - it does. Verified against the live endpoint
+# 2026-08-26: college-football 2025-12-27 returns 8 events, ALL
+# {'type': 3, 'slug': 'post-season'}, and 2026-01-01 returns 3 more. Without a
+# college allowlist the first December grading run books eight bowls into the
+# append-only ledger with no decision ever taken about whether a neutral-site,
+# month-of-layoff market is the same product. That is the identical House
+# Rule 1 failure preseason poses for the NFL, arriving four months later.
+SPORTS = {
+    "ncaaf": {"results": espn_ncaaf, "keyfn": espn_ncaaf.key_for,
+              "gradeable": espn_ncaaf.gradeable},
+    "nfl":   {"results": espn_nfl, "keyfn": None,
+              "gradeable": espn_nfl.gradeable},
+}
+
+
 def build(sport, snaps, results):
     """One candidate per gradeable game, plus the reasons games were skipped."""
+    cfg = SPORTS[sport]
     cands, skipped = [], []
     for r in results.values():
+        # SECTION 3a, THE ALLOWLIST, CHECKED BEFORE ANYTHING ELSE. Preseason is
+        # a different population, not a smaller sample of the same one: playing
+        # time is a coaching decision, the market prices exactly that, and we do
+        # not observe it. Recorded as a refusal rather than dropped, by the same
+        # rule as every other marker.
+        if cfg["gradeable"] and not cfg["gradeable"](r):
+            skipped.append((r["away"], r["home"],
+                            f"NOT REGULAR SEASON ({r.get('season_slug', 'unknown')})"))
+            continue
         if not r.get("final"):
             continue
         kick = parse_utc(r.get("kickoff_utc"))
@@ -109,8 +153,12 @@ def build(sport, snaps, results):
                             f"kickoff)"))
             continue
 
-        ev24 = find_event(t24[2], r["away"], r["home"])
-        evcl = find_event(close[2], r["away"], r["home"])
+        try:
+            ev24 = find_event(t24[2], r["away"], r["home"], cfg["keyfn"])
+            evcl = find_event(close[2], r["away"], r["home"], cfg["keyfn"])
+        except market.AmbiguousEvent as why:
+            skipped.append((r["away"], r["home"], f"AMBIGUOUS JOIN - {why}"))
+            continue
         if not ev24 or not evcl:
             skipped.append((r["away"], r["home"], "NO MARKET (game absent from a capture)"))
             continue
@@ -119,7 +167,17 @@ def build(sport, snaps, results):
             skipped.append((r["away"], r["home"],
                             f"NO MARKET ({len(q24)}/{len(qcl)} eligible books, need {MIN_BOOKS})"))
             continue
-        f24, fcl = fair(q24, r["away"], r["home"]), fair(qcl, r["away"], r["home"])
+        # PRICES ARE KEYED BY THE ODDS FEED'S OWN TEAM STRINGS, so every market
+        # call below uses the CAPTURE's away_raw/home_raw - never the results
+        # row's identity. The two are the same string for NCAA FBS (verbatim
+        # identity) and are NOT for the NFL, where a capture stores the
+        # canonical franchise key "NE" in `away` and "New England Patriots" in
+        # `away_raw`. Passing the results row's key here silently produced
+        # "NO MARKET (consensus not computable)" for every NFL game - a total
+        # blackout that would have looked like a thin market rather than a bug.
+        # Caught by selftest_allowlist.py's regular-season control case.
+        a_raw, h_raw = ev24.get("away_raw"), ev24.get("home_raw")
+        f24, fcl = fair(q24, a_raw, h_raw), fair(qcl, a_raw, h_raw)
         if not f24 or not fcl:
             skipped.append((r["away"], r["home"], "NO MARKET (consensus not computable)"))
             continue
@@ -128,7 +186,7 @@ def build(sport, snaps, results):
         # calls the identical function on the identical snapshot, so a play it
         # publishes is by construction a play this grader will accept.
         try:
-            m = market.evaluate(q24, r["away"], r["home"])
+            m = market.evaluate(q24, a_raw, h_raw)
         except market.NoMarket as why:
             skipped.append((r["away"], r["home"], str(why)))
             continue
@@ -140,7 +198,11 @@ def build(sport, snaps, results):
         if margin == 0:
             res, pnl = "push", 0.0
         else:
-            won = (pick["side"] == r["home"]) == (margin > 0)
+            # h_raw, not r["home"]: pick["side"] came from the capture's own
+            # strings (see above), so settlement must compare in that same
+            # identity space. Comparing across the two would silently settle
+            # every NFL pick as the AWAY side.
+            won = (pick["side"] == h_raw) == (margin > 0)
             res, pnl = ("win", payout(pick["price"])) if won else ("loss", -1.0)
 
         cands.append({
@@ -182,8 +244,7 @@ def load_ledger():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--sport", default="ncaaf", choices=["ncaaf"],
-                    help="NFL grading needs its results store wired the same way")
+    ap.add_argument("--sport", default="ncaaf", choices=sorted(SPORTS))
     ap.add_argument("--dry-run", action="store_true", help="print, write nothing")
     args = ap.parse_args()
 
@@ -191,9 +252,14 @@ def main():
     if not snaps:
         print(f"no {args.sport} odds captures on disk; nothing to grade.")
         return 0
-    results = espn_ncaaf.load_store()["events"]
-    print(f"{len(snaps)} captures, {len(results)} known events, "
-          f"{sum(1 for r in results.values() if r.get('final'))} final")
+    cfg = SPORTS[args.sport]
+    results = cfg["results"].load_store()["events"]
+    n_final = sum(1 for r in results.values() if r.get("final"))
+    line = (f"{len(snaps)} captures, {len(results)} known events, {n_final} final")
+    if cfg["gradeable"]:
+        n_ok = sum(1 for r in results.values() if cfg["gradeable"](r))
+        line += f", {n_ok} on the season-type allowlist"
+    print(line)
 
     cands, skipped = build(args.sport, snaps, results)
     if not cands:

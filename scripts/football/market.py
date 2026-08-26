@@ -113,11 +113,43 @@ def load_snapshots(sport, odds_dir):
     return out
 
 
-def find_event(snap, away, home):
-    for ev in snap.get("events", []):
-        if ev.get("away") == away and ev.get("home") == home:
-            return ev
-    return None
+def find_event(snap, away, home, keyfn=None):
+    """The event in `snap` for one game, or None.
+
+    `keyfn` EXISTS BECAUSE THE TWO SIDES OF THIS JOIN ARE NOT ALWAYS THE SAME
+    STRING, and a miss here is not a harmless miss: grading records it as
+    "NO MARKET (game absent from a capture)", so a game that WAS priced enters
+    the coverage record as one that was not. That is the silent corruption
+    espn_ncaaf.py's docstring warns about, arriving through the back door.
+
+    MEASURED 2026-08-26 on the 2026-08-29 NCAAF slate: 7 of 99 stored results
+    failed the raw `==` join while matching under the normalised key, 4 of them
+    with >=9 books and therefore fully gradeable (Hawai'i, San Jose State x2,
+    Sam Houston). Board building never saw it because a board looks games up
+    with the capture's own strings; only grading crosses from a results feed.
+
+    None means the two sides already share an identity - NFL captures and
+    espn_nfl.py both store canonical franchise keys, so `==` IS exact there.
+    Anything else passes its sport's key function and both sides go through it.
+    Still an exact comparison afterwards: normalise, then require a hit. No
+    fuzzy matching, no edit distance, no "closest" name.
+    """
+    key = (lambda s: s) if keyfn is None else keyfn
+    want = (key(away), key(home))
+    found = [ev for ev in snap.get("events", [])
+             if (key(ev.get("away")), key(ev.get("home"))) == want]
+    if len(found) > 1:
+        # Refuse rather than choose. Two events collapsing to one key means the
+        # key is too lossy for this feed, and picking either one attaches a
+        # price to a game it may not belong to.
+        raise AmbiguousEvent(
+            f"{away} @ {home} matched {len(found)} capture events under the "
+            f"join key; refusing to choose one")
+    return found[0] if found else None
+
+
+class AmbiguousEvent(Exception):
+    """Two capture events matched one result. Never resolved by picking one."""
 
 
 def pick_snapshots(snaps, kickoff):

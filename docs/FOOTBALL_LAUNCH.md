@@ -83,7 +83,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 |---|---|---|
 | A | ~~Branch not merged~~ **DONE 2026-08-26** (merge commit `b55f732`) | `main` is what GitHub Pages deploys. All 32 football commits are now on it; no behaviour changed, because no workflow runs them yet. |
 | B | **Board builder DONE 2026-08-26** — `market.py` + `board.py` + `selftest_board.py` | The rule now lives in ONE place that both the board and the grader call. Remaining: wiring it to a workflow, and decision 6c below. |
-| C | NFL grading unwired: `--sport` is `choices=["ncaaf"]`, NFL results store absent, season-type allowlist unimplemented | Hard deadline 2026-09-10. See section 0. |
+| C | **NFL grading DONE 2026-08-26** — `espn_nfl.py`, the season-type allowlist, `--sport nfl`, and `selftest_allowlist.py` | Beat the 2026-09-10 deadline. Two real bugs found and fixed on the way; see below. |
 | D | `data/football/football_ledger.json` does not exist | First entry is permanent under House Rule 1. Create it deliberately, not as a side effect of a test run. |
 | E | **Layer 2 does not exist** — zero code | Full-slate reasoning IS the product. The template is written; nothing renders a slate into prose. |
 | F | No site surface: `build_site.py` is MLB-only, single-file | No football page, no football ledger view, no fp-v0.1 copy. |

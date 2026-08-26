@@ -55,6 +55,29 @@ SCOREBOARD = ("http://site.api.espn.com/apis/site/v2/sports/football/"
 FBS_GROUP = "80"          # ESPN's group id for FBS
 PAGE_LIMIT = 400          # a full Saturday is ~60 FBS games; 400 is headroom
 
+# THE SEASON-TYPE ALLOWLIST (docs/FOOTBALL_PIPELINE.md section 3a). College has
+# no preseason, so this looked like an NFL-only concern and was not implemented
+# here. IT IS NOT NFL-ONLY: college has a POSTSEASON, and bowls are type 3.
+#
+# VERIFIED AGAINST THE LIVE ENDPOINT 2026-08-26:
+#     2025-08-30  -> 62 events, all {'type': 2, 'slug': 'regular-season'}
+#     2025-12-27  ->  8 events, all {'type': 3, 'slug': 'post-season'}
+#
+# Left unimplemented, the first December run would have booked eight bowls into
+# an append-only ledger under House Rule 1 with no decision ever taken about
+# whether a neutral-site, month-of-layoff market is the same product. That is
+# the same unrecoverable failure preseason poses for the NFL, arriving four
+# months later. ALLOWLIST, NOT BLOCKLIST: type 2 is named positively and
+# everything else is refused, including types ESPN has not invented yet.
+GRADEABLE_SEASON_TYPES = frozenset({2})
+SEASON_TYPE_NAMES = {1: "preseason", 2: "regular-season", 3: "post-season",
+                     4: "off-season/all-star"}
+
+
+def gradeable(row):
+    """The allowlist, in one place so nothing re-derives it."""
+    return row.get("season_type") in GRADEABLE_SEASON_TYPES
+
 
 def norm(s):
     """Team name -> comparison key. Deterministic, lossy, never approximate."""
@@ -135,6 +158,8 @@ def extract(ev):
     if set(sides) != {"home", "away"}:
         raise ValueError(f"event {ev.get('id')} has competitors {sorted(sides)}")
 
+    season = ev.get("season") or {}
+    stype = season.get("type")
     state = ev["status"]["type"]["name"]
     final = state == "STATUS_FINAL"
     hs = as_ = None
@@ -151,6 +176,11 @@ def extract(ev):
         "kickoff_utc": iso(parse_espn_dt(ev.get("date"))) if ev.get("date") else None,
         "status": state,
         "final": final,
+        # Section 3a. Stored on every row, including the ones that will never be
+        # graded, so the refusal is auditable rather than invisible.
+        "season_year": season.get("year"),
+        "season_type": stype,
+        "season_slug": season.get("slug") or SEASON_TYPE_NAMES.get(stype, "unknown"),
         "home": sides["home"]["name"], "home_key": sides["home"]["key"],
         "away": sides["away"]["name"], "away_key": sides["away"]["key"],
         "home_abbr": sides["home"]["abbr"], "away_abbr": sides["away"]["abbr"],
@@ -169,7 +199,10 @@ def load_store():
         return {"_note": ("NCAA FBS results from ESPN's public scoreboard. Keyed "
                           "by ESPN event id. Scores are None until a game is "
                           "STATUS_FINAL - an unplayed game has no score, not a "
-                          "score of zero. Grading reads this; nothing here writes "
+                          "score of zero. season_type is recorded on every row; "
+                          "ONLY type 2 (regular-season) is gradeable - bowls are "
+                          "type 3 and are refused, per docs/FOOTBALL_PIPELINE.md "
+                          "section 3a. Grading reads this; nothing here writes "
                           "to any ledger."),
                 "events": {}}
 
@@ -246,6 +279,15 @@ def main():
 
     finals = [r for r in rows if r["final"]]
     print(f"\n{len(rows)} events, {len(finals)} final")
+
+    by_type = {}
+    for r in rows:
+        by_type[r["season_slug"]] = by_type.get(r["season_slug"], 0) + 1
+    for slug, n in sorted(by_type.items()):
+        mark = ("GRADEABLE" if any(gradeable(r) for r in rows
+                                   if r["season_slug"] == slug)
+                else "NOT gradeable")
+        print(f"   {slug:<16} {n:>3}   {mark}")
 
     if args.join:
         report_join(rows)

@@ -266,9 +266,27 @@ its conclusion was stale, because the constraint moved and the doc did not.
 `data/odds_credits.json` is the evidence and it is in the repo in the clear —
 check it rather than the prose.
 
-**6b. Price.** Does $30/month stand for a football product that makes no
-expectation claim, and what does it buy in October once MLB has ended? This is
-a product decision, not a code decision, and Phase 3 cannot ship without it.
+**6b. What $30/month buys.** PARTLY DECIDED 2026-08-26.
+
+**Settled: ONE premium play a week, not one per sport.** NFL and NCAA FBS rank
+in a single pool (`FOOTBALL_PIPELINE.md` s.4 step 0, fp-v0.2). The measured
+consequence is that the play is usually a COLLEGE game — college fields ~3x the
+games, rank 1 is a minimum rather than a median, and more draws produce a better
+tail. Copy must set that expectation before a member forms the wrong one.
+
+**Still open: the price itself**, and it should be decided knowing the real
+shape of the thing. One graded play a week is ~4 a month. Sold as a pick
+service that is a hard number to defend for $30, and it should not be defended
+that way. The volume is in layer 2 — full reasoning on every covered game,
+~57 a week measured on the 2026-08-25 board. **The product is a weekly research
+publication in which one play is graded in public for accountability.** Price it
+as that, or reprice it, but do not sell four picks a month.
+
+Also unresolved and dated: on ~2026-09-27 MLB ends and anyone who subscribed for
+a daily product starts receiving a weekly one. That is a material change to what
+they bought. Handle it before it happens; with `WHOP_CHECKOUT_URL` still unset
+the member count is likely zero, which makes it free to handle now and expensive
+to handle later.
 
 ## 7. What this plan may NOT be used to justify
 
@@ -297,9 +315,63 @@ a product decision, not a code decision, and Phase 3 cannot ship without it.
 - A missing webhook, a missing key or a dead odds feed degrades the run; it
   never fails it and never publishes a stale board.
 
-## 9. Version history
+## 9. The year-round direction, and the ONE thing it changes today
+
+Stated by Daniel 2026-08-26: the goal is a subscription that delivers value
+every month regardless of which season is running — eventually all sports —
+sold on trust, transparency and information rather than on picks alone.
+
+**THE ARCHITECTURAL POINT, and it is the reason to write this down before gap B
+rather than after.** The three-layer design is SPORT-AGNOSTIC, and it is
+sport-agnostic precisely because it is market-derived. Layer 1 needs an odds
+feed and nothing else — no team ratings, no park factors, no starting pitchers.
+Layer 2 writes from layer 1's numbers. Layer 3 ranks by effective overround,
+which is defined for any two-way market in any sport. Contrast MLB's
+`engine.py`, which is irreducibly baseball: innings, pitchers, parks, wOBA.
+
+So the football pipeline is not a football pipeline. **It is the year-round
+chassis, and adding a sport is closer to adding an odds key than to building a
+model.** `fetch_odds.py` already carries a `SPORT_KEYS` dict; the Odds API
+covers NBA, NCAAB, NHL, MLB, soccer and more on the same `h2h` endpoint, at the
+same 1 credit per call, against an allowance with ~71,695 credits spare.
+
+**CONSEQUENCE FOR GAP B AND GAP E — decide it now, not in a later refactor:**
+write the board builder and the writeup generator **parameterised by sport from
+the first line**. No `football` in a function name, no NFL/NCAAF branching
+outside a config table, no hardcoded ESPN path. The things that ARE sport-
+specific — the results source, the team-identity mode (canonical vs verbatim,
+see `fetch_odds.py`), the season-type allowlist, what a "slate" means — belong
+in a per-sport config, not in the code. Football is then the first tenant of the
+chassis rather than the chassis itself.
+
+WHAT THIS DOES NOT LICENSE. Adding a sport still needs: a results source wired
+and verified, a season-type allowlist for that sport (the 3a failure mode is
+generic — any league with exhibition games can quietly poison a permanent
+ledger), a decision about identity mode, and its own ledger. None of that is
+free. The claim is only that the EXPENSIVE part — a defensible model — is not
+required, because this product does not make a model claim.
+
+**ON "a model that beats the market", kept honestly.** Two frozen studies say
+no for NFL moneyline at T−24 (`FOOTBALL_RESULT_T24.md`, `FOOTBALL_RESULT_PRICE.md`).
+Neither generalises beyond that market — they say nothing about NCAAB, NHL,
+lower-liquidity leagues, or non-moneyline markets, and it is genuinely plausible
+that a thinner market is beatable. That ambition is not dead; it is GATED. The
+route is another pre-registration frozen before scoring, with its own clean test
+season, exactly as v0.1 and v0.2 were. The 2025 holdout is unspent and reserved
+for it. Until such a study clears, the product ships with no expectation claim
+and the copy says so — and the process product earns while the research runs,
+which is the arrangement that makes patient research affordable.
+
+THE THIN MONTH IS JULY–AUGUST. Everything else has a major market: NFL/NCAAF
+Sep–Jan, NBA/NCAAB/NHL Oct–Jun, MLB Apr–Sep. Midsummer is MLB alone, and that is
+where a year-round subscription is hardest to justify. Whatever fills it —
+another sport, more MLB markets, or seasonal pricing — is a decision to make
+deliberately rather than discover next July.
+
+## 10. Version history
 
 | version | date (2026) | change |
 |---|---|---|
 | fl-v0.1 | Aug 26 | Initial plan. Gaps A-K, two hard deadlines (capture 08-29, NFL allowlist 09-10), four phases targeting premium live NFL Week 2-3, two open decisions (Odds API tier, price). |
 | fl-v0.2 | Aug 26 | Gap A closed (branch merged, `b55f732`). **Gap I withdrawn: the free-tier premise was wrong** — a paid 100,000/month tier has been live since ~08-21 with 71,695 remaining, so credits gate nothing and decision 6a is resolved rather than open. Capture deadline sharpened from "Sat 08-29" to the measured first window, 2026-08-28 10:00Z, with the 08-26 17:00Z preseason rehearsal noted. |
+| fl-v0.3 | Aug 26 | Capture half of gap H shipped and pushed (`football-capture.yml`, live). Decision 6b half-settled: ONE combined slate, one premium play a week (spec bumped to fp-v0.2), with the college-skew measured and recorded; price still open and reframed around layer 2's volume rather than four picks a month. New section 9 records the year-round direction and the one thing it changes immediately — gaps B and E get written sport-parameterised from the first line, because the market-derived chassis is not football-specific. |

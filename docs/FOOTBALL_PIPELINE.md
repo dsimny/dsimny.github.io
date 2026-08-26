@@ -131,11 +131,57 @@ grading, and before the 2026-09-09 opener.
 
 Ranked in this order, computed only from layer 1:
 
-**Step 0 — the slate is a WEEK, not a day.** Football is a weekly sport
-(`FOOTBALL_PREREG_V02.md` section 11 makes the same point about capture
-windows). Thursday and Monday are single-game days, so a per-day slate would
-leave no free play on half the calendar — measured: 80 of 162 game-days had
-only one qualifier, against 3 of 65 weeks.
+**Step 0 — the slate is a WEEK, not a day, and ONE slate spans BOTH sports.**
+
+Football is a weekly sport (`FOOTBALL_PREREG_V02.md` section 11 makes the same
+point about capture windows). Thursday and Monday are single-game days, so a
+per-day slate would leave no free play on half the calendar — measured: 80 of
+162 game-days had only one qualifier, against 3 of 65 weeks.
+
+NFL AND NCAA FBS RANK IN ONE POOL (decided 2026-08-26, fp-v0.2). The spec did
+not previously say, and `grade_football.py`'s `--sport` argument implied two
+separate slates and therefore two premium plays a week. One play a week is the
+product; two was an implementation detail about to become a product decision by
+accident.
+
+**THE MEASURED CONSEQUENCE, recorded before week 1 so nobody "fixes" it later.**
+Combining the pools does NOT usually hand the play to the NFL. It usually hands
+it to college, and the reason is volume, not quality. Measured on the
+2026-08-25 live capture (57 covered games, coverage filter and corroboration
+guard applied, effective overround at best Tier-1 price, in percentage points):
+
+| | n covered | min | median | p90 |
+|---|---:|---:|---:|---:|
+| NFL | 15 | 1.22 | 2.45 | 3.16 |
+| NCAA FBS | 42 | **0.63** | 2.70 | 3.95 |
+
+The typical college market is LOOSER than the typical NFL market — median 2.70
+against 2.45. But college fields roughly three times the games, and rank 1 is a
+minimum, not a median. Three times the draws produces a better tail, so the
+tightest game on a combined board is usually a college game: NCAAF took rank 1
+on this board and 15 of the tightest 20.
+
+So expect the premium play to be college most weeks, and often a low-profile
+one — the tightest market on this board was Wyoming @ Colorado State. **That is
+the rule working, not failing.** Step 1 ranks by the toll you pay to play, and
+it does not know or care which sport is on television. Copy must set that
+expectation up front; a reader who bought expecting an NFL play every week will
+otherwise read a correct result as a broken product.
+
+NOT CHARACTERISED HISTORICALLY, and this is a real limit rather than an
+oversight: section 4a's 2022–2024 table is NFL-only, because the purchased
+historical odds are NFL-only. There is no NCAA FBS price history on disk to
+re-run, so the combined rule's season-long behaviour will be OBSERVED LIVE
+rather than known in advance. The single capture above is one board, not a
+season. Publish that caveat with the first week's numbers rather than after
+someone notices.
+
+WHY THIS IS NOT THE THING SECTION 7 FORBIDS. Section 7 and House Rule 9 bar
+moving the rule IN RESPONSE TO RESULTS. No football result exists — the ledger
+is empty, week 1 has not been played, and this decision is about what the
+product IS, not about how it performed. It ships as a version bump with its
+reasoning and its measured consequence attached, which is the process House
+Rule 9 prescribes. After week 1 books its first entry, this door closes.
 
 **Step 1 — market quality.** For each covered game compute the EFFECTIVE
 OVERROUND at best prices:
@@ -238,3 +284,4 @@ precisely when the temptation peaks.
 | version | date (2026) | change |
 |---|---|---|
 | fp-v0.1 | Aug 24 | Adopted. Three layers, coverage markers, the effective-overround selection rule with its corroboration guard, free/premium split under House Rules 2 and 7, own ledger at 0u. No expectation claim made. |
+| fp-v0.2 | Aug 26 | Section 4 step 0: ONE combined NFL + NCAA FBS slate, so one premium play a week rather than one per sport. Measured consequence recorded — college takes rank 1 most weeks on volume, not quality — along with the limit that no NCAA FBS price history exists to characterise it on. Decided before week 1 and before any football result existed; no rule was moved in response to a result. |

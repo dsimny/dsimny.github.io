@@ -85,7 +85,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | B | **Board builder DONE 2026-08-26** — `market.py` + `board.py` + `selftest_board.py` | The rule now lives in ONE place that both the board and the grader call. Remaining: wiring it to a workflow, and decision 6c below. |
 | C | **NFL grading DONE 2026-08-26** — `espn_nfl.py`, the season-type allowlist, `--sport nfl`, and `selftest_allowlist.py` | Beat the 2026-09-10 deadline. Two real bugs found and fixed on the way; see below. |
 | D | `data/football/football_ledger.json` does not exist | First entry is permanent under House Rule 1. Create it deliberately, not as a side effect of a test run. |
-| E | **Layer 2 does not exist** — zero code | Full-slate reasoning IS the product. The template is written; nothing renders a slate into prose. |
+| E | **Layer 2 BUILT 2026-08-26** — `writeup.py` + `selftest_writeup.py` | Claude via the Messages API, with the numeral validator enforced. Needs `ANTHROPIC_API_KEY` set before it can generate; the round-trip is unproven until then. |
 | F | No site surface: `build_site.py` is MLB-only, single-file | No football page, no football ledger view, no fp-v0.1 copy. |
 | G | No football Discord delivery | `post_discord.py board` mode is MLB-shaped. |
 | H | Football workflows: **capture DONE** (`football-capture.yml`, 2026-08-26) — board and grade runs still missing | Capture is the half with the unrecoverable deadline. It is inert until pushed. |
@@ -157,7 +157,50 @@ drift, and the drift will surface as a premium play the ledger refuses to grade.
 Extract the shared coverage/consensus/selection functions into a module both
 import.
 
-### E — layer 2, and the one thing that makes it safe
+### E — layer 2 — BUILT 2026-08-26
+
+`scripts/football/writeup.py` (generator + validator) and
+`scripts/football/selftest_writeup.py` (17 adversarial cases).
+
+**Model: Claude, `claude-sonnet-5` by default**, over the Messages API using
+plain `requests` — no new dependency. Sonnet because the task is constrained
+narration over fixed numbers rather than open reasoning, and it runs ~57 times a
+week. `OLS_WRITEUP_MODEL` overrides it; `claude-opus-5` is a one-variable change
+if the prose should be richer. The system prompt is sent with `cache_control`,
+since it is identical for every game on the slate and only the data block
+changes.
+
+**NEW CONFIG REQUIRED: `ANTHROPIC_API_KEY` as a repo secret.** Until it is set,
+`annotate()` marks every game `no writeup (no API key configured)` and the board
+publishes numbers without prose — the same degrade-never-die rule as a missing
+Discord webhook. **The API round-trip is therefore UNPROVEN**; the validator,
+the prompt and the degrade path are all tested, the live call is not.
+
+THE VALIDATOR CAUGHT TWO REAL HOLES IN ITSELF, both found by writing the tests
+adversarially rather than to pass:
+
+1. **Tolerance on both sides is a hole, not double safety.** The first version
+   re-rounded the CANDIDATE token as well as expanding the allowed values, so
+   any number within rounding distance of a real one validated: "moved 2.5
+   points" rounds to "2", `books_at_best` is 2, and a fabricated line movement
+   passed against an unrelated book count. Rounding tolerance now lives ONLY in
+   the allowed set; the candidate is matched exactly.
+2. **A validator that cries wolf gets loosened.** "more than one regulated
+   book" was rejected because "one" is a spelled numeral. In English "one" is
+   overwhelmingly a determiner, so it is now exempt — a documented, bounded hole
+   (a count could be understated as "one") taken deliberately, because constant
+   false rejections are how a safety check gets switched off.
+
+Masking matters as much: team and book names are blanked BEFORE extraction, so
+"San Francisco 49ers" and "888sport" cannot fail an honest writeup. Masking a
+name cannot let a fabrication through, whereas whitelisting `49` could.
+
+WHAT IT DOES NOT CATCH, so nobody trusts it further than it goes: it checks
+NUMBERS, not claims. "the market is drifting toward Buffalo" contains no numeral
+and would pass while being unsupported. Only the prompt bars that. The validator
+is a floor.
+
+### The original specification, for reference
 
 `FOOTBALL_WRITEUP_TEMPLATE.md` section 1 states the rule: the model receives a
 filled data block and may not introduce a number that is not in it.
@@ -315,13 +358,18 @@ consequence is that the play is usually a COLLEGE game — college fields ~3x th
 games, rank 1 is a minimum rather than a median, and more draws produce a better
 tail. Copy must set that expectation before a member forms the wrong one.
 
-**Still open: the price itself**, and it should be decided knowing the real
-shape of the thing. One graded play a week is ~4 a month. Sold as a pick
-service that is a hard number to defend for $30, and it should not be defended
-that way. The volume is in layer 2 — full reasoning on every covered game,
-~57 a week measured on the 2026-08-25 board. **The product is a weekly research
-publication in which one play is graded in public for accountability.** Price it
-as that, or reprice it, but do not sell four picks a month.
+**Settled 2026-08-26: the price HOLDS AT $30/month.** Decided by Daniel with the
+shape of the product on the table, not by default.
+
+The framing that has to go with it is not optional. One graded play a week is
+~4 a month; sold as a pick service that is indefensible at $30, and it should
+not be defended that way. The volume is in layer 2 — full reasoning on every
+covered game, ~57 a week measured on the 2026-08-25 board. **The product is a
+weekly research publication in which one play is graded in public for
+accountability.** Copy that leads with the play instead of the slate prices the
+wrong product and invites exactly the comparison this brand loses: against touts
+willing to claim an edge, honesty is a handicap. Against research, it is the
+moat.
 
 Also unresolved and dated: on ~2026-09-27 MLB ends and anyone who subscribed for
 a daily product starts receiving a weekly one. That is a material change to what

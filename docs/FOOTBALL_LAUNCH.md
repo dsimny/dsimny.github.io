@@ -82,7 +82,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | # | gap | why it blocks launch |
 |---|---|---|
 | A | ~~Branch not merged~~ **DONE 2026-08-26** (merge commit `b55f732`) | `main` is what GitHub Pages deploys. All 32 football commits are now on it; no behaviour changed, because no workflow runs them yet. |
-| B | **No live board builder** | `grade_football.py` runs the rule AFTER results exist. Nothing runs it BEFORE kickoff. This is the core missing piece. |
+| B | **Board builder DONE 2026-08-26** — `market.py` + `board.py` + `selftest_board.py` | The rule now lives in ONE place that both the board and the grader call. Remaining: wiring it to a workflow, and decision 6c below. |
 | C | NFL grading unwired: `--sport` is `choices=["ncaaf"]`, NFL results store absent, season-type allowlist unimplemented | Hard deadline 2026-09-10. See section 0. |
 | D | `data/football/football_ledger.json` does not exist | First entry is permanent under House Rule 1. Create it deliberately, not as a side effect of a test run. |
 | E | **Layer 2 does not exist** — zero code | Full-slate reasoning IS the product. The template is written; nothing renders a slate into prose. |
@@ -93,7 +93,48 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | J | Premium copy is MLB-flavoured and claims nothing about football | House Rules 4 and 8. Football makes NO expectation claim and the copy must say so. |
 | K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST. |
 
-### B — the live board builder, in detail
+### B — the live board builder — BUILT 2026-08-26
+
+Shipped as three files:
+
+- **`scripts/football/market.py`** — layer 1, and now the ONLY implementation of
+  it. Eligibility, de-vigged consensus, best takeable price, effective
+  overround, the corroboration guard and the side the rule takes. Knows no
+  sport: every function takes quotes, team names and timestamps.
+- **`scripts/football/board.py`** — the pre-kickoff board. Covered games with
+  their data blocks, the premium and free plays, every excluded game named with
+  its reason, the >25% manual-review flag, and an encrypted board plus a
+  plaintext SHA-256 in football's own `commitments.json`. Publishes nothing in
+  the clear.
+- **`scripts/football/selftest_board.py`** — run after touching either.
+
+`grade_football.py` was REFACTORED to import from `market.py` rather than keep
+its own copies. That is the whole point: the grader and the board now call the
+same `evaluate()` on the same snapshot, so a play the board publishes is by
+construction a play the grader accepts.
+
+VERIFIED BY EQUIVALENCE, following the repo's own precedent for
+`engine.simulate_game` in v0.5 (extract, then prove nothing moved):
+- Every extracted function compared against the pre-refactor copy across 399
+  real events — **11,340 assertions, all equal**.
+- `build()` compared end to end on a two-snapshot fixture — **32 candidates and
+  79 skip reasons identical**, with win/loss/push all exercised.
+- One intended change: the unclassified-book message now ends "can be used"
+  rather than "can be graded", because two callers share it.
+
+That one-time proof needed a pristine pre-refactor copy and is not re-runnable.
+The invariant that must hold forever — board and grader agree — is asserted by
+`selftest_board.py` instead, which is.
+
+WHY THE SELF-TEST NEEDS A FIXTURE. Only one capture per sport exists and no game
+has been played, so the real data cannot exercise this path at all: today's
+board correctly covers 0 games and names all 8 as "no T-24 capture yet". The
+fixture rebuilds what a week of capturing leaves on disk — one capture per
+kickoff, each at that game's T-24 — from the real capture's real books and
+prices. Only timestamps move. It cannot invent books that had not opened yet,
+which is why the college games two weeks out stay excluded, correctly.
+
+### The original specification, for reference
 
 The one genuinely new component. Given the latest captures for a slate week it
 must:
@@ -287,6 +328,44 @@ a daily product starts receiving a weekly one. That is a material change to what
 they bought. Handle it before it happens; with `WHOP_CHECKOUT_URL` still unset
 the member count is likely zero, which makes it free to handle now and expensive
 to handle later.
+
+**6c. WHEN is the week's play chosen? NEW, found while building gap B, and the
+spec does not answer it.**
+
+Each game is evaluated at ITS OWN T−24. So the week's full field never exists at
+one moment: a Sunday NFL game's T−24 lands Saturday, by which time most of
+Saturday's college slate has kicked off. **There is no instant at which every
+T−24 exists and no game has started.** This is structural, not a bug, and it
+follows directly from fp-v0.2's decision to rank both sports in one pool.
+
+`board.py` therefore takes a decision moment (`--asof`) and ranks the games that
+are, at that moment, both evaluable and unplayed. Measured on the self-test
+fixture, the field really does move:
+
+| decision moment | covered | premium |
+|---|---:|---|
+| Wed, before anything kicks | 9 | BUF @ HOU, eff 1.22 |
+| Sat morning | 8 | BUF @ HOU, eff 1.22 |
+| Sun 11:00Z | 8 | BUF @ HOU, eff 1.22 |
+
+The play was stable here, but nothing guarantees that — a tighter market can
+appear at any later T−24, and if the rule is re-run it would move. **A premium
+play that can change after it is committed is not a commitment**, which is why
+this must be settled before week 1 rather than discovered in week 3.
+
+The options, none of them free:
+- **Fixed weekly moment.** Precommit a time (say Friday 18:00Z), rank what
+  exists, commit once. Simple and honest, but it structurally excludes Sunday
+  and Monday NFL games from ever being the premium play.
+- **Commit per game, choose per week.** Fingerprint each game at its own T−24 as
+  it arrives, and precommit the moment at which rank 1 among everything
+  committed so far becomes the play.
+- **Per-sport decision moments** — but that reopens fp-v0.2 and would give two
+  plays a week again.
+
+RECOMMENDATION: option 2. It matches how the captures actually arrive, keeps the
+NFL eligible, and still yields exactly one committed play. It needs a spec bump
+before it is real.
 
 ## 7. What this plan may NOT be used to justify
 

@@ -49,130 +49,33 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import espn_ncaaf                                   # noqa: E402
-from price_test import TIER1, TIER2                 # noqa: E402
+import market                                       # noqa: E402
+from market import (TIER1, TIER2, MIN_BOOKS, STALENESS_MIN,   # noqa: E402,F401
+                    MIN_CORROBORATION, IDEAL_T24_H, MAX_CLOSE_H, T24_TOLERANCE_H,
+                    implied, payout, parse_utc, iso, slate_week,
+                    eligible, fair, best, find_event, pick_snapshots)
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 FB = os.path.join(ROOT, "data", "football")
 ODDS_DIR = os.path.join(FB, "odds")
 LEDGER = os.path.join(FB, "football_ledger.json")
 
-MIN_BOOKS = 5             # pipeline spec section 3
-STALENESS_MIN = 15        # pipeline spec section 3
-MIN_CORROBORATION = 2     # pipeline spec section 4 step 2
-IDEAL_T24_H = 24.0
-
-# A capture only COUNTS as the moment it claims to be if it landed near it.
-# Without these two windows the grader will happily call a capture taken four
-# days before kickoff a "closing" price, because it is technically the last one
-# before the game — and then book CLV against it. That number would look fine
-# and mean nothing, which is the Tier C failure the whole capture design exists
-# to avoid. Caught while building the first test fixture, before any real slate.
-MAX_CLOSE_H = 6.0         # later than this before kickoff and it is not a close
-T24_TOLERANCE_H = 6.0     # T-24 must land within this of the 24h mark
-
-
-def implied(a):
-    a = float(a)
-    return (-a) / ((-a) + 100.0) if a < 0 else 100.0 / (a + 100.0)
-
-
-def payout(a):
-    a = float(a)
-    return 100.0 / (-a) if a < 0 else a / 100.0
-
-
-def parse_utc(s):
-    if not s:
-        return None
-    try:
-        return datetime.fromisoformat(s.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-
-
-def iso(dt):
-    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def slate_week(kickoff):
-    """The Tuesday on or before kickoff, as YYYY-MM-DD. See module docstring."""
-    d = kickoff.date()
-    return (d - timedelta(days=(d.weekday() - 1) % 7)).isoformat()
+# EVERY MARKET FUNCTION AND THRESHOLD NOW LIVES IN market.py, imported above
+# rather than defined here. They used to be defined in this file and board.py
+# would have needed its own copy; two implementations of one rule drift, and the
+# drift surfaces as a premium play the ledger refuses to grade. The extraction
+# was verified by comparing every function against this file's previous version
+# across 399 real events (11,340 assertions, all equal) - the same
+# extract-then-prove-equivalent pattern used for engine.simulate_game in v0.5.
+#
+# The grading-specific parts stay here: which snapshot is T-24 and which is the
+# close, settlement against a final score, and the append-only ledger write.
 
 
 def load_snapshots(sport):
-    out = []
-    for f in sorted(glob.glob(os.path.join(ODDS_DIR, f"{sport}_*.json"))):
-        with io.open(f, encoding="utf-8") as fh:
-            s = json.load(fh)
-        t = parse_utc(s.get("captured_utc"))
-        if t:
-            out.append((t, os.path.basename(f), s))
-    return out
-
-
-def eligible(ev, captured):
-    """{book: {team: price}} for quotes fresh enough to have been takeable."""
-    q = {}
-    for bk in ev.get("books", []):
-        lu = parse_utc(bk.get("last_update"))
-        if captured and lu and abs((captured - lu).total_seconds()) > STALENESS_MIN * 60:
-            continue
-        h2h = (bk.get("markets") or {}).get("h2h") or []
-        named = {o["name"]: o["price"] for o in h2h
-                 if o.get("name") and o.get("price") is not None}
-        if len(named) == 2:
-            q[bk["book"]] = named
-    return q
-
-
-def fair(q, a, b):
-    """Proportionally de-vigged consensus from the median price per side."""
-    pa = [v[a] for v in q.values() if a in v]
-    pb = [v[b] for v in q.values() if b in v]
-    if len(pa) < MIN_BOOKS or len(pb) < MIN_BOOKS:
-        return None
-    ia, ib = implied(statistics.median(pa)), implied(statistics.median(pb))
-    tot = ia + ib
-    return None if tot <= 0 else {a: ia / tot, b: ib / tot, "_ovr": tot - 1.0}
-
-
-def best(q, team, tier1_only=True):
-    """Best price for a side.
-
-    tier1_only because measurement and action need different book sets: the
-    consensus wants breadth and an offshore price is fine market information,
-    but a RECOMMENDATION has to be a number the reader can actually take. The
-    first live capture picked bovada, which most of the audience cannot use.
-    See docs/FOOTBALL_PIPELINE.md section 3.
-    """
-    ps = [(v[team], bk) for bk, v in q.items()
-          if team in v and (not tier1_only or bk in TIER1)]
-    if not ps:
-        return None
-    price, book = max(ps, key=lambda x: x[0])
-    ib = implied(price)
-    near = sum(1 for p, _ in ps if implied(p) <= ib + 0.01)
-    return {"price": price, "book": book, "near": near}
-
-
-def pick_snapshots(snaps, kickoff):
-    """(t24, closing) captures for one kickoff, chosen from what exists."""
-    before = [(t, n, s) for t, n, s in snaps if t < kickoff]
-    if not before:
-        return None, None
-    target = kickoff - timedelta(hours=IDEAL_T24_H)
-    t24 = min(snaps, key=lambda x: abs((x[0] - target).total_seconds()))
-    if t24[0] >= kickoff:
-        t24 = None
-    return t24, before[-1]
-
-
-def find_event(snap, away, home):
-    for ev in snap.get("events", []):
-        if ev.get("away") == away and ev.get("home") == home:
-            return ev
-    return None
+    """Grading reads captures from the repo's odds dir; market.py takes the
+    directory as an argument so a caller can point it elsewhere."""
+    return market.load_snapshots(sport, ODDS_DIR)
 
 
 def build(sport, snaps, results):
@@ -220,32 +123,18 @@ def build(sport, snaps, results):
         if not f24 or not fcl:
             skipped.append((r["away"], r["home"], "NO MARKET (consensus not computable)"))
             continue
-        # Consensus already used every eligible book; the price must be Tier 1.
-        ba, bh = best(q24, r["away"]), best(q24, r["home"])
-        if not ba or not bh:
-            skipped.append((r["away"], r["home"],
-                            "NO TAKEABLE PRICE (no Tier-1 book quoting)"))
-            continue
-        unclassified = sorted({b for b in q24 if b not in TIER1 and b not in TIER2})
-        if unclassified:
-            # Fail loud: an unknown book is neither takeable nor known-offshore,
-            # and guessing which would be exactly the wrong instinct.
-            skipped.append((r["away"], r["home"],
-                            f"UNCLASSIFIED BOOK(S) {unclassified} - add them to a "
-                            f"tier in price_test.py before this game can be graded"))
+        # THE SELECTION RULE ITSELF (section 4 steps 1-3, plus the takeable-price
+        # and unclassified-book markers) is market.evaluate(). The board builder
+        # calls the identical function on the identical snapshot, so a play it
+        # publishes is by construction a play this grader will accept.
+        try:
+            m = market.evaluate(q24, r["away"], r["home"])
+        except market.NoMarket as why:
+            skipped.append((r["away"], r["home"], str(why)))
             continue
 
-        # section 4 step 1
-        eff = implied(bh["price"]) + implied(ba["price"]) - 1.0
-        # section 4 step 3
-        opts = [{"side": r["away"], **ba, "gap": f24[r["away"]] - implied(ba["price"])},
-                {"side": r["home"], **bh, "gap": f24[r["home"]] - implied(bh["price"])}]
-        pick = max(opts, key=lambda o: o["gap"])
-        # section 4 step 2
-        if pick["near"] < MIN_CORROBORATION:
-            skipped.append((r["away"], r["home"],
-                            f"corroboration guard ({pick['near']} book at best price)"))
-            continue
+        pick = {"side": m["side"], "price": m["best_price"],
+                "book": m["best_book"], "near": m["books_at_best"]}
 
         margin = r["margin"]
         if margin == 0:
@@ -261,7 +150,7 @@ def build(sport, snaps, results):
             "kickoff_utc": r["kickoff_utc"],
             "side": pick["side"], "price": pick["price"], "book": pick["book"],
             "books_at_best": pick["near"], "n_books_t24": len(q24),
-            "eff_overround_pts": round(100 * eff, 3),
+            "eff_overround_pts": m["eff_overround_pts"],
             "fair_t24": round(f24[pick["side"]], 5),
             "fair_close": round(fcl[pick["side"]], 5),
             "clv_pts": round(100 * (fcl[pick["side"]] - implied(pick["price"])), 3),

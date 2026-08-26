@@ -90,7 +90,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | G | **Discord delivery BUILT 2026-08-26** — `discord.py` + `selftest_discord.py` | `free` to the public channel, `slate` (full slate + premium) to members. Idempotent per slate week. Needs the webhooks already configured for MLB. |
 | H | **Workflows DONE 2026-08-26** — `football-capture.yml`, `football-board.yml`, `football-grade.yml`, plus the home-page link | Capture hourly at :07, board hourly at :23, grade daily at 11:00Z. |
 | I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
-| J | Premium copy is MLB-flavoured and claims nothing about football | House Rules 4 and 8. Football makes NO expectation claim and the copy must say so. |
+| J | **Copy DONE 2026-08-26** — home-page premium block rewritten, football CTA added | Both sports described separately because they claim different things. Invisible until K. |
 | K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST. |
 
 ### B — the live board builder — BUILT 2026-08-26
@@ -539,6 +539,39 @@ TWO BUGS FOUND WHILE TESTING, both silent:
 - A `discord.py --dry-run` against a week with no board WROTE to
   `post_status.json` — a file CI commits. Every other write was guarded; that
   path was missed. A preview that mutates state is not a preview.
+
+### J — the premium copy — DONE 2026-08-26
+
+Two places: the home-page `upgrade_block` in `build_site.py`, and a football CTA
+on `/football/` and every week page. Both stay invisible until
+`WHOP_CHECKOUT_URL` is set, so the site never advertises something that cannot
+be bought.
+
+**THE TWO SPORTS ARE DESCRIBED SEPARATELY, and that is the load-bearing
+decision.** Baseball has a model, an edge gate and a circuit-breaker log.
+Football has two published studies saying its market cannot be out-forecast,
+makes no expectation claim, and is staked at zero units. A single "our edge"
+spanning both would be a claim we have already published the evidence against —
+the most damaging sentence that could appear on this site, because it would be
+contradicted by our own documents.
+
+**Football leads with the SLATE, never with the play.** One committed play a
+week is ~4 a month; sold as a pick service that is indefensible at $30 and
+invites comparison with people willing to promise a win — a comparison this
+brand loses by design, having disarmed on claims. The reasoned slate is the
+product, and it is what members actually receive.
+
+The copy says **"what arrives depends on what is in season"** out loud. That is
+the ~2026-09-27 problem handled in advance rather than discovered by a member in
+October, when MLB has ended and football is the whole product.
+
+Kept verbatim from the MLB block, because it is the best line on the page:
+*"If the ledger is not good enough to justify this, do not buy it."*
+
+STILL A HUMAN TASK, not a code one: anyone who subscribes before late September
+buys a daily product and will start receiving a weekly one. With
+`WHOP_CHECKOUT_URL` unset the member count is likely zero, which makes telling
+them free now and awkward later.
 
 ## 7. What this plan may NOT be used to justify
 

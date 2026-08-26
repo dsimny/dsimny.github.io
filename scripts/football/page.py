@@ -69,6 +69,36 @@ OUT = os.path.join(ROOT, "football")
 
 E = html.escape
 
+# The paid tier stays INVISIBLE until WHOP_CHECKOUT_URL is set, exactly as
+# build_site.py does it: the site never advertises something that cannot be
+# bought, and the switch is one repo variable rather than an edit.
+PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
+PREMIUM_PRICE = "$30/month"
+
+
+def upgrade_block(week=None):
+    """The football CTA. Leads with the SLATE, never with the play.
+
+    One committed play a week is ~4 a month. Sold as a pick service that is
+    indefensible at this price and invites comparison with people willing to
+    promise a win - a comparison this brand loses by design, because it has
+    disarmed on claims. The ~57 reasoned games are the product.
+    """
+    if not PREMIUM_URL:
+        return ""
+    return f'''
+    <div class="upgrade">
+      <p class="joinlead">Members get the whole slate, before kickoff.</p>
+      <p class="joinsub">Every covered game reasoned through from market prices — not a shortlist —
+      plus the one play we would act on, committed and fingerprinted before it starts.
+      {PREMIUM_PRICE}.</p>
+      <p class="joinsub">No claim is made that it wins. It is staked at zero units and every play
+      lands on the public record above, win or lose, so you can check it before you pay and keep
+      checking after. If that record is not good enough to justify this, do not buy it.</p>
+      <a class="upgradebtn" href="{E(PREMIUM_URL)}" rel="noopener">Go premium</a>
+    </div>'''
+
+
 NOCLAIM = (
     "<strong>We make no claim that these plays win.</strong> Two pre-registered "
     "studies, both published in full, found this market cannot be out-forecast "
@@ -215,6 +245,8 @@ def render_week(week, reveal=None):
             f'matchups are listed so you can see nothing was added later.</p>'
             f'<ul class="plain">{names}</ul>')
 
+    parts.append(upgrade_block(week))
+
     nm = b.get("no_market", [])
     parts.append('<h2>No market</h2>')
     if nm:
@@ -294,6 +326,7 @@ def render_hub():
   publish exactly like wins. Zero units throughout — the P&amp;L column is
   what one unit would have returned, not money risked.</p>
   {table}
+  {upgrade_block()}
   <h2>Weeks</h2>
   <ul class="plain">{wl}</ul>
   <p class="backline"><a href="/">Today's board</a> ·

@@ -497,11 +497,33 @@ commit_block = f'''
 
 # Deliberately promises access and disclosure, never profit. The ledger is the
 # only claim we are entitled to make, and it is public either way.
+#
+# THE TWO SPORTS ARE DESCRIBED SEPARATELY BECAUSE THEY CLAIM DIFFERENT THINGS,
+# and blurring them would be the most damaging sentence on the site. Baseball
+# has a model with an edge gate and a circuit-breaker log; football has two
+# published studies saying its market cannot be out-forecast, makes NO
+# expectation claim, and is staked at zero units (docs/FOOTBALL_PIPELINE.md
+# section 1, House Rules 4 and 8). One "our edge" spanning both would be a claim
+# we have already published the evidence against.
+#
+# It also leads football with the SLATE rather than the play, deliberately. One
+# committed play a week is ~4 a month; sold as a pick service that is
+# indefensible at this price and invites comparison with people willing to
+# promise a win. The ~57 reasoned games are the product, and after MLB ends in
+# late September they are the whole product - which is why "what arrives depends
+# on what is in season" is said out loud rather than discovered by a member in
+# October.
 upgrade_block = f'''
     <div class="upgrade">
-      <p class="joinlead">Premium: the whole board, before first pitch.</p>
-      <p class="joinsub">Every play we allocate, with the side, the price, the sizing, the edge and the
-      full circuit-breaker log, in Discord before the games start. {PREMIUM_PRICE}.</p>
+      <p class="joinlead">Premium: everything we publish, before it happens.</p>
+      <p class="joinsub"><strong>Baseball.</strong> Every play we allocate — side, price, sizing,
+      model edge and the full circuit-breaker log — in Discord before first pitch.</p>
+      <p class="joinsub"><strong>Football.</strong> The whole slate reasoned through from market
+      prices — every covered game, not a shortlist — plus the one play we would act on, committed
+      and fingerprinted before kickoff. <strong>Football makes no claim to beat the market.</strong>
+      We ran two pre-registered studies and published both failures, and it is staked at zero units.
+      What you are buying there is the research and the receipts, not a forecast.</p>
+      <p class="joinsub">{PREMIUM_PRICE}. What arrives depends on what is in season.</p>
       <p class="joinsub">Every one of them still publishes on the public ledger after grading, winners
       and losers alike, so you can check the record before you pay and keep checking after. If the
       ledger is not good enough to justify this, do not buy it.</p>

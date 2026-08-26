@@ -19,10 +19,23 @@ Required reading before touching anything here:
 
 Everything else in this document can slip. These two cannot.
 
-| date | deadline | consequence of missing it |
+| date (UTC) | deadline | consequence of missing it |
 |---|---|---|
-| **Sat 2026-08-29** | football capture running automatically | A missed T-24 window is gone permanently. Re-acquiring it means buying historical odds again — the last purchase was $59 and ~10,700 credits. Nothing else in this plan is unrecoverable; this is. |
+| **2026-08-28 10:00Z** | football capture running automatically | The first NCAAF Week 1 T-24 window (North Carolina @ TCU). A missed T-24 window is gone permanently — re-acquiring it means buying historical odds again. Nothing else in this plan is unrecoverable; this is. |
 | **Thu 2026-09-10** | NFL season-type allowlist implemented (gap C) | Preseason entries book into a permanent append-only ledger looking exactly like real ones. `FOOTBALL_PIPELINE.md` section 3a names this failure explicitly and calls it quiet, which is what makes it dangerous. |
+
+Both dates are MEASURED, not assumed — `capture_schedule.py` reads real kickoffs
+and reports the windows. Re-run it rather than trusting this table:
+
+    python scripts/football/capture_schedule.py --sport ncaaf
+    python scripts/football/capture_schedule.py --sport nfl --days 18
+
+As at 2026-08-26 that reported 16 NCAAF windows and 36 NFL windows upcoming,
+0 satisfied, 0 missed. **A preseason NFL T-24 window opens earlier still
+(2026-08-26 17:00Z, Steelers @ Bills).** Missing that one costs only a
+rehearsal, not evidence — preseason is captured and never graded (section 3a) —
+but it is the cheapest possible end-to-end test of the capture path against a
+real board, so take it if the workflow is ready in time.
 
 CAPTURE BEFORE YOU PUBLISH. The capture path is independent of every other gap
 here — it needs no site, no ledger, no writeup, no paywall. Turn it on first and
@@ -68,7 +81,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 
 | # | gap | why it blocks launch |
 |---|---|---|
-| A | Branch not merged: `claude/nfl-football-model` carries 32 commits `main` lacks; `main` has moved 31 commits since the split | `main` is what GitHub Pages deploys. Today, zero football code is live. |
+| A | ~~Branch not merged~~ **DONE 2026-08-26** (merge commit `b55f732`) | `main` is what GitHub Pages deploys. All 32 football commits are now on it; no behaviour changed, because no workflow runs them yet. |
 | B | **No live board builder** | `grade_football.py` runs the rule AFTER results exist. Nothing runs it BEFORE kickoff. This is the core missing piece. |
 | C | NFL grading unwired: `--sport` is `choices=["ncaaf"]`, NFL results store absent, season-type allowlist unimplemented | Hard deadline 2026-09-10. See section 0. |
 | D | `data/football/football_ledger.json` does not exist | First entry is permanent under House Rule 1. Create it deliberately, not as a side effect of a test run. |
@@ -76,7 +89,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | F | No site surface: `build_site.py` is MLB-only, single-file | No football page, no football ledger view, no fp-v0.1 copy. |
 | G | No football Discord delivery | `post_discord.py board` mode is MLB-shaped. |
 | H | No football workflow: all 7 files in `.github/workflows/` are MLB | Every football script has only ever been run by hand. |
-| I | Odds credits: ~458 of 500 projected for September | Section 6, open decision. |
+| I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
 | J | Premium copy is MLB-flavoured and claims nothing about football | House Rules 4 and 8. Football makes NO expectation claim and the copy must say so. |
 | K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST. |
 
@@ -130,16 +143,22 @@ Dates are targets. The section 0 deadlines are not.
 
 ### Phase 0 — capture (now -> Sat 2026-08-29)
 
-- Merge `claude/nfl-football-model` into `main` (gap A). Expect real conflicts:
-  `main` gained offseason handling (`season_state.json`), blog changes and the
-  published research post while the branch was out.
+- ~~Merge `claude/nfl-football-model` into `main`~~ **DONE 2026-08-26**, commit
+  `b55f732`. Four conflicts (`.gitignore`, `CLAUDE.md`, `odds_credits.json`,
+  `season_state.json`), all resolved as unions except `season_state.json` which
+  took main's newer CI-written value. `index.html` / `feed.xml` untouched. All
+  six football modules import from `main` and the scheduler runs.
+- ~~Resolve the credits decision~~ **MOOT** — see section 6a.
 - Add `football-capture.yml` (gap H, capture half only): run hourly, call
   `capture_schedule.py --run` for both sports, no-op when no window is open,
   stage `data/football/odds/` AND `data/odds_credits.json` (any new odds caller
   must stage the credit log — this was a real defect on `capture-closing`).
-- Resolve the credits decision (section 6). It gates how often this runs.
 - **Done when:** NCAAF Week 1 T-24 and closing windows are being satisfied
   automatically and the captures are landing in the repo.
+
+NOTE FOR WHOEVER WIRES THE WORKFLOW: `capture_schedule.py` without `--run`
+reports and spends nothing, so the workflow can be dry-run against the real
+schedule before it is ever allowed to fire. Do that first.
 
 ### Phase 1 — book it (Sat 2026-08-29 -> Sun 2026-09-06)
 
@@ -185,7 +204,7 @@ is the asset that makes the paywall honest, and it costs about two weeks.
 | 2026-08-29 | NCAAF Week 1 | Capture deadline. Nothing publishes. |
 | 2026-09-08 | Daily Pick STAKING REVIEW | Separate strategy, separate decision. Football is 0u regardless and this review authorises nothing here. Do not move the date. |
 | 2026-09-10 | NFL opener | Allowlist deadline. First free football publication. |
-| ~2026-09-27 | MLB regular season ends | Credit pressure drops to football-only (~208/mo). Also: decide what $30 buys in October. |
+| ~2026-09-27 | MLB regular season ends | Decide what $30 buys in October, when football is the only live product. Not a credit event — see section 6a. |
 
 ## 5. State of the acquisition asset — flagged, not solved
 
@@ -202,25 +221,39 @@ This strengthens the process-and-receipts framing already chosen, and it means
 the football ledger will be doing most of the persuading by itself. It is a
 reason to launch with graded football weeks in hand rather than without them.
 
-## 6. OPEN DECISIONS — needed before Phase 1
+## 6. DECISIONS — 6a resolved, 6b still open and still blocking Phase 3
 
-**6a. Odds API tier.** Free tier is 500 credits/month.
+**6a. Odds API tier — RESOLVED, and it was already resolved before this plan
+was written.** This section originally said the free tier's 500/month cap made
+September tight (~458/500) and recommended upgrading. **That was wrong.** The
+merge surfaced the correction in two places that main had not yet seen: the
+branch's own CLAUDE.md notes the paid tier went live, and
+`data/odds_credits.json` shows the balance directly.
 
-| caller | credits/month |
+| | |
 |---|---:|
-| MLB (`fetch_data` + `fetch_closing`, 8/day) | ~250 |
-| Football, h2h only, NCAAF + NFL, T-24 + closing | ~208 |
-| **September total** | **~458 / 500** |
+| plan | PAID, 100,000 credits / calendar month (live since ~2026-08-21) |
+| used, month to 2026-08-26T01:30Z | 28,305 |
+| **remaining** | **71,695** |
+| football need, h2h, NCAAF + NFL, T-24 + closing | ~208 / month |
 
-It fits on paper with ~8% headroom and no room for a re-run, a backfill, or a
-failed workflow retried. Note this is h2h ONLY — football coverage is moneyline
-and nothing else; at three markets football alone is ~620 and does not fit.
+**The allowance does not carry over**, so an unspent month is simply gone.
+Football's cost is a rounding error and credits gate nothing in this plan.
 
-`CLAUDE.md`'s upgrade decision rule condition 2 — "a market with a real product
-surface ships and its markets push the projected monthly spend over 450" — is
-arguably now met. **Recommendation: upgrade.** The alternative is cutting MLB
-capture cadence during the last month of its season, which degrades a live
-product to protect a launching one.
+Two corrections that follow, and neither should be inherited from the old
+framing:
+- Capture cadence is free to be generous. Run the scheduler hourly; do not
+  economise on windows.
+- `fetch_odds.py --markets h2h` stays the default, but **for a product reason,
+  not a budget one**: the selection rule uses the moneyline and nothing else,
+  and layer 2 may not mention a number layer 1 did not produce. Adding spreads
+  or totals is now affordable and is still a spec change under
+  `FOOTBALL_PIPELINE.md` section 7, not a flag flip.
+
+The lesson worth keeping: the budget arithmetic in CLAUDE.md was correct and
+its conclusion was stale, because the constraint moved and the doc did not.
+`data/odds_credits.json` is the evidence and it is in the repo in the clear —
+check it rather than the prose.
 
 **6b. Price.** Does $30/month stand for a football product that makes no
 expectation claim, and what does it buy in October once MLB has ended? This is
@@ -258,3 +291,4 @@ a product decision, not a code decision, and Phase 3 cannot ship without it.
 | version | date (2026) | change |
 |---|---|---|
 | fl-v0.1 | Aug 26 | Initial plan. Gaps A-K, two hard deadlines (capture 08-29, NFL allowlist 09-10), four phases targeting premium live NFL Week 2-3, two open decisions (Odds API tier, price). |
+| fl-v0.2 | Aug 26 | Gap A closed (branch merged, `b55f732`). **Gap I withdrawn: the free-tier premise was wrong** — a paid 100,000/month tier has been live since ~08-21 with 71,695 remaining, so credits gate nothing and decision 6a is resolved rather than open. Capture deadline sharpened from "Sat 08-29" to the measured first window, 2026-08-28 10:00Z, with the 08-26 17:00Z preseason rehearsal noted. |

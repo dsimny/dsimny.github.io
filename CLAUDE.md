@@ -137,10 +137,28 @@ LOUD FAILURE. Three layers, because they catch different things:
 NOT DONE, deliberately: a missed day stays missed. No board is ever backfilled
 for a day the pipeline skipped — the banner IS how a missed day is communicated.
 
-## Football fb-v0.2 — the price hypothesis (drafted 2026-08-24, NOT FROZEN)
+## Football fb-v0.2 — the price hypothesis (frozen 2026-08-24, ANSWERED)
 
-fb-v0.1 is closed: the market-blind model lost to the de-vigged consensus 9/9
-(`docs/FOOTBALL_RESULT_T24.md`). Do not reopen it by adding features.
+BOTH FOOTBALL STUDIES ARE CLOSED AND BOTH SAID NO. Do not reopen either by
+adding features, re-cutting book sets, or trying a new window.
+
+- fb-v0.1: the market-blind model lost to the de-vigged consensus 9/9, zero
+  incremental value (`docs/FOOTBALL_RESULT_T24.md`).
+- fb-v0.2: best price at T−24 vs closing fair value is EV −1.05%, and the
+  result reconciles almost exactly to the vig (`docs/FOOTBALL_RESULT_PRICE.md`).
+  The gate failed at its first condition, so **the 2025 holdout was NOT claimed
+  and remains unspent.** CLV came out NEGATIVE (−0.49), which the spec did not
+  predict: selecting the biggest book-vs-consensus outlier means buying the
+  number most likely to move against you. That finding is why the product's
+  selection rule carries a corroboration guard.
+
+What ships instead is the PRODUCT, not a picks model: see
+`docs/FOOTBALL_PIPELINE.md` (fp-v0.1, frozen) and `docs/FOOTBALL_LAUNCH.md`
+for the build order. It makes NO expectation claim, and copy saying otherwise
+is barred.
+
+The rest of this section is the spec's reasoning, kept because it is why the
+answer is believed:
 
 fb-v0.2 asks a DIFFERENT question — not "can we out-forecast the market" but
 "is the BEST available price at T-24 better than the market's own closing fair
@@ -165,10 +183,13 @@ wrong and expensive to get wrong late:
   purpose. Adding a future spec means adding it to `asof.SPECS`; a spec the
   registry does not know about is a spec the lock does not check.
 
-BLOCKED ON A PURCHASE: the holdout is the 2025 season and there are no 2025
-prices on disk (the purchased window ends 2025-02-08, the end of the 2024
-season). ~3,600 credits. The paid tier is live with ~89,287 remaining and the
-allowance does not carry over.
+THE HOLDOUT IS UNSPENT, AND NOT BECAUSE OF MONEY. The 2025 season was never
+purchased (~3,600 credits; the bought window ends 2025-02-08) and now must not
+be bought for v0.2, because v0.2's gate failed on data already in hand. Section
+10 of the spec lands on: report it, publish it, do not spend the holdout. It is
+reserved for a future fb-v0.3 with its own pre-registration. Buying 2025 to
+"have another look" at a closed question is exactly the overfitting the freeze
+exists to prevent.
 
 ## The offseason (season_state.json, added 2026-08-24)
 
@@ -416,11 +437,32 @@ such cost — Meta's Graph API is not metered — so its post keeps the link.
 
 ## The Odds API: tier, credit budget, and when to upgrade (2026-08-17)
 
-TIER IN USE: the FREE tier — 500 credits per calendar month, one key
-(ODDS_API_KEY). The `/v4/sports/.../odds` endpoint bills ONE CREDIT PER MARKET
-PER REGION PER CALL. So the markets string is a price tag, not a preference.
+**TIER CHANGED 2026-08-21 — this section's original free-tier framing is kept
+below because the per-call arithmetic is unchanged and still governs, but the
+CAP IS NO LONGER 500.** A PAID tier is live at 100,000 credits per calendar
+month, bought for the football historical pull. Measured from
+`data/odds_credits.json`: 28,305 used / **71,695 remaining** as at
+2026-08-26T01:30Z. THE ALLOWANCE DOES NOT CARRY OVER — an unspent month is
+simply gone, so "save credits" is not a reason for anything.
 
-THE ACTUAL BUDGET, counted from the code and the run history:
+Consequences, because the old constraint shaped several decisions that should
+now be re-read rather than inherited:
+- The "upgrade when…" decision rule at the end of this section is SPENT. It
+  fired and was acted on. It is kept as the record of why.
+- Football capture (~208/month at h2h) is a rounding error against 100,000, not
+  a budget event. `docs/FOOTBALL_LAUNCH.md` section 6a records this.
+- `scripts/football/fetch_odds.py` defaults to `--markets h2h` and its comment
+  justifies that on the 500 cap. **The default is still correct, but the reason
+  is now a product reason, not a budget one:** the selection rule in
+  `docs/FOOTBALL_PIPELINE.md` sections 3–4 uses the moneyline and nothing else,
+  and layer 2 may not mention a number layer 1 did not produce. Adding spreads
+  or totals is affordable now; it is still a spec change, not a flag flip.
+
+TIER MECHANICS (unchanged): the `/v4/sports/.../odds` endpoint bills ONE CREDIT
+PER MARKET PER REGION PER CALL. So the markets string is a price tag, not a
+preference.
+
+THE ACTUAL MLB BUDGET, counted from the code and the run history:
 
 | caller | markets × regions | calls/day | credits/day |
 |---|---|---|---|
@@ -428,10 +470,12 @@ THE ACTUAL BUDGET, counted from the code and the run history:
 | fetch_closing.py (capture-closing) | h2h,totals × us = 2 | 3 | 6 |
 | **total** | | **4** | **8** |
 
-8/day ≈ 250/month against a 500 cap — roughly 50% headroom. Two things eat it
-fast, and neither may be done casually: adding a market (spreads would be +50%
-across BOTH callers, not just the board) or adding capture runs (each new
-cron-job.org trigger is +2/day ≈ +60/month).
+8/day ≈ 250/month. Against the old 500 cap that was ~50% headroom and the two
+things that ate it fast — adding a market (spreads would be +50% across BOTH
+callers, not just the board) or adding capture runs (each new cron-job.org
+trigger is +2/day ≈ +60/month) — could not be done casually. Against 100,000
+they are noise. The per-call arithmetic still matters for reasoning about what
+a change costs; the scarcity it implied does not.
 
 SPREADS ARE NOT FETCHED, and adding them was considered and declined here:
 nothing is staked on spreads today, so it would be a 50% budget increase for a
@@ -497,8 +541,10 @@ MLB alone runs ~250/month against the free 500, so the free tier is correctly
 sized again. It has no room for a second market or extra capture runs, which is
 precisely what the rule below is for.
 
-DECISION RULE FOR UPGRADING TO THE PAID TIER: upgrade when any ONE of these is
-true, and not before —
+DECISION RULE FOR UPGRADING TO THE PAID TIER — **SPENT 2026-08-21, kept as the
+record of why.** Condition 2 fired: football shipped a market with a real
+product surface and pushed projected spend past the cap. The rule read:
+upgrade when any ONE of these is true, and not before —
 1. Two consecutive months close above 400 credits used (i.e. under 20% headroom).
 2. A market with a real product surface (spreads, F5, NRFI) ships and its
    markets push the projected monthly spend over 450.

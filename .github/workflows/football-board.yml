@@ -1,0 +1,154 @@
+name: Football board
+# Builds the week's board, writes the prose, renders the pages and delivers to
+# Discord. Runs hourly and is a no-op on most of those runs, by design.
+#
+# WHAT ACTUALLY HAPPENS EACH HOUR:
+#   before the decision moment  every game that has just reached its own T-24 is
+#                               fingerprinted into game_commitments.json and
+#                               frozen. Nothing is chosen, nothing is posted.
+#   at/after the decision moment (Saturday 14:00 US/Eastern) the week's board is
+#                               written ONCE - encrypted, with its SHA-256
+#                               published - and then the pages render and the
+#                               Discord posts go out.
+#   every hour after that       board.py refuses to overwrite an existing board,
+#                               discord.py skips a week it has already sent, and
+#                               page.py re-renders (cheap, and it is what flips a
+#                               week to its revealed form after grading).
+#
+# So the hourly cadence costs almost nothing and means no single missed run can
+# lose the week: the next hour picks up exactly where this one stopped.
+#
+# ON GITHUB CRON HERE, unlike football-capture.yml. Capture had to move to
+# external dispatch because a missed T-24 window is unrecoverable - the price is
+# simply gone. Nothing here is unrecoverable: a late board is a late board, and
+# the next run writes it. Lateness costs minutes of delay, not evidence. If the
+# board should land closer to the decision moment than GitHub's ~50 minutes of
+# drift allows, add a cron-job.org entry against the dispatch endpoint the same
+# way capture did - the trigger is already declared.
+#
+# BOARD_ENCRYPTION_KEY IS REQUIRED AND ITS ABSENCE FAILS THE RUN. crypto_box's
+# refuse_plaintext_in_ci() sees GITHUB_ACTIONS and raises rather than writing
+# picks in the clear. That is the correct direction to fail: no board at all is
+# a bad day, a board published unencrypted before kickoff is the product given
+# away.
+#
+# ANTHROPIC_API_KEY is OPTIONAL. Without it every game is marked "no writeup (no
+# API key configured)" and the board still publishes its numbers - the same
+# degrade-never-die rule as a missing Discord webhook.
+on:
+  schedule:
+    - cron: "23 * * * *"    # hourly at :23, off the top of the hour and clear
+                            # of football-capture's :07 slot so the two do not
+                            # race for the same data/ push.
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-board
+  cancel-in-progress: false
+
+jobs:
+  board:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Work out the current slate week
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          import os, sys
+          sys.path.insert(0, "scripts/football")
+          import market
+          print(f"SLATE_WEEK={market.slate_week(market.now_utc())}")
+          PY
+          echo "slate week: $SLATE_WEEK"
+
+      # Commits newly-evaluable games at their own T-24, and writes the board
+      # once the decision moment has passed. Both are no-ops when there is
+      # nothing to do, so this is safe to run every hour.
+      - name: Build the board
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}   # required
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}         # optional
+          OLS_WRITEUP_MODEL: ${{ vars.OLS_WRITEUP_MODEL }}
+        run: python scripts/football/board.py --sports nfl,ncaaf --writeups
+
+      # Always re-render, not only when a board was just written: a week's page
+      # changes when GRADING flips its commitment to revealed, which happens in
+      # a different workflow days later.
+      - name: Render the football pages
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/page.py --all
+
+      - name: Post the free play
+        if: ${{ !cancelled() }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/discord.py free --week "$SLATE_WEEK"
+
+      - name: Post the full slate to members
+        if: ${{ !cancelled() }}
+        env:
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/discord.py slate --week "$SLATE_WEEK"
+
+      - name: Commit
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash || true
+          # Explicit paths, never `git add -A`: a broad add from CI is how a
+          # locally built index.html or a stray file reaches a public repo.
+          # data/football/board_*.json is NOT listed - a plaintext board before
+          # its reveal is the one thing that must not be committed, and in CI
+          # crypto_box refuses to write one anyway.
+          git add data/football/board_*.enc \
+                  data/football/commitments.json \
+                  data/football/game_commitments.json \
+                  data/post_status.json \
+                  football/ 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Football board $SLATE_WEEK"
+          git push
+
+  alert:
+    needs: board
+    if: ${{ always() && needs.board.result != 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Post the failure to Discord
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          set +e
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
+          STEP=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs" --jq "$Q_STEP" 2>/dev/null)
+          [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
+          python scripts/post_discord.py alert \
+            "**Football board run did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          This one IS self-healing: the next hourly run picks up where this stopped, and board.py, discord.py and page.py are each safe to re-run. What it costs is delay, not evidence. Two exceptions worth checking rather than waiting on: if the failing step is \`Build the board\` with a BOARD_ENCRYPTION_KEY error the secret has gone missing and no board can be written at all until it is restored; and if this is the run at the decision moment, members are waiting on a slate that has not been sent."
+          exit 0

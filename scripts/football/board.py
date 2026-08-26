@@ -302,6 +302,31 @@ def build(sports, week, asof, commit=True):
     }
 
 
+def mark_revealed(week):
+    """Flip a week's commitment to revealed once its plaintext is published.
+
+    Mirrors crypto_box.mark_revealed. Called by grading, not by a person: House
+    Rule 7 says held plays are held, not hidden, and 'withholding a pick before
+    kickoff is the product, withholding it after is fraud'. A reveal that
+    depends on someone remembering to run it is a reveal that eventually does
+    not happen.
+    """
+    if not os.path.exists(COMMITMENTS):
+        return False
+    with io.open(COMMITMENTS, encoding="utf-8") as f:
+        log = json.load(f)
+    hit = False
+    for c in log.get("commitments", []):
+        if c.get("slate_week") == week and not c.get("revealed"):
+            c["revealed"] = True
+            c["revealed_utc"] = market.iso(market.now_utc())
+            hit = True
+    if hit:
+        with io.open(COMMITMENTS, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(log, f, indent=1)
+    return hit
+
+
 def record_commitment(week, board_sha, committed_utc):
     """Append-only, mirroring crypto_box.record_commitment.
 
@@ -389,7 +414,18 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="print, write nothing")
     ap.add_argument("--commit-only", action="store_true",
                     help="freeze newly-evaluable games at their T-24; never select")
+    ap.add_argument("--writeups", action="store_true",
+                    help="generate layer-2 prose BEFORE fingerprinting, so the "
+                         "commitment covers the words as well as the numbers")
+    ap.add_argument("--mark-revealed", metavar="WEEK",
+                    help="flip a week's commitment to revealed (grading does this)")
     args = ap.parse_args()
+
+    if args.mark_revealed:
+        done = mark_revealed(args.mark_revealed)
+        print(f"{args.mark_revealed}: "
+              + ("marked revealed" if done else "no unrevealed commitment"))
+        return 0
 
     asof = market.parse_utc(args.asof) if args.asof else market.now_utc()
     if args.asof and not asof:
@@ -426,6 +462,17 @@ def main():
         print(f"\nboard for {week} already exists; refusing to overwrite "
               f"(a commitment is not rewritten).")
         return 0
+
+    # WRITEUPS BEFORE THE FINGERPRINT, on purpose. Layer 2 is generated once,
+    # here, and then hashed with everything else - so the published commitment
+    # proves the PROSE was not edited after kickoff either, not just the
+    # numbers. Generating it after the hash would leave the words outside the
+    # only mechanism that makes them checkable. It also bounds the API cost to
+    # one slate per week: this branch is reached once, when the board is first
+    # written, and the exists-check above refuses a second pass.
+    if args.writeups:
+        import writeup
+        writeup.annotate(b)
 
     sha = crypto_box.sha256_of(b)
     if crypto_box.have_key():

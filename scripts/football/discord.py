@@ -302,7 +302,12 @@ def main():
     b, revealed = fbpage.load_board(week)
     if b is None:
         print(f"no board for {week}; nothing to post.")
-        record(week, status_mode, "no_board")
+        # NOT under --dry-run. A preview that writes state is not a preview, and
+        # this one did: two dry-runs left "no_board" rows in post_status.json,
+        # which is a file CI commits. Every other write in this file was already
+        # guarded; this path was missed.
+        if not args.dry_run:
+            record(week, status_mode, "no_board")
         return 0
     if not b.get("decision_made"):
         print(f"week {week} has no chosen play yet (decision moment "

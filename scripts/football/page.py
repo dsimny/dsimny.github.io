@@ -352,10 +352,27 @@ def main():
                     help="force the full reveal (normally driven by the "
                          "commitment log, so it is not a weekly judgement call)")
     ap.add_argument("--hub-only", action="store_true")
+    ap.add_argument("--all", action="store_true",
+                    help="re-render every week that has a board, then the hub")
     args = ap.parse_args()
 
     os.makedirs(OUT, exist_ok=True)
-    if not args.hub_only and args.week:
+    if args.all:
+        # RE-RENDER EVERY WEEK, not just the current one. A week's page changes
+        # when its commitment flips to revealed, which happens during GRADING -
+        # a different run, days after that page was last written. Rendering only
+        # "this week" would leave graded weeks frozen in their redacted form,
+        # which is the exact failure House Rule 7 forbids: held after grading is
+        # not held, it is hidden.
+        weeks = sorted({os.path.basename(p).replace("board_", "")
+                        .replace(".json", "").replace(".enc", "")
+                        for p in os.listdir(FB)
+                        if p.startswith("board_")})
+        for w in weeks:
+            render_week(w, True if args.reveal else None)
+        if not weeks:
+            print("no boards on disk yet; hub only.")
+    elif not args.hub_only and args.week:
         render_week(args.week, True if args.reveal else None)
     render_hub()
     return 0

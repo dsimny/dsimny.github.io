@@ -88,7 +88,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | E | **Layer 2 BUILT 2026-08-26** — `writeup.py` + `selftest_writeup.py` | Claude via the Messages API, with the numeral validator enforced. Needs `ANTHROPIC_API_KEY` set before it can generate; the round-trip is unproven until then. |
 | F | **Site surface BUILT 2026-08-26** — `page.py` + `selftest_page.py` | `/football/` hub and `/football/<week>/`. Redacted before grading, full after. Still to wire: a link from the MLB home page and a rebuild step in CI. |
 | G | **Discord delivery BUILT 2026-08-26** — `discord.py` + `selftest_discord.py` | `free` to the public channel, `slate` (full slate + premium) to members. Idempotent per slate week. Needs the webhooks already configured for MLB. |
-| H | Football workflows: **capture DONE** (`football-capture.yml`, 2026-08-26) — board and grade runs still missing | Capture is the half with the unrecoverable deadline. It is inert until pushed. |
+| H | **Workflows DONE 2026-08-26** — `football-capture.yml`, `football-board.yml`, `football-grade.yml`, plus the home-page link | Capture hourly at :07, board hourly at :23, grade daily at 11:00Z. |
 | I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
 | J | Premium copy is MLB-flavoured and claims nothing about football | House Rules 4 and 8. Football makes NO expectation claim and the copy must say so. |
 | K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST. |
@@ -493,6 +493,52 @@ ONE SMALL THING WORTH THE NOTE: the first dry-run crashed with
 console encoding. Message text now stays inside cp1252. The dry-run is how copy
 gets checked before it reaches members, and a preview that only works on the CI
 runner is not a preview.
+
+### H — the workflows — DONE 2026-08-26
+
+Three jobs, and the difference between them is what happens when one is missed.
+
+| workflow | when | missing a run costs |
+|---|---|---|
+| `football-capture.yml` | hourly :07 + external dispatch | **a price, permanently** |
+| `football-board.yml` | hourly :23 | minutes of delay |
+| `football-grade.yml` | daily 11:00Z | a day of delay |
+
+**That table is why only capture needed moving off GitHub cron.** Board and
+grade are self-healing: the next run picks up exactly where the last stopped,
+because `board.py` refuses to overwrite an existing board, `discord.py` skips a
+week already sent, the ledger refuses a week already graded, and `page.py`
+re-renders from scratch. Capture is the one job whose missed window cannot be
+recovered at any price short of buying historical odds.
+
+**The hourly board run is a no-op almost every time, deliberately.** Before the
+decision moment it only freezes newly-evaluable games at their own T−24. At the
+decision moment it writes the board ONCE. After that every step declines to
+repeat itself. So the cadence costs nothing and no single failed run can lose
+the week.
+
+**Writeups are generated BEFORE the fingerprint** (`board.py --writeups`), so
+the published SHA-256 proves the prose was not edited after kickoff either — not
+just the numbers. It also bounds the API cost to one slate per week, because
+that branch is reached only when the board is first written.
+
+**Grading drives the reveal, off the LEDGER rather than off a date.** A week is
+revealed exactly when it has actually been graded, which is the only definition
+that cannot drift from what the record says. House Rule 7 is not a thing anyone
+should have to remember to do.
+
+`page.py --all` re-renders EVERY week, not just the current one, because a
+week's page changes when grading flips it to revealed — days after that page was
+last written. Rendering only "this week" would leave graded weeks frozen in
+their redacted form, which is precisely the failure House Rule 7 forbids.
+
+TWO BUGS FOUND WHILE TESTING, both silent:
+- The alert steps ended their message with a trailing `\`, so `exit 0` became
+  two extra arguments to the alerter instead of a command. Caught by reading the
+  bytes rather than trusting that the YAML parsed.
+- A `discord.py --dry-run` against a week with no board WROTE to
+  `post_status.json` — a file CI commits. Every other write was guarded; that
+  path was missed. A preview that mutates state is not a preview.
 
 ## 7. What this plan may NOT be used to justify
 

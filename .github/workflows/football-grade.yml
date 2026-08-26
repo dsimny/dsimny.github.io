@@ -1,0 +1,159 @@
+name: Football grade
+# Refreshes results, grades finished slate weeks into the append-only football
+# ledger, reveals their boards, and re-renders the pages.
+#
+# THIS IS THE RUN THAT MAKES THE PAYWALL HONEST. House Rule 7: held plays are
+# held, not hidden. Withholding a pick before kickoff is the product;
+# withholding it after is fraud. So the reveal is driven from here, by the same
+# job that books the result, rather than by a person remembering to publish a
+# loss. A reveal that depends on somebody feeling like it is a reveal that
+# eventually does not happen.
+#
+# DAILY AT 11:00Z (~7am ET), which is after every US kickoff has finished,
+# including a Monday night game on the west coast.
+#
+# ON GITHUB CRON, and here that is genuinely fine - the distinction that moved
+# football-capture.yml to external dispatch does not apply. A missed capture
+# window is unrecoverable: the price is gone. A missed grading run is not: the
+# results are still on ESPN tomorrow, the captures are still on disk, and the
+# next run books exactly the same entries. Lateness costs a day of delay, not
+# evidence.
+#
+# APPEND-ONLY, AND THE GRADER ENFORCES IT. A slate week already in the ledger is
+# refused rather than recomputed (House Rule 1). So re-running this is safe, and
+# a week can never be quietly regraded into a better-looking number.
+#
+# SEASON TYPE IS FILTERED BY THE GRADER, not here. Preseason and bowls are
+# fetched and stored so the refusal is auditable, then refused by name. See
+# docs/FOOTBALL_PIPELINE.md section 3a.
+on:
+  schedule:
+    - cron: "0 11 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-grade
+  cancel-in-progress: false
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      # A generous window rather than "yesterday": a game postponed into the
+      # following week, or a run that failed for two days, must still be picked
+      # up. Both fetchers key by event id and overwrite in place, so re-fetching
+      # a day already stored changes nothing.
+      - name: Work out the refresh window
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone.utc)
+          start = (now - timedelta(days=12)).strftime("%Y%m%d")
+          end = (now + timedelta(days=1)).strftime("%Y%m%d")
+          print(f"REFRESH_RANGE={start}-{end}")
+          PY
+          echo "refreshing $REFRESH_RANGE"
+
+      - name: Refresh NCAA FBS results
+        run: python scripts/football/espn_ncaaf.py --dates "$REFRESH_RANGE"
+
+      - name: Refresh NFL results
+        if: ${{ !cancelled() }}
+        run: python scripts/football/espn_nfl.py --dates "$REFRESH_RANGE"
+
+      # Each sport grades independently: one sport's results feed being down
+      # must not stop the other's week being booked.
+      - name: Grade NCAA FBS
+        if: ${{ !cancelled() }}
+        run: python scripts/football/grade_football.py --sport ncaaf
+
+      - name: Grade NFL
+        if: ${{ !cancelled() }}
+        run: python scripts/football/grade_football.py --sport nfl
+
+      # Reveal every week the ledger has now booked. Driven off the LEDGER
+      # rather than off a date calculation: a week is revealed exactly when it
+      # has actually been graded, which is the only definition that cannot
+      # drift from what the record says.
+      - name: Reveal graded weeks
+        if: ${{ !cancelled() }}
+        run: |
+          python - <<'PY'
+          import io, json, os, subprocess, sys
+          p = "data/football/football_ledger.json"
+          weeks = []
+          if os.path.exists(p):
+              with io.open(p, encoding="utf-8") as f:
+                  weeks = sorted({e.get("slate_week") for e in
+                                  json.load(f).get("entries", []) if e.get("slate_week")})
+          if not weeks:
+              print("no graded weeks yet; nothing to reveal.")
+          for w in weeks:
+              subprocess.run([sys.executable, "scripts/football/board.py",
+                              "--mark-revealed", w], check=False)
+          PY
+
+      - name: Render the football pages
+        if: ${{ !cancelled() }}
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/page.py --all
+
+      - name: Commit
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash || true
+          # board_*.json IS staged here, unlike in football-board.yml: after
+          # grading the plaintext board is exactly what we are publishing, so
+          # anyone can hash it and check it against the fingerprint committed
+          # before kickoff.
+          git add data/football/football_ledger.json \
+                  data/football/commitments.json \
+                  data/football/ncaaf_results.json \
+                  data/football/nfl_results.json \
+                  data/football/board_*.json \
+                  football/ 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Football grade $(date -u +%F)"
+          git push
+
+  alert:
+    needs: grade
+    if: ${{ always() && needs.grade.result != 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Post the failure to Discord
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          set +e
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
+          STEP=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs" --jq "$Q_STEP" 2>/dev/null)
+          [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
+          python scripts/post_discord.py alert \
+            "**Football grading did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          Self-healing: results stay on ESPN, captures stay on disk, and tomorrow's run books the same entries. The ledger is append-only so nothing can be double-booked. What it costs is a day of delay. The part worth checking rather than waiting on is the reveal: until grading succeeds, that week's board stays REDACTED on the public page, and House Rule 7 says a graded play is published in full, win or lose. If this fails repeatedly, the site is holding back plays it has already settled."
+          exit 0

@@ -87,7 +87,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | D | `data/football/football_ledger.json` does not exist | First entry is permanent under House Rule 1. Create it deliberately, not as a side effect of a test run. |
 | E | **Layer 2 BUILT 2026-08-26** — `writeup.py` + `selftest_writeup.py` | Claude via the Messages API, with the numeral validator enforced. Needs `ANTHROPIC_API_KEY` set before it can generate; the round-trip is unproven until then. |
 | F | **Site surface BUILT 2026-08-26** — `page.py` + `selftest_page.py` | `/football/` hub and `/football/<week>/`. Redacted before grading, full after. Still to wire: a link from the MLB home page and a rebuild step in CI. |
-| G | No football Discord delivery | `post_discord.py board` mode is MLB-shaped. |
+| G | **Discord delivery BUILT 2026-08-26** — `discord.py` + `selftest_discord.py` | `free` to the public channel, `slate` (full slate + premium) to members. Idempotent per slate week. Needs the webhooks already configured for MLB. |
 | H | Football workflows: **capture DONE** (`football-capture.yml`, 2026-08-26) — board and grade runs still missing | Capture is the half with the unrecoverable deadline. It is inert until pushed. |
 | I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
 | J | Premium copy is MLB-flavoured and claims nothing about football | House Rules 4 and 8. Football makes NO expectation claim and the copy must say so. |
@@ -457,6 +457,42 @@ first run — the leak check matched `max-width:100%` in the stylesheet and
 reported the premium price as leaked. The test now strips CSS before checking,
 for the same reason the numeral validator exempts "one": a test that cries wolf
 gets loosened.
+
+### G — Discord delivery — BUILT 2026-08-26
+
+`scripts/football/discord.py`, two modes:
+
+- `free` → `DISCORD_WEBHOOK_URL` — the free play in full, two messages.
+- `slate` → `DISCORD_WEBHOOK_URL_MEMBERS` — the whole reasoned slate plus the
+  premium play. **This is the product**, for the reason gap F records: the
+  selection rule is public, so the full slate cannot be published before
+  kickoff without handing over the premium play.
+
+**IDEMPOTENT, deliberately unlike `post_discord.py`.** CLAUDE.md records that
+the MLB poster is intentionally not idempotent — a re-run re-posts one pick,
+a small and tolerable duplicate. This posts a WEEK. Measured on the self-test:
+57 games is **11 messages**, 120 games is 18. Re-running that buries the channel
+it exists to serve, so both modes check `post_status.json` and skip a week
+already sent. Status modes `fb_free` / `fb_slate` are distinct from
+`pick`/`board`/`email` for the reason `send_email.py` documents — `record()`
+deletes any existing (key, mode) row, so a shared mode lets one sender wipe
+another's guard and double-post.
+
+**Discord's limits are the real constraint and the character cap is the one that
+bites.** 2000 characters of content, 10 embeds, and 6000 characters across all
+embeds in one message. A writeup plus its number line runs ~700 characters, so
+ten embeds overflow a limit that a ten-per-message rule alone never catches. The
+chunker respects both, and the self-test runs 2, 9, 57 and 120-game slates
+because the week this breaks would be the biggest week of the season.
+
+Also asserted: the free post carries the free play and NOT the premium one, the
+members' post states 0 units, and no barred phrase appears in either channel.
+
+ONE SMALL THING WORTH THE NOTE: the first dry-run crashed with
+`UnicodeEncodeError` on a "→" (U+2192), which is outside Windows' cp1252
+console encoding. Message text now stays inside cp1252. The dry-run is how copy
+gets checked before it reaches members, and a preview that only works on the CI
+runner is not a preview.
 
 ## 7. What this plan may NOT be used to justify
 

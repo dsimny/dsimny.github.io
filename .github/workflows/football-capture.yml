@@ -1,0 +1,164 @@
+name: Capture football lines
+# Captures NFL and NCAA FBS moneyline prices into data/football/odds/ so that
+# every graded football entry has a re-checkable price behind it. Phase 0 of
+# docs/FOOTBALL_LAUNCH.md, and the only deadline in that plan that cannot be
+# recovered from: a T-24 window that closes with no capture in it is gone, and
+# re-acquiring it means buying historical odds again.
+#
+# THIS JOB PUBLISHES NOTHING. It writes price snapshots and commits them. No
+# board, no site, no Discord, no ledger. Grading is a separate job that does not
+# exist yet, so until it does this run is pure evidence-gathering.
+#
+# WHAT IT ACTUALLY DECIDES. scripts/football/capture_schedule.py reads each
+# game's real kickoff from ESPN and derives two windows per game:
+#     T-24    [kickoff-30h, kickoff-18h]
+#     closing [kickoff-6h,  kickoff]
+# It fires ONE capture per sport only if some window is open with no capture
+# already inside it. One capture returns the whole board and therefore satisfies
+# many games at once, which is why an hourly job does not mean hourly spending.
+# Those bounds mirror grade_football.py; if they ever drift, the grader wins.
+#
+# --eager, DELIBERATELY, and this is a decision the credit correction unlocked.
+# The script's default is to wait until the most urgent open window is within
+# ~2h of closing, which is the point of maximum overlap and the cheapest way to
+# run. That default assumed credits were scarce. They are not: the Odds API is
+# on a paid 100,000/month plan (see CLAUDE.md) and football needs ~208. Against
+# that, --eager costs at most ~720 credits/sport/month in the pathological case
+# and buys the thing that actually matters here - slack. GitHub's scheduler is
+# known in this repo to fire hours late (the reason the board run was moved off
+# it on 2026-07-23), and "hours late" against a 2h lead is a missed window.
+# Firing as soon as anything is open means a late run still lands inside the
+# window. Trading credits we have for windows we cannot get back is the right
+# way round.
+#
+# ON GITHUB CRON, same reasoning as heartbeat.yml. The two objections that moved
+# the board run to external triggers were lateness and that a late run re-posted
+# the free pick. The second does not apply - this job posts nothing. The first is
+# handled by --eager plus an hourly cadence rather than by pretending it is not
+# real. Hourly external triggers would be ~720 cron-job.org firings a month to
+# configure; that is not a better trade.
+#
+# A MISSING ODDS_API_KEY FAILS THIS RUN, on purpose, and this is a deliberate
+# departure from the MLB jobs where a missing key no-ops cleanly. There the cost
+# is one day's prices and a blank CLV column. Here the cost is a permanently
+# ungradeable game. fetch_odds.py calls localenv.require(), which raises, and the
+# alert job below says so.
+#
+# PRESEASON IS CAPTURED AND NEVER GRADED (FOOTBALL_PIPELINE.md section 3a).
+# Capturing it is a free rehearsal of this whole path against real games; the
+# allowlist in the grader is what keeps it out of the ledger. Note one known
+# seam, not worth engineering around for the few days it exists: ESPN's NFL
+# scoreboard lists preseason games, but the Odds API prices them under a separate
+# sport key (americanfootball_nfl_preseason), so a preseason-driven window may
+# fire a call that returns regular-season events instead. The capture is still
+# valid; only the rehearsal is less exact.
+on:
+  schedule:
+    - cron: "7 * * * *"     # hourly, at :07 - off the top of the hour, where
+                            # GitHub's scheduler is most congested.
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+# Several jobs share data/ and push to the same branch. Queue rather than cancel:
+# a cancelled capture is a possibly-missed window, which is the one outcome this
+# job exists to prevent.
+concurrency:
+  group: football-capture
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      # Report first, unconditionally and without --run. Costs nothing, spends
+      # nothing, and puts the window state in the log for every run - including
+      # the runs that decide to do nothing. When a window IS eventually missed,
+      # this is the record of what the scheduler believed at the time.
+      - name: Report window state (no spend)
+        run: |
+          python scripts/football/capture_schedule.py --sport ncaaf --days 8
+          python scripts/football/capture_schedule.py --sport nfl   --days 18
+
+      - name: Capture NCAA FBS if due
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python scripts/football/capture_schedule.py --sport ncaaf --days 8 --eager --run
+
+      # !cancelled() rather than always(): if NCAAF failed, NFL still gets its
+      # chance, because the two sports' windows are independent and one broken
+      # call must not cost the other a window. The job still fails overall.
+      - name: Capture NFL if due
+        if: ${{ !cancelled() }}
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python scripts/football/capture_schedule.py --sport nfl --days 18 --eager --run
+
+      # Also !cancelled(): a capture that succeeded before a later step failed is
+      # still evidence, and leaving it on a torn-down runner throws away the one
+      # thing this job cannot re-fetch.
+      - name: Commit captures
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash || true   # shares data/ with the board, grade and closing jobs
+          # odds_credits.json MUST be staged here. fetch_odds.py writes a reading
+          # on every call, but an unstaged reading dies with the runner - the
+          # exact defect that hid capture-closing's spending until 2026-08-20.
+          # Counters and timestamps only; no key material. The paid-data
+          # directories under data/football/ are gitignored, so this add cannot
+          # publish them.
+          git add data/football/odds/ data/odds_credits.json
+          git diff --cached --quiet || git commit -m "Football lines $(date -u +%FT%TZ)"
+          git push
+
+  # Loud failure, same rule as the board, grading and closing runs. The impact
+  # line is written to be TRUE rather than reassuring: this is the one job whose
+  # failure destroys something, so it must not read like the closing-capture
+  # alert, which is genuinely low-stakes.
+  alert:
+    needs: capture
+    if: ${{ always() && needs.capture.result != 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Post the failure to Discord
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
+        run: |
+          set +e
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
+          Q_JOB='[.jobs[] | select(.name != "alert") | select(.conclusion != "success") | .id][0] // empty'
+          RUN_JOBS="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
+          STEP=$(gh api "$RUN_JOBS" --jq "$Q_STEP" 2>/dev/null)
+          JOB_ID=$(gh api "$RUN_JOBS" --jq "$Q_JOB" 2>/dev/null)
+          [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
+          : > tail.txt
+          if [ -n "$JOB_ID" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$JOB_ID/logs" > joblog.txt 2>/dev/null \
+              && tail -n 20 joblog.txt > tail.txt
+          fi
+          python scripts/post_discord.py alert \
+            "**Football capture did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          THIS ONE IS NOT SELF-HEALING. Every other scheduled job recovers on its next run; this one cannot. If a game's T-24 or closing window closes with no capture inside it, that price is gone and the game becomes permanently ungradeable — the only way back is buying historical odds. Check it now rather than at the end of the day. Read the 'Report window state' step in the run log: it prints how many windows are OPEN NOW and how many are already MISSED. If a key or quota problem is the cause, fixing it and re-running by hand (Actions → Capture football lines → Run workflow) still saves every window that has not closed yet." \
+            --detail-file tail.txt
+          exit 0

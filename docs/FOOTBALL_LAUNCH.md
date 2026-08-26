@@ -88,7 +88,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | E | **Layer 2 does not exist** — zero code | Full-slate reasoning IS the product. The template is written; nothing renders a slate into prose. |
 | F | No site surface: `build_site.py` is MLB-only, single-file | No football page, no football ledger view, no fp-v0.1 copy. |
 | G | No football Discord delivery | `post_discord.py board` mode is MLB-shaped. |
-| H | No football workflow: all 7 files in `.github/workflows/` are MLB | Every football script has only ever been run by hand. |
+| H | Football workflows: **capture DONE** (`football-capture.yml`, 2026-08-26) — board and grade runs still missing | Capture is the half with the unrecoverable deadline. It is inert until pushed. |
 | I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
 | J | Premium copy is MLB-flavoured and claims nothing about football | House Rules 4 and 8. Football makes NO expectation claim and the copy must say so. |
 | K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST. |
@@ -149,16 +149,27 @@ Dates are targets. The section 0 deadlines are not.
   took main's newer CI-written value. `index.html` / `feed.xml` untouched. All
   six football modules import from `main` and the scheduler runs.
 - ~~Resolve the credits decision~~ **MOOT** — see section 6a.
-- Add `football-capture.yml` (gap H, capture half only): run hourly, call
-  `capture_schedule.py --run` for both sports, no-op when no window is open,
-  stage `data/football/odds/` AND `data/odds_credits.json` (any new odds caller
-  must stage the credit log — this was a real defect on `capture-closing`).
+- ~~Add `football-capture.yml`~~ **BUILT 2026-08-26**, and **inert until
+  pushed** — a workflow file on a local branch never runs. Hourly GitHub cron at
+  :07, both sports, reports window state every run before deciding anything,
+  stages `data/football/odds/` AND `data/odds_credits.json` (any new odds caller
+  must stage the credit log — a real defect on `capture-closing` until
+  2026-08-20). Two choices in it are worth not reverting by accident:
+  - **`--eager`**, so a capture fires as soon as any window is open rather than
+    waiting for the cheapest moment. GitHub's scheduler is known in this repo to
+    fire hours late, and hours late against the script's 2h default lead is a
+    missed window. Credits are abundant (section 6a) and windows are not; spend
+    the abundant one.
+  - **A missing `ODDS_API_KEY` FAILS this run**, unlike the MLB jobs where it
+    no-ops. There a missing key costs one day of prices; here it costs a
+    permanently ungradeable game.
 - **Done when:** NCAAF Week 1 T-24 and closing windows are being satisfied
   automatically and the captures are landing in the repo.
 
-NOTE FOR WHOEVER WIRES THE WORKFLOW: `capture_schedule.py` without `--run`
-reports and spends nothing, so the workflow can be dry-run against the real
-schedule before it is ever allowed to fire. Do that first.
+VERIFY IT WITHOUT SPENDING ANYTHING: `capture_schedule.py` without `--run`
+reports and spends nothing, which is also the workflow's own first step — so
+every run logs what the scheduler believed, including the runs that do nothing.
+When a window is eventually missed, that log is the record of why.
 
 ### Phase 1 — book it (Sat 2026-08-29 -> Sun 2026-09-06)
 

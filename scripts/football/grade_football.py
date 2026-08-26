@@ -176,8 +176,22 @@ def build(sport, snaps, results):
         # "NO MARKET (consensus not computable)" for every NFL game - a total
         # blackout that would have looked like a thin market rather than a bug.
         # Caught by selftest_allowlist.py's regular-season control case.
-        a_raw, h_raw = ev24.get("away_raw"), ev24.get("home_raw")
-        f24, fcl = fair(q24, a_raw, h_raw), fair(qcl, a_raw, h_raw)
+        #
+        # EACH SNAPSHOT IS READ WITH ITS OWN STRINGS, and the side is carried
+        # across as HOME-OR-AWAY rather than as a name. The earlier version took
+        # away_raw/home_raw from the T-24 capture and used them against the
+        # CLOSING capture's quotes, which assumes the feed spells a team
+        # identically at both ends. That is fail-closed, not corrupting - fair()
+        # filters on `if a in v`, an unmatched key empties the list, and the game
+        # is skipped - but it would be skipped as "consensus not computable"
+        # when the truth is "the feed renamed the team". A priced game recorded
+        # with a reason that is not the true one is the exact class of failure
+        # the join fix just removed, so it is not worth leaving in for the sake
+        # of a rename being unlikely inside 24h. Raised in review by
+        # claude-code-e2 from code reading; no instance has been observed.
+        a24, h24 = ev24.get("away_raw"), ev24.get("home_raw")
+        acl, hcl = evcl.get("away_raw"), evcl.get("home_raw")
+        f24, fcl = fair(q24, a24, h24), fair(qcl, acl, hcl)
         if not f24 or not fcl:
             skipped.append((r["away"], r["home"], "NO MARKET (consensus not computable)"))
             continue
@@ -186,23 +200,27 @@ def build(sport, snaps, results):
         # calls the identical function on the identical snapshot, so a play it
         # publishes is by construction a play this grader will accept.
         try:
-            m = market.evaluate(q24, a_raw, h_raw)
+            m = market.evaluate(q24, a24, h24)
         except market.NoMarket as why:
             skipped.append((r["away"], r["home"], str(why)))
             continue
 
         pick = {"side": m["side"], "price": m["best_price"],
                 "book": m["best_book"], "near": m["books_at_best"]}
+        # HOME-OR-AWAY IS THE IDENTITY from here on. m["side"] is a T-24 string;
+        # resolving it to a side once means the close and the settlement never
+        # have to agree with the T-24 spelling, only with the schedule.
+        pick_is_home = (m["side"] == h24)
+        close_side = hcl if pick_is_home else acl
 
         margin = r["margin"]
         if margin == 0:
             res, pnl = "push", 0.0
         else:
-            # h_raw, not r["home"]: pick["side"] came from the capture's own
-            # strings (see above), so settlement must compare in that same
-            # identity space. Comparing across the two would silently settle
-            # every NFL pick as the AWAY side.
-            won = (pick["side"] == h_raw) == (margin > 0)
+            # margin is from the HOME perspective, so this compares like with
+            # like. Comparing a capture string against the results row's home
+            # team - the earlier bug - settled every NFL pick as the away side.
+            won = pick_is_home == (margin > 0)
             res, pnl = ("win", payout(pick["price"])) if won else ("loss", -1.0)
 
         cands.append({

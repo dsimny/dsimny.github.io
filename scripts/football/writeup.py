@@ -320,8 +320,18 @@ take, and how many regulated books corroborate it.
 - offshore price: market colour only. Never a recommendation.
 
 STYLE: 60-90 words, plain and blunt, no filler, no hype, no rhetorical \
-questions. Do not open with the team names - the reader can see the matchup. \
-Write about the market. One paragraph, no headings, no bullet points.
+questions. Write about the market. One paragraph, no headings, no bullet \
+points.
+
+VARY YOUR OPENING SENTENCE. A reader sees this paragraph beside ~56 others, so \
+a shared opening turns the whole slate into a form letter and quietly tells \
+them nothing here was actually thought about. Do not open with the team names, \
+and do not default to the number of books either - "Ten books price this one" \
+is exactly the tic to avoid. Start from whatever is genuinely most notable \
+about THIS market: an unusually tight or expensive toll, a price that is well \
+corroborated or barely corroborated, a near coin-flip, a lopsided favourite, a \
+wide gap between consensus and the best available number. If nothing stands \
+out, say so plainly - an ordinary market is a fact worth stating.
 
 THREE THINGS THAT READ BADLY ACROSS A WHOLE SLATE. A reader sees ~57 of these \
 in one sitting, so anything formulaic becomes obvious in a way it never is in \

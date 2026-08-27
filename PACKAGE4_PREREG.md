@@ -200,8 +200,19 @@ canonical key, because it describes which line the market has settled on.
 modal_line = the line quoted by the most distinct eligible books
 ```
 
-Tie-break, in order: greater book count → most recent `MAX(captured_at)` →
-`line ASC`. Fully deterministic.
+**Tie-break: book count DESC, then `line ASC`.** Total and explicit — line
+values within a group are distinct by construction, so exactly one row can win
+and nothing depends on query order.
+
+Recency was considered and **rejected**. It is deterministic but not *stable*:
+with two lines tied on book count, whichever book updated last would take the
+modal flag, so the modal line would flip between polls while the market had not
+moved. That is the same flapping the `best_book` tie-break avoids by preferring
+alphabetical order over freshest. A modal line that changes when nothing changed
+is worse than an arbitrary but steady one.
+
+*(Caught during implementation: the original rule placed recency ahead of
+`line ASC`, and a deliberate 2-vs-2 tie test exposed the instability.)*
 
 Also reported: `modal_line_book_count`, and `distinct_line_count` — the number
 of different lines live at once, which is itself a market-instability signal.

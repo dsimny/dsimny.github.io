@@ -1,7 +1,8 @@
 # OLP-M1 Package #3 — Provider Integration & Resilience
 
 **Status: FROZEN** at `pkg3-v1.0` (2026-08-27), **amended by `pkg3-v1.1`** —
-a post-freeze live-boundary correction to `captured_at` semantics (§6b).
+a post-freeze live-boundary correction to `captured_at` semantics (§6b),
+**confirmed against the live feed by two controlled ingests**.
 
 The original freeze stands as issued. It was made on the evidence available at
 the time: a clean read-only live boundary. The first controlled `--ingest`
@@ -392,6 +393,44 @@ is now one we have **not polled recently**, so the test builds it at the databas
 layer via `olp_test.seed_stale_market()`. This is the third appearance of the
 same underlying confusion the guard rail in migration 036 exists for: staleness
 is about *our newest observation*, never about a timestamp we can choose.
+
+### Confirmed in production, 2026-08-27
+
+Two controlled ingests against the live feed, 133 seconds apart.
+
+**Ingest 1 — the fix:**
+
+| Check | Before the fix | After |
+|---|---|---|
+| `placeable` | **0** of 4,552 | **4,552** of 4,552 |
+| quote age spread | 74s → 172s | **17s → 17s** |
+| `dark_events` | (all) | **0** of 272 |
+
+Every quote in a poll now carries one identical `captured_at` — a single
+observation instant — instead of sprawling across 100 seconds of bookmaker
+`last_update` values. That identity is the structural proof, not merely that the
+ages fall under 120.
+
+**Ingest 2 — the refresh mechanism, which the old semantics made unreachable:**
+
+```
+written 4552, skipped 0          unchanged prices re-recorded after the window
+snapshot_rows   4552 -> 9104     observation history grew
+logical_quotes  4552 -> 4552     cardinality did NOT
+board_rows             4552      board shows current state, not history
+placeable              4552      still fully tradeable
+duplicates                0
+events   272 (new 0)             event ingestion idempotent
+```
+
+`board_rows` holding at 4,552 while `snapshot_rows` doubled is the important
+one: history growth never leaks into the tradeable surface. And zero duplicates
+across 9,104 rows confirms the distinction the model rests on — the same logical
+quote at two different `captured_at` values is history, not duplication.
+
+Quota moved exactly 3 credits for the second ingest, re-confirming
+`regions × markets`. (One earlier observation showed a 4-credit move against a
+single request; it did not recur and is recorded here only for completeness.)
 
 ### What this says about the original freeze
 

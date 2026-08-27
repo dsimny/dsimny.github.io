@@ -695,6 +695,60 @@ def t24_live_shape_row_identity_and_bounded_time():
             f"one event {single*1000:.0f}ms, full board {board:.1f}s")
 
 
+
+def t26_best_price_ranks_on_exact_payout_not_rounded_money():
+    """Found by the live sign-off script, not by this suite.
+
+    `best_price` used to rank with olp_american_profit(1, price), which rounds
+    to cents because it is the MONEY function. On a 1-unit stake adjacent
+    American prices collapse into the same cent -- -142 and -143 both give 0.70
+    -- so they tied and `sportsbook ASC` decided, which can name the WORSE
+    price as best.
+
+    The fixture puts the worse price on the alphabetically earlier book, so the
+    old comparator picks bookB (-143) over bookC (-142).
+    """
+    admin = h.connect(); h.reset(admin)
+
+    # The money function collides; the ranking function must not.
+    same = h.scalar(admin, """SELECT public.olp_american_profit(1, -142)
+                                   = public.olp_american_profit(1, -143)""")
+    ranks = h.scalar(admin, """SELECT public.olp_price_payout(-142)
+                                    > public.olp_price_payout(-143)""")
+    assert same is True, "fixture assumes the money function rounds these together"
+    assert ranks is True, "the ranking function must separate -142 from -143"
+
+    ev = event(admin, "T26")
+    two_sided(admin, ev, "SPREAD", -3.0, -144, 120, "bookA")   # worst, sorts first
+    two_sided(admin, ev, "SPREAD", -3.0, -143, 121, "bookB")
+    two_sided(admin, ev, "SPREAD", -3.0, -142, 122, "bookC")   # best, sorts last
+
+    canon = h.row(admin, """SELECT best_price, best_book FROM public.canonical_market
+                            WHERE event_id=%s AND market_type='SPREAD'
+                              AND selection='DAL' AND line=-3.0""", (ev,))
+    assert canon == (-142, "bookC"), f"canonical named a worse price as best: {canon}"
+
+    ex = h.row(admin, """SELECT best_price, best_book FROM public.executable_market
+                         WHERE event_id=%s AND market_type='SPREAD'
+                           AND selection='DAL' AND line=-3.0""", (ev,))
+    assert ex == (-142, "bookC"), f"executable named a worse price as best: {ex}"
+
+    # Sweep adjacent pairs across the range where cent collisions occur. Each
+    # pair must rank strictly, in both directions of book naming.
+    for better, worse in ((-142, -143), (-152, -153), (-175, -177), (-205, -210)):
+        h.reset(admin)
+        ev = event(admin, f"T26-{better}")
+        two_sided(admin, ev, "SPREAD", -3.0, worse, 120, "bookA")
+        two_sided(admin, ev, "SPREAD", -3.0, better, 121, "bookZ")
+        got = h.scalar(admin, """SELECT best_price FROM public.canonical_market
+                                 WHERE event_id=%s AND market_type='SPREAD'
+                                   AND selection='DAL' AND line=-3.0""", (ev,))
+        assert got == better, f"{better} vs {worse}: best_price came back {got}"
+
+    admin.close()
+    return "-142 beats -143 in canonical and executable; 4 adjacent pairs rank strictly"
+
+
 PACKAGE4 = [
     ("P4-T01", "Different lines are separate rows", t01_different_lines_are_separate_rows),
     ("P4-T02", "Best price never crosses lines", t02_best_price_never_crosses_lines),
@@ -721,4 +775,5 @@ PACKAGE4 = [
     ("P4-T23", "Line movement is not price movement", t23_line_movement_is_not_price_movement),
     ("P4-T24", "Live-shape row identity and bounded time", t24_live_shape_row_identity_and_bounded_time),
     ("P4-T25", "Modal symmetry across a fragmented board", t25_modal_symmetry_holds_across_a_fragmented_board),
+    ("P4-T26", "Best price ranks on exact payout", t26_best_price_ranks_on_exact_payout_not_rounded_money),
 ]

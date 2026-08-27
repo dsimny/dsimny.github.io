@@ -9,10 +9,12 @@ AUTHENTICATED USER → CURRENT LEDGER CHAPTER → CHAPTER_OPEN +10,000 LC
    → SETTLE TICKET → RELEASE ESCROW → PERMANENT LEDGER RESULT
 ```
 
-**Status: exit gate met.** 40/40 tests pass on **both** a real Supabase stack
-(PostgreSQL 17.6) and the bundled PostgreSQL 16.2, including 15-way
-true-concurrency placement against independent database connections. See
-[TEST_REPORT.md](TEST_REPORT.md) and [DEVIATIONS.md](DEVIATIONS.md).
+**Status: Packages #1 and #2 complete.** 74/74 tests pass on **both** a real
+Supabase stack (PostgreSQL 17.6) and the bundled PostgreSQL 16.2, including
+15-way true-concurrency placement against independent database connections.
+
+- Package #1 — Database Foundation: 40/40. [TEST_REPORT.md](TEST_REPORT.md), [DEVIATIONS.md](DEVIATIONS.md)
+- Package #2 — Market Ingestion & Event Lifecycle: 34/34. [PACKAGE2.md](PACKAGE2.md)
 
 ---
 
@@ -36,14 +38,19 @@ asserts it is not 20,000.
 
 ```
 db/
-  migrations/        001-019, applied in order. This is what ships.
+  migrations/        001-029, applied in order. This is what ships.
   testkit/           TEST ONLY. Never apply to Supabase.
   rollback/          ROLLBACK_NOTES.md
+ingest/              Package #2 ingestion worker
+  provider.py        the provider boundary (EventRow / QuoteRow / OddsProvider)
+  fixture_provider.py deterministic offline provider
+  worker.py          drives the RPCs; holds no business rules
 tests/
   harness.py         server boot, migration runner, assertion helpers
   test_acceptance.py section 33 acceptance tests
   test_security.py   section 35 security tests
   test_concurrency.py true multi-connection contention tests
+  test_package2.py   ingestion & event lifecycle (M2)
   run_all.py         full suite + section 40 report
 ```
 
@@ -68,6 +75,21 @@ tests/
 | 017 | `declare_bankruptcy_rpc()` |
 | 018 | `chapter_balances`, `ticket_effective_results` views |
 | 019 | `olp_test` fixture helpers |
+
+Package #2 (see [PACKAGE2.md](PACKAGE2.md)):
+
+| Migration | Contents |
+|---|---|
+| 020 | ingestion policy config, `ingestion_runs`, `event_lifecycle_log` |
+| 021 | `void_event_tickets_rpc` |
+| 022 | `reschedule_event_rpc` (postponement policy) |
+| 023 | `ingest_event_rpc` |
+| 024 | `ingest_market_snapshot_rpc` + batch form |
+| 025 | `capture_closing_line_rpc` |
+| 026 | `mark_event_live_rpc`, `close_event_rpc`, `cancel_event_rpc` |
+| 027 | run bookkeeping + Package #2 privileges |
+| 028 | `current_market_board`, `ticket_closing_line_value` |
+| 029 | Package #2 fixtures |
 
 ---
 
@@ -117,12 +139,15 @@ a deliberate `OLP_ALLOW_REMOTE=1` — don't set that on a project with real user
 
 ## Deploying to Supabase
 
-Apply `db/migrations/001` … `018` in numeric order. Do **not** apply anything in
-`db/testkit/`.
+Apply `db/migrations/` in numeric order, skipping the two fixture migrations.
+Do **not** apply anything in `db/testkit/`.
 
-Migration 019 (`olp_test` fixtures) is **development only** — nothing in 001–018
-depends on it, and it defines `olp_test.reset()`, which truncates every ledger
-table. Skip it in production.
+| Apply | Skip in production |
+|---|---|
+| 001–018, 020–028 | **019** and **029** (`olp_test` fixtures) |
+
+The fixture migrations are development only: nothing else depends on them, and
+they define `olp_test.reset()`, which truncates every ledger table.
 
 Three things to confirm after deploying:
 
@@ -148,7 +173,7 @@ ledger-critical table. Every write goes through a `SECURITY DEFINER` RPC with
 | Role | May execute |
 |---|---|
 | `authenticated` | `open_chapter_rpc`, `place_ticket_rpc`, `declare_bankruptcy_rpc` |
-| `service_role` | `settle_ticket_rpc`, `apply_settlement_correction_rpc` |
+| `service_role` | `settle_ticket_rpc`, `apply_settlement_correction_rpc`, and every Package #2 ingestion/lifecycle RPC |
 | `anon` | nothing |
 
 Table privileges are stated explicitly rather than inherited from Supabase's
@@ -193,9 +218,25 @@ the same ticket back — never a second one, even under true concurrency
 
 ---
 
-## What this package deliberately does not do
+## Running ingestion
 
-No leaderboard, social, contest or casino functionality. No live odds
-ingestion, event closing, schedule polling or closing-line capture — those are
-**Package #2: Market Ingestion & Event Lifecycle**, which this hardened ledger
-is now ready to receive.
+No odds provider is wired up — none was chosen. `ingest/provider.py` is the seam:
+subclass `OddsProvider`, map the feed onto `EventRow` / `QuoteRow`, and pass it
+to `poll_once(conn, provider)`. No migration and no line of `worker.py` changes.
+
+```python
+from ingest import FixtureProvider, poll_once
+schedule_result, odds_result = poll_once(service_role_conn, FixtureProvider())
+```
+
+Run `ingest_schedule` on a slow cadence and `ingest_odds` on a fast one — under
+the 60s refresh window, so quotes stay inside the placement TTL. See
+[PACKAGE2.md](PACKAGE2.md) §3.1 for why that bound matters.
+
+---
+
+## What this project deliberately does not do
+
+No leaderboard, social, contest or casino functionality. No automatic result
+grading from a scores feed — settlement still requires an explicit
+`settle_ticket_rpc` call. No frontend.

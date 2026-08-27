@@ -1,9 +1,10 @@
-"""OLP-M1 Database Foundation -- full suite runner.
+"""OLP-M1 full suite runner (Packages #1 and #2).
 
     python tests/run_all.py
 
-Boots PostgreSQL, applies migrations 001-019, runs every acceptance, security
-and concurrency test, and prints the package's required report format.
+Boots PostgreSQL, applies every migration, then runs the Package #1 acceptance,
+security and concurrency suites plus the Package #2 ingestion and event
+lifecycle suite, and prints the report format required by Package #1 section 40.
 Exit code is non-zero if anything fails.
 """
 
@@ -17,6 +18,7 @@ import harness as h
 from test_acceptance import ACCEPTANCE
 from test_security import SECURITY, SECURITY_EXTRA
 from test_concurrency import CONCURRENCY
+from test_package2 import PACKAGE2
 
 
 def run_group(title, tests, results):
@@ -66,6 +68,7 @@ def main():
     run_group("Concurrency tests", CONCURRENCY, results)
     run_group("Security tests", SECURITY, results)
     run_group("Additional authorization tests", SECURITY_EXTRA, results)
+    run_group("Package #2 -- ingestion & event lifecycle", PACKAGE2, results)
 
     # ---- summary -----------------------------------------------------------
     def tally(tests):
@@ -78,6 +81,7 @@ def main():
     con = tally(CONCURRENCY)
     sec = tally(SECURITY)
     ext = tally(SECURITY_EXTRA)
+    pkg2 = tally(PACKAGE2)
 
     total_pass = sum(1 for r in results if r[2] == "PASS")
     total = len(results)
@@ -106,6 +110,13 @@ def main():
     print(f"Concurrency placement: {verdict(group_ok({'M1-T04','M1-T07c','M1-T17c'}))}")
     print(f"Concurrency settlement: {verdict(group_ok({'M1-T09','M1-T09b','M1-T16'}))}")
     print(f"Authorization: {verdict(group_ok({t[0] for t in SECURITY} | {t[0] for t in SECURITY_EXTRA}))}")
+    print(f"Market ingestion: {verdict(group_ok({'M2-T01','M2-T02','M2-T03','M2-T04','M2-T05','M2-T06','M2-T07','M2-T08','M2-T09'}))}")
+    print(f"Schedule & postponement: {verdict(group_ok({'M2-T10','M2-T11','M2-T12','M2-T13','M2-T14','M2-T15'}))}")
+    print(f"Closing-line capture: {verdict(group_ok({'M2-T16','M2-T17','M2-T18','M2-T19','M2-T20'}))}")
+    print(f"Event lifecycle: {verdict(group_ok({'M2-T21','M2-T22','M2-T23','M2-T24'}))}")
+    print(f"Market board & CLV: {verdict(group_ok({'M2-T25','M2-T26','M2-T27'}))}")
+    print(f"Ingestion worker: {verdict(group_ok({'M2-T28','M2-T29','M2-T30'}))}")
+    print(f"Package #2 authorization: {verdict(group_ok({'M2-T31','M2-T32','M2-T33'}))}")
 
     # The 29 test IDs the package's section 33 table actually enumerates.
     ENUMERATED = {
@@ -129,6 +140,7 @@ def main():
     print(f"\nConcurrency tests:\n{con[0]}/{con[1]} PASS")
     print(f"\nSecurity tests:\n{sec[0]}/{sec[1]} PASS")
     print(f"\nAdditional authorization tests:\n{ext[0]}/{ext[1]} PASS")
+    print(f"\nPackage #2 tests (ingestion & lifecycle):\n{pkg2[0]}/{pkg2[1]} PASS")
     print(f"\nTOTAL: {total_pass}/{total} PASS")
 
     if failures:

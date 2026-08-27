@@ -149,3 +149,74 @@ Two changes are worth making forward rather than by rollback:
 - **Changing an RPC's behaviour** is a `CREATE OR REPLACE FUNCTION` in a new
   migration. All five RPCs are written as `CREATE OR REPLACE`, so replacing one
   never requires dropping it first and never disturbs its grants.
+
+
+---
+
+# Package #2 rollback (migrations 020–029)
+
+Package #2 is additive and touches no financial table, so rolling it back
+removes ingestion and lifecycle capability without endangering the ledger. The
+only data lost is market/event provenance.
+
+| Migration | Reversible | Data loss on rollback |
+|---|---|---|
+| 020 config + provenance | yes | ingestion runs, event lifecycle audit |
+| 021–027 RPCs + privileges | yes | none |
+| 028 views | yes | none |
+| 029 fixtures | yes | test data only |
+
+```sql
+-- 029  (also restores the Package #1 reset(); re-apply 019 afterwards if you
+--       still want fixtures)
+DROP FUNCTION IF EXISTS olp_test.age_quote(UUID, public.market_type, TEXT, TEXT, INTERVAL);
+DROP FUNCTION IF EXISTS olp_test.seed_slate(INT, INTERVAL);
+
+-- 028
+DROP VIEW IF EXISTS public.ticket_closing_line_value;
+DROP VIEW IF EXISTS public.current_market_board;
+DROP POLICY IF EXISTS p_settings_read_anon ON public.system_settings;
+REVOKE SELECT ON public.system_settings FROM anon;
+
+-- 027
+DROP FUNCTION IF EXISTS public.finish_ingestion_run_rpc(UUID, public.ingestion_status, TEXT, INT);
+DROP FUNCTION IF EXISTS public.start_ingestion_run_rpc(TEXT, public.ingestion_kind);
+
+-- 026
+DROP FUNCTION IF EXISTS public.cancel_event_rpc(UUID, TEXT, TEXT);
+DROP FUNCTION IF EXISTS public.close_event_rpc(UUID, TEXT);
+DROP FUNCTION IF EXISTS public.mark_event_live_rpc(UUID, TIMESTAMPTZ, TEXT);
+
+-- 025
+DROP FUNCTION IF EXISTS public.capture_closing_line_rpc(UUID, TEXT);
+
+-- 024
+DROP FUNCTION IF EXISTS public.ingest_market_snapshots_rpc(JSONB, UUID);
+DROP FUNCTION IF EXISTS public.ingest_market_snapshot_rpc(
+    UUID, public.market_type, TEXT, NUMERIC, INT, TEXT, TEXT, TIMESTAMPTZ, BOOLEAN);
+
+-- 023
+DROP FUNCTION IF EXISTS public.ingest_event_rpc(TEXT, TEXT, TEXT, TIMESTAMPTZ, TEXT, TEXT, TEXT);
+
+-- 022
+DROP FUNCTION IF EXISTS public.reschedule_event_rpc(UUID, TIMESTAMPTZ, TEXT, TEXT);
+
+-- 021
+DROP FUNCTION IF EXISTS public.void_event_tickets_rpc(UUID, TEXT, TEXT);
+
+-- 020
+DROP FUNCTION IF EXISTS public.olp_log_lifecycle(UUID, public.event_lifecycle_action, TEXT, JSONB);
+DROP TABLE IF EXISTS public.event_lifecycle_log;
+DROP TABLE IF EXISTS public.ingestion_runs;
+DROP TYPE  IF EXISTS public.event_lifecycle_action;
+DROP TYPE  IF EXISTS public.ingestion_status;
+DROP TYPE  IF EXISTS public.ingestion_kind;
+ALTER TABLE public.system_settings
+    DROP CONSTRAINT IF EXISTS ck_refresh_inside_ttl,
+    DROP COLUMN IF EXISTS snapshot_refresh_seconds,
+    DROP COLUMN IF EXISTS postponement_void_hours;
+```
+
+Note: tickets voided by a postponement stay voided. Those are settled financial
+facts under Package #1's append-only rules and are not reversed by dropping the
+code that triggered them.

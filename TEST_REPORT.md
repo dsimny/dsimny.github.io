@@ -1,4 +1,8 @@
-# OLP-M1 Database Foundation — Test Report
+# OLP-M1 — Test Report
+
+> Covers **Package #1 (Database Foundation)** in detail. Package #2 (Market
+> Ingestion & Event Lifecycle) adds 34 further tests; its matrix and design
+> record live in [PACKAGE2.md](PACKAGE2.md). Combined: **74/74 PASS**.
 
 **Package:** #1 — Database Foundation
 **Architecture:** v0.3 FROZEN
@@ -35,7 +39,8 @@ Security tests:
 Additional hardening tests:
 6/6 PASS
 
-TOTAL: 40/40 PASS
+TOTAL: 40/40 PASS   (Package #1)
+       74/74 PASS   (including Package #2)
 
 Known deviations:
 None that change the architecture. 14 implementation decisions
@@ -307,3 +312,50 @@ with `CASCADE`, reaching `auth.refresh_tokens`, which `postgres` does not own on
 Supabase. Fixture-only; no migration or RPC was involved. `reset()` now scopes
 its cleanup to a `DELETE` on the `@olp.test` email domain and never touches the
 rest of the auth system.
+
+
+---
+
+## Package #2 — Market Ingestion & Event Lifecycle
+
+Built freehand (no written contract existed) and recorded in
+[PACKAGE2.md](PACKAGE2.md). **34/34 PASS** on both engines.
+
+| Group | Result |
+|---|---|
+| Market ingestion (T01–T09) | PASS |
+| Schedule & postponement (T10–T15) | PASS |
+| Closing-line capture (T16–T20) | PASS |
+| Event lifecycle (T21–T24) | PASS |
+| Market board & CLV (T25–T27) | PASS |
+| Ingestion worker (T28–T30) | PASS |
+| Authorization (T31–T33) | PASS |
+| Quote ordering (T34) | PASS |
+
+### The finding worth carrying forward
+
+De-duplicating unchanged quotes — the obvious way to stop a polling feed burying
+the immutable history in noise — silently breaks Package #1. `place_ticket_rpc`
+requires the newest quote to be younger than the 120s TTL, so a market nobody
+moved would age out of its own TTL and become unplaceable for want of news.
+
+Ingestion therefore re-records an unchanged quote once
+`snapshot_refresh_seconds` (60s) has elapsed, and a CHECK constraint pins that
+interval strictly inside the TTL so the two policies cannot drift apart later.
+`M2-T04` proves it end to end: a quote nearly TTL-old is refreshed on the next
+poll and remains placeable at the same price.
+
+### Two tests that were wrong before they were right
+
+`M2-T04` failed on first run. The cause was the test, not the code: its fixture
+appended a *back-dated* quote, which by design never becomes the newest quote,
+so de-duplication correctly skipped it. Rewritten to age the current quote, it
+passes — and the flawed premise became `M2-T34`, which now asserts that a
+late-arriving older quote is retained as history but never becomes the
+executable price.
+
+`M2-T25` also carried a weak assertion: it checked that a stale snapshot was not
+placeable on the board, but the board only ever shows the newest quote per group,
+so that row was absent entirely and the check passed for the wrong reason. It now
+asserts a real non-placeable case — once an event goes live, nothing on it is
+offered and the RPC agrees.

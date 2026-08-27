@@ -1,15 +1,21 @@
 # OLP-M1 Package #3 — Provider Integration & Resilience
 
-**Status:** implemented and verified offline. 121/121 tests pass on both a real
-Supabase stack (PostgreSQL 17.6) and bundled PostgreSQL 16.2 — 40 Package #1,
-34 + 14 Package #2, 33 Package #3.
+**Status: FROZEN** at tag `pkg3-v1.0`, following a live boundary check against
+production on 2026-08-27.
 
-**Not yet run against the live API.** No key exists on this machine and a live
-call spends real quota, so every test uses a recorded v4 payload or a fake
-transport. See §6.
+121/121 tests pass on both a real Supabase stack (PostgreSQL 17.6) and bundled
+PostgreSQL 16.2 — 40 Package #1, 34 + 14 Package #2, 33 Package #3 — and the
+provider contract is now validated against the live API rather than a recording.
 
 The question this package answers: *does the clean deterministic system survive
-an unreliable real-world feed?*
+an unreliable real-world feed?* The read-only half of that is answered (§6). The
+persistence half — one controlled `--ingest`, then a repeat for idempotency — is
+the next step and is deliberately not part of this freeze.
+
+**Frozen unless a live defect is found:** the v4 adapter and its field mapping,
+the error taxonomy and retry/backoff behaviour, quota-header handling, the
+bookmaker-key stability assumption, and the read-only smoke contract. Changing
+any of them is a new package with its own review.
 
 ---
 
@@ -241,36 +247,67 @@ raising when the breaker is open, so a tick can log and move on.
 
 ---
 
-## 6. What is NOT verified
+## 6. Live boundary verification
 
-Stated plainly, because this is the part a passing suite cannot tell you.
+**Run against production on 2026-08-27.** Operator-run and reported to the
+author, not observed directly — no API key exists on the build machine, which is
+deliberate (§3.5). The numbers below are as reported.
 
-1. **No live call has been made.** The adapter is written to the documented v4
-   shape and validated against a recorded payload. Only a real call settles
-   whether documentation and production agree. `scripts/live_smoke.py` is one
-   command away and writes nothing.
-2. **Bookmaker keys are taken verbatim** (`draftkings`, `fanduel`). Same-book
-   closing-line capture depends on that key being stable across polls. The v4
-   docs describe `key` as the bookmaker identifier alongside `title`, which
-   supports the design — but stability *across polls* is an empirical question,
-   which is why `--polls 3 --interval 75` exists.
-3. **`Retry-After` on a 429 is NOT assumed.** The v4 documentation has a
-   "Rate Limiting (status code 429)" section but does not document a
-   `Retry-After` header. It is therefore treated as a bonus: present, it
-   overrides the computed delay; absent or malformed, backoff stands on its own
-   jittered curve. `P3-T31` asserts exactly that, including `""`, `"soon"` and a
-   missing header.
-4. **Quota accounting is read from headers, never computed.** All three
-   documented headers are read — `x-requests-remaining`, `x-requests-used` and
-   `x-requests-last` (the per-call cost, which is how you discover what a given
-   `regions x markets` combination actually bills). If a header is absent the
-   guard passes rather than guessing (`P3-T32`).
+Sequence was one single-poll read-only check as an abort point, then a spaced
+three-poll run.
 
-   `x-requests-last` is read and reported but **not yet persisted** to
-   `provider_health`; that needs a new RPC signature and was deliberately
-   deferred until after the live check.
+| Check | Result |
+|---|---|
+| HTTP | 200 |
+| Events received vs parsed | 272 / 272, on all three polls |
+| Parse errors | 0 |
+| Bookmaker keys | 10, **identical across all three polls** |
+| Event IDs in common | 272 of 272 |
+| Markets present | moneyline, spread, total |
+| Quotes parsed | 4,552 |
+| `x-requests-last` | 3 per request |
+| Quota consumed | 6 credits across the two intervals after poll 1 |
+| Transient conditions | none — no 429, no 5xx, no timeout |
+| Credential leakage (URL / stdout / exception) | PASS / PASS / PASS |
+| Database writes | 0 |
 
----
+### What this settles
+
+The previous version of this section listed four unknowns. Three are now closed:
+
+1. **Authentication and payload shape match the documented v4 contract.**
+   272 received, 272 parsed, zero parse errors — the adapter's field mapping is
+   correct against production, not just against a recording. Any gap between
+   *received* and *parsed* would have been an adapter fault; there was none.
+2. **Bookmaker keys are stable across polls.** Ten keys, unchanged over roughly
+   150 seconds. Same-book closing-line capture (§3.4, PACKAGE2 §3.4) rests
+   entirely on this and it now has evidence rather than an assumption.
+3. **`x-requests-last` reads cleanly and reported 3**, exactly matching
+   `regions × markets` (1 × 3). The documented billing model is confirmed.
+
+One remains open, and cannot be closed on demand:
+
+4. **`Retry-After` on a 429 is still unobserved** — no rate limit was hit. This
+   is fine: the v4 docs never promised the header, and the fallback stands
+   without it (`P3-T31`). It stays unverified until a real limit breach happens.
+
+### The economics are now measured, not estimated
+
+At 3 credits per poll, a naive 60-second cadence costs ~4,320 credits/day
+(~130k/month). Cost is **per request, not per event** — the same 3 credits
+returned all 272 events — so the single-call-per-cycle design (§3.1) is already
+the right shape and there is nothing to win by batching differently.
+
+The remaining lever is *when* to poll, not *how*. Package #2 §3.1 pins the
+refresh window at 60s inside the 120s TTL, and that bound is load-bearing:
+loosening it to save quota would let quotes age out and break placement. So the
+correct optimisation is **schedule-aware polling windows** — poll at full cadence
+only near kickoff, and rarely or not at all otherwise. Restricting to game-day
+windows cuts the bill by roughly an order of magnitude without touching a single
+freshness rule.
+
+This is recorded here as a frozen architectural conclusion: *tighten the polling
+schedule, never the freshness guarantees.*
 
 ## 7. Out of scope
 

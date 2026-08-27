@@ -1,0 +1,98 @@
+[
+  {
+    "id": "e912304de2b2ce35b473ce2ecd3d1502",
+    "sport_key": "americanfootball_nfl",
+    "sport_title": "NFL",
+    "commence_time": "2026-09-14T17:00:00Z",
+    "home_team": "Houston Texans",
+    "away_team": "New Orleans Saints",
+    "bookmakers": [
+      {
+        "key": "draftkings",
+        "title": "DraftKings",
+        "last_update": "2026-09-14T12:10:29Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-09-14T12:10:29Z",
+            "outcomes": [
+              { "name": "Houston Texans", "price": -110 },
+              { "name": "New Orleans Saints", "price": -110 }
+            ]
+          },
+          {
+            "key": "spreads",
+            "last_update": "2026-09-14T12:10:31Z",
+            "outcomes": [
+              { "name": "Houston Texans", "price": -110, "point": -2.5 },
+              { "name": "New Orleans Saints", "price": -110, "point": 2.5 }
+            ]
+          },
+          {
+            "key": "totals",
+            "last_update": "2026-09-14T12:10:33Z",
+            "outcomes": [
+              { "name": "Over", "price": -112, "point": 42.5 },
+              { "name": "Under", "price": -108, "point": 42.5 }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "fanduel",
+        "title": "FanDuel",
+        "last_update": "2026-09-14T12:11:02Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-09-14T12:11:02Z",
+            "outcomes": [
+              { "name": "Houston Texans", "price": -115 },
+              { "name": "New Orleans Saints", "price": -105 }
+            ]
+          },
+          {
+            "key": "spreads",
+            "last_update": "2026-09-14T12:11:02Z",
+            "outcomes": [
+              { "name": "Houston Texans", "price": -108, "point": -2.5 },
+              { "name": "New Orleans Saints", "price": -112, "point": 2.5 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "b7c1a0e4f2a94d0aa1b2c3d4e5f60789",
+    "sport_key": "americanfootball_nfl",
+    "sport_title": "NFL",
+    "commence_time": "2026-09-14T20:25:00Z",
+    "home_team": "Dallas Cowboys",
+    "away_team": "Philadelphia Eagles",
+    "bookmakers": [
+      {
+        "key": "draftkings",
+        "title": "DraftKings",
+        "last_update": "2026-09-14T12:09:58Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2026-09-14T12:09:58Z",
+            "outcomes": [
+              { "name": "Dallas Cowboys", "price": 135 },
+              { "name": "Philadelphia Eagles", "price": -160 }
+            ]
+          },
+          {
+            "key": "player_pass_tds",
+            "last_update": "2026-09-14T12:09:58Z",
+            "outcomes": [
+              { "name": "Over", "price": -120, "point": 1.5 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

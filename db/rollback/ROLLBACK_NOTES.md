@@ -220,3 +220,39 @@ ALTER TABLE public.system_settings
 Note: tickets voided by a postponement stay voided. Those are settled financial
 facts under Package #1's append-only rules and are not reversed by dropping the
 code that triggered them.
+
+---
+
+# Package #3 rollback (migrations 033–035)
+
+Purely additive: new tables, a view and RPCs. No Package #1 or #2 object is
+modified, so rolling back removes resilience instrumentation without touching
+the ledger or the lifecycle. Only operational history is lost.
+
+| Migration | Reversible | Data loss on rollback |
+|---|---|---|
+| 033 provider health / circuit | yes | circuit state + quota observations |
+| 034 feed health | yes | none (derived) |
+| 035 fixtures | yes | test data only |
+
+```sql
+-- 035  (restores the Package #2 reset(); re-apply 029 afterwards if wanted)
+--       nothing to drop -- it only replaces olp_test.reset()
+
+-- 034
+DROP FUNCTION IF EXISTS public.feed_health_summary_rpc();
+DROP VIEW IF EXISTS public.market_feed_health;
+
+-- 033
+DROP FUNCTION IF EXISTS public.provider_reset_circuit_rpc(TEXT);
+DROP FUNCTION IF EXISTS public.provider_attempt_failure_rpc(TEXT, TEXT, INT);
+DROP FUNCTION IF EXISTS public.provider_attempt_success_rpc(TEXT, INT, INT);
+DROP FUNCTION IF EXISTS public.provider_attempt_begin_rpc(TEXT, INT, INT);
+DROP TABLE IF EXISTS public.provider_health;
+DROP TYPE  IF EXISTS public.circuit_state;
+```
+
+Dropping 033 loses the record that a provider is down. The worker then treats
+every tick as a fresh start and will call a dead provider once per tick — which
+is exactly the behaviour the durable circuit exists to prevent. Roll it back
+only as part of removing Package #3 entirely.

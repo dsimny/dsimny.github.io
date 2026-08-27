@@ -20,6 +20,7 @@ from test_security import SECURITY, SECURITY_EXTRA
 from test_concurrency import CONCURRENCY
 from test_package2 import PACKAGE2
 from test_p2_boundary import BOUNDARY
+from test_package3 import PACKAGE3
 
 
 def run_group(title, tests, results):
@@ -71,6 +72,7 @@ def main():
     run_group("Additional authorization tests", SECURITY_EXTRA, results)
     run_group("Package #2 -- ingestion & event lifecycle", PACKAGE2, results)
     run_group("Package #2 -- boundary & concurrency", BOUNDARY, results)
+    run_group("Package #3 -- provider integration & resilience", PACKAGE3, results)
 
     # ---- summary -----------------------------------------------------------
     def tally(tests):
@@ -85,6 +87,7 @@ def main():
     ext = tally(SECURITY_EXTRA)
     pkg2 = tally(PACKAGE2)
     bnd = tally(BOUNDARY)
+    pkg3 = tally(PACKAGE3)
 
     total_pass = sum(1 for r in results if r[2] == "PASS")
     total = len(results)
@@ -125,6 +128,13 @@ def main():
     print(f"Kickoff boundary: {verdict(group_ok({'B07','B08'}))}")
     print(f"Provider message robustness: {verdict(group_ok({'B09','B10'}))}")
     print(f"Double-invoked lifecycle: {verdict(group_ok({'B11','B12','B13'}))}")
+    print(f"Provider parsing: {verdict(group_ok({'P3-T01','P3-T02','P3-T03','P3-T04'}))}")
+    print(f"Error taxonomy & secrets: {verdict(group_ok({'P3-T05','P3-T06','P3-T07','P3-T08','P3-T09','P3-T10'}))}")
+    print(f"Retry & backoff: {verdict(group_ok({'P3-T11','P3-T12','P3-T13','P3-T14','P3-T15'}))}")
+    print(f"Quota & throttling: {verdict(group_ok({'P3-T16','P3-T17','P3-T26'}))}")
+    print(f"Circuit breaker: {verdict(group_ok({'P3-T18','P3-T19','P3-T20','P3-T21','P3-T22'}))}")
+    print(f"Outage & fail-closed: {verdict(group_ok({'P3-T23','P3-T24','P3-T25','P3-T27','P3-T28','P3-T29'}))}")
+    print(f"Package #3 authorization: {verdict(group_ok({'P3-T30'}))}")
 
     # The 29 test IDs the package's section 33 table actually enumerates.
     ENUMERATED = {

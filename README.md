@@ -9,13 +9,14 @@ AUTHENTICATED USER → CURRENT LEDGER CHAPTER → CHAPTER_OPEN +10,000 LC
    → SETTLE TICKET → RELEASE ESCROW → PERMANENT LEDGER RESULT
 ```
 
-**Status: Packages #1 and #2 complete; Package #2 FROZEN at `pkg2-v1.0`.**
-87/87 tests pass on **both** a real Supabase stack (PostgreSQL 17.6) and the
+**Status: Packages #1–#3 complete; Package #2 FROZEN at `pkg2-v1.0`.**
+117/117 tests pass on **both** a real Supabase stack (PostgreSQL 17.6) and the
 bundled PostgreSQL 16.2, including 15-way true-concurrency placement against
 independent database connections.
 
 - Package #1 — Database Foundation: 40/40. [TEST_REPORT.md](TEST_REPORT.md), [DEVIATIONS.md](DEVIATIONS.md)
 - Package #2 — Market Ingestion & Event Lifecycle: 34/34 plus 13 boundary/concurrency. [PACKAGE2.md](PACKAGE2.md)
+- Package #3 — The Odds API + resilience: 30/30, **verified offline only**. [PACKAGE3.md](PACKAGE3.md)
 
 ---
 
@@ -39,13 +40,19 @@ asserts it is not 20,000.
 
 ```
 db/
-  migrations/        001-032, applied in order. This is what ships.
+  migrations/        001-035, applied in order. This is what ships.
   testkit/           TEST ONLY. Never apply to Supabase.
   rollback/          ROLLBACK_NOTES.md
 ingest/              Package #2 ingestion worker
   provider.py        the provider boundary (EventRow / QuoteRow / OddsProvider)
   fixture_provider.py deterministic offline provider
   worker.py          drives the RPCs; holds no business rules
+  providers/         real adapters (The Odds API v4)
+  resilience.py      retry, backoff, throttle, quota, circuit breaker
+  http.py            stdlib transport; redacts credentials
+  resilient.py       run_poll_cycle -- a guarded poll
+scripts/
+  live_smoke.py      opt-in live API check (spends quota; dry-run by default)
 tests/
   harness.py         server boot, migration runner, assertion helpers
   test_acceptance.py section 33 acceptance tests
@@ -53,6 +60,7 @@ tests/
   test_concurrency.py true multi-connection contention tests
   test_package2.py   ingestion & event lifecycle (M2)
   test_p2_boundary.py boundary & concurrency edge conditions (B01-B13)
+  test_package3.py   provider integration & resilience (P3)
   run_all.py         full suite + section 40 report
 ```
 
@@ -95,6 +103,9 @@ Package #2 (see [PACKAGE2.md](PACKAGE2.md)):
 | 030 | ticket/schedule binding + placement event lock (review) |
 | 031 | ticket-relative postponement (review) |
 | 032 | ingestion event lock + kickoff guard (review) |
+| 033 | durable provider health / circuit state (Pkg #3) |
+| 034 | feed health + fail-closed visibility (Pkg #3) |
+| 035 | Package #3 fixtures |
 
 ---
 
@@ -149,7 +160,7 @@ Do **not** apply anything in `db/testkit/`.
 
 | Apply | Skip in production |
 |---|---|
-| 001–018, 020–028, 030–032 | **019** and **029** (`olp_test` fixtures) |
+| 001–018, 020–028, 030–034 | **019**, **029**, **035** (`olp_test` fixtures) |
 
 The fixture migrations are development only: nothing else depends on them, and
 they define `olp_test.reset()`, which truncates every ledger table.
@@ -225,18 +236,30 @@ the same ticket back — never a second one, even under true concurrency
 
 ## Running ingestion
 
-No odds provider is wired up — none was chosen. `ingest/provider.py` is the seam:
-subclass `OddsProvider`, map the feed onto `EventRow` / `QuoteRow`, and pass it
-to `poll_once(conn, provider)`. No migration and no line of `worker.py` changes.
+The Odds API adapter ships in `ingest/providers/`. A guarded poll cycle wraps it
+in retry, throttling, quota and a durable circuit breaker:
 
 ```python
-from ingest import FixtureProvider, poll_once
-schedule_result, odds_result = poll_once(service_role_conn, FixtureProvider())
+from ingest import RetryPolicy, RateLimiter, QuotaGuard, run_poll_cycle
+from ingest.providers import TheOddsApiProvider
+
+result = run_poll_cycle(conn, TheOddsApiProvider(), retry=RetryPolicy(),
+                        limiter=RateLimiter(min_interval=1.0),
+                        quota=QuotaGuard(reserve=25))
 ```
 
-Run `ingest_schedule` on a slow cadence and `ingest_odds` on a fast one — under
-the 60s refresh window, so quotes stay inside the placement TTL. See
+Set `THE_ODDS_API_KEY` in the environment — never on the command line. Poll odds
+faster than the 60s refresh window so quotes stay inside the placement TTL; see
 [PACKAGE2.md](PACKAGE2.md) §3.1 for why that bound matters.
+
+To check the live API (spends quota, dry-run by default):
+
+```bash
+python scripts/live_smoke.py
+```
+
+Any other feed drops into the same seam: subclass `OddsProvider`, map onto
+`EventRow` / `QuoteRow`. No migration and no line of `worker.py` changes.
 
 ---
 

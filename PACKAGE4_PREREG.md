@@ -455,6 +455,7 @@ from what was originally written.
 | `P4-T11` | Implied probability and its inverse round-trip across `±100 … ±10000`, **within the quantisation bound** (see §12.2) |
 | `P4-T12` | Multiplicative de-vig of a known pair reproduces hand-computed fair probabilities; `fair₁ + fair₂ = 1` |
 | `P4-T13` | `best_price` uses payout ordering — `+100` beats `-105` beats `-110` |
+| `P4-T26` | `best_price` ranks on **exact** payout, not the rounded money function — `-142` beats `-143` in canonical and executable, and four adjacent cent-colliding pairs rank strictly |
 | `P4-T14` | Median consensus is unmoved by one extreme book that would swing a mean |
 
 ### Quality and gating
@@ -520,6 +521,10 @@ Recorded rather than renumbered away.
    `(-3.50, +3.00)` under all five permutations and `P4-T25` report
    `SPREAD 60/60`, so both tests genuinely detect the defect rather than
    passing by construction.
+9. **`best_price` was ranked with a rounding money function** — found by the
+   sign-off script on a seeded board, not by this suite, and fixed in migration
+   `044`. See §12.5. `P4-T26` added; negative control reverting `044` reports
+   `canonical named a worse price as best: (-143, 'bookB')`.
 
 ### 12.2 Round-trip tolerance is a property of the odds format, not slop
 
@@ -562,6 +567,53 @@ Collapsing that is a materialisation decision, not a view rewrite, and it is
 deliberately **not** taken in Package #4 — no consumer scans the whole board,
 and materialising would introduce a staleness surface this package exists to
 avoid. Recorded here so the decision is visible rather than forgotten.
+
+### 12.5 `best_price` was ranked with a money function that rounds
+
+The largest defect found in Package #4, and the test suite did not find it — the
+live sign-off script did, while validating the *reporting*, on a board built to
+exercise canonical-vs-executable substitution.
+
+`best_price` was ordered by `olp_american_profit(1, price) DESC`. That is
+Package #1's **money** function: it rounds to two decimals because ledger
+amounts are cents, which is correct for money and wrong for comparison. On a
+one-unit stake, adjacent American prices collapse into the same cent:
+
+```
+-142  ->  100/142 = 0.704225  ->  round(...,2) = 0.70
+-143  ->  100/143 = 0.699301  ->  round(...,2) = 0.70
+```
+
+They tied, `sportsbook ASC` then decided, and it could name the **worse** price.
+Observed live in the sign-off output: with `book4` at `-141` excluded as
+superseded, the executable surface reported `book2` at `-143` while `book3` was
+offering `-142`. The one field the whole package exists to produce — "where is
+the best executable price" — was wrong, quietly, by one price step.
+
+The collision is not rare. Any two prices whose per-unit payouts land in the
+same cent bucket tie, which is most adjacent pairs once magnitudes pass roughly
+`-110`.
+
+Fixed in `044` with `olp_price_payout(INT)`: exact, never rounded, deliberately
+a separate function so no caller can confuse *what ranks higher* with *what gets
+paid*. `olp_american_profit` is untouched — it is right for money, Package #1
+froze it, and tickets carry its output as `potential_profit`. Only the two
+`ORDER BY` clauses moved.
+
+**Why the tests missed it.** `P4-T13` asserted payout ordering with `+100` /
+`-105` / `-110` — prices far enough apart that rounding cannot collapse them.
+The property was true and the test was honest; the fixture simply never entered
+the range where the defect lives. The same lesson as §12.1 item 8: an invariant
+has to be tested on inputs that can actually violate it.
+
+**Reported, not fixed:** `ticket_closing_line_value` (migration `028`, Package
+#2, frozen `pkg2-v1.0`) computes `beat_close` by comparing
+`olp_american_profit(1, accepted_price)` against
+`olp_american_profit(1, closing_price)`, and carries the identical collision — a
+ticket that beat the close by one point can read as not having beaten it, and
+`payout_edge_per_unit` inherits the rounding before its own `round(..., 4)`.
+Package #2's semantics are frozen and were not changed as a side effect of a
+Package #4 fix. This needs its own decision.
 
 ### 12.4 A benchmarking trap worth naming
 

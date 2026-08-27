@@ -733,20 +733,32 @@ def t26_best_price_ranks_on_exact_payout_not_rounded_money():
                            AND selection='DAL' AND line=-3.0""", (ev,))
     assert ex == (-142, "bookC"), f"executable named a worse price as best: {ex}"
 
-    # Sweep adjacent pairs across the range where cent collisions occur. Each
-    # pair must rank strictly, in both directions of book naming.
-    for better, worse in ((-142, -143), (-152, -153), (-175, -177), (-205, -210)):
-        h.reset(admin)
-        ev = event(admin, f"T26-{better}")
-        two_sided(admin, ev, "SPREAD", -3.0, worse, 120, "bookA")
-        two_sided(admin, ev, "SPREAD", -3.0, better, 121, "bookZ")
-        got = h.scalar(admin, """SELECT best_price FROM public.canonical_market
-                                 WHERE event_id=%s AND market_type='SPREAD'
-                                   AND selection='DAL' AND line=-3.0""", (ev,))
-        assert got == better, f"{better} vs {worse}: best_price came back {got}"
+    # The full ordering rule, pair by pair. The WORSE price always goes on the
+    # alphabetically earlier book, so `sportsbook ASC` cannot rescue a wrong
+    # answer -- if the payout keys tie, the wrong price wins and the test fails.
+    #
+    #   rule 1  positive beats negative          +100 > -101,  +100 > -100
+    #   rule 2  among positive, larger is better  +101 > +100
+    #   rule 3  among negative, closer to zero    -142 > -143,  -101 > -102
+    PAIRS = ((-142, -143), (-101, -102), (100, -101), (101, 100),
+             (100, -100), (-152, -153), (-205, -210))
+    for better, worse in PAIRS:
+        for market, line in (("SPREAD", -3.0), ("MONEYLINE", None)):
+            h.reset(admin)
+            ev = event(admin, f"T26-{market}-{better}-{worse}")
+            two_sided(admin, ev, market, line, worse, -110, "bookA")
+            two_sided(admin, ev, market, line, better, -110, "bookZ")
+            got = h.row(admin, """SELECT best_price, best_book
+                                  FROM public.canonical_market
+                                  WHERE event_id=%s AND market_type=%s
+                                    AND selection='DAL'
+                                    AND line IS NOT DISTINCT FROM %s""",
+                        (ev, market, line))
+            assert got == (better, "bookZ"),                 f"{market} {better} vs {worse}: got {got}, expected ({better}, 'bookZ')"
 
     admin.close()
-    return "-142 beats -143 in canonical and executable; 4 adjacent pairs rank strictly"
+    return (f"{len(PAIRS)} price pairs x 2 markets rank strictly; "
+            "-142 beats -143 in canonical and executable")
 
 
 PACKAGE4 = [

@@ -606,6 +606,41 @@ The property was true and the test was honest; the fixture simply never entered
 the range where the defect lives. The same lesson as §12.1 item 8: an invariant
 has to be tested on inputs that can actually violate it.
 
+**Completing the rule (`045`).** `olp_price_payout` implements *among positive,
+larger is better* and *among negative, closer to zero is better* exactly, and
+implements *positive beats negative* for every pair but one. Positive prices pay
+`p/100 >= 1.0` and negative prices pay `100/|p| <= 1.0`, so the only collision is
+the boundary itself:
+
+```
++100  ->  100/100 = 1.0
+-100  ->  100/100 = 1.0
+```
+
+and `market_snapshots` permits both — `CHECK (price <= -100 OR price >= 100)`.
+There the payout is genuinely identical, both being even money, so the ordering
+fell through to `sportsbook ASC`: arbitrary rather than wrong. Since rule 1 is
+stated as absolute it is now enforced as absolute, with `(price > 0) DESC`
+between the payout key and the alphabetical tie-break. It can only fire on
+`+100` vs `-100`, and it is not an economic claim — it makes an arbitrary choice
+deterministic.
+
+`P4-T26` covers the whole rule as seven price pairs across two markets, with the
+worse price always on the alphabetically earlier book so `sportsbook ASC` cannot
+rescue a wrong answer. Two negative controls, each isolating one migration:
+removing `045`'s sign key fails only `SPREAD 100 vs -100: got (-100, 'bookA')`;
+reverting `044`'s comparator fails `canonical named a worse price as best:
+(-143, 'bookB')`.
+
+**Audit.** Every `olp_american_profit()` call site was reviewed and is recorded
+in `045`'s header. `014` and `030` use it for money on a placed ticket, which is
+correct. No `ORDER BY`, `MAX`, `MIN`, `GREATEST`, `LEAST`, `rank()` or
+`row_number()` anywhere else in the schema ranks on price. One further use was
+found and fixed outside the schema: `scripts/package4_signoff.sql` computed its
+own `impossible_improvements` check with the rounding function, and would have
+missed a sub-cent improvement — the same bug in the instrument built to detect
+the bug.
+
 **Reported, not fixed:** `ticket_closing_line_value` (migration `028`, Package
 #2, frozen `pkg2-v1.0`) computes `beat_close` by comparing
 `olp_american_profit(1, accepted_price)` against

@@ -254,8 +254,11 @@ SELECT count(*) AS executable_rows,
              / NULLIF(count(*), 0), 2) AS pct,
        -- a substitution must never IMPROVE on canonical: the executable set is
        -- a subset, so its best can only be equal or worse
-       count(*) FILTER (WHERE public.olp_american_profit(1, exec_price)
-                            > public.olp_american_profit(1, canon_price)) AS impossible_improvements
+       -- olp_price_payout, NOT olp_american_profit: the money function rounds
+       -- to cents and would miss a sub-cent improvement, which is the same
+       -- precision bug migration 044 fixed in the views themselves.
+       count(*) FILTER (WHERE public.olp_price_payout(exec_price)
+                            > public.olp_price_payout(canon_price)) AS impossible_improvements
 FROM j;
 
 -- -----------------------------------------------------------------------------

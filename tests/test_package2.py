@@ -595,7 +595,7 @@ def t34_out_of_order_quote_never_becomes_current():
 
     # A straggler from the provider, timestamped before the current quote.
     late = h.scalar(admin,
-        "SELECT olp_test.age_quote(%s,'SPREAD','HOME1','BOOK_A', INTERVAL '30 seconds')", (ev,))
+        "SELECT olp_test.append_backdated_quote(%s,'SPREAD','HOME1','BOOK_A', INTERVAL '30 seconds')", (ev,))
     assert late is not None
 
     newest = h.scalar(admin,

@@ -698,6 +698,95 @@ def s_short(sql):
     return sql.split("(")[0][-30:]
 
 
+def t31_rate_limit_without_retry_after_falls_back_to_backoff():
+    """The v4 docs have a 429 section but do NOT document a Retry-After header.
+
+    So the header must be treated as a bonus, never a requirement: with it
+    absent, backoff has to stand on its own jittered curve.
+    """
+    slept = []
+    policy = RetryPolicy(max_attempts=3, base_delay=1.0, multiplier=2.0,
+                         max_delay=8.0, sleeper=slept.append, rng=random.Random(3))
+
+    def limited():
+        raise RateLimitedError("429 Too Many Requests")      # no retry_after
+
+    try:
+        policy.run(limited)
+        raise AssertionError("should have surfaced after max attempts")
+    except RateLimitedError as exc:
+        assert exc.retry_after is None, "fixture should carry no header"
+        assert exc.retryable is True
+
+    assert len(slept) == 2, slept
+    assert 0 <= slept[0] <= 1.0, slept          # ceiling base * 2^0
+    assert 0 <= slept[1] <= 2.0, slept          # ceiling base * 2^1
+    assert all(s == s for s in slept)           # never NaN from float(None)
+
+    # A malformed Retry-After must not crash the classifier either.
+    for bad in ("", "soon", None):
+        err = _classify(429, {"retry-after": bad} if bad is not None else {}, "", "u")
+        assert err.retry_after is None, bad
+        assert err.retryable is True
+
+
+def t32_quota_last_header_is_read():
+    """x-requests-last is the per-call cost; it is how you learn what a given
+    regions x markets combination actually bills."""
+    p = provider(HttpResponse(status=200, body=sample_payload(), headers={
+        "x-requests-remaining": "497", "x-requests-used": "3", "x-requests-last": "6"}))
+    p.prefetch()
+    assert (p.quota_remaining, p.quota_used, p.quota_last) == (497, 3, 6)
+
+    # Absent header degrades to None rather than guessing.
+    p2 = provider(HttpResponse(status=200, body=sample_payload(), headers={}))
+    p2.prefetch()
+    assert (p2.quota_remaining, p2.quota_used, p2.quota_last) == (None, None, None)
+
+
+def t33_live_smoke_report_renders_offline():
+    """The smoke script is what gets pointed at production and spends a real
+    request. A rendering bug discovered live wastes that request, so the report
+    path is exercised here against the recorded payload."""
+    import os
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
+    import live_smoke
+
+    saved = os.environ.get("THE_ODDS_API_KEY")
+    os.environ["THE_ODDS_API_KEY"] = "SECRET-KEY-abc123XYZ"
+    try:
+        p = TheOddsApiProvider(transport=FakeTransport(HttpResponse(
+            status=200, body=sample_payload(),
+            headers={"x-requests-remaining": "499", "x-requests-used": "1",
+                     "x-requests-last": "1"})))
+
+        report = live_smoke.Report()
+        summary = live_smoke.poll_once_readonly(p, report)
+        rendered = report.contents()
+        clean = live_smoke.leakage_check(p, report, rendered)
+        out = report.contents()
+
+        assert clean is True, "leakage check should pass on a clean report"
+        assert os.environ["THE_ODDS_API_KEY"] not in out, "THE KEY LEAKED INTO THE REPORT"
+
+        for expected in ("LIVE SMOKE - READ ONLY", "HTTP", "Events received",
+                         "Parse errors", "Quota", "Last request",
+                         "Bookmakers observed", "Markets", "Event sample",
+                         "Credential leakage check"):
+            assert expected in out, expected
+
+        assert summary["books"] == {"draftkings", "fanduel"}, summary
+        assert summary["markets"] == {"MONEYLINE", "SPREAD", "TOTAL"}, summary
+        assert summary["quota_remaining"] == 499
+        # No full URL is ever rendered.
+        assert "apiKey=" not in out or "REDACTED" in out
+    finally:
+        if saved is None:
+            os.environ.pop("THE_ODDS_API_KEY", None)
+        else:
+            os.environ["THE_ODDS_API_KEY"] = saved
+
+
 PACKAGE3 = [
     ("P3-T01", "v4 payload maps to domain rows", t01_v4_payload_maps_to_domain_rows),
     ("P3-T02", "One HTTP call serves schedule and odds", t02_one_http_call_serves_schedule_and_odds),
@@ -729,4 +818,7 @@ PACKAGE3 = [
     ("P3-T28", "Dead feed fails closed and is visible", t28_dead_feed_fails_closed_and_is_visible),
     ("P3-T29", "Repeated cycles are idempotent", t29_repeated_cycles_are_idempotent),
     ("P3-T30", "Clients cannot touch provider health", t30_clients_cannot_touch_provider_health),
+    ("P3-T31", "429 without Retry-After falls back to backoff", t31_rate_limit_without_retry_after_falls_back_to_backoff),
+    ("P3-T32", "x-requests-last header is read", t32_quota_last_header_is_read),
+    ("P3-T33", "Live smoke report renders offline", t33_live_smoke_report_renders_offline),
 ]

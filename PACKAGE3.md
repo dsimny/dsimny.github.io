@@ -1,8 +1,8 @@
 # OLP-M1 Package #3 — Provider Integration & Resilience
 
-**Status:** implemented and verified offline. 117/117 tests pass on both a real
+**Status:** implemented and verified offline. 121/121 tests pass on both a real
 Supabase stack (PostgreSQL 17.6) and bundled PostgreSQL 16.2 — 40 Package #1,
-34 + 13 Package #2, 30 Package #3.
+34 + 14 Package #2, 33 Package #3.
 
 **Not yet run against the live API.** No key exists on this machine and a live
 call spends real quota, so every test uses a recorded v4 payload or a fake
@@ -67,7 +67,7 @@ retrying?* — and never about HTTP.
 | Condition | Class | Retried |
 |---|---|---|
 | 5xx, timeout, connection reset, DNS | `TransientProviderError` | yes |
-| 429 | `RateLimitedError` | yes, honouring `Retry-After` |
+| 429 | `RateLimitedError` | yes; honours `Retry-After` **if sent** |
 | 401 / 403 | `PermanentProviderError` | **no** |
 | 422, other 4xx | `PermanentProviderError` | **no** |
 | Non-JSON or non-array body | `MalformedPayloadError` | **no** |
@@ -81,8 +81,10 @@ Retrying a bad key is worse than useless: it burns quota and can never succeed
 Backoff sleeps uniformly in `[0, min(max_delay, base × 2^(n-1))]`. Equal or zero
 jitter means every worker instance retries on the same schedule, and a
 recovering provider gets a synchronised thundering herd at the moment it can
-least take one. A server-supplied `Retry-After` always wins over the computed
-delay — the server knows better than the curve (`P3-T13`, `P3-T14`).
+least take one. A server-supplied `Retry-After` wins over the computed delay when it is
+present — the server knows better than the curve. The v4 docs do not promise
+one, so its absence is the expected case, not the exception (`P3-T13`,
+`P3-T14`, `P3-T31`).
 
 ### 3.4 Quota keeps a reserve
 
@@ -140,8 +142,9 @@ always true and therefore useless (`P3-T28`).
 | Circuit breaker (durable) | P3-T18 … T22 |
 | End-to-end cycles, outage, fail-closed | P3-T23 … T29 |
 | Authorization | P3-T30 |
+| Rate-limit header absent, quota headers, smoke report | P3-T31 … T33 |
 
-**30/30 PASS.** Highlights worth naming:
+**33/33 PASS.** Highlights worth naming:
 
 - **P3-T25** — an outage trips the breaker, and the next cycle is refused
   *without calling the provider at all*, with zero rows written.
@@ -149,16 +152,36 @@ always true and therefore useless (`P3-T28`).
 - **P3-T28** — a dark event is refused and reported while a healthy event on the
   same slate keeps trading.
 - **P3-T29** — three identical cycles produce 2 events and 16 quotes, not 48.
+- **P3-T31** — a 429 with no `Retry-After` still backs off on its own curve.
+- **P3-T33** — the live smoke report renders offline, so a formatting bug
+  cannot waste a real request.
 
-### One test that was wrong first
+### The recurring mistake, now impossible
 
 `P3-T28` originally faked a dead feed by inserting back-dated snapshot rows.
-That does not model anything: ordering is `captured_at DESC`, so a back-dated
-row never becomes the current quote — and snapshots are immutable, so the fresh
-ones cannot be removed. A dark feed is an event whose **newest** quote is old,
-so the test now builds a slate where one event's last successful poll is older
-than the TTL. (The identical mistake was made and corrected once already in
-Package #2's `M2-T04`.)
+That models nothing: ordering is `captured_at DESC`, so a back-dated row never
+becomes the current quote — and snapshots are immutable, so the fresh ones
+cannot be removed. A dark feed is an event whose **newest** quote is old.
+
+The identical mistake was made and corrected once already in Package #2's
+`M2-T04`. Twice is a pattern, so it is now a guard rail rather than a note
+(migration 036):
+
+| Fixture | Behaviour |
+|---|---|
+| `olp_test.append_backdated_quote()` | renamed from `age_quote`, which implied something it never did. Appends a late-arriving observation; the market stays fresh. |
+| `olp_test.make_current_quote_stale()` | **asserts, never mutates.** Succeeds if the newest quote is already that old; otherwise raises `STALENESS_FIXTURE_MISUSE`, explaining why ageing a fresh market is impossible and naming the alternative. |
+| `olp_test.seed_stale_market()` | the honest construction: an event whose only observation is old. |
+
+`B14` asserts the guard fires, that back-dating leaves the market placeable, and
+that the honest construction produces a genuinely dark market.
+
+Designing that helper surfaced the same confusion one level deeper. Its first
+implementation *inserted* a row at the target time, which could only ever
+produce a quote **newer** than the current one — reducing staleness, never
+creating it. A function named `make_` that cannot make anything is worse than
+no function. It now asserts and refuses, keeping the name so the attempt lands
+somewhere that explains itself.
 
 ---
 
@@ -172,9 +195,30 @@ export THE_ODDS_API_KEY=...
 python scripts/live_smoke.py
 ```
 
-Dry run: one request, parse and report, **no writes**. Add `--ingest` (with
-`OLP_DATABASE_URL` set) to write. Trim `--markets` / `--regions` / `--bookmakers`
-to spend less.
+Read only: one request, parse and report, **no writes**, ending in an explicit
+`DATABASE WRITES: 0`. It reports HTTP status, events received vs parsed, parse
+errors, all three quota headers, every bookmaker key observed, which markets came
+back, one full event sample, and a credential-leakage check over the URL, the
+rendered report and a real exception.
+
+The report is buffered and scanned for the key **before** anything is printed —
+a leak check that runs after printing is not a check. Nothing is emitted at all
+if the key appears anywhere in it.
+
+To settle the bookmaker-key stability question empirically:
+
+```bash
+python scripts/live_smoke.py --polls 3 --interval 75
+```
+
+Three read-only polls, then a stability summary comparing bookmaker keys and
+event IDs across them, plus the quota actually consumed. Costs 3 requests.
+
+Only after that: `--ingest`, with `OLP_DATABASE_URL` set. Trim `--markets` /
+`--regions` / `--bookmakers` to spend less.
+
+`P3-T33` renders this entire report offline against the recorded payload, so a
+formatting bug cannot waste a live request.
 
 Production shape — a cron tick or Edge Function holding a service-role
 connection:
@@ -202,19 +246,29 @@ raising when the breaker is open, so a tick can log and move on.
 Stated plainly, because this is the part a passing suite cannot tell you.
 
 1. **No live call has been made.** The adapter is written to the documented v4
-   shape and validated against a recorded payload. Field names, the
-   `x-requests-remaining` header and error-body shapes are as documented — but
-   documentation and production disagree sometimes, and only a real call
-   settles it. `scripts/live_smoke.py` exists for exactly that and is one
-   command away.
+   shape and validated against a recorded payload. Only a real call settles
+   whether documentation and production agree. `scripts/live_smoke.py` is one
+   command away and writes nothing.
 2. **Bookmaker keys are taken verbatim** (`draftkings`, `fanduel`). Same-book
-   closing-line capture depends on that key being stable across polls. It is
-   the provider's stable identifier, but it is worth confirming on live data.
-3. **Rate-limit behaviour under real 429s is simulated**, not observed. The
-   `Retry-After` handling follows the HTTP spec; whether The Odds API sends that
-   header, and in what units, needs a real limit breach to confirm.
-4. **Quota accounting is read from headers, never computed.** If the header is
-   absent the guard passes rather than guessing.
+   closing-line capture depends on that key being stable across polls. The v4
+   docs describe `key` as the bookmaker identifier alongside `title`, which
+   supports the design — but stability *across polls* is an empirical question,
+   which is why `--polls 3 --interval 75` exists.
+3. **`Retry-After` on a 429 is NOT assumed.** The v4 documentation has a
+   "Rate Limiting (status code 429)" section but does not document a
+   `Retry-After` header. It is therefore treated as a bonus: present, it
+   overrides the computed delay; absent or malformed, backoff stands on its own
+   jittered curve. `P3-T31` asserts exactly that, including `""`, `"soon"` and a
+   missing header.
+4. **Quota accounting is read from headers, never computed.** All three
+   documented headers are read — `x-requests-remaining`, `x-requests-used` and
+   `x-requests-last` (the per-call cost, which is how you discover what a given
+   `regions x markets` combination actually bills). If a header is absent the
+   guard passes rather than guessing (`P3-T32`).
+
+   `x-requests-last` is read and reported but **not yet persisted** to
+   `provider_health`; that needs a new RPC signature and was deliberately
+   deferred until after the live check.
 
 ---
 

@@ -10,13 +10,13 @@ AUTHENTICATED USER → CURRENT LEDGER CHAPTER → CHAPTER_OPEN +10,000 LC
 ```
 
 **Status: Packages #1–#3 complete; Package #2 FROZEN at `pkg2-v1.0`.**
-117/117 tests pass on **both** a real Supabase stack (PostgreSQL 17.6) and the
+121/121 tests pass on **both** a real Supabase stack (PostgreSQL 17.6) and the
 bundled PostgreSQL 16.2, including 15-way true-concurrency placement against
 independent database connections.
 
 - Package #1 — Database Foundation: 40/40. [TEST_REPORT.md](TEST_REPORT.md), [DEVIATIONS.md](DEVIATIONS.md)
-- Package #2 — Market Ingestion & Event Lifecycle: 34/34 plus 13 boundary/concurrency. [PACKAGE2.md](PACKAGE2.md)
-- Package #3 — The Odds API + resilience: 30/30, **verified offline only**. [PACKAGE3.md](PACKAGE3.md)
+- Package #2 — Market Ingestion & Event Lifecycle: 34/34 plus 14 boundary/concurrency. [PACKAGE2.md](PACKAGE2.md)
+- Package #3 — The Odds API + resilience: 33/33, **verified offline only**. [PACKAGE3.md](PACKAGE3.md)
 
 ---
 
@@ -40,7 +40,7 @@ asserts it is not 20,000.
 
 ```
 db/
-  migrations/        001-035, applied in order. This is what ships.
+  migrations/        001-036, applied in order. This is what ships.
   testkit/           TEST ONLY. Never apply to Supabase.
   rollback/          ROLLBACK_NOTES.md
 ingest/              Package #2 ingestion worker
@@ -106,6 +106,7 @@ Package #2 (see [PACKAGE2.md](PACKAGE2.md)):
 | 033 | durable provider health / circuit state (Pkg #3) |
 | 034 | feed health + fail-closed visibility (Pkg #3) |
 | 035 | Package #3 fixtures |
+| 036 | staleness guard-rail fixtures |
 
 ---
 
@@ -160,7 +161,7 @@ Do **not** apply anything in `db/testkit/`.
 
 | Apply | Skip in production |
 |---|---|
-| 001–018, 020–028, 030–034 | **019**, **029**, **035** (`olp_test` fixtures) |
+| 001–018, 020–028, 030–034 | **019**, **029**, **035**, **036** (`olp_test` fixtures) |
 
 The fixture migrations are development only: nothing else depends on them, and
 they define `olp_test.reset()`, which truncates every ledger table.
@@ -257,6 +258,9 @@ To check the live API (spends quota, dry-run by default):
 ```bash
 python scripts/live_smoke.py
 ```
+
+Read-only, `DATABASE WRITES: 0`. Add `--polls 3 --interval 75` to check
+bookmaker-key stability across polls before ingesting anything.
 
 Any other feed drops into the same seam: subclass `OddsProvider`, map onto
 `EventRow` / `QuoteRow`. No migration and no line of `worker.py` changes.

@@ -427,7 +427,7 @@ def b10_late_historical_quote_never_replaces_current():
 
     current = quote(ev, price=-124)
     late = h.scalar(admin,
-        "SELECT olp_test.age_quote(%s,'SPREAD','HOME1','BOOK_A', INTERVAL '45 seconds')", (ev,))
+        "SELECT olp_test.append_backdated_quote(%s,'SPREAD','HOME1','BOOK_A', INTERVAL '45 seconds')", (ev,))
 
     assert h.scalar(admin,
         """SELECT id FROM public.market_snapshots
@@ -533,6 +533,65 @@ def b13_concurrent_void_paths_settle_once():
     return "one settlement, one wallet row"
 
 
+def b14_staleness_fixture_refuses_the_recurring_mistake():
+    """The regression rule, enforced rather than documented.
+
+    Modelling a dead feed by inserting an older row is seductive and silently
+    wrong: reads order by captured_at DESC so a back-dated row never becomes
+    current, and snapshots are immutable so the fresh ones cannot be removed.
+    This mistake was made twice (M2-T04, P3-T28). The fixture now refuses it.
+    """
+    admin = h.connect(); h.reset(admin)
+    ev = seed_slate(admin, 1)[0][0]
+
+    # A fresh observation exists, so this CANNOT make the current quote stale.
+    def wrong():
+        h.scalar(admin,
+            """SELECT olp_test.make_current_quote_stale(
+                   %s,'SPREAD','HOME1','BOOK_A', INTERVAL '5 minutes')""", (ev,))
+    err = h.expect_error(wrong, "STALENESS_FIXTURE_MISUSE", "B14 guard")
+    assert "captured_at DESC" in err and "seed_stale_market" in err, err
+    assert "CANNOT be aged" in err, err
+
+    # Back-dating is still available -- under a name that says what it does.
+    late = h.scalar(admin,
+        """SELECT olp_test.append_backdated_quote(
+               %s,'SPREAD','HOME1','BOOK_A', INTERVAL '5 minutes')""", (ev,))
+    assert late is not None
+    assert h.scalar(admin,
+        """SELECT count(*) FROM public.current_market_board
+           WHERE event_id=%s AND is_placeable""", (ev,)) > 0,         "back-dating must NOT have made the market dark"
+
+    # The honest construction: a market whose newest observation is old.
+    dark_ev, dark_snap = h.row(admin,
+        "SELECT * FROM olp_test.seed_stale_market('DARK-1', INTERVAL '5 minutes')")
+    assert h.scalar(admin,
+        """SELECT count(*) FROM public.current_market_board
+           WHERE event_id=%s AND is_placeable""", (dark_ev,)) == 0,         "seed_stale_market should produce a dark market"
+
+    u = new_user(admin, "guardrail"); ch = open_chapter(u)
+    h.expect_error(lambda: place(u, ch, dark_snap, 100),
+                   "SNAPSHOT_STALE", "B14 dark market unplaceable")
+
+    # On a genuinely quiet market it asserts successfully and returns the
+    # existing snapshot -- it never fabricates one.
+    confirmed = h.scalar(admin,
+        """SELECT olp_test.make_current_quote_stale(
+               %s,'SPREAD','HOME_DARK_1','BOOK_A', INTERVAL '3 minutes')""", (dark_ev,))
+    assert confirmed == dark_snap, (confirmed, dark_snap)
+    assert h.scalar(admin,
+        "SELECT count(*) FROM public.market_snapshots WHERE event_id=%s", (dark_ev,)) == 1,         "asserting staleness must not insert anything"
+
+    # Asking for MORE staleness than the market actually has is refused too.
+    def overreach():
+        h.scalar(admin,
+            """SELECT olp_test.make_current_quote_stale(
+                   %s,'SPREAD','HOME_DARK_1','BOOK_A', INTERVAL '90 minutes')""", (dark_ev,))
+    h.expect_error(overreach, "STALENESS_FIXTURE_MISUSE", "B14 overreach")
+    admin.close()
+    return "misuse refused, honest construction works"
+
+
 BOUNDARY = [
     ("B01", "Ticket before first slip absorbs total displacement", b01_ticket_before_first_slip_absorbs_total_displacement),
     ("B02", "Ticket after first slip ignores earlier displacement", b02_ticket_after_first_slip_ignores_earlier_displacement),
@@ -547,4 +606,5 @@ BOUNDARY = [
     ("B11", "Double cancel cannot double-release escrow", b11_double_cancel_cannot_double_release_escrow),
     ("B12", "Double postpone cannot double-release escrow", b12_double_postpone_cannot_double_release_escrow),
     ("B13", "Concurrent void paths settle once", b13_concurrent_void_paths_settle_once),
+    ("B14", "Staleness fixture refuses the recurring mistake", b14_staleness_fixture_refuses_the_recurring_mistake),
 ]

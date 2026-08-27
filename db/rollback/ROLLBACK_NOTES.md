@@ -256,3 +256,18 @@ Dropping 033 loses the record that a provider is down. The worker then treats
 every tick as a fresh start and will call a dead provider once per tick — which
 is exactly the behaviour the durable circuit exists to prevent. Roll it back
 only as part of removing Package #3 entirely.
+
+---
+
+# Package #3 addendum (migration 036)
+
+```sql
+-- 036  (restores the pre-036 fixture names)
+DROP FUNCTION IF EXISTS olp_test.seed_stale_market(TEXT, INTERVAL, INTERVAL, TEXT);
+DROP FUNCTION IF EXISTS olp_test.make_current_quote_stale(UUID, public.market_type, TEXT, TEXT, INTERVAL);
+DROP FUNCTION IF EXISTS olp_test.append_backdated_quote(UUID, public.market_type, TEXT, TEXT, INTERVAL);
+-- olp_test.age_quote was dropped by 036; re-apply 029 to restore it.
+```
+
+Fixture-only. Dropping 036 removes the guard rail that stops a test modelling
+feed staleness by back-dating a snapshot -- a mistake already made twice.

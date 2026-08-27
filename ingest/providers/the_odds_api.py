@@ -96,6 +96,10 @@ class TheOddsApiProvider(OddsProvider):
     def quota_used(self) -> Optional[int]:
         return self.last_response.quota_used if self.last_response else None
 
+    @property
+    def quota_last(self) -> Optional[int]:
+        return self.last_response.quota_last if self.last_response else None
+
     # -- transport ----------------------------------------------------------
 
     def _fetch(self) -> list:

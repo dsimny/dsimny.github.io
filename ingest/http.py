@@ -64,6 +64,12 @@ class HttpResponse:
     def quota_used(self) -> Optional[int]:
         return self._int_header("x-requests-used")
 
+    @property
+    def quota_last(self) -> Optional[int]:
+        """Cost of the most recent call. Billed as regions x markets, so this is
+        how you find out what a given parameter set actually costs."""
+        return self._int_header("x-requests-last")
+
 
 class HttpTransport:
     """Injectable so tests can substitute a fake without touching the network."""

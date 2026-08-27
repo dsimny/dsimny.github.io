@@ -9,14 +9,14 @@ AUTHENTICATED USER → CURRENT LEDGER CHAPTER → CHAPTER_OPEN +10,000 LC
    → SETTLE TICKET → RELEASE ESCROW → PERMANENT LEDGER RESULT
 ```
 
-**Status: Packages #1–#3 complete. #2 FROZEN at `pkg2-v1.0`, #3 at `pkg3-v1.0`.**
-121/121 tests pass on **both** a real Supabase stack (PostgreSQL 17.6) and the
+**Status: Packages #1–#3 complete. #2 FROZEN at `pkg2-v1.0`, #3 at `pkg3-v1.1`.**
+126/126 tests pass on **both** a real Supabase stack (PostgreSQL 17.6) and the
 bundled PostgreSQL 16.2, including 15-way true-concurrency placement against
 independent database connections.
 
 - Package #1 — Database Foundation: 40/40. [TEST_REPORT.md](TEST_REPORT.md), [DEVIATIONS.md](DEVIATIONS.md)
 - Package #2 — Market Ingestion & Event Lifecycle: 34/34 plus 14 boundary/concurrency. [PACKAGE2.md](PACKAGE2.md)
-- Package #3 — The Odds API + resilience: 33/33, **FROZEN at `pkg3-v1.0`**, live boundary verified 2026-08-27. [PACKAGE3.md](PACKAGE3.md)
+- Package #3 — The Odds API + resilience: 38/38, **FROZEN at `pkg3-v1.0`, amended by `pkg3-v1.1`** (post-freeze `captured_at` correction). [PACKAGE3.md](PACKAGE3.md)
 
 ---
 

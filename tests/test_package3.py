@@ -11,6 +11,7 @@ import json
 import pathlib
 import random
 import sys
+import time
 import uuid
 
 import harness as h
@@ -21,7 +22,7 @@ from ingest import (                                                  # noqa: E4
     CircuitBreaker, CircuitOpenError, HttpResponse, MalformedPayloadError,
     PermanentProviderError, QuotaExhaustedError, QuotaGuard, RateLimitedError,
     RateLimiter, RetryPolicy, TransientProviderError, redact, run_poll_cycle,
-    feed_health,
+    feed_health, ingest_schedule, ingest_odds,
 )
 from ingest.http import _classify                                     # noqa: E402
 from ingest.providers import TheOddsApiProvider                       # noqa: E402
@@ -131,8 +132,11 @@ def t01_v4_payload_maps_to_domain_rows():
     assert not any(q.market_type not in ("MONEYLINE", "SPREAD", "TOTAL") for q in quotes)
     assert p.last_parse_errors == [], p.last_parse_errors
 
-    # Per-market last_update becomes captured_at.
-    assert sp.captured_at == dt.datetime(2026, 9, 14, 12, 10, 31, tzinfo=UTC)
+    # Per-market last_update is PROVENANCE, not the observation time.
+    assert sp.provider_updated_at == dt.datetime(2026, 9, 14, 12, 10, 31, tzinfo=UTC)
+    # captured_at is when WE fetched, which is now -- not 2026-09-14.
+    assert sp.captured_at == p.fetched_at
+    assert abs((dt.datetime.now(UTC) - sp.captured_at).total_seconds()) < 30
 
 
 def t02_one_http_call_serves_schedule_and_odds():
@@ -586,45 +590,35 @@ def t28_dead_feed_fails_closed_and_is_visible():
     admin = h.connect(); h.reset(admin)
     ttl = h.scalar(admin, "SELECT snapshot_ttl_seconds FROM public.system_settings")
 
-    # Two events. The second one's feed stopped reporting more than a TTL ago --
-    # its last successful poll is all it has. Back-dating extra rows would NOT
-    # model this: ordering is captured_at DESC, so a stale row never becomes the
-    # current quote, and snapshots are immutable so the fresh ones cannot be
-    # removed. A dark feed is an event whose NEWEST quote is old.
-    payload = live_payload(events=2)
-    gone_dark = (dt.datetime.now(UTC)
-                 - dt.timedelta(seconds=ttl + 60)).isoformat().replace("+00:00", "Z")
-    for book in payload[1]["bookmakers"]:
-        book["last_update"] = gone_dark
-        for market in book["markets"]:
-            market["last_update"] = gone_dark
+    # A dark market can no longer be faked through the provider payload: since
+    # the captured_at correction, every quote a poll returns is stamped with the
+    # fetch time and is therefore fresh by construction. That is the point of
+    # the fix. A dark market is one we have NOT polled recently, so it is built
+    # at the database layer.
+    dark_ev, dark_snap = h.row(admin,
+        "SELECT * FROM olp_test.seed_stale_market('DARK-FEED', make_interval(secs => %s))",
+        (ttl + 60,))
 
-    p = provider(ok(payload))
+    # A healthy event on the same slate, ingested through the real cycle.
+    p = provider(ok(live_payload(events=1)))
     with h.connect_as("service_role") as conn:
         run_poll_cycle(conn, p, retry=no_sleep_retry())
-
     live_event = h.scalar(admin,
         "SELECT id FROM public.events WHERE source_event_id='live-evt-1'")
-    dark_event = h.scalar(admin,
-        "SELECT id FROM public.events WHERE source_event_id='live-evt-2'")
 
-    # The live event still trades.
+    # The live event trades.
     u = new_user(admin, "dead_feed"); ch = open_chapter(u)
     snap = h.scalar(admin,
         """SELECT snapshot_id FROM public.current_market_board
            WHERE event_id=%s AND is_placeable LIMIT 1""", (live_event,))
-    assert snap is not None, "the healthy event should still be placeable"
+    assert snap is not None, "the freshly polled event must be placeable"
     assert place(u, ch, snap, 100) is not None
 
-    # The dark one fails CLOSED: nothing offered, and placement refused.
+    # The dark one fails CLOSED.
     assert h.scalar(admin,
         """SELECT count(*) FROM public.current_market_board
-           WHERE event_id=%s AND is_placeable""", (dark_event,)) == 0
-
-    newest_dark = h.scalar(admin,
-        """SELECT id FROM public.market_snapshots WHERE event_id=%s
-           ORDER BY captured_at DESC, ingest_seq DESC LIMIT 1""", (dark_event,))
-    h.expect_error(lambda: place(u, ch, newest_dark, 100),
+           WHERE event_id=%s AND is_placeable""", (dark_ev,)) == 0
+    h.expect_error(lambda: place(u, ch, dark_snap, 100),
                    "SNAPSHOT_STALE", "T28 fail closed")
 
     # And it is visible rather than silent.
@@ -633,13 +627,12 @@ def t28_dead_feed_fails_closed_and_is_visible():
     assert health["open_events"] == 2, health
     assert health["dark_events"] == 1, health
     assert health["stalest_quote_age_seconds"] >= ttl, health
-    assert health["providers"][0]["circuit"] == "CLOSED", health
 
     rows = {r[0]: r[1] for r in h.rows(admin,
         "SELECT event_id, is_dark FROM public.market_feed_health")}
-    assert rows[live_event] is False and rows[dark_event] is True, rows
+    assert rows[live_event] is False and rows[dark_ev] is True, rows
     admin.close()
-    return "healthy event trades, dark event refused and reported"
+    return "freshly polled event trades, un-polled event refused and reported"
 
 
 def t29_repeated_cycles_are_idempotent():
@@ -787,6 +780,179 @@ def t33_live_smoke_report_renders_offline():
             os.environ["THE_ODDS_API_KEY"] = saved
 
 
+def t34_fresh_fetch_is_inside_the_ttl():
+    """The defect that the first live ingest exposed, as a test.
+
+    Every quote a poll returns must be placeable immediately, regardless of how
+    long ago the bookmaker last moved its price.
+    """
+    admin = h.connect(); h.reset(admin)
+    ttl = h.scalar(admin, "SELECT snapshot_ttl_seconds FROM public.system_settings")
+
+    # Mirror the real slate: bookmaker last_update well past the TTL, which is
+    # exactly what production returned (122-221s behind the fetch).
+    payload = live_payload(events=2)
+    ancient = (dt.datetime.now(UTC)
+               - dt.timedelta(seconds=ttl * 5)).isoformat().replace("+00:00", "Z")
+    for ev in payload:
+        for book in ev["bookmakers"]:
+            book["last_update"] = ancient
+            for market in book["markets"]:
+                market["last_update"] = ancient
+
+    p = provider(ok(payload))
+    with h.connect_as("service_role") as conn:
+        result = run_poll_cycle(conn, p, retry=no_sleep_retry())
+    assert result.odds.snapshots_written == 16, result.odds
+
+    board, placeable, oldest = h.row(admin,
+        """SELECT count(*), count(*) FILTER (WHERE is_placeable), max(quote_age_seconds)
+           FROM public.current_market_board""")
+    assert board == 16, board          # 2 events x 2 markets x 2 selections x 2 books
+    assert placeable == 16, f"only {placeable} of {board} placeable straight after a poll"
+    assert oldest < ttl, f"newest quote already {oldest}s old against a {ttl}s TTL"
+
+    # And a ticket actually places against it.
+    u = new_user(admin, "fresh"); ch = open_chapter(u)
+    snap = h.scalar(admin,
+        "SELECT snapshot_id FROM public.current_market_board WHERE is_placeable LIMIT 1")
+    assert place(u, ch, snap, 100) is not None
+    admin.close()
+    return f"{placeable}/{board} placeable immediately, oldest {oldest}s"
+
+
+def t35_stale_provider_timestamp_does_not_make_a_quote_stale():
+    """provider last_update older than the TTL is provenance, not staleness."""
+    admin = h.connect(); h.reset(admin)
+    ttl = h.scalar(admin, "SELECT snapshot_ttl_seconds FROM public.system_settings")
+
+    payload = live_payload(events=1)
+    ancient_dt = dt.datetime.now(UTC) - dt.timedelta(hours=6)
+    ancient = ancient_dt.isoformat().replace("+00:00", "Z")
+    for book in payload[0]["bookmakers"]:
+        book["last_update"] = ancient
+        for market in book["markets"]:
+            market["last_update"] = ancient
+
+    p = provider(ok(payload))
+    quotes = list(p.fetch_odds())
+
+    # Provenance preserved...
+    assert all(q.provider_updated_at == ancient_dt for q in quotes), "last_update lost"
+    # ...but the observation is ours, and recent.
+    assert all(q.captured_at == p.fetched_at for q in quotes)
+    assert all((dt.datetime.now(UTC) - q.captured_at).total_seconds() < 30 for q in quotes)
+
+    with h.connect_as("service_role") as conn:
+        ingest_schedule(conn, p); ingest_odds(conn, p)
+
+    age = h.scalar(admin,
+        """SELECT round(extract(epoch FROM (NOW() - max(captured_at))))::int
+           FROM public.market_snapshots""")
+    assert age < ttl, f"persisted quote is {age}s old"
+    assert h.scalar(admin,
+        "SELECT count(*) FROM public.current_market_board WHERE is_placeable") == 8
+    admin.close()
+    return "last_update 6h old, quote still placeable"
+
+
+def t36_repeat_poll_inside_refresh_window_dedupes():
+    admin = h.connect(); h.reset(admin)
+    payload = live_payload(events=2)
+    p = provider(ok(payload))
+
+    with h.connect_as("service_role") as conn:
+        first = run_poll_cycle(conn, p, retry=no_sleep_retry())
+        second = run_poll_cycle(conn, p, retry=no_sleep_retry())
+        third = run_poll_cycle(conn, p, retry=no_sleep_retry())
+
+    assert first.odds.snapshots_written == 16, first.odds
+    for later in (second, third):
+        assert later.odds.snapshots_written == 0, later.odds
+        assert later.odds.snapshots_skipped == 16, later.odds
+
+    rows, logical = h.row(admin,
+        """SELECT (SELECT count(*) FROM public.market_snapshots),
+                  (SELECT count(*) FROM (SELECT DISTINCT event_id, market_type,
+                          selection, sportsbook FROM public.market_snapshots) x)""")
+    assert (rows, logical) == (16, 16), (rows, logical)
+    admin.close()
+    return "3 polls inside the window -> 16 rows, 0 duplicates"
+
+
+def t37_poll_after_refresh_window_appends_even_if_price_unchanged():
+    """The mechanism the old semantics silently defeated."""
+    admin = h.connect(); h.reset(admin)
+    payload = live_payload(events=2)
+    p = provider(ok(payload))
+
+    with h.connect_as("service_role") as conn:
+        first = run_poll_cycle(conn, p, retry=no_sleep_retry())
+    assert first.odds.snapshots_written == 16
+
+    # Cross the refresh window without waiting 60s. Config row, not code;
+    # olp_test.reset() restores the shipped default.
+    admin.execute("UPDATE public.system_settings SET snapshot_refresh_seconds = 1")
+    time.sleep(1.5)
+
+    with h.connect_as("service_role") as conn:
+        second = run_poll_cycle(conn, p, retry=no_sleep_retry())
+
+    # Identical prices, yet re-recorded -- this is what keeps a quiet market
+    # inside the TTL instead of letting it go dark.
+    assert second.odds.snapshots_written == 16, second.odds
+    assert second.odds.snapshots_skipped == 0, second.odds
+
+    rows, logical = h.row(admin,
+        """SELECT (SELECT count(*) FROM public.market_snapshots),
+                  (SELECT count(*) FROM (SELECT DISTINCT event_id, market_type,
+                          selection, sportsbook FROM public.market_snapshots) x)""")
+    assert rows == 32, rows          # observation history grew, by design
+    assert logical == 16, logical    # logical cardinality did NOT
+
+    assert h.scalar(admin,
+        "SELECT count(*) FROM public.current_market_board WHERE is_placeable") == 16
+    admin.execute("UPDATE public.system_settings SET snapshot_refresh_seconds = 60")
+    admin.close()
+    return "unchanged prices re-recorded: 32 rows, still 16 logical quotes"
+
+
+def t38_logical_cardinality_is_stable_across_many_polls():
+    """Observation rows may append; logical quotes must not multiply."""
+    admin = h.connect(); h.reset(admin)
+    p = provider(ok(live_payload(events=3)))
+
+    with h.connect_as("service_role") as conn:
+        run_poll_cycle(conn, p, retry=no_sleep_retry())
+    logical_after_first = h.scalar(admin,
+        """SELECT count(*) FROM (SELECT DISTINCT event_id, market_type, selection,
+                  sportsbook FROM public.market_snapshots) x""")
+
+    admin.execute("UPDATE public.system_settings SET snapshot_refresh_seconds = 1")
+    for _ in range(4):
+        time.sleep(1.1)
+        with h.connect_as("service_role") as conn:
+            run_poll_cycle(conn, p, retry=no_sleep_retry())
+
+    rows, logical, events = h.row(admin,
+        """SELECT (SELECT count(*) FROM public.market_snapshots),
+                  (SELECT count(*) FROM (SELECT DISTINCT event_id, market_type,
+                          selection, sportsbook FROM public.market_snapshots) x),
+                  (SELECT count(*) FROM public.events)""")
+
+    assert logical == logical_after_first == 24, (logical, logical_after_first)
+    assert events == 3, events
+    assert rows == 24 * 5, f"expected 5 observations per logical quote, got {rows}"
+    assert h.scalar(admin,
+        """SELECT count(*) FROM public.market_snapshots
+           GROUP BY event_id, market_type, selection, sportsbook, captured_at
+           HAVING count(*) > 1 LIMIT 1""") is None, "duplicate observations appeared"
+
+    admin.execute("UPDATE public.system_settings SET snapshot_refresh_seconds = 60")
+    admin.close()
+    return f"5 polls -> {rows} observations, {logical} logical quotes"
+
+
 PACKAGE3 = [
     ("P3-T01", "v4 payload maps to domain rows", t01_v4_payload_maps_to_domain_rows),
     ("P3-T02", "One HTTP call serves schedule and odds", t02_one_http_call_serves_schedule_and_odds),
@@ -821,4 +987,9 @@ PACKAGE3 = [
     ("P3-T31", "429 without Retry-After falls back to backoff", t31_rate_limit_without_retry_after_falls_back_to_backoff),
     ("P3-T32", "x-requests-last header is read", t32_quota_last_header_is_read),
     ("P3-T33", "Live smoke report renders offline", t33_live_smoke_report_renders_offline),
+    ("P3-T34", "Fresh fetch is inside the TTL", t34_fresh_fetch_is_inside_the_ttl),
+    ("P3-T35", "Stale provider timestamp does not make a quote stale", t35_stale_provider_timestamp_does_not_make_a_quote_stale),
+    ("P3-T36", "Repeat poll inside refresh window dedupes", t36_repeat_poll_inside_refresh_window_dedupes),
+    ("P3-T37", "Poll after refresh window appends unchanged price", t37_poll_after_refresh_window_appends_even_if_price_unchanged),
+    ("P3-T38", "Logical cardinality stable across many polls", t38_logical_cardinality_is_stable_across_many_polls),
 ]

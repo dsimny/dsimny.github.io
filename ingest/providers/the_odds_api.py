@@ -13,6 +13,22 @@ per cycle is cached and served to both `fetch_schedule()` and `fetch_odds()`;
 PARSING IS TOLERANT, NOT SILENT. A malformed event or outcome is skipped and
 recorded in `last_parse_errors` rather than discarding the whole slate -- one
 bad row must not cost a poll. The worker writes those errors to the run.
+
+CAPTURED_AT IS OUR FETCH TIME, NOT THE FEED'S last_update.
+Corrected after the first live ingest (2026-08-27). v4 reports one `last_update`
+per bookmaker -- when THAT BOOK last moved its prices -- and on a real NFL slate
+those ran 122-221 seconds behind the fetch. Using them as `captured_at` made
+every one of 4,552 quotes arrive already past the 120s placement TTL: the board
+was 100% unplaceable.
+
+Worse, it silently defeated the refresh mechanism. A book that does not move its
+price reports an unchanged `last_update`, so the de-duplication gap computed as
+`new - previous = 0`, the quote was skipped as "fresh", and it could never be
+re-recorded. A stable market would have gone dark permanently.
+
+The TTL asks how long since WE confirmed a price. We confirm every quote at
+fetch time, so that is what `captured_at` records. The feed's own timestamp is
+kept on QuoteRow.provider_updated_at as provenance and is not persisted.
 """
 
 from __future__ import annotations
@@ -78,6 +94,7 @@ class TheOddsApiProvider(OddsProvider):
         self.transport = transport or HttpTransport()
 
         self._cache: Optional[list] = None
+        self._fetched_at: Optional[_dt.datetime] = None
         self.last_response = None
         self.last_parse_errors: List[dict] = []
 
@@ -86,7 +103,14 @@ class TheOddsApiProvider(OddsProvider):
     def new_cycle(self) -> None:
         """Drop the cached payload so the next fetch hits the provider."""
         self._cache = None
+        self._fetched_at = None
         self.last_parse_errors = []
+
+    @property
+    def fetched_at(self) -> Optional[_dt.datetime]:
+        """When the cached payload was observed. Shared by every quote in it, so
+        one poll yields one consistent observation time."""
+        return self._fetched_at
 
     @property
     def quota_remaining(self) -> Optional[int]:
@@ -123,6 +147,9 @@ class TheOddsApiProvider(OddsProvider):
             raise MalformedPayloadError(
                 f"expected a JSON array of events, got {type(response.body).__name__}")
 
+        # One observation time for the whole payload: every quote in this poll
+        # was confirmed at the same instant.
+        self._fetched_at = _dt.datetime.now(UTC)
         self.last_response = response
         self._cache = response.body
         return self._cache
@@ -207,7 +234,8 @@ class TheOddsApiProvider(OddsProvider):
         # it in home_team/away_team, so selections and events always agree.
         selection = name.upper() if market_type == "TOTAL" else name
 
-        captured_at = _parse_iso(stamp) if stamp else None
+        # THE observation time is ours, not the feed's. See the module docstring.
+        provider_updated_at = _parse_iso(stamp) if stamp else None
 
         return QuoteRow(
             source_event_id=event_id,
@@ -216,7 +244,8 @@ class TheOddsApiProvider(OddsProvider):
             price=price,
             sportsbook=book_key,
             line=None if line is None else float(line),
-            captured_at=captured_at,
+            captured_at=self._fetched_at or _dt.datetime.now(UTC),
+            provider_updated_at=provider_updated_at,
         )
 
     @staticmethod

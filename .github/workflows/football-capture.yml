@@ -1,13 +1,27 @@
-name: Capture football lines
-# Captures NFL and NCAA FBS moneyline prices into data/football/odds/ so that
-# every graded football entry has a re-checkable price behind it. Phase 0 of
-# docs/FOOTBALL_LAUNCH.md, and the only deadline in that plan that cannot be
-# recovered from: a T-24 window that closes with no capture in it is gone, and
-# re-acquiring it means buying historical odds again.
+name: Football capture and board
+# ONE workflow, TWO halves, and the order between them is deliberate.
 #
-# THIS JOB PUBLISHES NOTHING. It writes price snapshots and commits them. No
-# board, no site, no Discord, no ledger. Grading is a separate job that does not
-# exist yet, so until it does this run is pure evidence-gathering.
+#   HALF 1  capture NFL and NCAA FBS moneyline prices into data/football/odds/.
+#           A T-24 window that closes with no capture in it is GONE, and
+#           re-acquiring it means buying historical odds again. This is the only
+#           unrecoverable step in the whole pipeline.
+#   HALF 2  freeze newly-evaluable games at their T-24, write the week's board
+#           once the decision moment has passed, render the pages, and deliver
+#           to Discord.
+#
+# MERGED FROM A SEPARATE football-board.yml ON 2026-08-26, because GitHub's
+# scheduler is not reliable in this repo. Measured: football-board.yml sat at
+# ZERO runs for nine and a half hours on an hourly cron, while capture - which
+# also has an external cron-job.org trigger - fired every hour. The board is now
+# driven by the trigger that demonstrably works rather than the one that does
+# not, and there is one external entry to maintain instead of two.
+#
+# CAPTURES ARE COMMITTED BEFORE THE BOARD RUNS, and that is the whole reason
+# this merge is safe. The risk of putting slow work in the same job is that a
+# hang in half 2 tears down the runner with half 1's evidence still on it,
+# unpushed - losing the one thing that cannot be re-fetched. So there are two
+# commit steps: prices are pushed the moment they exist, before anything else is
+# attempted.
 #
 # WHAT IT ACTUALLY DECIDES. scripts/football/capture_schedule.py reads each
 # game's real kickoff from ESPN and derives two windows per game:
@@ -48,23 +62,21 @@ name: Capture football lines
 #     heartbeat (schedule)      9/9 fired, consistently 15-23 min late
 #     morning-board (dispatch)  15:10:08, 15:10:08, 15:10:08 - to the second
 #     capture-closing (dispatch) 01:30:10, 22:30:10, 16:30:11
-#     THIS JOB (schedule)       registered, active, ZERO runs after 45 minutes
+#     the separate board job (schedule)  ZERO runs in nine and a half hours
 #
 # --eager mitigates lateness. It cannot mitigate a run that never happens, and
 # this is the one job in the repo whose missed window is unrecoverable. So it
 # gets the mechanism the repo already trusts for work that must actually occur.
 #
-# ACTION REQUIRED IN DANIEL'S cron-job.org ACCOUNT (no code change - the
-# workflow_dispatch trigger below is already declared): add an HOURLY entry
-# hitting this workflow's dispatch endpoint, exactly like the existing
-# morning-board and capture-closing entries.
-#     POST https://api.github.com/repos/dsimny/dsimny.github.io/actions/
-#          workflows/football-capture.yml/dispatches      body {"ref":"main"}
+# THE EXTERNAL ENTRY IS LIVE: cron-job.org dispatches this workflow hourly at
+# :37, alongside the morning-board and capture-closing entries. That is the
+# primary trigger and it is why the board half was folded in here.
 #
 # THE SCHEDULE BELOW STAYS as a second, independent trigger. Two triggers cannot
 # double-spend: the second run finds the window already satisfied by the first
-# and fires no call. For an unrecoverable job, redundancy at a cost of zero
-# credits is the right trade.
+# and fires no call, and every board step declines to repeat work already done.
+# For an unrecoverable job, redundancy at a cost of zero credits is the right
+# trade.
 #
 # A MISSING ODDS_API_KEY FAILS THIS RUN, on purpose, and this is a deliberate
 # departure from the MLB jobs where a missing key no-ops cleanly. There the cost
@@ -148,6 +160,80 @@ jobs:
           git diff --cached --quiet || git commit -m "Football lines $(date -u +%FT%TZ)"
           git push
 
+      # ---------------- half 2: the board ----------------
+      # Everything below is recoverable. If any of it fails the next hourly run
+      # redoes it, and the prices from half 1 are already safely pushed.
+
+      - name: Work out the current slate week
+        if: ${{ !cancelled() }}
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          import sys
+          sys.path.insert(0, "scripts/football")
+          import market
+          print(f"SLATE_WEEK={market.slate_week(market.now_utc())}")
+          PY
+          echo "slate week: $SLATE_WEEK"
+
+      # Freezes newly-evaluable games at their own T-24, and writes the board
+      # once the decision moment (Saturday 14:00 US/Eastern) has passed. Both
+      # are no-ops when there is nothing to do, so this is safe every hour.
+      #
+      # BOARD_ENCRYPTION_KEY IS REQUIRED. crypto_box.refuse_plaintext_in_ci()
+      # sees GITHUB_ACTIONS and raises rather than writing picks in the clear.
+      # That is the correct direction to fail: no board is a bad day, a board
+      # published unencrypted before kickoff is the product given away.
+      # ANTHROPIC_API_KEY is optional - without it the board publishes its
+      # numbers and every game reads "no writeup (no API key configured)".
+      - name: Build the board
+        if: ${{ !cancelled() }}
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OLS_WRITEUP_MODEL: ${{ vars.OLS_WRITEUP_MODEL }}
+        run: python scripts/football/board.py --sports nfl,ncaaf --writeups
+
+      # Always re-render, not only when a board was just written: a week's page
+      # changes when GRADING flips its commitment to revealed, which happens in
+      # football-grade.yml days later.
+      - name: Render the football pages
+        if: ${{ !cancelled() }}
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
+        run: python scripts/football/page.py --all
+
+      - name: Post the free play
+        if: ${{ !cancelled() }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/discord.py free --week "$SLATE_WEEK"
+
+      - name: Post the full slate to members
+        if: ${{ !cancelled() }}
+        env:
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/discord.py slate --week "$SLATE_WEEK"
+
+      - name: Commit the board and pages
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash || true
+          # data/football/board_*.json is NOT staged: a plaintext board before
+          # its reveal is the one thing that must never be committed, and in CI
+          # crypto_box refuses to write one anyway. Grading stages it later,
+          # after the reveal, which is when publishing it is the point.
+          git add data/football/board_*.enc                   data/football/commitments.json                   data/football/game_commitments.json                   data/post_status.json                   football/ 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Football board $SLATE_WEEK"
+          git push
+
   # Loud failure, same rule as the board, grading and closing runs. The impact
   # line is written to be TRUE rather than reassuring: this is the one job whose
   # failure destroys something, so it must not read like the closing-capture
@@ -186,7 +272,10 @@ jobs:
               && tail -n 20 joblog.txt > tail.txt
           fi
           python scripts/post_discord.py alert \
-            "**Football capture did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
-          THIS ONE IS NOT SELF-HEALING. Every other scheduled job recovers on its next run; this one cannot. If a game's T-24 or closing window closes with no capture inside it, that price is gone and the game becomes permanently ungradeable — the only way back is buying historical odds. Check it now rather than at the end of the day. Read the 'Report window state' step in the run log: it prints how many windows are OPEN NOW and how many are already MISSED. If a key or quota problem is the cause, fixing it and re-running by hand (Actions → Capture football lines → Run workflow) still saves every window that has not closed yet." \
+            "**Football run did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          WHICH HALF FAILED DECIDES HOW URGENT THIS IS, so read the step name above before anything else.
+          CAPTURE steps ('Report window state', 'Capture NCAA FBS if due', 'Capture NFL if due', 'Commit captures') are NOT self-healing. If a game's T-24 or closing window closes with no capture inside it, that price is gone and the game is permanently ungradeable — the only way back is buying historical odds. Check it now rather than at the end of the day. The 'Report window state' step prints how many windows are OPEN NOW and how many are already MISSED. Fixing a key or quota problem and re-running by hand still saves every window that has not closed yet.
+          BOARD steps ('Build the board', 'Render the football pages', either Discord post, 'Commit the board and pages') ARE self-healing: the next hourly run redoes them, the captures are already committed, and each step declines to repeat work already done. That costs delay, not evidence. Two things still worth checking rather than waiting on: a BOARD_ENCRYPTION_KEY error means the secret has gone missing and no board can be written at all, and if this is the run at the decision moment then members are waiting on a slate that has not been sent.
+          Re-run by hand at Actions → Football capture and board → Run workflow." \
             --detail-file tail.txt
           exit 0

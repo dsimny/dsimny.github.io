@@ -88,7 +88,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | E | **Layer 2 BUILT 2026-08-26** — `writeup.py` + `selftest_writeup.py` | Claude via the Messages API, with the numeral validator enforced. Needs `ANTHROPIC_API_KEY` set before it can generate; the round-trip is unproven until then. |
 | F | **Site surface BUILT 2026-08-26** — `page.py` + `selftest_page.py` | `/football/` hub and `/football/<week>/`. Redacted before grading, full after. Still to wire: a link from the MLB home page and a rebuild step in CI. |
 | G | **Discord delivery BUILT 2026-08-26** — `discord.py` + `selftest_discord.py` | `free` to the public channel, `slate` (full slate + premium) to members. Idempotent per slate week. Needs the webhooks already configured for MLB. |
-| H | **Workflows DONE 2026-08-26** — `football-capture.yml`, `football-board.yml`, `football-grade.yml`, plus the home-page link | Capture hourly at :07, board hourly at :23, grade daily at 11:00Z. |
+| H | **Workflows DONE 2026-08-26** — `football-capture.yml` (capture + board, merged) and `football-grade.yml`, plus the home-page link | One external trigger hourly at :37; grade daily at 11:00Z. |
 | I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
 | J | **Copy DONE 2026-08-26** — home-page premium block rewritten, football CTA added | Both sports described separately because they claim different things. Invisible until K. |
 | K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST. |
@@ -500,11 +500,28 @@ Three jobs, and the difference between them is what happens when one is missed.
 
 | workflow | when | missing a run costs |
 |---|---|---|
-| `football-capture.yml` | hourly :07 + external dispatch | **a price, permanently** |
-| `football-board.yml` | hourly :23 | minutes of delay |
+| `football-capture.yml` (capture **and board**) | cron-job.org hourly :37, GitHub :07 as backstop | **a price, permanently** (capture half) |
 | `football-grade.yml` | daily 11:00Z | a day of delay |
 
-**That table is why only capture needed moving off GitHub cron.** Board and
+**MERGED 2026-08-26, and the measurement forced it.** These began as three
+workflows. `football-board.yml` sat at **ZERO runs for nine and a half hours** on
+an hourly GitHub cron, while capture — which also has an external cron-job.org
+trigger — fired every hour. GitHub's scheduler is not merely late in this repo,
+it drops slots entirely. Rather than add a second external entry, the board half
+now runs inside the job whose trigger demonstrably works: one entry to maintain,
+and the board cannot be orphaned by a scheduler that never fires.
+
+**CAPTURES ARE COMMITTED BEFORE THE BOARD RUNS, and that is what makes the merge
+safe.** The risk of putting slower work in the same job is that a hang in the
+board half tears down the runner with the prices still on it, unpushed — losing
+the one thing that cannot be re-fetched. So there are two commit steps: prices
+are pushed the moment they exist, before anything else is attempted.
+
+The alert now keys off the failing step name, because the two halves need
+different reactions: a capture step failing is unrecoverable and wants attention
+now; a board step failing is self-healing and costs delay.
+
+**That distinction is why only capture needed moving off GitHub cron.** Board and
 grade are self-healing: the next run picks up exactly where the last stopped,
 because `board.py` refuses to overwrite an existing board, `discord.py` skips a
 week already sent, the ledger refuses a week already graded, and `page.py`

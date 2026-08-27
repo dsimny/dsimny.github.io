@@ -1,11 +1,17 @@
 # OLP-M1 Package #3 — Provider Integration & Resilience
 
-**Status: FROZEN** at tag `pkg3-v1.0`, following a live boundary check against
-production on 2026-08-27.
+**Status: FROZEN** at `pkg3-v1.0` (2026-08-27), **amended by `pkg3-v1.1`** —
+a post-freeze live-boundary correction to `captured_at` semantics (§6b).
 
-121/121 tests pass on both a real Supabase stack (PostgreSQL 17.6) and bundled
-PostgreSQL 16.2 — 40 Package #1, 34 + 14 Package #2, 33 Package #3 — and the
-provider contract is now validated against the live API rather than a recording.
+The original freeze stands as issued. It was made on the evidence available at
+the time: a clean read-only live boundary. The first controlled `--ingest`
+afterwards exposed a defect that no read-only check could have found, which is
+precisely the case the freeze clause reserved — *frozen unless a live defect is
+found*. One was. This is that correction, recorded as an amendment rather than
+by rewriting history.
+
+126/126 tests pass on both a real Supabase stack (PostgreSQL 17.6) and bundled
+PostgreSQL 16.2 — 40 Package #1, 34 + 14 Package #2, 38 Package #3.
 
 The question this package answers: *does the clean deterministic system survive
 an unreliable real-world feed?* The read-only half of that is answered (§6). The
@@ -149,8 +155,9 @@ always true and therefore useless (`P3-T28`).
 | End-to-end cycles, outage, fail-closed | P3-T23 … T29 |
 | Authorization | P3-T30 |
 | Rate-limit header absent, quota headers, smoke report | P3-T31 … T33 |
+| `captured_at` semantics (post-freeze correction, §6b) | P3-T34 … T38 |
 
-**33/33 PASS.** Highlights worth naming:
+**38/38 PASS.** Highlights worth naming:
 
 - **P3-T25** — an outage trips the breaker, and the next cycle is refused
   *without calling the provider at all*, with zero rows written.
@@ -161,6 +168,8 @@ always true and therefore useless (`P3-T28`).
 - **P3-T31** — a 429 with no `Retry-After` still backs off on its own curve.
 - **P3-T33** — the live smoke report renders offline, so a formatting bug
   cannot waste a real request.
+- **P3-T37** — an unchanged price is still re-recorded after the refresh
+  window. This is the test that would have caught the `captured_at` defect.
 
 ### The recurring mistake, now impossible
 
@@ -308,6 +317,93 @@ freshness rule.
 
 This is recorded here as a frozen architectural conclusion: *tighten the polling
 schedule, never the freshness guarantees.*
+
+## 6b. Post-freeze correction — `captured_at` semantics (`pkg3-v1.1`)
+
+**Found by the first controlled `--ingest`, 2026-08-27. Read-only checks could
+not have found it: it only manifests once quotes are persisted and read back
+through the placement TTL.**
+
+### What went wrong
+
+The adapter set `captured_at` from the v4 `last_update` field. That is **one
+timestamp per bookmaker** — when *that book* last moved its prices — not when we
+observed them. On a real NFL slate the books ran 122–221 seconds behind the
+fetch:
+
+```
+bovada          17:16:29   → 221s old at read time
+draftkings      17:17:13   → 176s
+betus           17:18:08   → 122s   ← the freshest anything got
+```
+
+Against a 120s TTL, all 4,552 quotes arrived already stale. Four minutes after a
+successful ingest the board was **100% unplaceable** — `placeable 0 of 4552`.
+
+### Why it was worse than it looked
+
+It silently defeated the refresh mechanism, the one PACKAGE2 §3.1 calls
+load-bearing. A book that does not move its price reports an **unchanged**
+`last_update`, so de-duplication computed `new − previous = 0`, saw `0 < 60`,
+and skipped the quote as fresh. It could never be re-recorded. A stable market
+would have gone dark permanently and no amount of polling would have recovered
+it.
+
+Two mechanisms in direct contradiction: the refresh window existed to keep
+unchanged quotes inside the TTL, and the `captured_at` choice guaranteed it
+could not.
+
+### The correction
+
+`captured_at` is now **our observation time** — one timestamp per poll, shared by
+every quote in that payload. The TTL asks *"how long since we confirmed this
+price?"*, and we confirm every quote at fetch. A price that has not moved is the
+**most** reliable price there is, not the stalest.
+
+The feed's own timestamp is retained as `QuoteRow.provider_updated_at` for
+provenance and diagnostics. It is deliberately **not persisted** —
+`market_snapshots` has no column for it and one is not worth a migration.
+
+Scope: `ingest/providers/the_odds_api.py` and one optional field on
+`ingest/provider.py`. **No migration. No database change. No Package #2
+semantic touched.**
+
+### Proofs added
+
+| Test | Asserts |
+|---|---|
+| `P3-T34` | a fresh fetch is inside the TTL — 16/16 placeable immediately, oldest 0s, even with bookmaker `last_update` five TTLs old |
+| `P3-T35` | `last_update` six hours old does not make a quote stale; provenance preserved, quote placeable |
+| `P3-T36` | three polls inside the refresh window still de-duplicate: 16 rows, 0 duplicates |
+| `P3-T37` | a poll after the refresh window re-records an **unchanged** price: 32 observation rows, still 16 logical quotes |
+| `P3-T38` | five polls → 120 observations, 24 logical quotes; cardinality flat, no duplicate observations |
+
+`P3-T37` is the one that would have caught this originally. It fails outright
+against the old semantics, because unchanged `last_update` made the gap zero.
+
+### Two existing tests had encoded the defect
+
+`P3-T01` asserted `captured_at == last_update`; it now asserts
+`provider_updated_at == last_update` and that `captured_at` is the fetch time.
+
+`P3-T28` built its dark-feed scenario by back-dating `last_update` in the
+payload. That is no longer possible — and that is the fix working. A dark market
+is now one we have **not polled recently**, so the test builds it at the database
+layer via `olp_test.seed_stale_market()`. This is the third appearance of the
+same underlying confusion the guard rail in migration 036 exists for: staleness
+is about *our newest observation*, never about a timestamp we can choose.
+
+### What this says about the original freeze
+
+The read-only smoke was correct and its conclusions still stand — authentication,
+payload shape, bookmaker-key stability and quota accounting were all validated
+and none of them changed. The defect lived in a field that a read-only check
+never evaluates, because nothing computes an age against a TTL until the data is
+persisted and read back. **The lesson is about sequencing, not about the freeze:
+a provider boundary is not fully proven until one controlled write has been read
+back.**
+
+---
 
 ## 7. Out of scope
 

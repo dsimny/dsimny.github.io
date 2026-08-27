@@ -42,7 +42,18 @@ class EventRow:
 
 @dataclass(frozen=True)
 class QuoteRow:
-    """One price, from one book, for one selection."""
+    """One price, from one book, for one selection.
+
+    `captured_at` is OUR OBSERVATION TIME -- when we fetched and confirmed this
+    price. It is not when the bookmaker last moved it. The placement TTL asks
+    "how long since we confirmed this?", and a price that has not moved is the
+    most reliable price there is, not the stalest.
+
+    `provider_updated_at` carries the feed's own "last changed" timestamp for
+    provenance. It is deliberately NOT persisted -- market_snapshots has no
+    column for it and one is not worth a migration -- so it lives only in
+    memory, for logging and diagnostics.
+    """
 
     source_event_id: str
     market_type: str
@@ -52,6 +63,7 @@ class QuoteRow:
     line: Optional[float] = None
     captured_at: Optional[_dt.datetime] = None
     is_in_play: bool = False
+    provider_updated_at: Optional[_dt.datetime] = None
 
     def __post_init__(self):
         if self.market_type not in MARKET_TYPES:
@@ -66,6 +78,8 @@ class QuoteRow:
             raise ValueError(f"{self.market_type} requires a line")
         if self.captured_at is not None and self.captured_at.tzinfo is None:
             raise ValueError("captured_at must be timezone-aware")
+        if self.provider_updated_at is not None and self.provider_updated_at.tzinfo is None:
+            raise ValueError("provider_updated_at must be timezone-aware")
 
 
 class OddsProvider(abc.ABC):

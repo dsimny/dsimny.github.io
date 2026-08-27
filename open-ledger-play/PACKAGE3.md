@@ -1,8 +1,20 @@
 # OLP-M1 Package #3 — Provider Integration & Resilience
 
-**Status: FROZEN** at `pkg3-v1.0` (2026-08-27), **amended by `pkg3-v1.1`** —
-a post-freeze live-boundary correction to `captured_at` semantics (§6b),
-**confirmed against the live feed by two controlled ingests**.
+**Status: COMPLETE and FROZEN.**
+
+| | |
+|---|---|
+| Frozen | `pkg3-v1.0` — 2026-08-27, after a clean read-only live boundary |
+| Amended | `pkg3-v1.1` — post-freeze `captured_at` correction (§6b) |
+| Production-validated | two controlled live ingests, §6b |
+| Delivered | merged to `dsimny/dsimny.github.io` `main` at `38059ec` |
+| Site exposure | excluded from GitHub Pages at `5fa7be0`, verified 404 in production |
+| Tests | 126/126 on PostgreSQL 17.6 (Supabase) and 16.2 |
+
+The freeze history is deliberately preserved rather than flattened: the original
+freeze was made on the evidence available at the time, an amendment corrected it
+when live persistence exposed a defect, and production then confirmed the fix.
+Reading those three states in order is the point.
 
 The original freeze stands as issued. It was made on the evidence available at
 the time: a clean read-only live boundary. The first controlled `--ingest`
@@ -441,6 +453,54 @@ never evaluates, because nothing computes an age against a TTL until the data is
 persisted and read back. **The lesson is about sequencing, not about the freeze:
 a provider boundary is not fully proven until one controlled write has been read
 back.**
+
+---
+
+## 6c. Completion record
+
+**Delivered.** `open-ledger-play/` was merged into `dsimny/dsimny.github.io`
+`main` as a self-contained subtree (`38059ec`) — 67 files, 12,919 insertions,
+**zero deletions**, nothing outside that path touched. `index.html`, `feed.xml`
+and `CNAME` are byte-identical to their pre-merge blobs and were never rebuilt.
+
+**Not published.** The repository is public and serves GitHub Pages, so a root
+`_config.yml` excludes the subtree (`5fa7be0`). Verified against the live site,
+not assumed:
+
+| Path | Status |
+|---|---|
+| `/` | 200 |
+| `/open-ledger-play/README.html`, `PACKAGE3.html`, `PACKAGE2.html`, `TEST_REPORT.html`, `DEVIATIONS.html` | 404 |
+| `/open-ledger-play/scripts/live_smoke.py`, `tests/test_package3.py` | 404 |
+| `/open-ledger-play/db/migrations/*.sql`, `db/rollback/*.md` | 404 |
+| `/open-ledger-play/`, `README.md` (raw), `supabase/config.toml` | 404 |
+
+Controls confirm the checker and the site are both sound: `/odds/`,
+`/football/`, `/blog/` and `/docs/FOOTBALL_PIPELINE.html` all return 200 — that
+last one being markdown Jekyll still renders, so markdown processing is intact
+and only the subtree is gone. The served homepage hashes identically to
+`HEAD:index.html`, proving the 404s come from the current deployment rather than
+a stale cache.
+
+**Caution carried in `_config.yml`:** setting `exclude` *replaces* Jekyll's
+default exclude list rather than extending it. None of those defaults exist in
+the repository today, so nothing regressed — but they must be restated there if
+a `Gemfile`, `vendor/` or `node_modules/` is ever added, or they will be
+published silently.
+
+### What Package #3 leaves open
+
+- **`Retry-After` on a 429 is still unobserved** — no rate limit was ever hit.
+  The fallback stands without it (`P3-T31`), but it is unverified against
+  production and can only be closed by a real limit breach.
+- **`x-requests-last` is read and reported, not persisted.** Deferred
+  deliberately: persisting it needs a new RPC signature, and the decision on
+  whether it belongs in provider-health telemetry, poll-run accounting or both
+  is better made with real cadence data.
+- **Nothing schedules the worker.** `run_poll_cycle` is designed to be *called*
+  by cron or an Edge Function. At 3 credits per poll against ~71,600 remaining,
+  a naive 60s cadence exhausts the allowance in about 16 days — so the first
+  scheduling decision is *when* to poll, not how fresh to require (§6).
 
 ---
 

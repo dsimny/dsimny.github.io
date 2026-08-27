@@ -16,7 +16,7 @@ independent database connections.
 
 - Package #1 — Database Foundation: 40/40. [TEST_REPORT.md](TEST_REPORT.md), [DEVIATIONS.md](DEVIATIONS.md)
 - Package #2 — Market Ingestion & Event Lifecycle: 34/34 plus 14 boundary/concurrency. [PACKAGE2.md](PACKAGE2.md)
-- Package #3 — The Odds API + resilience: 38/38, **FROZEN at `pkg3-v1.0`, amended by `pkg3-v1.1`** (post-freeze `captured_at` correction). [PACKAGE3.md](PACKAGE3.md)
+- Package #3 — The Odds API + resilience: 38/38, **COMPLETE** — frozen `pkg3-v1.0`, amended `pkg3-v1.1`, production-validated by two live ingests. [PACKAGE3.md](PACKAGE3.md)
 
 ---
 

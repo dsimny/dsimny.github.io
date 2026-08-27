@@ -40,7 +40,7 @@ Package #4 **writes nothing.** It is a read layer.
 | `044` | Exact payout comparator (`olp_price_payout`) |
 | `045` | Total price ordering (`positive > negative` made absolute) |
 
-Migrations are append-only. `042`–`044` replace view bodies via
+Migrations are append-only. `042`–`045` replace view bodies via
 `CREATE OR REPLACE` rather than editing `038`/`039`/`040` in place, so any
 database that applied an earlier migration reaches the same final state.
 
@@ -99,7 +99,7 @@ database that applied an earlier migration reaches the same final state.
 26 Package #4 tests (`P4-T01`…`P4-T26`) inside a 152-test suite, green on
 **PostgreSQL 16.2** and **Supabase 17.6**.
 
-Three defects were found during the package and each has a negative control
+Four defects were found during the package and each has a negative control
 proving its test detects the defect rather than passing by construction:
 
 | Defect | Found by | Fix | Negative control |

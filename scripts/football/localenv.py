@@ -24,7 +24,13 @@ ENV_FILE = os.path.join(ROOT, ".env.local")
 
 # Names this project expects to find. Anything else in .env.local is ignored
 # rather than loaded, so the file cannot quietly set PATH or similar.
-ALLOWED = {"ODDS_API_KEY", "ODDS_MARKETS", "ODDS_REGIONS"}
+# ANTHROPIC_API_KEY is here so layer 2 can be exercised LOCALLY. In CI the
+# key arrives from repo secrets, which means the API round-trip is only ever
+# proven on a live slate at the decision moment - the worst possible moment
+# to discover a bad key. A developer with a key in .env.local can prove it
+# against a fixture board any day of the week.
+ALLOWED = {"ODDS_API_KEY", "ODDS_MARKETS", "ODDS_REGIONS",
+           "ANTHROPIC_API_KEY", "OLS_WRITEUP_MODEL"}
 
 
 def load(verbose=True):

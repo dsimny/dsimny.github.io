@@ -73,6 +73,12 @@ import requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import market                                        # noqa: E402
+import localenv                                      # noqa: E402
+
+# Local runs read the key from an untracked .env.local; CI supplies it from repo
+# secrets and always wins (localenv never overrides a real environment value).
+# Without this there is no way to exercise the API outside a live CI slate.
+localenv.load(verbose=False)
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 FB = os.path.join(ROOT, "data", "football")

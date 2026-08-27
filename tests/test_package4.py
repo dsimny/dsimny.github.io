@@ -183,65 +183,147 @@ def _modal_of(admin, ev, market="TOTAL", selection="OVER"):
         (ev, market, selection))
 
 
-def t09_modal_invariant_to_order_and_recency():
-    """The property review asked to lock in.
+def _modal_pair(admin, ev, market="SPREAD", home="DAL", away="PHI"):
+    """Modal line as seen from each side of the same wager."""
+    return (_modal_of(admin, ev, market, home), _modal_of(admin, ev, market, away))
 
-    A 2-vs-2 tie must resolve identically under: reversed insertion order,
-    reversed bookmaker order, and one tied line refreshed later than the other.
+
+def t09_modal_invariant_to_order_and_recency():
+    """The modal line must be a property of the market, not of how we happened
+    to observe it. A 2-vs-2 tie must resolve identically under all four:
+
+        (1) insertion order
+        (2) bookmaker order
+        (3) observation recency
+        (4) equivalent sign presentation -- the same wager asked about from the
+            other side
+
+    Run on SPREAD, because that is the only market whose two sides carry
+    opposite signs, and so the only one where a signed tie-break can disagree
+    with itself. Dimension (4) is what the original `line ASC` rule failed:
+    home sorted {-3.5, -3.0} and picked -3.5 while away sorted {+3.0, +3.5} and
+    picked +3.0 -- two different wagers for one market.
     """
-    admin = h.connect(); h.reset(admin)
+    admin = h.connect()
     results = {}
 
-    # (a) 44.5 first
+    def scenario(label, seed):
+        h.reset(admin)
+        ev = event(admin, "MODAL-" + label)
+        seed(ev)
+        results[label] = _modal_pair(admin, ev)
+
+    # (1a) baseline -- the -3.0 books written first
+    scenario("A-low-first", lambda ev: (
+        [two_sided(admin, ev, "SPREAD", -3.0, -110, -110, bk) for bk in ("bookA", "bookB")],
+        [two_sided(admin, ev, "SPREAD", -3.5, -108, -112, bk) for bk in ("bookC", "bookD")]))
+
+    # (1b) reversed insertion order
+    scenario("B-high-first", lambda ev: (
+        [two_sided(admin, ev, "SPREAD", -3.5, -108, -112, bk) for bk in ("bookC", "bookD")],
+        [two_sided(admin, ev, "SPREAD", -3.0, -110, -110, bk) for bk in ("bookA", "bookB")]))
+
+    # (2) reversed bookmaker order -- alphabetically later books on -3.0
+    scenario("C-books-reversed", lambda ev: (
+        [two_sided(admin, ev, "SPREAD", -3.0, -110, -110, bk) for bk in ("bookY", "bookZ")],
+        [two_sided(admin, ev, "SPREAD", -3.5, -108, -112, bk) for bk in ("bookA", "bookB")]))
+
+    # (3) -3.5 refreshed LATER than -3.0 -- recency must not matter
+    scenario("D-high-refreshed-later", lambda ev: (
+        [two_sided(admin, ev, "SPREAD", -3.0, -110, -110, bk, age=50) for bk in ("bookA", "bookB")],
+        [two_sided(admin, ev, "SPREAD", -3.5, -108, -112, bk, age=0) for bk in ("bookC", "bookD")]))
+
+    # (3b) and the other way round
+    scenario("E-low-refreshed-later", lambda ev: (
+        [two_sided(admin, ev, "SPREAD", -3.5, -108, -112, bk, age=50) for bk in ("bookC", "bookD")],
+        [two_sided(admin, ev, "SPREAD", -3.0, -110, -110, bk, age=0) for bk in ("bookA", "bookB")]))
+
+    home_answers = {float(v[0]) for v in results.values()}
+    away_answers = {float(v[1]) for v in results.values()}
+    assert home_answers == {-3.0}, f"home modal was not invariant: {results}"
+    assert away_answers == {3.0}, f"away modal was not invariant: {results}"
+
+    # (4) equivalent sign presentation: the two sides must name the SAME wager.
+    # Under the old `line ASC` rule this read (-3.5, +3.0) and would fail here.
+    for label, (hm, aw) in results.items():
+        assert float(hm) == -float(aw), (
+            f"{label}: sides disagree about the market -- {hm} vs {aw}")
+
+    # Control: totals mirror at the same number, so they were never exposed to
+    # the bias. Assert they still are not.
     h.reset(admin)
-    ev = event(admin, "MODAL-A")
+    ev = event(admin, "MODAL-TOTAL")
     for bk in ("bookA", "bookB"):
         two_sided(admin, ev, "TOTAL", 44.5, -110, -110, bk, home="OVER", away="UNDER")
     for bk in ("bookC", "bookD"):
         two_sided(admin, ev, "TOTAL", 45.0, -108, -112, bk, home="OVER", away="UNDER")
-    results["insertion 44.5 first"] = _modal_of(admin, ev)
+    o, u = _modal_pair(admin, ev, "TOTAL", "OVER", "UNDER")
+    assert float(o) == 44.5 and float(u) == 44.5, f"totals modal: {o} / {u}"
 
-    # (b) 45.0 first -- reversed insertion order
-    h.reset(admin)
-    ev = event(admin, "MODAL-B")
-    for bk in ("bookC", "bookD"):
-        two_sided(admin, ev, "TOTAL", 45.0, -108, -112, bk, home="OVER", away="UNDER")
-    for bk in ("bookA", "bookB"):
-        two_sided(admin, ev, "TOTAL", 44.5, -110, -110, bk, home="OVER", away="UNDER")
-    results["insertion 45.0 first"] = _modal_of(admin, ev)
-
-    # (c) reversed bookmaker order -- alphabetically later books on the low line
-    h.reset(admin)
-    ev = event(admin, "MODAL-C")
-    for bk in ("bookY", "bookZ"):
-        two_sided(admin, ev, "TOTAL", 44.5, -110, -110, bk, home="OVER", away="UNDER")
-    for bk in ("bookA", "bookB"):
-        two_sided(admin, ev, "TOTAL", 45.0, -108, -112, bk, home="OVER", away="UNDER")
-    results["books reversed"] = _modal_of(admin, ev)
-
-    # (d) 45.0 refreshed LATER than 44.5 -- recency must not matter
-    h.reset(admin)
-    ev = event(admin, "MODAL-D")
-    for bk in ("bookA", "bookB"):
-        two_sided(admin, ev, "TOTAL", 44.5, -110, -110, bk, home="OVER", away="UNDER", age=50)
-    for bk in ("bookC", "bookD"):
-        two_sided(admin, ev, "TOTAL", 45.0, -108, -112, bk, home="OVER", away="UNDER", age=0)
-    results["45.0 refreshed later"] = _modal_of(admin, ev)
-
-    distinct = {float(v) for v in results.values()}
-    assert distinct == {44.5}, f"modal line was not invariant: {results}"
     admin.close()
-    return "44.50 under all four permutations"
+    return "spread -3.0/+3.0 under 5 permutations; totals 44.50 both sides"
+
+
+def t25_modal_symmetry_holds_across_a_fragmented_board():
+    """Regression guard for the measured defect. On a fully-tied fragmented
+    board the old rule made 33.5% of spread wagers describe the market from two
+    different centres. Board-wide, every wager's two sides must agree."""
+    admin = h.connect(); h.reset(admin)
+
+    admin.execute("""
+        SELECT olp_test.create_event('SYM-'||g, 'H'||g, 'A'||g, INTERVAL '4 hours')
+        FROM generate_series(1, 60) g""")
+    # Every event fragmented into a 1-vs-1 tie across two lines, both markets.
+    admin.execute("""
+        WITH ev AS (SELECT id, home_team, away_team FROM public.events)
+        INSERT INTO public.market_snapshots (
+            event_id, market_type, selection, line, price,
+            sportsbook, source_provider, captured_at, is_in_play)
+        SELECT e.id, m.mt, sel.s,
+               CASE m.mt WHEN 'SPREAD'
+                    THEN (CASE WHEN sel.is_home THEN -1 ELSE 1 END) * (3.0 + 0.5 * b.n)
+                    ELSE 44.5 + 0.5 * b.n END,
+               -110, 'book'||b.n, 'FIXTURE', NOW(), FALSE
+        FROM ev e
+        CROSS JOIN LATERAL (VALUES ('SPREAD'::public.market_type), ('TOTAL')) m(mt)
+        CROSS JOIN LATERAL (
+            SELECT CASE WHEN m.mt='TOTAL' THEN 'OVER'  ELSE e.home_team END, TRUE
+            UNION ALL
+            SELECT CASE WHEN m.mt='TOTAL' THEN 'UNDER' ELSE e.away_team END, FALSE
+        ) sel(s, is_home)
+        CROSS JOIN LATERAL generate_series(0, 1) b(n)""")
+
+    disagreements = h.rows(admin, """
+        SELECT a.market_type, count(*) FILTER (WHERE NOT mirrored) AS bad, count(*) AS total
+        FROM (
+            SELECT DISTINCT a.event_id, a.market_type,
+                   CASE a.market_type
+                       WHEN 'SPREAD' THEN a.modal_line = -b.modal_line
+                       ELSE a.modal_line = b.modal_line
+                   END AS mirrored
+            FROM public.canonical_market a
+            JOIN public.canonical_market b
+              ON b.event_id = a.event_id AND b.market_type = a.market_type
+             AND b.selection > a.selection
+            WHERE a.modal_line IS NOT NULL AND b.modal_line IS NOT NULL
+        ) a GROUP BY 1 ORDER BY 1""")
+    assert disagreements, "the symmetry probe found no wagers to check"
+    for market, bad, total in disagreements:
+        assert bad == 0, f"{market}: {bad}/{total} wagers describe two centres"
+    admin.close()
+    return "; ".join(f"{m} 0/{t}" for m, _, t in disagreements)
 
 
 def t10_modal_reflects_book_count_not_line_value():
-    """line ASC is only a tie-break. Book count must dominate it."""
+    """The tie-break is only a tie-break. Book count must dominate it."""
     admin = h.connect(); h.reset(admin)
     ev = event(admin, "MODAL-COUNT")
     two_sided(admin, ev, "TOTAL", 44.5, -110, -110, "bookA", home="OVER", away="UNDER")
     for bk in ("bookB", "bookC", "bookD"):
         two_sided(admin, ev, "TOTAL", 45.0, -108, -112, bk, home="OVER", away="UNDER")
-    assert float(_modal_of(admin, ev)) == 45.0, "book count must beat line ASC"
+    # 45.0 has the LARGER magnitude, so abs(line) ASC would prefer 44.5.
+    # Three books beat one, which is the whole point.
+    assert float(_modal_of(admin, ev)) == 45.0, "book count must beat the tie-break"
     admin.close()
 
 
@@ -638,4 +720,5 @@ PACKAGE4 = [
     ("P4-T22", "Opening equals current on single-observation slate", t22_opening_equals_current_on_a_single_observation_slate),
     ("P4-T23", "Line movement is not price movement", t23_line_movement_is_not_price_movement),
     ("P4-T24", "Live-shape row identity and bounded time", t24_live_shape_row_identity_and_bounded_time),
+    ("P4-T25", "Modal symmetry across a fragmented board", t25_modal_symmetry_holds_across_a_fragmented_board),
 ]

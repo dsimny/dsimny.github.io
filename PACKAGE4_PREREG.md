@@ -200,19 +200,63 @@ canonical key, because it describes which line the market has settled on.
 modal_line = the line quoted by the most distinct eligible books
 ```
 
-**Tie-break: book count DESC, then `line ASC`.** Total and explicit — line
-values within a group are distinct by construction, so exactly one row can win
-and nothing depends on query order.
+**Bookmaker count is the only substantive criterion.** The modal line is the
+line the most distinct eligible books quote, and nothing else feeds into it.
+Everything after `line_books DESC` exists solely to make the ordering total.
 
-Recency was considered and **rejected**. It is deterministic but not *stable*:
-with two lines tied on book count, whichever book updated last would take the
-modal flag, so the modal line would flip between polls while the market had not
-moved. That is the same flapping the `best_book` tie-break avoids by preferring
+**Tie-break: `abs(line) ASC`, then `line ASC`.** These are deterministic
+tie-breakers and **carry no economic meaning**. `abs(line) ASC` is not a claim
+that smaller magnitudes are more central, more liquid, or more correct; it is
+the cheapest sign-neutral total order available. Any interpretation of the
+tie-break as a market signal is a misreading — when it fires, the market
+genuinely has no single centre, and `distinct_line_count` is the field that says
+so.
+
+Two rules were considered and rejected before this one.
+
+**Recency — rejected as unstable.** With two lines tied on book count, whichever
+book updated last would take the modal flag, so the modal line would flip
+between polls while the market had not moved. Deterministic but not *stable*.
+This is the same flapping the `best_book` tie-break avoids by preferring
 alphabetical order over freshest. A modal line that changes when nothing changed
-is worse than an arbitrary but steady one.
+is worse than an arbitrary but steady one. *(Caught during implementation: the
+original rule placed recency ahead of `line ASC`, and a deliberate 2-vs-2 tie
+test exposed it.)*
 
-*(Caught during implementation: the original rule placed recency ahead of
-`line ASC`, and a deliberate 2-vs-2 tie test exposed the instability.)*
+**Bare `line ASC` — rejected for signed-direction bias.** This one survived
+longer because it is stable, order-independent and recency-independent, and the
+invariance tests at the time only exercised totals. It is still wrong, for a
+reason those tests could not see.
+
+`line ASC` sorts a **signed** number, and it is evaluated **per selection** —
+but the two sides of a spread carry opposite signs for the same wager. On a tie
+the home side sorts over `{-3.5, -3.0}` and picks `-3.5`, while the away side
+sorts over `{+3.0, +3.5}` and picks `+3.0`. Those are different wagers. The
+market is then described as centred in two places at once, and which answer you
+get depends only on which side you happened to ask about.
+
+So `line ASC` does not express *no preference*. It expresses a standing
+preference for the more negative number, which on a spread means a standing
+preference for the favourite's larger number and the underdog's smaller one —
+a directional bias smuggled in as a formatting rule. That is precisely the kind
+of unearned economic content the modal line is not permitted to carry: it must
+**describe** the market, never define truth about it.
+
+Totals never exposed this, because `OVER` and `UNDER` mirror at the *same*
+number, so both sides sort over the same set and agree by construction.
+Moneylines have no line at all. Spreads are the only market where the defect can
+appear, and the original invariance tests were written on totals.
+
+Measured on a fully-tied 272-event slate: **33.5% of spread wagers** disagreed
+across their two sides under `line ASC`; **0.0%** under `abs(line) ASC`. Fixed
+in migration `043`; see §12.1 item 7 and tests `P4-T09` / `P4-T25`.
+
+Taking the magnitude before the sign makes both sides sort over the same values,
+so they resolve to the same wager. The trailing `line ASC` is retained only to
+keep the order total when magnitudes are equal but signs differ — a line that
+has crossed zero, e.g. one book at `DAL -3` and another at `DAL +3`. No
+sign-blind rule can resolve that case symmetrically; it is left deterministic
+rather than pretended away.
 
 Also reported: `modal_line_book_count`, and `distinct_line_count` — the number
 of different lines live at once, which is itself a market-instability signal.
@@ -396,12 +440,13 @@ from what was originally written.
 | `P4-T08` | `TOTAL` de-vig pairs `OVER 44.5` with `UNDER 44.5`, never `UNDER 45` |
 | `P4-T23` | A pure `-3 → -3.5` line move reads as `line_movement` (`-0.5` / `+0.5` mirrored) and **not** as `probability_movement` on either line |
 
-### Modal line — determinism, and independence from order and recency
+### Modal line — determinism, and independence from presentation
 
 | Test | Asserts |
 |---|---|
-| `P4-T09` | Modal line is invariant to insertion order, bookmaker order, and which tied line refreshed last |
-| `P4-T10` | Modal reflects book count, not line value; ties break `book count DESC → line ASC` |
+| `P4-T09` | On **spreads**, the modal line is invariant to insertion order, bookmaker order, observation recency, and **equivalent sign presentation** — the two sides of one wager must name the same wager. Totals retained as a control |
+| `P4-T10` | Book count is the only substantive criterion: three books on the larger magnitude beat one book on the smaller, so count dominates the tie-break |
+| `P4-T25` | Board-wide regression guard — across a fragmented 60-event board, zero wagers describe two different centres |
 
 ### Correctness of the arithmetic
 
@@ -458,6 +503,23 @@ Recorded rather than renumbered away.
    `WIDE_DISPERSION` and left the executable surface via the dispersion gate
    rather than the `MARKET_MOVED` parity being tested. Repriced so the test
    probes what it claims to.
+7. **The locked `line ASC` tie-break was replaced with `abs(line) ASC, line
+   ASC`** in migration `043`, on review, after the live sign-off script exposed
+   a spread whose two sides reported different modal lines. The rule was stable
+   and recency-independent as intended, but sorted a signed value per selection,
+   so it carried a standing preference for the more negative number — see the
+   modal-line section above. Book count remains the only substantive criterion
+   and is untouched; `P4-T10` asserts it still dominates the tie-break. No other
+   Package #4 behaviour was changed to accommodate this.
+8. **`P4-T09` was extended and moved onto spreads.** It previously proved
+   invariance to insertion order, bookmaker order and recency — on totals, the
+   one market that structurally cannot exhibit the bias. It now proves all four
+   invariants, including **equivalent sign presentation**, on spreads, and keeps
+   the totals case as a control. `P4-T25` adds the board-wide regression guard.
+   Negative control run: reverting `043` makes `P4-T09` report
+   `(-3.50, +3.00)` under all five permutations and `P4-T25` report
+   `SPREAD 60/60`, so both tests genuinely detect the defect rather than
+   passing by construction.
 
 ### 12.2 Round-trip tolerance is a property of the odds format, not slop
 

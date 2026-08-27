@@ -1,0 +1,26 @@
+# Line endings are normalised by the repository, not by whoever checked it out.
+#
+# core.autocrlf is commonly `true` on Windows, which would leave a Linux CI
+# checkout seeing different bytes than a Windows working tree. These rules take
+# precedence over that setting, so the SQL applied to Supabase and the bytes a
+# reviewer diffs are identical everywhere.
+
+# Store LF in the repository AND check out LF in every working tree.
+* text=auto eol=lf
+
+# Explicit for the file types this repo actually contains.
+*.sql        text eol=lf
+*.py         text eol=lf
+*.md         text eol=lf
+*.toml       text eol=lf
+*.json       text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+.gitignore   text eol=lf
+.gitattributes text eol=lf
+
+# Never touch binaries, should any land here later.
+*.png  binary
+*.jpg  binary
+*.pdf  binary
+*.zip  binary

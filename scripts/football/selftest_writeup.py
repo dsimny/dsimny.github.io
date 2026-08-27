@@ -79,9 +79,10 @@ MUST_ACCEPT = [
      GAME,
      "The recommendation is restricted to Tier 1 books, and 2 of them sit at "
      "the best number."),
-    ("kickoff time from the block",
+    ("kickoff is no longer sent, so prose without it is the norm",
      GAME,
-     "Kicks at 17:00 UTC, and the market has 7 books quoting by then."),
+     "Seven books is a thin but workable count, and the best price is "
+     "corroborated rather than a lone outlier."),
     ("no numbers at all",
      GAME,
      "The market is tight, the best price is corroborated at more than one "
@@ -128,6 +129,18 @@ MUST_REJECT = [
      GAME,
      "The line has drifted 6.8 points, though fair value holds at 50.4%.",
      "6.8"),
+    ("a count wearing the DAY OF THE MONTH - the kickoff hole, closed",
+     GAME,
+     "13 books quote this market, and the best price is +100.",
+     "13"),
+    ("the same count spelled out",
+     GAME,
+     "Thirteen books quote this market, and the best price is +100.",
+     "thirteen"),
+    ("a figure wearing the kickoff HOUR",
+     GAME,
+     "The line has moved 17 points since open; fair value now 50.4%.",
+     "17"),
     ("a fabricated ledger record, which is the ancestor format's own bug",
      GAME,
      "Our record stands at 105-51 for +124.55 units. Houston best priced at "
@@ -168,7 +181,9 @@ def main():
     # The allowed set must be derived, never open. If everything validates,
     # the validator is a no-op and every case above passes for free.
     ok = W.allowed_numerals(GAME)
-    for impossible in ("47.2", "63.5", "84", "2.5"):
+    # 13 = day of month, 17 = hour, 2026 = year. All were admitted before the
+    # kickoff allowance was removed; none may be now.
+    for impossible in ("47.2", "63.5", "84", "2.5", "13", "17", "2026"):
         if impossible in ok:
             fails.append(f"allowed set wrongly contains {impossible}")
     if not {"7", "seven", "1.22", "3.84", "100"} <= ok:

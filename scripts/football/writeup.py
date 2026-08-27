@@ -109,10 +109,19 @@ TIMEOUT = 60
 
 # The fields layer 2 may narrate. Anything else on the game dict is board
 # bookkeeping (commitment hashes, ranks) and is not the model's business.
+# KICKOFF IS DELIBERATELY NOT HERE. The style rules forbid mentioning it, so
+# sending it would only invite the violation - but the stronger reason is that
+# it was a hole in the validator. Kickoff parts (year, month, DAY, hour, minute)
+# were admitted to the allowed set so "kicks at 3:30" would not fail an honest
+# writeup. Measured: with a 2026-09-13 kickoff and n_books=7, BOTH "13 books
+# quote this market" and "Thirteen books quote this market" VALIDATED - a
+# fabricated count hiding behind the day of the month. Every field admitted to
+# the allowed set widens the target; a field the model may not use should never
+# be in it.
 NARRATABLE = ("n_books", "fair_away", "fair_home", "raw_overround_pts",
               "eff_overround_pts", "side", "best_price", "best_book",
               "books_at_best", "fair_side", "offshore_best", "move_pts",
-              "clv_pts", "league", "matchup", "away", "home", "kickoff_utc")
+              "clv_pts", "league", "matchup", "away", "home")
 
 WORDS = {0: "zero", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
          6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
@@ -171,13 +180,11 @@ def allowed_numerals(g):
     off = g.get("offshore_best")
     if isinstance(off, dict):
         ok |= _variants(off.get("price"))
-    # Kickoff parts, so "kicks at 3:30" does not fail a writeup for saying when
-    # the game is. Still derived from the block - no free numbers.
-    k = market.parse_utc(g.get("kickoff_utc"))
-    if k:
-        for v in (k.year, k.month, k.day, k.hour, k.minute,
-                  k.hour % 12 or 12):
-            ok |= _variants(v)
+    # NO KICKOFF PARTS. They used to be admitted so "kicks at 3:30" would not
+    # fail an honest writeup; the cost was that the day of the month, the hour
+    # and the year all became free numbers a fabrication could wear. The style
+    # rules now bar mentioning kickoff at all, so the allowance bought nothing
+    # and is gone. See NARRATABLE.
     return ok
 
 
@@ -314,7 +321,26 @@ take, and how many regulated books corroborate it.
 
 STYLE: 60-90 words, plain and blunt, no filler, no hype, no rhetorical \
 questions. Do not open with the team names - the reader can see the matchup. \
-Write about the market. One paragraph, no headings, no bullet points."""
+Write about the market. One paragraph, no headings, no bullet points.
+
+THREE THINGS THAT READ BADLY ACROSS A WHOLE SLATE. A reader sees ~57 of these \
+in one sitting, so anything formulaic becomes obvious in a way it never is in \
+a single paragraph:
+
+1. DO NOT MENTION THE KICKOFF TIME OR DATE. The reader has the schedule and it \
+is the least useful sentence you could spend words on. Ending every game with \
+one makes the whole slate read like a filled-in template.
+
+2. ROUND SENSIBLY. Overrounds and percentages get ONE decimal place at most - \
+"3.9 points", not "3.909 points". Three decimals implies a measurement far \
+sharper than this is, and false precision undermines the numbers that matter. \
+Prices are exact as given: +168 stays +168.
+
+3. IF A FIELD IS ABSENT, SAY NOTHING ABOUT IT. When there is no offshore \
+price, write nothing about offshore prices - do not announce its absence. \
+"No offshore quote is reported here" is filler that tells the reader nothing.
+
+Rounding a number DOWN in precision is always allowed; inventing one never is."""
 
 
 def build_prompt(g):

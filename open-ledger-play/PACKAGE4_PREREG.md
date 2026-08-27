@@ -259,7 +259,7 @@ quality_reasons TEXT[]      -- every applicable code, never collapsed
 | Reason code | Raised when | Severity |
 |---|---|---|
 | `LOW_BOOK_COUNT` | eligible books < `mi_min_book_count` (3) | DEGRADED |
-| `SINGLE_BOOK` | exactly 1 eligible book | UNUSABLE |
+| `SINGLE_BOOK` | exactly 1 eligible book | UNUSABLE — **fails closed** |
 | `NO_ELIGIBLE_BOOKS` | 0 eligible books | UNUSABLE |
 | `ALL_BOOKS_STALE` | every observation older than the TTL | UNUSABLE |
 | `NO_DEVIG_PAIR` | no book had a complete two-sided pair | UNUSABLE |
@@ -288,7 +288,7 @@ A row appears only if **all** hold:
 
 1. `market_quality <> 'UNUSABLE'`
 2. `WIDE_DISPERSION` not among `quality_reasons`
-3. `book_count >= mi_execution_min_book_count` (default 3)
+3. `book_count >= mi_execution_min_book_count` (default **2**)
 4. event is not closed, not live, `actual_start_time IS NULL`,
    `NOW() < current_scheduled_start`
 5. the best-price observation is within `snapshot_ttl_seconds`
@@ -335,8 +335,8 @@ Added to `public.system_settings`, consistent with existing practice:
 
 | Setting | Default |
 |---|---|
-| `mi_min_book_count` | 3 |
-| `mi_execution_min_book_count` | 3 |
+| `mi_min_book_count` | 3 *(advisory only)* |
+| `mi_execution_min_book_count` | **2** |
 | `mi_dispersion_wide_threshold` | 0.05 |
 | `mi_outlier_min_books` | 4 |
 | `mi_outlier_probability_delta` | 0.10 |
@@ -345,6 +345,18 @@ Added to `public.system_settings`, consistent with existing practice:
 | `mi_devig_method` | `MULTIPLICATIVE` |
 
 No new freshness setting. `snapshot_ttl_seconds` is reused.
+
+**Threshold rationale (set at review, 2026-08-27).** The advisory threshold and
+the execution floor are deliberately different numbers. Live book coverage on an
+NFL slate is heavily skewed — `draftkings` quoted all 272 events,
+`williamhill_us` 256, `betus` 143, and the remaining seven books 16–32 each — so
+an execution floor of 3 would gate roughly half the slate out on book coverage
+rather than on market quality. The floor is therefore **2**, while
+`mi_min_book_count = 3` remains as the *advisory* signal that a market is thin.
+
+**One-book markets fail closed** by two independent rules: `SINGLE_BOOK` is
+classed `UNUSABLE`, and 1 is below the execution floor of 2. Neither alone is
+relied upon.
 
 ---
 

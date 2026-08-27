@@ -1,13 +1,21 @@
 # OLP-M1 Package #2 — Market Ingestion & Event Lifecycle
 
-**Status:** implemented and verified. 74/74 tests pass on both a real Supabase
-stack (PostgreSQL 17.6) and bundled PostgreSQL 16.2 — 40 from Package #1, 34 new.
+**Status: FROZEN** at tag `pkg2-v1.0` following architectural review.
+87/87 tests pass on both a real Supabase stack (PostgreSQL 17.6) and bundled
+PostgreSQL 16.2 — 40 from Package #1, 34 Package #2, 13 boundary/concurrency.
 
 Package #1 arrived as a frozen written contract. This one did not: it was built
-freehand from the one-line description in Package #1 §42, so **this document is
-the contract, written down after the fact**. Every design decision that a spec
-would normally have dictated is recorded here, and each is a decision you can
-overrule.
+freehand from the one-line description in Package #1 §42, so this document was
+written after the fact.
+
+**From the freeze onward it is a PROSPECTIVE contract.** The semantics below —
+the postponement rule, the refresh/TTL relationship, the lock order, the kickoff
+boundary — are not to be changed casually. Changing any of them is a new package
+with its own review, not an edit to this one.
+
+Review outcome: passed, with one semantic change (postponement is now
+ticket-relative, section 3.2) and a boundary/concurrency suite added
+(section 4b).
 
 ---
 
@@ -36,7 +44,7 @@ behave exactly as they already did.
 
 ## 2. What was built
 
-### Migrations 020–029
+### Migrations 020–032
 
 | Migration | Contents |
 |---|---|
@@ -50,6 +58,9 @@ behave exactly as they already did.
 | 027 | run bookkeeping RPCs + Package #2 privileges/RLS |
 | 028 | `current_market_board`, `ticket_closing_line_value` |
 | 029 | Package #2 fixtures (development only) |
+| 030 | `tickets.accepted_event_start`; `place_ticket_rpc` takes the event share lock (review) |
+| 031 | `reschedule_event_rpc` -> ticket-relative postponement (review) |
+| 032 | `ingest_market_snapshot_rpc` -> event share lock + kickoff guard (review) |
 
 ### The `ingest/` package
 
@@ -90,24 +101,63 @@ proves the mechanism end to end: a quote nearly TTL-old is refreshed on the next
 poll and remains placeable at the same unchanged price. `M2-T05` proves the
 constraint bites.
 
-### 3.2 Postponement is measured cumulatively, and in absolute terms
+### 3.2 Postponement is TICKET-RELATIVE, and absolute
 
-Threshold: `postponement_void_hours`, default **48**, measured against
-`original_scheduled_start`.
+*Changed at architectural review. The original rule measured displacement from
+the event's `original_scheduled_start`, which charged a bettor for a slip that
+happened before they ever placed.*
 
-- **Cumulative**, because two 24-hour slips are the same displacement as one
-  48-hour slip and should not escape the rule by arriving separately (`M2-T12`).
-- **Absolute**, because a game pulled 48 hours *earlier* is no more "the game you
-  bet on" than one pushed 48 hours later (`M2-T13`).
+Threshold: `postponement_void_hours`, default **48**. Each open ticket is judged
+on the displacement between the new start time and **the schedule that ticket
+was accepted against**:
 
-Crossing it voids every open ticket on the event and returns the stake, rather
-than leaving capital escrowed against a game that moved.
+| Ticket | Counts against it |
+|---|---|
+| Placed before the first slip | all subsequent displacement |
+| Placed after the first slip | only displacement occurring after it |
 
-**Worth your review:** measuring from `original_scheduled_start` means a ticket
-placed *after* a first slip is judged against a displacement that partly predates
-it. The alternative — per-ticket displacement from time of placement — is more
-precise and considerably more complex. I chose the simpler rule; say the word if
-you want the precise one.
+Displacement stays **absolute**: a game pulled 48 hours earlier is no more "the
+game you bet on" than one pushed 48 hours later.
+
+A single reschedule may therefore void some tickets and retain others. That is
+intended, not a bug — they bought different schedules (`B03`).
+
+The event lifecycle label still reports the event's own story (cumulative
+displacement from its original start), because the log describes the event; the
+per-ticket decision is what moves money.
+
+**Implementation:** `tickets.accepted_event_start`, recorded at acceptance and
+frozen with the rest of the accepted economics. This is the one place Package #2
+touches a Package #1 table.
+
+Deriving the baseline from `event_schedule_history` via `tickets.accepted_at`
+was considered and rejected. `accepted_at` defaults to `NOW()`, which in
+PostgreSQL is *transaction* start time; a placement that blocks on a concurrent
+reschedule resumes and commits with a timestamp predating it, so the derivation
+would hand it the abandoned schedule — exactly the ticket the sweep already
+decided not to void. Recording the value the RPC validated against removes the
+inference.
+
+### 3.2b Placement takes an event share lock, before the chapter lock
+
+**This deviates from Package #1 section 20**, which fixes the sequence as
+idempotency then chapter `FOR UPDATE` then validation. Placement now takes
+`events FOR SHARE` *before* the chapter lock.
+
+Without it, placement and postponement never serialise: placement locks a
+chapter, postponement locks an event. A placement in flight is invisible to a
+postponement void sweep, so a ticket could be accepted against an abandoned
+schedule and then never voided.
+
+The order matters as much as the lock. Reschedule and cancel take
+event(exclusive) then chapter(exclusive), so placement must take event(share)
+then chapter(exclusive) and not the reverse, or the two paths deadlock.
+**Every event-touching path in this schema acquires the event before any
+chapter.**
+
+The chapter `FOR UPDATE` is untouched; nothing about the capital decision moved.
+`B04` asserts the race, `B13` asserts two void paths racing settle exactly
+once.
 
 ### 3.3 Schedule changes have exactly one code path
 
@@ -115,6 +165,14 @@ you want the precise one.
 `reschedule_event_rpc`. A schedule feed therefore cannot slide a game 48 hours
 without triggering the void rules, because there is no second path that skips
 them.
+
+### 3.3b The kickoff boundary is closed on both sides
+
+Ingestion takes `events FOR SHARE` too, and refuses a **non-in-play quote dated
+at or after the actual kickoff**. After kickoff a pre-game price is a provider
+error by definition, and accepting one would manufacture an executable price for
+a game already under way. In-play pricing after kickoff remains legitimate, and
+can never become a closing line (`B07`, `B08`).
 
 ### 3.4 Closing lines are captured at kickoff, per book
 
@@ -210,6 +268,46 @@ an event goes live nothing on it is offered.
 
 ---
 
+## 4b. Boundary and concurrency suite
+
+Added at review, to find problems here rather than after a live provider is
+attached.
+
+| Test | Requirement |
+|---|---|
+| B01 | Ticket placed before the first slip absorbs total subsequent displacement |
+| B02 | Ticket placed after the first slip ignores earlier displacement |
+| B03 | Mixed cohorts on one event are adjudicated separately |
+| B04 | Postponement racing `place_ticket_rpc` has deterministic ordering |
+| B05 | Quote refresh at 59 / 60 / 61 seconds |
+| B06 | Executable TTL at 119 / 120 / 121 seconds |
+| B07 | Kickoff and incoming quote race cannot create a post-close executable price |
+| B08 | Post-kickoff pre-game quote refused; in-play still accepted |
+| B09 | Duplicate and crossed provider messages remain idempotent |
+| B10 | Late historical quote can never replace a newer executable quote |
+| B11 | Cancel invoked repeatedly cannot double-release escrow |
+| B12 | Postpone invoked repeatedly cannot double-release escrow |
+| B13 | Cancel and postpone racing settle exactly once |
+
+**13/13 PASS**, and 12/12 repeat runs of the whole group with zero failures.
+
+Two measurement notes, stated rather than glossed:
+
+- **B06 cannot assert exactly 120 end to end.** Wall-clock advances a few
+  milliseconds between stamping `captured_at` and the RPC evaluating it, pushing
+  a nominal 120 to 120.00x and over the line. The boundary is pinned from both
+  sides instead — 119 executable, 121 stale — plus a sub-second probe at 119.75
+  proving the comparison is inclusive rather than strict. B05 boundaries have a
+  full second of margin on each side and are exact.
+- **B04 outcome distribution is skewed.** Released from a barrier the reschedule
+  won 12/12, because placement does an idempotency lookup and a snapshot read
+  before reaching the event lock. The converse ordering is covered
+  deterministically by B01 and B12. What B04 establishes is that the illegal
+  outcome — an ACCEPTED ticket still bound to an abandoned schedule — is
+  unreachable either way.
+
+---
+
 ## 5. Adding a real provider
 
 No provider is wired up — none was chosen. The seam is `ingest/provider.py`:
@@ -233,7 +331,15 @@ Function, a cron container, or anything else holding a service-role connection.
 
 ---
 
-## 6. Out of scope
+## 6. Freeze
+
+Frozen at `pkg2-v1.0`. Provider-specific parsing, authentication, throttling,
+retries, reconnects, rate limits and outage behaviour are integration concerns
+and were deliberately kept out of the lifecycle domain model. They belong to
+Package #3, which asks whether this deterministic system survives an unreliable
+real feed.
+
+## 7. Out of scope
 
 Deliberately not built: automatic result grading from a scores feed (settlement
 still requires an explicit `settle_ticket_rpc` call), retry/backoff policy,

@@ -579,9 +579,10 @@ def t21_zero_odds_rejected():
                 """INSERT INTO public.tickets
                    (user_id, chapter_id, event_id, market_snapshot_id, market_type,
                     selection, accepted_price, accepted_sportsbook, snapshot_captured_at,
-                    risk, potential_profit, submission_idempotency_key)
+                    risk, potential_profit, submission_idempotency_key,
+                    accepted_event_start)
                    SELECT u.id, c.id, %s, %s, 'SPREAD', 'DAL', 0, 'TESTBOOK', NOW(),
-                          100, 90, gen_random_uuid()
+                          100, 90, gen_random_uuid(), NOW() + INTERVAL '3 hours'
                    FROM public.users u JOIN public.ledger_chapters c ON c.user_id = u.id
                    LIMIT 1""",
                 (ev, fresh_snapshot(admin, ev, book="TICKETCHK")))

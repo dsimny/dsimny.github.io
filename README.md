@@ -9,12 +9,13 @@ AUTHENTICATED USER → CURRENT LEDGER CHAPTER → CHAPTER_OPEN +10,000 LC
    → SETTLE TICKET → RELEASE ESCROW → PERMANENT LEDGER RESULT
 ```
 
-**Status: Packages #1 and #2 complete.** 74/74 tests pass on **both** a real
-Supabase stack (PostgreSQL 17.6) and the bundled PostgreSQL 16.2, including
-15-way true-concurrency placement against independent database connections.
+**Status: Packages #1 and #2 complete; Package #2 FROZEN at `pkg2-v1.0`.**
+87/87 tests pass on **both** a real Supabase stack (PostgreSQL 17.6) and the
+bundled PostgreSQL 16.2, including 15-way true-concurrency placement against
+independent database connections.
 
 - Package #1 — Database Foundation: 40/40. [TEST_REPORT.md](TEST_REPORT.md), [DEVIATIONS.md](DEVIATIONS.md)
-- Package #2 — Market Ingestion & Event Lifecycle: 34/34. [PACKAGE2.md](PACKAGE2.md)
+- Package #2 — Market Ingestion & Event Lifecycle: 34/34 plus 13 boundary/concurrency. [PACKAGE2.md](PACKAGE2.md)
 
 ---
 
@@ -38,7 +39,7 @@ asserts it is not 20,000.
 
 ```
 db/
-  migrations/        001-029, applied in order. This is what ships.
+  migrations/        001-032, applied in order. This is what ships.
   testkit/           TEST ONLY. Never apply to Supabase.
   rollback/          ROLLBACK_NOTES.md
 ingest/              Package #2 ingestion worker
@@ -51,6 +52,7 @@ tests/
   test_security.py   section 35 security tests
   test_concurrency.py true multi-connection contention tests
   test_package2.py   ingestion & event lifecycle (M2)
+  test_p2_boundary.py boundary & concurrency edge conditions (B01-B13)
   run_all.py         full suite + section 40 report
 ```
 
@@ -90,6 +92,9 @@ Package #2 (see [PACKAGE2.md](PACKAGE2.md)):
 | 027 | run bookkeeping + Package #2 privileges |
 | 028 | `current_market_board`, `ticket_closing_line_value` |
 | 029 | Package #2 fixtures |
+| 030 | ticket/schedule binding + placement event lock (review) |
+| 031 | ticket-relative postponement (review) |
+| 032 | ingestion event lock + kickoff guard (review) |
 
 ---
 
@@ -144,7 +149,7 @@ Do **not** apply anything in `db/testkit/`.
 
 | Apply | Skip in production |
 |---|---|
-| 001–018, 020–028 | **019** and **029** (`olp_test` fixtures) |
+| 001–018, 020–028, 030–032 | **019** and **029** (`olp_test` fixtures) |
 
 The fixture migrations are development only: nothing else depends on them, and
 they define `olp_test.reset()`, which truncates every ledger table.

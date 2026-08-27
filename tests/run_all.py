@@ -19,6 +19,7 @@ from test_acceptance import ACCEPTANCE
 from test_security import SECURITY, SECURITY_EXTRA
 from test_concurrency import CONCURRENCY
 from test_package2 import PACKAGE2
+from test_p2_boundary import BOUNDARY
 
 
 def run_group(title, tests, results):
@@ -69,6 +70,7 @@ def main():
     run_group("Security tests", SECURITY, results)
     run_group("Additional authorization tests", SECURITY_EXTRA, results)
     run_group("Package #2 -- ingestion & event lifecycle", PACKAGE2, results)
+    run_group("Package #2 -- boundary & concurrency", BOUNDARY, results)
 
     # ---- summary -----------------------------------------------------------
     def tally(tests):
@@ -82,6 +84,7 @@ def main():
     sec = tally(SECURITY)
     ext = tally(SECURITY_EXTRA)
     pkg2 = tally(PACKAGE2)
+    bnd = tally(BOUNDARY)
 
     total_pass = sum(1 for r in results if r[2] == "PASS")
     total = len(results)
@@ -117,6 +120,11 @@ def main():
     print(f"Market board & CLV: {verdict(group_ok({'M2-T25','M2-T26','M2-T27'}))}")
     print(f"Ingestion worker: {verdict(group_ok({'M2-T28','M2-T29','M2-T30'}))}")
     print(f"Package #2 authorization: {verdict(group_ok({'M2-T31','M2-T32','M2-T33'}))}")
+    print(f"Ticket-relative postponement: {verdict(group_ok({'B01','B02','B03','B04'}))}")
+    print(f"Refresh/TTL boundaries: {verdict(group_ok({'B05','B06'}))}")
+    print(f"Kickoff boundary: {verdict(group_ok({'B07','B08'}))}")
+    print(f"Provider message robustness: {verdict(group_ok({'B09','B10'}))}")
+    print(f"Double-invoked lifecycle: {verdict(group_ok({'B11','B12','B13'}))}")
 
     # The 29 test IDs the package's section 33 table actually enumerates.
     ENUMERATED = {

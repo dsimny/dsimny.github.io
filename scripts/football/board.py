@@ -470,9 +470,10 @@ def main():
     # only mechanism that makes them checkable. It also bounds the API cost to
     # one slate per week: this branch is reached once, when the board is first
     # written, and the exists-check above refuses a second pass.
+    wstatus = None
     if args.writeups:
         import writeup
-        writeup.annotate(b)
+        wstatus = writeup.annotate(b)
 
     sha = crypto_box.sha256_of(b)
     if crypto_box.have_key():
@@ -487,6 +488,18 @@ def main():
     print(f"\nwrote {os.path.relpath(wrote, ROOT)}")
     print(f"sha256 {sha}")
     print("commitment recorded" if fresh else "commitment already existed; left alone")
+
+    # PUBLISH FIRST, THEN GO RED. The board, its fingerprint and its commitment
+    # are all on disk by this point, and the workflow's later steps run under
+    # `if: !cancelled()` - so the pages still render and members still get the
+    # slate. Only then does the run report the problem, by exiting non-zero into
+    # the existing alert job. Failing earlier would have withheld a perfectly
+    # good board because its prose was missing, which is the wrong trade: a
+    # slate with numbers and no writeups is degraded, not worthless.
+    if wstatus and wstatus.get("degraded"):
+        print("\nExiting non-zero so this reaches the alert channel. The board "
+              "above IS published; it is the prose that failed.")
+        return 1
     return 0
 
 

@@ -176,6 +176,36 @@ publishes numbers without prose — the same degrade-never-die rule as a missing
 Discord webhook. **The API round-trip is therefore UNPROVEN**; the validator,
 the prompt and the degrade path are all tested, the live call is not.
 
+**A CONFIGURED KEY THAT STOPS WORKING IS NOT ALLOWED TO BE SILENT.** Degrading
+rather than raising is right — a board with numbers and no prose is still a
+board — but it means an expired key, a dry balance or a typo'd model name
+produces a green run, a normal-looking page, and prose that quietly stopped
+appearing. That is the shape of the dead free-pick webhook that went unnoticed
+for a day, and it is why `post_status.json` exists.
+
+So `annotate()` returns a status, and when a key IS configured but fewer than
+half the games get prose, `board.py` exits non-zero **after publishing
+everything** — the board, its fingerprint, the pages and the Discord posts all
+land first, and only then does the run go red into the existing alert. Failing
+earlier would withhold a good board because its prose was missing, which is the
+wrong trade.
+
+The threshold separates the two failure modes cleanly and needs no tuning: the
+validator rejecting one awkward game costs one writeup, while a broken
+credential costs all of them. Tested at four points — no key (not degraded),
+healthy, every call failing (alarm), and one validator rejection out of eight
+(no alarm).
+
+**Three API defects were found here by checking the current contract rather than
+recalling it**, each of which would have surfaced on the first live run as a
+slate with no prose: it sent `temperature` (removed on Sonnet 5 / Opus 5, and a
+400 — every call would have failed); it set `cache_control` on a ~500-token
+system prompt when the minimum cacheable prefix is ~1024, so it would never have
+cached while reading like an optimisation; and it defaulted to Sonnet to save
+money, which is the owner's decision rather than one to bake in quietly. The
+retry now names the exact numerals the validator rejected instead of varying a
+sampling parameter the API no longer accepts.
+
 THE VALIDATOR CAUGHT TWO REAL HOLES IN ITSELF, both found by writing the tests
 adversarially rather than to pass:
 

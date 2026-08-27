@@ -387,16 +387,41 @@ def write_one(g, attempts=2):
     return None, f"no writeup (unverifiable numerals: {', '.join(last_bad)})"
 
 
+# Below this success rate, a configured key is assumed BROKEN rather than the
+# validator being strict. The two failure modes separate cleanly: the validator
+# rejecting a genuinely awkward game costs one or two writeups, while an expired
+# key, an exhausted balance or a wrong model name costs ALL of them. Half is
+# comfortably between those and needs no tuning.
+MIN_WRITEUP_RATE = 0.5
+
+
 def annotate(board, verbose=True):
-    """Add `writeup` to every covered game on a board dict, in place."""
+    """Add `writeup` to every covered game, in place. Returns a status dict.
+
+    THE STATUS EXISTS BECAUSE THIS FAILURE IS OTHERWISE SILENT. Every path here
+    degrades rather than raising - which is right, a board with numbers and no
+    prose is still a board - but that means an expired key, a dry balance or a
+    typo'd model produces a GREEN run, a normal-looking page, and prose that
+    quietly stopped appearing. That is the same shape as the dead free-pick
+    webhook that went unnoticed for a day and is why post_status.json exists.
+
+    So the caller gets `degraded`, and board.py turns it into a non-zero exit
+    AFTER everything has been published. Publish first, then go red: the slate
+    still reaches members, and the run still tells somebody.
+    """
+    games = board.get("games", [])
     if not have_key():
+        # Not degraded: no key configured is a deliberate state, not a fault.
         print("ANTHROPIC_API_KEY not set: publishing numbers without prose.")
-        for g in board.get("games", []):
+        for g in games:
             g["writeup"] = None
             g["writeup_note"] = "no writeup (no API key configured)"
-        return board
+        return {"ok": 0, "refused": 0, "degraded": False,
+                "reason": "no API key configured"}
+
     ok = refused = 0
-    for g in board.get("games", []):
+    last_note = ""
+    for g in games:
         if verbose:
             print(f"  {g.get('league','')} {g.get('matchup','')}")
         text, note = write_one(g)
@@ -407,8 +432,21 @@ def annotate(board, verbose=True):
                 print(f"    OK ({len(text.split())} words)")
         else:
             refused += 1
+            last_note = note or last_note
     print(f"\n{ok} written, {refused} refused ({MODEL})")
-    return board
+
+    total = ok + refused
+    rate = (ok / total) if total else 1.0
+    degraded = bool(total) and rate < MIN_WRITEUP_RATE
+    if degraded:
+        print(f"\nWRITEUP FAILURE: only {ok} of {total} games were written "
+              f"({rate*100:.0f}%, floor {MIN_WRITEUP_RATE*100:.0f}%).")
+        print(f"  last reason: {last_note}")
+        print("  A key IS configured, so this is not the intended no-prose "
+              "mode. Check, in order: the key has not expired, the account "
+              "has credit, and OLS_WRITEUP_MODEL names a real model.")
+    return {"ok": ok, "refused": refused, "degraded": degraded,
+            "reason": last_note}
 
 
 def main():
@@ -444,11 +482,13 @@ def main():
         print("\n(--dry-run: no API call made)")
         return 0
 
-    annotate(board)
+    status = annotate(board)
+    # Written either way - partial prose is still worth keeping, and the note on
+    # each game records why any given one is missing.
     with io.open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(board, f, indent=1, sort_keys=True)
     print(f"wrote {os.path.relpath(path, ROOT)}")
-    return 0
+    return 1 if status.get("degraded") else 0
 
 
 if __name__ == "__main__":

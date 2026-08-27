@@ -38,10 +38,19 @@ not a ceiling.
 MODEL
 ------------------------------------------------------------------------------
 Claude, via the Messages API over plain `requests` - no new dependency; the repo
-already ships requests. Default claude-sonnet-5: the task is constrained
-narration over fixed numbers rather than open reasoning, and it runs ~57 times a
-week. Set OLS_WRITEUP_MODEL to override (claude-opus-5 for richer prose) - one
-variable, no code change.
+already ships requests. Default claude-opus-5. Set OLS_WRITEUP_MODEL to override
+(claude-sonnet-5 costs less per token) - one variable, no code change.
+
+THREE THINGS THIS FILE GOT WRONG ON THE FIRST PASS, all found by checking the
+current API contract instead of trusting recall, and all of which would have
+surfaced as a silent no-prose slate on the first live run:
+  - it sent `temperature`. Sampling parameters were REMOVED on Sonnet 5 and
+    Opus 5 and now return a 400. Every call would have failed.
+  - it set `cache_control` on the system prompt. The minimum cacheable prefix
+    is ~1024 tokens and this prompt is ~500, so it would never have cached
+    while reading like an optimisation.
+  - it defaulted to Sonnet to save money. Picking a cheaper model is the
+    owner's call, not a default to bake in quietly.
 
 DEGRADE, NEVER DIE. No ANTHROPIC_API_KEY, an API error, a timeout, a refusal:
 the board publishes with numbers and no prose, exactly as a missing Discord
@@ -70,7 +79,12 @@ FB = os.path.join(ROOT, "data", "football")
 
 API_URL = "https://api.anthropic.com/v1/messages"
 API_VERSION = "2023-06-01"
-MODEL = os.environ.get("OLS_WRITEUP_MODEL", "claude-sonnet-5").strip()
+# claude-opus-5 is the default because it is the current default model, not
+# because this task needs the top tier. Choosing a cheaper model to save money
+# is Daniel's decision to make, not one to bake in quietly: set
+# OLS_WRITEUP_MODEL=claude-sonnet-5 to halve the rate. At ~57 short paragraphs a
+# week either is small money; the difference is real but it is his to weigh.
+MODEL = os.environ.get("OLS_WRITEUP_MODEL", "claude-opus-5").strip()
 MAX_TOKENS = 500
 TIMEOUT = 60
 
@@ -299,8 +313,23 @@ def have_key():
     return bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
 
 
-def call_claude(prompt, temperature=1.0):
-    """One Messages API call. Returns text, or None on any failure."""
+def call_claude(prompt):
+    """One Messages API call. Returns text, or None on any failure.
+
+    NO `temperature`. Sampling parameters (temperature / top_p / top_k) were
+    REMOVED on Claude Sonnet 5 and Opus 5 and are rejected with a 400 - so the
+    first version of this file, which passed temperature to vary the retry,
+    would have failed EVERY call on Saturday and published a slate with no
+    prose at all. Retry variation now comes from the prompt (see write_one),
+    which is better anyway: it tells the model what was wrong instead of
+    re-rolling the dice.
+
+    NO `cache_control` either. The minimum cacheable prefix is ~1024 tokens and
+    this system prompt is ~500, so a breakpoint here would silently never cache
+    while looking like an optimisation. If the prompt grows past ~1024 tokens,
+    add it back and confirm with usage.cache_read_input_tokens rather than
+    assuming.
+    """
     try:
         r = requests.post(API_URL, timeout=TIMEOUT, headers={
             "x-api-key": os.environ["ANTHROPIC_API_KEY"],
@@ -309,17 +338,21 @@ def call_claude(prompt, temperature=1.0):
         }, json={
             "model": MODEL,
             "max_tokens": MAX_TOKENS,
-            "temperature": temperature,
-            # cache_control on the system block: the system prompt is identical
-            # for every game in the slate and only the data block changes.
-            "system": [{"type": "text", "text": SYSTEM,
-                        "cache_control": {"type": "ephemeral"}}],
+            "system": SYSTEM,
             "messages": [{"role": "user", "content": prompt}],
         })
         if r.status_code != 200:
             print(f"    API {r.status_code}: {r.text[:160]}")
             return None
-        parts = [b.get("text", "") for b in r.json().get("content", [])
+        body = r.json()
+        # A safety classifier may decline (HTTP 200, stop_reason "refusal").
+        # Betting copy is exactly the kind of content that can trip one, so
+        # check before reading content rather than silently getting "".
+        if body.get("stop_reason") == "refusal":
+            cat = (body.get("stop_details") or {}).get("category")
+            print(f"    model declined this game (refusal, category {cat})")
+            return None
+        parts = [b.get("text", "") for b in body.get("content", [])
                  if b.get("type") == "text"]
         return "".join(parts).strip() or None
     except (requests.RequestException, KeyError, ValueError) as exc:
@@ -332,7 +365,16 @@ def write_one(g, attempts=2):
     prompt = build_prompt(g)
     last_bad = None
     for i in range(attempts):
-        text = call_claude(prompt, temperature=1.0 if i == 0 else 0.2)
+        # THE RETRY IS TARGETED, not a re-roll. It names the exact tokens the
+        # validator rejected, which is both more likely to succeed and more
+        # honest than varying a sampling parameter the API no longer accepts.
+        attempt_prompt = prompt if not last_bad else (
+            prompt + "\n\nYour previous attempt was REJECTED. It contained "
+            f"numbers that are not in the data block: {', '.join(last_bad)}. "
+            "Every numeral you write is checked against the block. Rewrite the "
+            "paragraph using only numbers that appear above, or write it with "
+            "no numbers at all.")
+        text = call_claude(attempt_prompt)
         if text is None:
             return None, "no writeup (generation failed)"
         bad = validate(text, g)

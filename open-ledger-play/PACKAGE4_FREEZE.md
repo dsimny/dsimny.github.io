@@ -38,8 +38,9 @@ Package #4 **writes nothing.** It is a read layer.
 | `042` | Partner lookup off the CTE onto the index; `PARALLEL SAFE` metadata |
 | `043` | Modal tie-break symmetry (`abs(line) ASC`) |
 | `044` | Exact payout comparator (`olp_price_payout`) |
+| `045` | Total price ordering (`positive > negative` made absolute) |
 
-Migrations are append-only. `042`–`044` replace view bodies via
+Migrations are append-only. `042`–`045` replace view bodies via
 `CREATE OR REPLACE` rather than editing `038`/`039`/`040` in place, so any
 database that applied an earlier migration reaches the same final state.
 
@@ -65,7 +66,18 @@ database that applied an earlier migration reaches the same final state.
    Package #5.
 7. **`opening_*` is our first observation**, not the true market open.
 8. **Ranking is not money.** `olp_price_payout` ranks; `olp_american_profit`
-   pays. Never substitute one for the other.
+   pays. Never substitute one for the other. The ordering rule, in full:
+
+   ```
+   1. positive beats negative              (+100 > -100, +100 > -101)
+   2. among positive, larger is better     (+101 > +100)
+   3. among negative, closer to zero wins  (-101 > -102, -142 > -143)
+   ```
+
+   Applied at both selection points and nowhere else: `canonical_market.best`
+   and `executable_market.exec_best` — the latter being also the promoted book
+   after a quote is superseded by a line move. `best_price_book_count` compares
+   integer prices with `=` and never needed a comparator.
 
 ## 4. Configuration
 
@@ -87,7 +99,7 @@ database that applied an earlier migration reaches the same final state.
 26 Package #4 tests (`P4-T01`…`P4-T26`) inside a 152-test suite, green on
 **PostgreSQL 16.2** and **Supabase 17.6**.
 
-Three defects were found during the package and each has a negative control
+Four defects were found during the package and each has a negative control
 proving its test detects the defect rather than passing by construction:
 
 | Defect | Found by | Fix | Negative control |
@@ -95,6 +107,7 @@ proving its test detects the defect rather than passing by construction:
 | Modal tie-break used recency → flapped between polls | a deliberate 2-vs-2 tie test | ordering rule | — |
 | `line ASC` tie-break carried signed-direction bias → the two sides of a spread named different wagers (33.5%) | review of the sign-off output | `043` | `P4-T09` → `(-3.50, +3.00)`; `P4-T25` → `SPREAD 60/60` |
 | `best_price` ranked with a rounding money function → named a worse price as best | `package4_signoff.sql` on a seeded board | `044` | `P4-T26` → `(-143, 'bookB')` |
+| `+100` and `-100` tied on payout, so *positive > negative* was not absolute | review of the ordering rule | `045` | `P4-T26` → `(-100, 'bookA')` |
 
 The recurring lesson, recorded in `PACKAGE4_PREREG.md` §12.1 and §12.5: **an
 invariant has to be tested on inputs that can actually violate it.** The modal
@@ -133,5 +146,7 @@ Run `scripts/package4_signoff.sql` within ~2 minutes of a fresh ingest.
 ## 8. Open items carried forward
 
 - Rotate The Odds API key (pasted into a transcript 2026-08-27).
+- Full audit of `olp_american_profit()` call sites is recorded in `045`'s
+  header. Only `028` (Package #2) still ranks with it.
 - Package #2 `beat_close` rounding collision — decision needed.
 - Nothing schedules the ingestion worker; 3 credits per poll.

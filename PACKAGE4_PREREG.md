@@ -373,7 +373,9 @@ relied upon.
 
 ## 12. Tests — same-line isolation and no cross-line leakage
 
-The proofs this package must pass. Written before implementation.
+The proofs this package must pass. Pre-registered before implementation; the
+table below is the **as-built** reconciliation, and §12.1 records every drift
+from what was originally written.
 
 ### Same-line isolation
 
@@ -385,41 +387,127 @@ The proofs this package must pass. Written before implementation.
 | `P4-T04` | `TOTAL OVER 44.5` and `OVER 45` never merge |
 | `P4-T05` | `MONEYLINE` (`line IS NULL`) groups correctly and never collides with a spread row |
 
-### Cross-line leakage canary
+### Cross-line leakage canary and partner rules
 
 | Test | Asserts |
 |---|---|
-| `P4-T06` | A slate constructed so that blending would give a *materially different* best price — the leak is detectable if present, not merely absent by luck |
+| `P4-T06` | A slate constructed so blending would give a *materially different* best price — the leak is detectable if present, not merely absent by luck |
 | `P4-T07` | `SPREAD` de-vig pairs `DAL -3` with `PHI +3` and **never** with `PHI +3.5`; the mismatched book yields `NO_DEVIG_PAIR` |
 | `P4-T08` | `TOTAL` de-vig pairs `OVER 44.5` with `UNDER 44.5`, never `UNDER 45` |
-| `P4-T09` | Line movement `-3 → -3.5` appears as `line_movement`, and **not** as `probability_movement` on either line |
+| `P4-T23` | A pure `-3 → -3.5` line move reads as `line_movement` (`-0.5` / `+0.5` mirrored) and **not** as `probability_movement` on either line |
+
+### Modal line — determinism, and independence from order and recency
+
+| Test | Asserts |
+|---|---|
+| `P4-T09` | Modal line is invariant to insertion order, bookmaker order, and which tied line refreshed last |
+| `P4-T10` | Modal reflects book count, not line value; ties break `book count DESC → line ASC` |
 
 ### Correctness of the arithmetic
 
 | Test | Asserts |
 |---|---|
-| `P4-T10` | Implied probability and its inverse round-trip across `±100 … ±10000` |
-| `P4-T11` | Multiplicative de-vig of a known pair reproduces hand-computed fair probabilities; `fair₁ + fair₂ = 1` |
-| `P4-T12` | `best_price` uses payout ordering — `+100` beats `-105` beats `-110` |
-| `P4-T13` | Median consensus is unmoved by one extreme book that would swing a mean |
+| `P4-T11` | Implied probability and its inverse round-trip across `±100 … ±10000`, **within the quantisation bound** (see §12.2) |
+| `P4-T12` | Multiplicative de-vig of a known pair reproduces hand-computed fair probabilities; `fair₁ + fair₂ = 1` |
+| `P4-T13` | `best_price` uses payout ordering — `+100` beats `-105` beats `-110` |
+| `P4-T14` | Median consensus is unmoved by one extreme book that would swing a mean |
 
 ### Quality and gating
 
 | Test | Asserts |
 |---|---|
-| `P4-T14` | Every reason code is reachable and appears in `quality_reasons` |
-| `P4-T15` | Reasons accumulate — a row can carry several at once, uncollapsed |
-| `P4-T16` | Stale books excluded on `snapshot_ttl_seconds`; no second freshness constant exists |
-| `P4-T17` | No outlier removal below `mi_outlier_min_books`; never more than a third removed |
-| `P4-T18` | `UNUSABLE` rows appear in the canonical surface and are absent from the executable one |
+| `P4-T15` | Every reason code is reachable, and reasons accumulate uncollapsed on one row |
+| `P4-T16` | A single-book market fails closed |
+| `P4-T17` | Stale books excluded on `snapshot_ttl_seconds`; **no second freshness constant exists** |
+| `P4-T18` | No outlier removal below `mi_outlier_min_books`; never more than a third removed |
 | `P4-T19` | Every `best_snapshot_id` on the executable surface is **accepted by `place_ticket_rpc`** — the surface and the RPC cannot disagree |
 | `P4-T20` | A superseded snapshot never appears on the executable surface (`MARKET_MOVED` parity) |
+| `P4-T21` | A live event is absent from the executable surface |
+| `P4-T22` | Opening equals current on a single-observation slate — `market_movement`'s duplicated partner rule agrees with `canonical_market`'s by construction |
 
 ### Live-shape
 
 | Test | Asserts |
 |---|---|
-| `P4-T21` | Against the 272-event / 4,552-quote live shape: canonical row count equals distinct `(event, market, selection, line)`, and query time is bounded |
+| `P4-T24` | At live shape (272 events / 5,712 quotes), canonical row count equals distinct `(event, market, selection, line)`, and the per-event query — the access pattern a model actually uses — stays bounded |
+
+---
+
+### 12.1 Deviations from the pre-registration
+
+Recorded rather than renumbered away.
+
+1. **IDs shifted by one from `P4-T10` onward.** The four modal-invariance
+   properties added at review became `P4-T09`/`P4-T10`, displacing the
+   arithmetic and gating blocks. Nothing was dropped; the mapping is
+   old `T10→T11`, `T11→T12`, `T12→T13`, `T13→T14`, `T16→T17`, `T17→T18`.
+2. **Old `P4-T14` and `P4-T15` merged** into `P4-T15`. Reachability and
+   accumulation are asserted by the same fixture; splitting them duplicated
+   setup without adding a proof.
+3. **Old `P4-T09` (line vs price movement) was initially not implemented.**
+   Caught during reconciliation and added as `P4-T23`.
+4. **Old `P4-T21` (live-shape) was initially not implemented.** Added as
+   `P4-T24`, against a synthetic slate of the live census's shape rather than
+   captured data, so it runs without an API key.
+5. **`P4-T18`'s original fixture was too weak.** A `-900` book paired against
+   `+130` deviates only `0.0945` from the median — inside
+   `mi_outlier_probability_delta = 0.10`, so it is *correctly* not an outlier.
+   The fixture now uses a genuinely divergent book (`-2000 / +1500`).
+6. **`P4-T20`'s original fixture was gated out for the right reason.** The
+   superseded book was priced so far from the others that the row earned
+   `WIDE_DISPERSION` and left the executable surface via the dispersion gate
+   rather than the `MARKET_MOVED` parity being tested. Repriced so the test
+   probes what it claims to.
+
+### 12.2 Round-trip tolerance is a property of the odds format, not slop
+
+American odds are integers. `-110` and `-111` are adjacent representable prices
+whose implied probabilities differ by ~0.0011, so `fair_american(implied(p))`
+cannot round-trip exactly — there is frequently no integer price for the exact
+fair probability. `P4-T11` asserts the round-trip lands within one representable
+step, which is the tightest true statement available. Asserting equality would
+require either non-integer odds or a lie.
+
+### 12.3 Performance finding: the partner lookup was quadratic
+
+`P4-T24` exists because "bounded query time" was pre-registered. It found that
+the de-vig partner LATERAL in `038` and `040` scanned the whole `newest` /
+`earliest` CTE once per row — a CTE has no index, and the planner estimated 571
+rows against an actual 5,712. Measured cost: `0.325 ms × 5,712 loops = 1.86 s`,
+growing quadratically with board size.
+
+Migration `042` points the same LATERAL at `public.market_snapshots`, where
+`idx_snapshots_canonical` serves it. That node fell to `0.010 ms × 5,712 =
+57 ms`, a 32× reduction, and the growth is no longer quadratic. Semantics are
+unchanged — `LIMIT 1` and the ordering are preserved, so it selects exactly the
+row the CTE held.
+
+An equi-join on a derived partner key was tried first and was **worse**: the
+planner still chose a nested loop off the bad CTE estimate, and without the
+LATERAL's early exit it scanned to completion. Rejected and recorded.
+
+Remaining honest numbers, 272 events / 5,712 quotes:
+
+| | PostgreSQL 16.2 | Supabase 17.6 |
+|---|---|---|
+| one event (the real access pattern) | 1.4 s cold | 0.87 s cold |
+| full-board `canonical_market` scan | 14.7 s | 10.7 s |
+
+The full-board scan is **not** dominated by the partner lookup any more; it is
+dominated by the CTE chain, which `market_intelligence` re-evaluates once
+directly and twice more inside `executable_market` and `market_movement`.
+Collapsing that is a materialisation decision, not a view rewrite, and it is
+deliberately **not** taken in Package #4 — no consumer scans the whole board,
+and materialising would introduce a staleness surface this package exists to
+avoid. Recorded here so the decision is visible rather than forgotten.
+
+### 12.4 A benchmarking trap worth naming
+
+The synthetic slate is seeded at `NOW()` and ages out of `snapshot_ttl_seconds`
+while a benchmark runs. During this work a sequence of timings took 84 seconds,
+by which point every quote was stale and the views correctly returned zero rows
+— which reads exactly like a correctness bug and is not one. Keep any
+measurement inside the TTL window, or re-seed between runs.
 
 ---
 

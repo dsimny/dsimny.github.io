@@ -21,6 +21,7 @@ from test_concurrency import CONCURRENCY
 from test_package2 import PACKAGE2
 from test_p2_boundary import BOUNDARY
 from test_package3 import PACKAGE3
+from test_package4 import PACKAGE4
 
 
 def run_group(title, tests, results):
@@ -73,6 +74,7 @@ def main():
     run_group("Package #2 -- ingestion & event lifecycle", PACKAGE2, results)
     run_group("Package #2 -- boundary & concurrency", BOUNDARY, results)
     run_group("Package #3 -- provider integration & resilience", PACKAGE3, results)
+    run_group("Package #4 -- market intelligence", PACKAGE4, results)
 
     # ---- summary -----------------------------------------------------------
     def tally(tests):
@@ -88,6 +90,7 @@ def main():
     pkg2 = tally(PACKAGE2)
     bnd = tally(BOUNDARY)
     pkg3 = tally(PACKAGE3)
+    pkg4 = tally(PACKAGE4)
 
     total_pass = sum(1 for r in results if r[2] == "PASS")
     total = len(results)

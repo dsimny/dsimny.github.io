@@ -91,7 +91,20 @@ API_VERSION = "2023-06-01"
 # OLS_WRITEUP_MODEL=claude-sonnet-5 to halve the rate. At ~57 short paragraphs a
 # week either is small money; the difference is real but it is his to weigh.
 MODEL = os.environ.get("OLS_WRITEUP_MODEL", "claude-opus-5").strip()
-MAX_TOKENS = 500
+# THINKING COUNTS AGAINST max_tokens, and this was set to 500 on the assumption
+# that a 90-word paragraph needs nothing more. Measured on the first live call:
+# 363 output tokens, of which 207 were THINKING - leaving ~156 for the prose.
+# Sometimes that fits under 500 and sometimes it does not, so paragraphs were
+# being truncated mid-sentence INTERMITTENTLY, which is the worst version of
+# this bug: it would have looked fine in testing and shipped a half-sentence to
+# members on a busy slate. 2000 leaves room for thinking to run long.
+MAX_TOKENS = 2000
+
+# Constrained narration over fixed numbers is not a reasoning task. Low effort
+# cuts the thinking tokens - which are the bulk of the per-game cost at Opus
+# rates - without touching the quality of what is essentially disciplined
+# rewriting. Raise it if the prose ever reads mechanically.
+EFFORT = os.environ.get("OLS_WRITEUP_EFFORT", "low").strip()
 TIMEOUT = 60
 
 # The fields layer 2 may narrate. Anything else on the game dict is board
@@ -344,6 +357,7 @@ def call_claude(prompt):
         }, json={
             "model": MODEL,
             "max_tokens": MAX_TOKENS,
+            "output_config": {"effort": EFFORT},
             "system": SYSTEM,
             "messages": [{"role": "user", "content": prompt}],
         })
@@ -357,6 +371,17 @@ def call_claude(prompt):
         if body.get("stop_reason") == "refusal":
             cat = (body.get("stop_details") or {}).get("category")
             print(f"    model declined this game (refusal, category {cat})")
+            return None
+        # A TRUNCATED PARAGRAPH MUST NEVER BE PUBLISHABLE. Hitting the cap ends
+        # the text mid-sentence, and the numeral validator would happily pass it
+        # - every number in half a sentence is still a real number. So the check
+        # has to be here, on stop_reason, not downstream. Raising max_tokens
+        # makes this rare; this makes it harmless when it happens anyway.
+        if body.get("stop_reason") == "max_tokens":
+            u = body.get("usage") or {}
+            think = (u.get("output_tokens_details") or {}).get("thinking_tokens")
+            print(f"    hit max_tokens ({MAX_TOKENS}) - truncated, discarding. "
+                  f"output={u.get('output_tokens')} thinking={think}")
             return None
         parts = [b.get("text", "") for b in body.get("content", [])
                  if b.get("type") == "text"]

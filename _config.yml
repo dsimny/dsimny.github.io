@@ -1,0 +1,19 @@
+# Jekyll configuration for dsimny.github.io
+#
+# This file exists for one reason: to keep the open-ledger-play/ subtree out of
+# the published site. That subtree is application source -- database migrations,
+# RPCs, tests -- kept in this repository for provenance. It is not part of the
+# site, and without this exclusion Jekyll would render its markdown as pages and
+# serve its .sql and .py files as static assets.
+#
+# CAUTION for future edits: setting `exclude` REPLACES Jekyll's default exclude
+# list rather than extending it. The defaults are:
+#
+#   .sass-cache/  .jekyll-cache/  gemfiles/  Gemfile  Gemfile.lock
+#   node_modules/  vendor/bundle/  vendor/cache/  vendor/gems/  vendor/ruby/
+#
+# None of those paths exist in this repository today, so replacing the list
+# changes nothing. If any of them are ever added, restate them here or they will
+# be published.
+exclude:
+  - open-ledger-play

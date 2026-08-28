@@ -16,7 +16,7 @@
 -- assert: a probability, an interval, and its own provenance.
 --
 -- The MARKET side of the row is not an input. The function resolves the
--- Package #4 observation itself and stamps `market_snapshot_id` and
+-- Package #4 observation itself and stamps `formation_snapshot_id` and
 -- `market_probability_at_formation` from it. A model that could choose its own
 -- formation market probability could manufacture an edge by understating the
 -- market, and no downstream grading would ever notice.
@@ -25,12 +25,12 @@
 -- THE ANCHOR IS THE SNAPSHOT, NOT THE CLOCK
 -- -----------------------------------------------------------------------------
 -- `formed_at` alone is not enough: "the market at 14:03" stops being a single
--- fact once several books, selections and observations exist. `market_snapshot_id`
+-- fact once several books, selections and observations exist. `formation_snapshot_id`
 -- is a concrete historical row, so the question "what was this belief formed
 -- against" has exactly one answer forever.
 --
 -- REJECTED, and worth recording: a composite foreign key
--- (market_snapshot_id, event_id, market_type, selection) referencing
+-- (formation_snapshot_id, event_id, market_type, selection) referencing
 -- market_snapshots would prove semantic consistency declaratively, which is
 -- nicer than a trigger. Two reasons not to.
 --
@@ -50,24 +50,44 @@
 -- privileged mistake.
 --
 -- -----------------------------------------------------------------------------
--- DECISION NEEDED -- formation requires an executable market
+-- LOCKED -- what formation_snapshot_id does and does not claim
 -- -----------------------------------------------------------------------------
--- `market_intelligence` exposes exactly one snapshot id: `executable_snapshot_id`,
--- and it is NULL unless the row is executable. So binding to a concrete
--- observation is only possible for executable wagers, and this migration
--- refuses formation otherwise (`MARKET_NOT_EXECUTABLE`).
+-- `formation_snapshot_id` identifies the EXECUTABLE market observation against
+-- which the belief was formed, and from which Package #2's movement and
+-- staleness semantics are inherited. It is an ANCHOR, not a complete
+-- representation of every market fact the model used.
 --
--- The consequence is real and should be signed off rather than absorbed: v1
--- cannot form a belief about a single-book market, a wide-dispersion market, a
--- stale one, or anything past kickoff. Those are all legitimate things to
--- forecast and grade for calibration, even when unplayable. If they should be
--- forecastable, Package #4 needs to expose a canonical (non-executable) snapshot
--- anchor, which is a change to a frozen package and belongs in its own decision.
+-- The distinction is load-bearing. `market_intelligence` encodes consensus,
+-- dispersion, book counts, modal line and movement -- information derived from
+-- many quotes across many books. Naming a single `market_snapshots.id` as the
+-- belief's provenance would overstate what that id proves. It proves which
+-- executable quote anchored the belief and whether that quote has since been
+-- superseded; it does not prove what the rest of the surface said.
+--
+-- So the record carries two different proofs:
+--
+--     formation_snapshot_id   which executable quote anchored this belief, and
+--                             is it stale under Package #2 semantics?
+--     market_input_hash       what market-intelligence state did the model
+--                             actually receive?
+--
+-- `market_input_hash` is an md5 over the whole `model_input.market_intelligence`
+-- row the model consumed, stamped by the database. It lets a later reader prove
+-- the input SURFACE has not been silently reconstructed differently -- if
+-- Package #4's definition changes, replaying the same inputs produces a
+-- different hash and the discrepancy is visible rather than absorbed.
+--
+-- Formation therefore requires an executable market: `executable_snapshot_id`
+-- is the only snapshot anchor `market_intelligence` exposes, and reusing it
+-- preserves the Package #4 boundary. Deliberately NOT built: a second staleness
+-- system, or any grant of raw snapshot access to olp_model to obtain a "better"
+-- anchor. The consequence -- v1 cannot form beliefs about single-book,
+-- wide-dispersion, stale or post-kickoff markets -- is accepted.
 --
 -- -----------------------------------------------------------------------------
 -- IDENTITY -- append-only does not mean one prediction forever
 -- -----------------------------------------------------------------------------
--- UNIQUE (model_id, model_version, market_snapshot_id).
+-- UNIQUE (model_id, model_version, formation_snapshot_id).
 --
 -- One model version may state one belief per exact market observation. When the
 -- market moves, that is a NEW observation, so a new prospective belief is
@@ -106,7 +126,8 @@ CREATE TABLE model.beliefs (
     -- what the market said at formation. Stamped by the database, never by
     -- the model.
     market_probability_at_formation NUMERIC(9,6) NOT NULL,
-    market_snapshot_id UUID NOT NULL REFERENCES public.market_snapshots(id),
+    formation_snapshot_id UUID NOT NULL REFERENCES public.market_snapshots(id),
+    market_input_hash TEXT NOT NULL,
 
     formed_at        TIMESTAMPTZ NOT NULL,
     inputs_hash      TEXT NOT NULL,
@@ -132,7 +153,7 @@ CREATE TABLE model.beliefs (
         CHECK ((lower_bound IS NULL) = (uncertainty_method IS NULL)),
 
     CONSTRAINT uq_belief_identity
-        UNIQUE (model_id, model_version, market_snapshot_id)
+        UNIQUE (model_id, model_version, formation_snapshot_id)
 );
 
 COMMENT ON TABLE model.beliefs IS
@@ -141,9 +162,25 @@ COMMENT ON TABLE model.beliefs IS
     'a row; it never rewrites one. The market columns are stamped by '
     'model.form_belief(), never supplied by the model.';
 
-COMMENT ON COLUMN model.beliefs.market_snapshot_id IS
-    'The hard anchor. formed_at alone is ambiguous once several books and '
-    'observations exist; this is a concrete historical row.';
+COMMENT ON COLUMN model.beliefs.formation_snapshot_id IS
+    'The executable market observation this belief was formed against, and the '
+    'anchor from which Package #2 movement and staleness semantics are '
+    'inherited. An ANCHOR, not a complete representation of every market fact '
+    'the model used -- market_intelligence encodes information derived from many '
+    'quotes, and naming one snapshot as the belief''s full provenance would '
+    'overstate what it proves. formed_at alone is worse: it stops being a single '
+    'fact once several books and observations exist.';
+
+COMMENT ON COLUMN model.beliefs.market_input_hash IS
+    'md5 of the whole model_input.market_intelligence row the model consumed, '
+    'stamped by the database. Proves what market state the model actually '
+    'received, so a later reconstruction of the input surface is visible as a '
+    'hash mismatch rather than absorbed silently.';
+
+COMMENT ON COLUMN model.beliefs.inputs_hash IS
+    'The model''s own declaration of its inputs. Distinct from '
+    'market_input_hash, which the database computes and the model cannot '
+    'influence.';
 
 CREATE INDEX idx_beliefs_wager
     ON model.beliefs (event_id, market_type, selection_key, line);
@@ -180,7 +217,7 @@ AS $fn$
 DECLARE
     s public.market_snapshots%ROWTYPE;
 BEGIN
-    SELECT * INTO s FROM public.market_snapshots WHERE id = NEW.market_snapshot_id;
+    SELECT * INTO s FROM public.market_snapshots WHERE id = NEW.formation_snapshot_id;
 
     IF s.event_id    IS DISTINCT FROM NEW.event_id
     OR s.market_type IS DISTINCT FROM NEW.market_type
@@ -231,7 +268,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, public, pg_temp
 AS $fn$
 DECLARE
-    mi        RECORD;
+    mi        model_input.market_intelligence%ROWTYPE;
     v_belief  UUID;
 BEGIN
     IF p_model_id IS NULL OR p_model_version IS NULL
@@ -242,10 +279,10 @@ BEGIN
             USING ERRCODE = 'not_null_violation';
     END IF;
 
-    SELECT event_id, market_type, selection, line,
-           consensus_probability, is_executable, executable_snapshot_id
-      INTO mi
-      FROM public.market_intelligence
+    -- Read the surface the MODEL sees, not the public view, so the hash below
+    -- is over exactly what was consumed.
+    SELECT * INTO mi
+      FROM model_input.market_intelligence
      WHERE event_id    = p_event_id
        AND market_type = p_market_type::public.market_type
        AND selection   = p_selection
@@ -280,14 +317,15 @@ BEGIN
         model_id, model_version, feature_version,
         event_id, market_type, selection_key, line,
         model_probability, lower_bound, upper_bound, uncertainty_method,
-        market_probability_at_formation, market_snapshot_id,
-        formed_at, inputs_hash)
+        market_probability_at_formation, formation_snapshot_id,
+        market_input_hash, formed_at, inputs_hash)
     VALUES (
         p_model_id, p_model_version, p_feature_version,
         mi.event_id, mi.market_type, mi.selection, mi.line,
         p_probability, p_lower_bound, p_upper_bound, p_uncertainty_method,
         -- stamped from the market, never from the caller
         mi.consensus_probability, mi.executable_snapshot_id,
+        md5(to_jsonb(mi)::text),
         NOW(), p_inputs_hash)
     RETURNING belief_id INTO v_belief;
 
@@ -297,10 +335,10 @@ $fn$;
 
 COMMENT ON FUNCTION model.form_belief IS
     'The model proposes a belief; the database determines what market fact it '
-    'was formed against. market_snapshot_id and market_probability_at_formation '
-    'are resolved from Package #4 and are not caller inputs -- a model able to '
-    'choose its own formation market probability could manufacture an edge that '
-    'no later grading would detect.';
+    'was formed against. formation_snapshot_id, market_probability_at_formation '
+    'and market_input_hash are resolved from Package #4 and are not caller '
+    'inputs -- a model able to choose its own formation market probability could '
+    'manufacture an edge that no later grading would detect.';
 
 -- -----------------------------------------------------------------------------
 -- Privileges. The model may form beliefs and read its own prior beliefs -- they

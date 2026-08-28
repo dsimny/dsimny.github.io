@@ -451,6 +451,22 @@ Only when all eleven hold does a real model become worth writing — arriving wi
 a scoreboard that already works, rather than one built beside it and tuned to
 flatter it.
 
+## 11.2 Thresholds introduced in 053, signed off
+
+| Threshold | Value | Status |
+|---|---|---|
+| `min_bin_count` | 30 | **Signed off.** With the pre-registered 500-sample evaluation and 10 equal-count bins the expected bin size is ~50, so 30 is a reasonable floor for "adequately populated" without letting tiny partial bins drive the per-bin failure rule. |
+| `parity_epsilon` | 0.001 | **Signed off as an interim operational definition of parity — NOT a statistical claim of indistinguishability.** |
+
+`AT_PARITY` at `|BSS| <= 0.001` means *"we are treating these as equivalent for
+operational purposes"*. It does **not** mean the model and the market have been
+shown to be statistically indistinguishable; nothing here computes a confidence
+interval on the skill score.
+
+If bootstrap or confidence-interval machinery is added around the skill score
+later, that is a **new pre-registered amendment**, not a silent change to what
+`AT_PARITY` means.
+
 ## 12.2 Pre-registration corrections
 
 Recorded as corrections to the contract, not as post-hoc model changes. The

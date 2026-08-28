@@ -397,10 +397,38 @@ end-to-end:
 | 10 | A planted **well-calibrated-but-useless** model legitimately ends `CALIBRATED / RESEARCH` |
 | 11 | The grader **does not care whether a belief would have won** |
 
-Proof 11 is the one that is easy to overlook and needs a negative control. A
-70% prediction that loses can still be an excellent probabilistic forecast; a
-51% prediction that wins is not thereby a good one. Betting-oriented systems
-drift toward win/loss grading by default, and this package must not.
+Proof 11 is the one that is easy to overlook and needs a negative control.
+Betting-oriented systems drift toward win/loss grading by default, and this
+package must not.
+
+**CORRECTION, made before implementation.** This proof was first written as
+*"a losing 70% forecast outscores a winning 51% forecast"*. That is
+**mathematically false** on a single observation, under both rules:
+
+```
+Brier(0.70, LOSS) = 0.4900     Brier(0.51, WIN) = 0.2401
+LogL (0.70, LOSS) = 1.2040     LogL (0.51, WIN) = 0.6733
+```
+
+The winner scores better, and it should — a proper scoring rule on one sample is
+dominated by the outcome. The intuition being reached for is real but it is an
+**aggregate** property, belonging to `053`: over a sample, a well-calibrated
+model beats a lucky one.
+
+The single-observation statement that is both true and load-bearing is
+**side-indifference plus properness**:
+
+```
+Brier(0.70, LOSS) == Brier(0.30, WIN)      exactly -- the grade depends on the
+LogL (0.70, LOSS) == LogL (0.30, WIN)      forecast and the outcome, never on
+                                           which side happened to win
+Brier(0.90, LOSS) >  Brier(0.60, LOSS)     confident-and-wrong is punished
+                                           harder: the rule is proper
+```
+
+plus the structural half: the grade record carries **no win-rate, profit, or
+"would this bet have won" field at all**, so win/loss grading cannot creep in
+later.
 
 ### 12.1 Increment order
 
@@ -460,7 +488,7 @@ including one latent since migration `038`.
 | `P5-T19` | 8 | Null model: formation-market divergence is **exactly** zero |
 | `P5-T20` | 9 | A planted bad model scores worse than the null on both proper scoring rules |
 | `P5-T21` | 10 | A planted well-calibrated-but-useless model ends `CALIBRATED` **and** `RESEARCH` |
-| `P5-T22` | 11 | The grader is indifferent to win/loss: a losing 70% forecast outscores a winning 51% forecast |
+| `P5-T22` | 11 | The grader scores forecasts, not bets: `Brier(0.70, LOSS) == Brier(0.30, WIN)` exactly, `Brier(0.90, LOSS) > Brier(0.60, LOSS)`, and the grade record has no win-rate or profit field |
 | `P5-T23` | — | Weighted calibration error ≤ 3pp passes, and a single bin at 8pp fails despite a good weighted average |
 
 ## 14. Out of scope

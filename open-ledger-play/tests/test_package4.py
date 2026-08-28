@@ -676,9 +676,23 @@ def t24_live_shape_row_identity_and_bounded_time():
     assert single < 5, f"single-event market_intelligence took {single:.1f}s"
 
     # Row identity: exactly one canonical row per distinct fresh key.
+    #
+    # PERFORMANCE GUARD. Before migration 046 every stage of the canonical
+    # pipeline after `newest` was referenced once, so PostgreSQL inlined it and
+    # the planner -- with rows=1 estimates off a statistics-free CTE -- chose
+    # nested loops that re-ran whole aggregate subplans PER OUTPUT ROW. On the
+    # live board `best_ties` was recomputed 2,476 times over 4,560 quotes and
+    # the full scan took 9.7-14.7s; the live sign-off's check 3, which expanded
+    # the view about ten times, ran over twenty minutes. The threshold below is
+    # deliberately loose: it is not a benchmark, it is a tripwire for that
+    # re-execution coming back.
     t0 = time.time()
     canon = h.scalar(admin, "SELECT count(*) FROM public.canonical_market")
     board = time.time() - t0
+    assert board < 5, (
+        f"canonical_market full scan took {board:.1f}s at live shape -- the "
+        "pipeline is being re-executed per row again; check that every CTE "
+        "after `newest` is still MATERIALIZED (migration 046)")
     expected = h.scalar(admin, """
         SELECT count(*) FROM (
             SELECT DISTINCT s.event_id, s.market_type, s.selection, s.line
@@ -692,7 +706,7 @@ def t24_live_shape_row_identity_and_bounded_time():
     assert canon == expected, f"canonical {canon} != distinct keys {expected}"
     admin.close()
     return (f"{events} events / {quotes} quotes -> {canon} rows; "
-            f"one event {single*1000:.0f}ms, full board {board:.1f}s")
+            f"one event {single*1000:.0f}ms, full board {board*1000:.0f}ms")
 
 
 

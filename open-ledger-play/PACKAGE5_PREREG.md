@@ -1,8 +1,9 @@
 # Package #5 — Model Layer — Pre-Registration
 
-**Status: CONTRACT LOCKED (statistical protocol), no code written.** Written
-before implementation, as `PACKAGE4_PREREG.md` was. Two scoping decisions remain
-open and are marked in §11.
+**Status: CONTRACT LOCKED IN FULL, no code written.** Written before
+implementation, as `PACKAGE4_PREREG.md` was. All seven decisions settled.
+Baseline commit `84e980b`; this revision locks decisions 6 and 7 and defines
+Phase A.
 
 ---
 
@@ -63,7 +64,31 @@ Also readable: `ticket_closing_line_value`, `ticket_effective_results`,
 `events`, `event_schedule_history`, and the model's own prior outputs.
 
 **Not readable, ever:** anything that did not exist at the moment being
-predicted. See §8.
+predicted (§8), and — **LOCKED for v1** — anything about the model's own
+performance.
+
+### 3.1 The model cannot see the grading system
+
+| Allowed | Denied |
+|---|---|
+| `market_intelligence` at formation | settled outcomes |
+| pre-declared external / model features | grading tables |
+| model and version configuration | calibration results |
+| | CLV history |
+| | model standings |
+| | prior model performance |
+
+**The grading system can see the model. The model cannot see the grading
+system.**
+
+A model reading its own history opens a feedback channel that survives good
+intentions. Even without explicitly training on results, features and prompts
+begin adapting to past performance, and the prospective test stops being as
+clean as it looks while continuing to look clean.
+
+If an adaptive or online-learning model is wanted later, it is a **new
+pre-registered model class with its own contract** — not a quiet expansion of
+v1's permissions.
 
 **LOCKED — market-only inputs for v1.** Ratings, injuries, weather, rest and
 travel are out. Adding a feature source means adding a second provenance and
@@ -316,34 +341,80 @@ already works, rather than one built alongside it and tuned to flatter it.
 | 3 | Calibration protocol | **LOCKED** — §6 |
 | 4 | Uncertainty representation | **LOCKED** — interval + stated method, §4 |
 | 5 | Null-model harness before any model | **LOCKED** — §9.1 |
-| 6 | Which markets first — moneyline only, or all three? | **OPEN** (recommend moneyline: one line per wager, no fragmentation to reason about) |
-| 7 | Does a model see its own past performance? | **OPEN** (recommend no in v1 — invites fitting to recent noise) |
+| 6 | First modelled market | **LOCKED** — moneyline. Binary outcome, straightforward probability semantics, and no push handling, spread geometry or total thresholds to mix in while the grader is being validated. The **harness stays market-type agnostic**; only the first model experiment is narrowed. |
+| 7 | Model access to its own performance | **LOCKED** — none in v1. §3.1 |
 
-## 12. Pre-registered tests
+## 12. Phase A — the grader and the null model, and nothing else
+
+**No predictive model code is written in Phase A.** The deliverable is the
+ability to grade *any* model, plus a null model whose answer is already known.
+
+Phase A is complete only when the harness proves all of the following
+end-to-end:
+
+| # | Proof |
+|---|---|
+| 1 | A belief is formed **prospectively and immutably** |
+| 2 | It is bound to the **exact** market observation that existed at formation |
+| 3 | Settlement grades the probability correctly |
+| 4 | Brier and log loss reproduce **independently known** examples |
+| 5 | Equal-count calibration bins and Wilson intervals are correct |
+| 6 | Market-relative comparisons use the **frozen formation probability** |
+| 7 | Future CLV is recorded as an **observation, never treated as an identity** |
+| 8 | The null model produces **exactly zero** formation-market divergence |
+| 9 | A planted **bad** model scores worse than the null model |
+| 10 | A planted **well-calibrated-but-useless** model legitimately ends `CALIBRATED / RESEARCH` |
+| 11 | The grader **does not care whether a belief would have won** |
+
+Proof 11 is the one that is easy to overlook and needs a negative control. A
+70% prediction that loses can still be an excellent probabilistic forecast; a
+51% prediction that wins is not thereby a good one. Betting-oriented systems
+drift toward win/loss grading by default, and this package must not.
+
+Only when all eleven hold does a real model become worth writing — arriving with
+a scoreboard that already works, rather than one built beside it and tuned to
+flatter it.
+
+## 13. Pre-registered tests
 
 Each needs a negative control proving it detects the defect rather than passing
 by construction — the discipline that caught four real defects in Package #4,
 including one latent since migration `038`.
 
+### Boundary and integrity
+
 | Test | Asserts |
 |---|---|
 | `P5-T01` | The **actual `olp_model` role** is refused by PostgreSQL on `market_snapshots`, `canonical_market`, `executable_market` and `market_movement` — by attempting the read and catching the error, **not** by inspecting grants |
-| `P5-T02` | No `model.` column name collides with a `market_intelligence` column |
-| `P5-T03` | Same inputs + same version → byte-identical output |
-| `P5-T04` | A belief bound to a superseded snapshot is reported stale |
-| `P5-T05` | `NONE` / `DEGRADED` beliefs cannot reach the decision path |
-| `P5-T06` | Null model: edge vs formation market is **exactly** 0 and divergence is **exactly** 0 |
-| `P5-T07` | Null model: no assertion is made about future CLV — a planted non-zero CLV does not fail the harness |
-| `P5-T08` | `UPDATE` on a settled belief is refused by the database |
-| `P5-T09` | A graded model version cannot be modified |
-| `P5-T10` | Package #5 writes nothing to Packages #1–#4 tables |
-| `P5-T11` | No model row can be used as a `place_ticket_rpc` argument |
-| `P5-T12` | A belief consuming post-`formed_at` data is rejected |
-| `P5-T13` | Calibration maths verified against hand-computed bins, including Wilson intervals |
-| `P5-T14` | A model can be `CALIBRATED` and `RESEARCH` simultaneously — good calibration does not imply market superiority |
-| `P5-T15` | Weighted calibration error ≤ 3pp passes, and a single bin at 8pp fails despite a good weighted average |
+| `P5-T02` | The same role is refused on settled outcomes, grading tables, calibration results, CLV history and model standings (§3.1), again by attempt |
+| `P5-T03` | No `model.` column name collides with a `market_intelligence` column |
+| `P5-T04` | Same inputs + same version → byte-identical output |
+| `P5-T05` | A belief bound to a superseded snapshot is reported stale |
+| `P5-T06` | `UPDATE` on a settled belief is refused by the database |
+| `P5-T07` | A graded model version cannot be modified |
+| `P5-T08` | Package #5 writes nothing to Packages #1–#4 tables |
+| `P5-T09` | No model row can be used as a `place_ticket_rpc` argument |
+| `P5-T10` | A belief consuming post-`formed_at` data is rejected |
+| `P5-T11` | `NONE` / `DEGRADED` beliefs cannot reach the decision path |
 
-## 13. Out of scope
+### Phase A — the grading harness
+
+| Test | Proof | Asserts |
+|---|---|---|
+| `P5-T12` | 1 | A belief is formed prospectively and is immutable thereafter |
+| `P5-T13` | 2 | The belief binds to the exact market observation at formation |
+| `P5-T14` | 3 | Settlement grades the probability correctly |
+| `P5-T15` | 4 | Brier and log loss match hand-computed, independently known values |
+| `P5-T16` | 5 | Equal-count bins and Wilson intervals match hand-computed values |
+| `P5-T17` | 6 | Market-relative comparison uses the frozen formation probability, not a later one |
+| `P5-T18` | 7 | A planted non-zero future CLV does **not** fail the harness — CLV is observed, not asserted |
+| `P5-T19` | 8 | Null model: formation-market divergence is **exactly** zero |
+| `P5-T20` | 9 | A planted bad model scores worse than the null on both proper scoring rules |
+| `P5-T21` | 10 | A planted well-calibrated-but-useless model ends `CALIBRATED` **and** `RESEARCH` |
+| `P5-T22` | 11 | The grader is indifferent to win/loss: a losing 70% forecast outscores a winning 51% forecast |
+| `P5-T23` | — | Weighted calibration error ≤ 3pp passes, and a single bin at 8pp fails despite a good weighted average |
+
+## 14. Out of scope
 
 Sizing, bankroll policy, portfolio construction, correlation between plays,
 live/in-play modelling, and any non-market feature source. Each is its own

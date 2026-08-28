@@ -39,8 +39,9 @@ Package #4 **writes nothing.** It is a read layer.
 | `043` | Modal tie-break symmetry (`abs(line) ASC`) |
 | `044` | Exact payout comparator (`olp_price_payout`) |
 | `045` | Total price ordering (`positive > negative` made absolute) |
+| `046` | Materialise the pipeline CTEs (stop per-row re-execution) |
 
-Migrations are append-only. `042`–`045` replace view bodies via
+Migrations are append-only. `042`–`046` replace view bodies via
 `CREATE OR REPLACE` rather than editing `038`/`039`/`040` in place, so any
 database that applied an earlier migration reaches the same final state.
 
@@ -99,7 +100,7 @@ database that applied an earlier migration reaches the same final state.
 26 Package #4 tests (`P4-T01`…`P4-T26`) inside a 152-test suite, green on
 **PostgreSQL 16.2** and **Supabase 17.6**.
 
-Four defects were found during the package and each has a negative control
+Five defects were found during the package and each has a negative control
 proving its test detects the defect rather than passing by construction:
 
 | Defect | Found by | Fix | Negative control |
@@ -108,29 +109,73 @@ proving its test detects the defect rather than passing by construction:
 | `line ASC` tie-break carried signed-direction bias → the two sides of a spread named different wagers (33.5%) | review of the sign-off output | `043` | `P4-T09` → `(-3.50, +3.00)`; `P4-T25` → `SPREAD 60/60` |
 | `best_price` ranked with a rounding money function → named a worse price as best | `package4_signoff.sql` on a seeded board | `044` | `P4-T26` → `(-143, 'bookB')` |
 | `+100` and `-100` tied on payout, so *positive > negative* was not absolute | review of the ordering rule | `045` | `P4-T26` → `(-100, 'bookA')` |
+| Pipeline CTEs inlined and re-executed per output row → quadratic; check 3 ran >20 min | the live sign-off | `046` | `P4-T24` → `full scan took 14.5s` |
 
 The recurring lesson, recorded in `PACKAGE4_PREREG.md` §12.1 and §12.5: **an
 invariant has to be tested on inputs that can actually violate it.** The modal
 bias hid because the invariance tests ran on totals; the comparator bug hid
 because the payout test used prices too far apart to collide.
 
-## 6. Live sign-off — TO BE COMPLETED
+## 6. Live sign-off — 9 of 10 PASS, one open decision
 
-Run `scripts/package4_signoff.sql` within ~2 minutes of a fresh ingest.
+Captured slate: **272 events, 4,560 quotes, 10 bookmakers** (The Odds API, NFL).
+
+The first attempt died on check 3, which ran over twenty minutes before being
+killed — the defect fixed in `046`. Re-run after the fix, the whole sign-off
+completes in **26 s**.
 
 | # | Check | Result |
 |---|---|---|
-| 1 | canonical row count = distinct fresh keys | _pending_ |
-| 2 | modal row count = one per event/market/selection | _pending_ |
-| 3 | executable row count, strict subset, 0 orphans | _pending_ |
-| 4 | market-quality distribution | _pending_ |
-| 5 | spread modal mirror violations = 0 | _pending_ |
-| 6 | de-vig pair failures; both sides sum to 1 | _pending_ |
-| 7 | cross-line leakage violations = 0 (two probes) | _pending_ |
-| 8 | canonical-vs-executable substitutions (rate; 0 impossible improvements) | _pending_ |
-| 9 | movement rows and direction sanity | _pending_ |
-| 10 | execution handoff validity via `best_snapshot_id` = 0 failures | _pending_ |
+| 1 | canonical rows = distinct fresh keys | **PASS** — 2,476 = 2,476 |
+| 2 | modal rows = one per event/market/selection | **PASS** — 1,632 = 1,632 |
+| 3 | executable subset, 0 orphans | **PASS** — 1,240 ⊂ 2,476, 0 orphans |
+| 4 | market-quality distribution | UNUSABLE 48.7%, DEGRADED 40.4%, OK 10.9% |
+| 5 | spread modal mirror violations | **FAIL** — 1 of 272 (see below) |
+| 6 | de-vig pair failures | **PASS** — 0 unpaired rows; 1,238 paired wagers, worst deviation from 1 is `0.000000` |
+| 7 | cross-line leakage (two probes) | **PASS** — 0 and 0 |
+| 8 | canonical-vs-executable substitutions | 0 of 1,240; 0 impossible improvements |
+| 9 | movement rows / direction sanity | **PASS** — 2,476 rows, 0 direction violations, 0 mirror violations |
+| 10 | execution handoff via `best_snapshot_id` | **PASS** — 0 failures on every sub-check |
 
+Reason codes: `SINGLE_BOOK` 48.7%, `LOW_BOOK_COUNT` 40.0%,
+`WIDE_DISPERSION` 1.2%, `LINE_FRAGMENTED` 0.3%. The large `SINGLE_BOOK` share is
+the alternate-line long tail failing closed, which is the designed behaviour.
+
+Checks 8 and 9 could not be fully exercised by a single poll: with one
+observation per quote, opening equals current everywhere, so every row reads
+`FLAT` and no book has moved off a line. Both need a second poll to be
+meaningful. They are recorded as *not disconfirming* rather than as passes.
+
+### The check 5 failure
+
+```
+Cleveland Browns vs Atlanta Falcons
+    Atlanta Falcons    modal_line  -1.50
+    Cleveland Browns   modal_line  -1.50
+```
+
+Both sides report themselves favoured by 1.5. This is a genuine incoherence in
+the surface, and it is **the exact residual case migration `043` documented as
+unresolvable by any sign-blind rule**: the line has crossed zero. Books are
+split on who is favoured in a near-pick'em, so Atlanta's lines are
+`{-1.5, +1.5}` and Cleveland's are `{-1.5, +1.5}`. Book counts tie, magnitudes
+tie at 1.5, and the final `line ASC` tie-break then picks the negative value
+**for both sides independently**.
+
+Rate: 1 of 272 spread wagers, 0.37%.
+
+No sign-blind, per-selection rule can fix this — for either selection the
+candidate set is identical, so any deterministic function of that set returns
+the same answer for both. A fix has to decide at the **wager** level and mirror
+outward: pick the modal line once per `(event, market_type)` from a fixed
+reference side (home for spreads, OVER for totals) and negate it for the other
+side. That is mirrored by construction and removes the last asymmetry.
+
+It is a **semantic change** and is deliberately **not** made here. It needs the
+same treatment the rest of Package #4 got: a decision, then a test that fails
+without it.
+
+**Package #4 is not frozen until this is decided.**
 ## 7. Deliberately not done
 
 - **No materialisation** of the CTE chain that `market_intelligence` evaluates

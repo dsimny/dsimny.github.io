@@ -21,6 +21,12 @@
 \timing on
 \pset pager off
 
+-- Nothing in this script should take minutes. If a check ever does, fail fast
+-- rather than leaving a backend running: during the live sign-off a runaway
+-- check 3 was cancelled in psql but kept executing server-side for over twenty
+-- minutes, holding locks and blocking the investigation.
+SET statement_timeout = '120s';
+
 \echo ''
 \echo '######## PACKAGE #4 LIVE SIGN-OFF ########'
 
@@ -76,22 +82,34 @@ FROM public.canonical_market;
 \echo ''
 \echo '=== 3. EXECUTABLE ROW COUNT (must be a strict subset of canonical) ==='
 -- -----------------------------------------------------------------------------
-SELECT
-    (SELECT count(*) FROM public.canonical_market)  AS canonical_rows,
-    (SELECT count(*) FROM public.executable_market) AS executable_rows,
-    (SELECT count(*) FROM public.executable_market x
-      WHERE NOT EXISTS (SELECT 1 FROM public.canonical_market c
-                        WHERE c.event_id = x.event_id AND c.market_type = x.market_type
-                          AND c.selection = x.selection
-                          AND c.line IS NOT DISTINCT FROM x.line)) AS orphans,
-    CASE WHEN (SELECT count(*) FROM public.executable_market)
-              <= (SELECT count(*) FROM public.canonical_market)
-          AND (SELECT count(*) FROM public.executable_market x
-               WHERE NOT EXISTS (SELECT 1 FROM public.canonical_market c
-                                 WHERE c.event_id = x.event_id AND c.market_type = x.market_type
-                                   AND c.selection = x.selection
-                                   AND c.line IS NOT DISTINCT FROM x.line)) = 0
-         THEN 'PASS' ELSE 'FAIL' END AS verdict;
+-- Written as a SINGLE PASS on purpose. The first version named
+-- canonical_market twice and executable_market four times at the top level,
+-- and executable_market contains canonical_market -- so one statement expanded
+-- the canonical pipeline about ten times, and the correlated NOT EXISTS ran
+-- against a fresh expansion per executable row. On the live board it ran for
+-- over twenty minutes. A view is a macro, not a cached result: naming it twice
+-- computes it twice.
+WITH c AS MATERIALIZED (
+    SELECT event_id, market_type, selection, line FROM public.canonical_market
+),
+x AS MATERIALIZED (
+    SELECT event_id, market_type, selection, line FROM public.executable_market
+),
+counts AS (
+    SELECT (SELECT count(*) FROM c) AS canonical_rows,
+           (SELECT count(*) FROM x) AS executable_rows,
+           (SELECT count(*) FROM x
+             WHERE NOT EXISTS (
+                 SELECT 1 FROM c
+                 WHERE c.event_id    = x.event_id
+                   AND c.market_type = x.market_type
+                   AND c.selection   = x.selection
+                   AND c.line IS NOT DISTINCT FROM x.line)) AS orphans
+)
+SELECT canonical_rows, executable_rows, orphans,
+       CASE WHEN executable_rows <= canonical_rows AND orphans = 0
+            THEN 'PASS' ELSE 'FAIL' END AS verdict
+FROM counts;
 
 -- -----------------------------------------------------------------------------
 \echo ''
@@ -237,6 +255,8 @@ WHERE c.book_count <> t.books;
 -- means canonical named a price that place_ticket_rpc would now reject (the
 -- book moved off that line), and the executable layer recomputed over what is
 -- still placeable. Reported so the rate is visible.
+-- One expansion of each view. Do not add a second reference to either -- see
+-- the note on check 3.
 WITH j AS (
     SELECT c.event_id, c.market_type, c.selection, c.line,
            c.best_price AS canon_price, c.best_book AS canon_book,

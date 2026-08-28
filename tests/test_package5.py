@@ -49,6 +49,9 @@ DENIED_SCOREBOARD = [
     "public.market_feed_health",
     "public.event_lifecycle_log",
     "public.users",
+    # the scoreboard proper -- Package #5's own grading surface
+    "grading.wager_outcomes",
+    "grading.belief_grades",
 ]
 
 INSUFFICIENT_PRIVILEGE = "42501"
@@ -440,6 +443,280 @@ def t27_anchor_and_input_hash_prove_different_things():
     return "anchor = executable observation; input hash reproducible and moves with the market"
 
 
+
+# =============================================================================
+# Increment 3 -- grading primitives
+# =============================================================================
+
+def _resolve(admin, ev, sel, outcome, market="MONEYLINE", line=None):
+    return h.scalar(admin, """
+        SELECT grading.record_outcome(%s::uuid, %s, %s, %s::numeric, %s, 'test')""",
+        (ev, market, sel, line, outcome))
+
+
+def _grade(conn, belief_id):
+    return h.scalar(conn, "SELECT grading.grade_belief(%s::uuid)", (belief_id,))
+
+
+def _g(admin, belief_id, cols):
+    return h.row(admin, f"SELECT {cols} FROM grading.belief_grades "
+                        f"WHERE belief_id = %s", (belief_id,))
+
+
+def t14_a_resolved_belief_is_graded_from_stored_facts():
+    """The positive path. Every input is a stored fact: the belief's own
+    probability, its frozen formation baseline, and a recorded outcome."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _form(admin, ev, prob=0.62)
+    baseline = h.scalar(admin, "SELECT market_probability_at_formation "
+                               "FROM model.beliefs WHERE belief_id=%s", (bid,))
+    _resolve(admin, ev, "DAL", "WIN")
+    _grade(admin, bid)
+
+    outcome, status, mb, mll, kb, kll, bd = _g(
+        admin, bid, "outcome::text, scoring_status::text, model_brier, "
+                    "model_log_loss, market_brier, market_log_loss, brier_delta")
+    assert (outcome, status) == ("WIN", "SCORED")
+    assert abs(float(mb) - (0.62 - 1) ** 2) < 1e-7, mb
+    assert abs(float(kb) - (float(baseline) - 1) ** 2) < 1e-7, (kb, baseline)
+    assert abs(float(bd) - (float(mb) - float(kb))) < 1e-7
+    admin.close()
+    return f"graded WIN: model brier {float(mb):.4f} vs market {float(kb):.4f}"
+
+
+def t15_scoring_rules_match_hand_computed_values():
+    """Independently known values, not the implementation checked against
+    itself."""
+    admin = h.connect()
+    # 1e-7 rather than 1e-9 throughout: grades are stored NUMERIC(12,8), so the
+    # stored value is rounded and a tighter bound tests the storage precision
+    # rather than the arithmetic.
+    cases = [
+        ("brier",    0.75, True,  0.0625),
+        ("brier",    0.75, False, 0.5625),
+        ("brier",    0.50, True,  0.25),
+        ("brier",    0.10, False, 0.01),
+        ("log_loss", 0.50, True,  0.6931471805599453),
+        ("log_loss", 0.25, False, 0.2876820724517809),
+        ("log_loss", 0.80, True,  0.2231435513142097),
+        ("log_loss", 0.90, False, 2.302585092994046),
+    ]
+    for fn, p_, won, expected in cases:
+        got = h.scalar(admin, f"SELECT grading.{fn}(%s::numeric, %s)", (p_, won))
+        assert abs(float(got) - expected) < 1e-9, \
+            f"{fn}({p_}, {won}) = {got}, expected {expected}"
+    admin.close()
+    return f"{len(cases)} hand-computed Brier and log-loss values matched"
+
+
+def t22_the_grader_scores_forecasts_not_bets():
+    """CORRECTED before implementation -- see PACKAGE5_PREREG.md section 12.
+
+    The original pre-registered claim, that a losing 70% forecast outscores a
+    winning 51% forecast, is FALSE on a single observation: the winner scores
+    better under both rules, and should. That intuition is an AGGREGATE property
+    and belongs to 053.
+
+    What is true and load-bearing on one observation is side-indifference plus
+    properness -- the grade depends on the forecast and the outcome, never on
+    which side happened to win -- plus the structural half: no win-rate or
+    profit field exists to grade on.
+    """
+    admin = h.connect()
+
+    # side-indifference: 0.70 on a loser scores exactly as 0.30 on a winner
+    for fn in ("brier", "log_loss"):
+        a = h.scalar(admin, f"SELECT grading.{fn}(0.70::numeric, FALSE)")
+        b = h.scalar(admin, f"SELECT grading.{fn}(0.30::numeric, TRUE)")
+        assert abs(float(a) - float(b)) < 1e-12, f"{fn}: {a} != {b}"
+
+    # properness: confident-and-wrong is punished harder
+    worse = h.scalar(admin, "SELECT grading.brier(0.90::numeric, FALSE)")
+    milder = h.scalar(admin, "SELECT grading.brier(0.60::numeric, FALSE)")
+    assert float(worse) > float(milder)
+
+    # and the honest direction of the original intuition, stated truthfully
+    loser70 = float(h.scalar(admin, "SELECT grading.brier(0.70::numeric, FALSE)"))
+    winner51 = float(h.scalar(admin, "SELECT grading.brier(0.51::numeric, TRUE)"))
+    assert winner51 < loser70, (
+        "on ONE observation the winner scores better -- if this ever flips, the "
+        "scoring rule is not proper")
+
+    # structural: nothing in the grade expresses bet accounting
+    forbidden = {"won", "win", "is_win", "winner", "profit", "pnl", "roi",
+                 "stake", "units", "net", "return", "hit_rate", "win_rate"}
+    cols = {r[0] for r in h.rows(admin, """
+        SELECT column_name FROM information_schema.columns
+        WHERE table_schema='grading' AND table_name='belief_grades'""")}
+    leaked = cols & forbidden
+    assert not leaked, f"the grade record has bet-accounting fields: {leaked}"
+    admin.close()
+    return ("side-indifferent, proper, and no win-rate field; single-observation "
+            "direction stated truthfully")
+
+
+def t17_the_baseline_is_the_frozen_formation_probability():
+    """Scoring a model against a market it never saw would not be grading it."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _form(admin, ev, prob=0.62)
+    frozen = float(h.scalar(admin, "SELECT market_probability_at_formation "
+                                   "FROM model.beliefs WHERE belief_id=%s", (bid,)))
+
+    # the market moves a long way AFTER formation
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, -400, 320, bk)
+    moved = float(h.scalar(admin, """
+        SELECT consensus_probability FROM public.market_intelligence
+        WHERE event_id=%s AND market_type='MONEYLINE' AND selection='DAL'""", (ev,)))
+    assert abs(moved - frozen) > 0.1, "fixture failed to move the market"
+
+    _resolve(admin, ev, "DAL", "WIN")
+    _grade(admin, bid)
+    kb = float(_g(admin, bid, "market_brier")[0])
+
+    assert abs(kb - (frozen - 1) ** 2) < 1e-7, "baseline is not the frozen value"
+    assert abs(kb - (moved - 1) ** 2) > 1e-6, "baseline used the LATER market"
+    admin.close()
+    return f"baseline held at formation {frozen:.4f}, not the moved {moved:.4f}"
+
+
+def t18_clv_is_observed_never_asserted():
+    """A non-zero future CLV is recorded and changes nothing about validity."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _form(admin, ev, prob=0.62)
+
+    form = h.row(admin, """
+        SELECT s.sportsbook, s.price, s.line FROM model.beliefs b
+        JOIN public.market_snapshots s ON s.id = b.formation_snapshot_id
+        WHERE b.belief_id = %s""", (bid,))
+    # a closing quote at a materially different price, same book, same line
+    admin.execute("""
+        INSERT INTO public.market_snapshots
+            (event_id, market_type, selection, line, price, sportsbook,
+             source_provider, captured_at, is_in_play, is_closing_snapshot)
+        VALUES (%s,'MONEYLINE','DAL',%s,-220,%s,'FIXTURE',NOW(),FALSE,TRUE)""",
+        (ev, form[2], form[0]))
+
+    _resolve(admin, ev, "DAL", "WIN")
+    _grade(admin, bid)
+    status, delta, mb = _g(admin, bid, "clv_status, clv_payout_delta, model_brier")
+
+    assert status == "OBSERVED", status
+    assert delta is not None and abs(float(delta)) > 0, "CLV recorded as zero"
+    # ...and the probabilistic score is untouched by it
+    assert abs(float(mb) - (0.62 - 1) ** 2) < 1e-9, \
+        "a non-zero CLV changed the probabilistic score"
+    admin.close()
+    return f"CLV observed at {float(delta):+.4f} payout units; scores unaffected"
+
+
+def t28_grading_cannot_rewrite_history():
+    """Grading is append-only and cannot touch the belief it grades."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _form(admin, ev, prob=0.62)
+    before = h.row(admin, "SELECT model_probability, market_probability_at_formation "
+                          "FROM model.beliefs WHERE belief_id=%s", (bid,))
+    _resolve(admin, ev, "DAL", "WIN")
+    _grade(admin, bid)
+
+    after = h.row(admin, "SELECT model_probability, market_probability_at_formation "
+                         "FROM model.beliefs WHERE belief_id=%s", (bid,))
+    assert before == after, "grading mutated the belief"
+
+    h.expect_error(lambda: admin.execute(
+        "UPDATE grading.belief_grades SET model_brier = 0 WHERE belief_id=%s", (bid,)),
+        "APPEND_ONLY_VIOLATION", "UPDATE a grade")
+    h.expect_error(lambda: admin.execute(
+        "DELETE FROM grading.belief_grades WHERE belief_id=%s", (bid,)),
+        "APPEND_ONLY_VIOLATION", "DELETE a grade")
+    h.expect_error(lambda: _grade(admin, bid),
+        "uq_grade_per_belief", "grade the same belief twice")
+    h.expect_error(lambda: admin.execute(
+        "UPDATE grading.wager_outcomes SET outcome='LOSS'"),
+        "APPEND_ONLY_VIOLATION", "rewrite a recorded outcome")
+    admin.close()
+    return "belief untouched; grades and outcomes both append-only"
+
+
+def t29_an_unresolved_wager_cannot_be_graded():
+    """A belief cannot be graded before the world has answered it."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _form(admin, ev)
+    h.expect_error(lambda: _grade(admin, bid), "WAGER_UNRESOLVED", "no outcome")
+
+    # and the wrong wager's outcome does not count as this one's
+    _resolve(admin, ev, "PHI", "WIN")
+    h.expect_error(lambda: _grade(admin, bid), "WAGER_UNRESOLVED", "other selection")
+
+    assert h.scalar(admin, "SELECT count(*) FROM grading.belief_grades") == 0
+    admin.close()
+    return "ungraded without an outcome for that exact wager"
+
+
+def t30_push_and_void_are_excluded_not_silently_scored():
+    """Pre-registered treatment. A probabilistic forecast can only be scored
+    against a binary outcome, so PUSH and VOID are recorded and excluded rather
+    than quietly entering the sample."""
+    admin = h.connect(); h.reset(admin)
+    out = []
+    for src, outcome, expect in (("P5-PUSH", "PUSH", "EXCLUDED_PUSH"),
+                                 ("P5-VOID", "VOID", "EXCLUDED_VOID")):
+        ev = _seed_executable(admin, src)
+        bid = _form(admin, ev, prob=0.62)
+        _resolve(admin, ev, "DAL", outcome)
+        _grade(admin, bid)
+        status, mb, mll, kb = _g(admin, bid,
+            "scoring_status::text, model_brier, model_log_loss, market_brier")
+        assert status == expect, (outcome, status)
+        assert mb is None and mll is None and kb is None, \
+            f"{outcome} carries scores and would enter an aggregate"
+        out.append(f"{outcome}->{status}")
+
+    scored = h.scalar(admin, "SELECT count(*) FROM grading.belief_grades "
+                             "WHERE scoring_status='SCORED'")
+    assert scored == 0, "an excluded row is counted as scored"
+    admin.close()
+    return "; ".join(out) + "; scores NULL so they cannot reach an aggregate"
+
+
+def t31_grading_permissions_point_one_way():
+    """The grader may read beliefs and write grades. It may not write beliefs.
+    The model may do neither."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _form(admin, ev)
+    _resolve(admin, ev, "DAL", "WIN")
+
+    grader = h.connect_as("olp_grader")
+    with grader.cursor() as cur:                    # can read beliefs
+        cur.execute("SELECT count(*) FROM model.beliefs"); cur.fetchall()
+    _grade(grader, bid)                             # can write grades
+    for label, sql in (
+        ("INSERT belief", "INSERT INTO model.beliefs (model_id) VALUES ('x')"),
+        ("UPDATE belief", "UPDATE model.beliefs SET model_probability = 0.5"),
+        ("DELETE belief", "DELETE FROM model.beliefs")):
+        try:
+            with grader.cursor() as cur:
+                cur.execute(sql)
+        except psycopg.Error as exc:
+            assert exc.sqlstate == INSUFFICIENT_PRIVILEGE, \
+                f"grader {label} refused with {exc.sqlstate}, not a permission error"
+            continue
+        raise AssertionError(f"olp_grader performed {label}")
+    grader.close()
+
+    model = h.connect_as("olp_model")               # sees none of it
+    for obj in ("grading.wager_outcomes", "grading.belief_grades"):
+        _assert_refused(model, obj)
+    model.close(); admin.close()
+    return "grader reads beliefs and writes grades; cannot write beliefs; model refused both"
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -461,4 +738,22 @@ PACKAGE5 = [
      t26_model_cannot_write_beliefs_directly),
     ("P5-T27", "Anchor and input hash prove different things",
      t27_anchor_and_input_hash_prove_different_things),
+    ("P5-T14", "Resolved belief graded from stored facts",
+     t14_a_resolved_belief_is_graded_from_stored_facts),
+    ("P5-T15", "Scoring rules match hand-computed values",
+     t15_scoring_rules_match_hand_computed_values),
+    ("P5-T22", "Grader scores forecasts, not bets",
+     t22_the_grader_scores_forecasts_not_bets),
+    ("P5-T17", "Baseline is the frozen formation probability",
+     t17_the_baseline_is_the_frozen_formation_probability),
+    ("P5-T18", "CLV is observed, never asserted",
+     t18_clv_is_observed_never_asserted),
+    ("P5-T28", "Grading cannot rewrite history",
+     t28_grading_cannot_rewrite_history),
+    ("P5-T29", "Unresolved wager cannot be graded",
+     t29_an_unresolved_wager_cannot_be_graded),
+    ("P5-T30", "Push and void excluded, not silently scored",
+     t30_push_and_void_are_excluded_not_silently_scored),
+    ("P5-T31", "Grading permissions point one way",
+     t31_grading_permissions_point_one_way),
 ]

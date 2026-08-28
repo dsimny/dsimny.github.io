@@ -196,6 +196,7 @@ CREATE FUNCTION grading.record_outcome(
 )
 RETURNS UUID
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = pg_catalog, public, pg_temp
 AS $fn$
 DECLARE
@@ -212,10 +213,18 @@ $fn$;
 
 -- -----------------------------------------------------------------------------
 -- Grading one belief.
+--
+-- SECURITY DEFINER, for the same reason 051's binding trigger is: the function's
+-- JOB requires reading market_snapshots to observe the closing line, and a
+-- function that fails because its CALLER lacks a read is failing for the wrong
+-- reason -- a permission error standing in for work that never ran. Authority to
+-- invoke is controlled by the EXECUTE grant instead, which keeps olp_grader's
+-- own grants minimal: it never needs raw market access of its own.
 -- -----------------------------------------------------------------------------
 CREATE FUNCTION grading.grade_belief(p_belief_id UUID)
 RETURNS UUID
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = pg_catalog, public, pg_temp
 AS $fn$
 DECLARE

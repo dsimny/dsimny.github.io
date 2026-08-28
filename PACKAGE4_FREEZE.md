@@ -176,6 +176,51 @@ same treatment the rest of Package #4 got: a decision, then a test that fails
 without it.
 
 **Package #4 is not frozen until this is decided.**
+### 6a. Migration 046 equivalence proof
+
+`046` is a planner/performance correction, not a semantic change, and that is
+proved rather than asserted. `scripts/verify_046_equivalence.py` emits a
+transaction that installs the **pre-046** definitions of all four views into a
+`zz_old` schema alongside the current ones, compares them, and rolls back.
+
+Both versions run inside **one transaction**, so `now()` — and therefore the TTL
+window and the pre-kickoff gate — is identical for both. The comparison is the
+symmetric difference of the full-row JSON multisets:
+
+```sql
+(SELECT to_jsonb(t) FROM public.V t EXCEPT ALL SELECT to_jsonb(t) FROM zz_old.V t)
+UNION ALL
+(SELECT to_jsonb(t) FROM zz_old.V t EXCEPT ALL SELECT to_jsonb(t) FROM public.V t)
+```
+
+No column is named, so nothing can be quietly left out of the check, and it
+catches differing values, differing row counts and changed duplicate
+multiplicity alike.
+
+| View | rows (old = new) | differing rows |
+|---|---|---|
+| `canonical_market` | 2,360 | **0** |
+| `market_movement` | 2,360 | **0** |
+| `executable_market` | 1,808 | **0** |
+| `market_intelligence` | 2,360 | **0** |
+
+That covers canonical keys, best price, consensus, modal lines, quality codes,
+movement and execution gating together — every column of every row is identical.
+
+Performance on the same board (272 events, 5,712 quotes):
+
+| | before `046` | after |
+|---|---|---|
+| `canonical_market` | 14.7 s | **0.34 s** |
+| `executable_market` | — | 0.40 s |
+| `market_movement` | — | 0.49 s |
+| `market_intelligence` | 43.8 s | **1.28 s** |
+| sign-off check 3 | > 20 min | **~1.0 s** |
+
+Regression guard: `P4-T24` asserts the full-board canonical scan stays under 5 s.
+Negative control — stripping `046`'s markers makes it report
+`full scan took 14.5s`.
+
 ## 7. Deliberately not done
 
 - **No materialisation** of the CTE chain that `market_intelligence` evaluates

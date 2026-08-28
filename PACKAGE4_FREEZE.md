@@ -41,8 +41,9 @@ Package #4 **writes nothing.** It is a read layer.
 | `045` | Total price ordering (`positive > negative` made absolute) |
 | `046` | Materialise the pipeline CTEs (stop per-row re-execution) |
 | `047` | Wager-level modal line (decided once, mirrored outward) |
+| `048` | Same rule without a CTE-to-CTE join, so the planner can estimate it |
 
-Migrations are append-only. `042`–`047` replace view bodies via
+Migrations are append-only. `042`–`048` replace view bodies via
 `CREATE OR REPLACE` rather than editing `038`/`039`/`040` in place, so any
 database that applied an earlier migration reaches the same final state.
 
@@ -71,7 +72,13 @@ database that applied an earlier migration reaches the same final state.
    converting spread points to probability, which is modelling and belongs to
    Package #5.
 7. **`opening_*` is our first observation**, not the true market open.
-8. **Ranking is not money.** `olp_price_payout` ranks; `olp_american_profit`
+8. **Prefer a shape the planner can estimate.** Three separate quadratic plans
+   in this package traced to statistics-free CTEs (`042`, `046`, `048`). Inside
+   this pipeline, favour an aggregate, a window, or a `DISTINCT ON` over ONE
+   relation over a join between CTEs — a CTE-to-CTE join has no statistics on
+   either side and its estimate bottoms out at 1 row, which makes nested loops
+   look free.
+9. **Ranking is not money.** `olp_price_payout` ranks; `olp_american_profit`
    pays. Never substitute one for the other. The ordering rule, in full:
 
    ```
@@ -105,7 +112,7 @@ database that applied an earlier migration reaches the same final state.
 28 Package #4 tests (`P4-T01`…`P4-T28`) inside a 154-test suite, green on
 **PostgreSQL 16.2** and **Supabase 17.6**.
 
-Six defects were found during the package and each has a negative control
+Seven defects were found during the package and each has a negative control
 proving its test detects the defect rather than passing by construction:
 
 | Defect | Found by | Fix | Negative control |
@@ -116,6 +123,7 @@ proving its test detects the defect rather than passing by construction:
 | `+100` and `-100` tied on payout, so *positive > negative* was not absolute | review of the ordering rule | `045` | `P4-T26` → `(-100, 'bookA')` |
 | Pipeline CTEs inlined and re-executed per output row → quadratic; check 3 ran >20 min | the live sign-off | `046` | `P4-T24` → `full scan took 14.5s` |
 | Zero-crossing wager: both sides reported themselves favoured | the live sign-off, check 5 | `047` | `P4-T27` → `DAL -1.50 / PHI -1.50` |
+| `047`'s mirroring join collapsed the `modal` estimate 200 → 1, so it was rescanned 2,480× | bisecting `047` against `046` | `048` | `P4-T24` full-board guard |
 
 The recurring lesson, recorded in `PACKAGE4_PREREG.md` §12.1 and §12.5: **an
 invariant has to be tested on inputs that can actually violate it.** The modal

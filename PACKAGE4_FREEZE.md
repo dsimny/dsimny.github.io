@@ -42,8 +42,9 @@ Package #4 **writes nothing.** It is a read layer.
 | `046` | Materialise the pipeline CTEs (stop per-row re-execution) |
 | `047` | Wager-level modal line (decided once, mirrored outward) |
 | `048` | Same rule without a CTE-to-CTE join, so the planner can estimate it |
+| `049` | `best_ties` off the same anti-pattern (latent since `038`) |
 
-Migrations are append-only. `042`–`048` replace view bodies via
+Migrations are append-only. `042`–`049` replace view bodies via
 `CREATE OR REPLACE` rather than editing `038`/`039`/`040` in place, so any
 database that applied an earlier migration reaches the same final state.
 
@@ -130,38 +131,80 @@ invariant has to be tested on inputs that can actually violate it.** The modal
 bias hid because the invariance tests ran on totals; the comparator bug hid
 because the payout test used prices too far apart to collide.
 
-### 5a. Performance acceptance needs two fixtures and a structural assertion
+### 5a. Planner-health guard, and what it is for
 
-Wall-clock acceptance on one dataset shape is not sufficient, and this package
-proved it twice.
+**`P4-T29` detects severe cardinality underestimation that causes pathological
+repeated execution of an intermediate relation. It does not prohibit efficient
+planner-selected materialisation.**
 
-**Two benchmark fixtures are now required** for any change to these views:
+Two fixtures, exercising different planner regimes:
 
-| Fixture | Shape | What it exercises |
-|---|---|---|
-| dense | 60 events × 3 markets × 2 sides × 5 books × 2 lines | high-cardinality planning, join ordering, rescans |
-| single-event | 1 event, 1 market, 2 books | the degenerate regime, where every estimate is tiny |
+| Fixture | Shape |
+|---|---|
+| dense | 60 events × 3 markets × 2 sides × 5 books × 2 lines |
+| single-event | 1 event, 1 market, 2 books |
 
-**But timing on either fixture would have missed migration 047.** Its defect was
-a collapsed cardinality estimate on the `modal` node. On the dense live board
-that produced 2,480 rescans and a twenty-minute check 3; on the synthetic board
-the estimate was *equally wrong* and the timing was *fine*, because the
-surrounding plan happened not to choose a nested loop:
+But **timing on either fixture would have missed `047`**. Its collapse was
+latent on a synthetic board — the estimate equally wrong, the clock fine —
+because the surrounding plan happened not to nested-loop it. So the assertion is
+on the plan:
 
 ```
-modal node        046  est 200 / act 1632  loops 1
-                  047  est   1 / act 1632  loops 1      <- collapsed but LATENT
-                  048  est 200 / act 1632  loops 1
+underestimate_ratio = actual / max(estimated, 1)
+repeated_rows       = actual × loops
 ```
 
-So `P4-T29` asserts the **plan**, not the clock: on each fixture it reads
-`EXPLAIN (ANALYZE)`, finds the `modal` CTE scan, and — once the node holds
-enough rows for a rescan to matter — requires `loops = 1` and an estimate within
-10× of actual. Negative control: reverting `048` reports
-`dense: the modal CTE holds 360 rows and is rescanned 600 times (est 1)`.
+Judged in two tiers, because two different things produce repeated work:
 
-Timing thresholds remain in `P4-T24`, but as tripwires with deliberately loose
-bounds; they are not the acceptance criterion.
+1. **Cardinality collapse** — the planner believes a relation is tiny and the
+   repetition is *accidental*. Applied to relation scans (`CTE Scan`,
+   `Seq Scan`, `Subquery Scan`, …): fails at `ratio ≥ 20`, `loops ≥ 20`,
+   `repeated ≥ 10,000`.
+2. **Deliberate planner choice** — `Materialize` exists precisely to make
+   rescans cheap; a `Nested Loop` with many loops is the symptom whose cause tier
+   1 already catches. These fail only at `ratio ≥ 100`, `loops ≥ 100`,
+   `repeated ≥ 1,000,000`, and are otherwise **reported as advisory**.
+
+Chasing tier 2 would mean complicating a 180 ms query to satisfy a test.
+
+```
+P4-T29 PASS  305 plan nodes checked, 0 pathological
+  advisory (allowed):
+    executable_market/Materialize      est=1 act=600  loops=1080  touches=648,000
+    executable_market/Merge Right Join est=1 act=600  loops=1080  touches=648,000
+```
+
+`EXPLAIN (ANALYZE)` must execute the query, so the guard is bounded at 60 s per
+plan and a timeout is itself a failure — unbounded, it hung for over eight
+minutes on an 1,800-quote fixture. It is scoped to `canonical_market` and
+`executable_market`; the other two views are compositions of these, so a
+collapse in them originates here.
+
+**Benchmark hygiene is mandatory.** Every performance or plan measurement starts
+from a fresh seed, `VACUUM ANALYZE`, and a session that has not been replacing
+view definitions. Numbers taken after DDL churn against stale statistics are not
+slow results, they are **invalid** results — they produced a phantom "048
+regression" that cost an afternoon.
+
+### 5b. What the guard found on its first run
+
+A latent instance of the same anti-pattern in `best_ties`, present since `038`
+and untouched by `046`: `MATERIALIZED` stops a CTE being recomputed but not
+rescanned. Fixed in `049`, byte-exact across all four views.
+
+```
+best_ties   without 049 (join form):    est   1 / act 600   ratio 600x
+            with 049 (window form):     est 180 / act 600   ratio   3x
+```
+
+On PostgreSQL 16.2 the collapse manifested as 600 rescans — 360,000 row touches,
+fatal. On 17.6 it stayed latent at `loops = 1`. Same estimate, different
+consequence, exactly like `047`.
+
+**This is the durable result: one performance bug became a planner-health
+framework, and it immediately found an eleven-migration-old latent defect
+nobody was looking for.** Timing tests detect symptoms; plan-structure guards
+detect latent scaling failures.
 
 ## 6. Live sign-off — 8 PASS, 2 unexercised, 1 FAIL
 

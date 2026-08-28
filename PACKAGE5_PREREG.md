@@ -49,7 +49,25 @@ observed market reality. A model must not be able to quietly reconstruct
 consensus probabilities using different rounding, de-vigging, tie-breaking,
 freshness or book-selection rules.
 
-Enforced by **privilege, not convention**, in the `olp_model` role:
+Enforced by **privilege, not convention**, in the `olp_model` role.
+
+Two schemas, and the split is load-bearing:
+
+| Schema | Holds |
+|---|---|
+| `model_input` | what the model may **see** — read-through of the Package #4 surface |
+| `model` | what the model **produces** |
+
+The read-through exists because Package #4's views are `security_invoker`, so a
+grant on `market_intelligence` alone would still require the caller to hold
+`SELECT` on `market_snapshots` — handing the model the raw quotes this contract
+forbids. **A nested owner-privileged view does not fix that**: `security_invoker`
+checks the *original* invoker, not an intermediate view's owner. The bridge is a
+`SECURITY DEFINER` function, the same mechanism Package #1 uses for its RPCs.
+
+The disjoint-column rule in §7 governs `model` only. `model_input` is market
+truth passed through unchanged, so its columns are deliberately identical —
+which is exactly why outputs live in a different schema from inputs.
 
 | Object | Access |
 |---|---|
@@ -387,6 +405,7 @@ including one latent since migration `038`.
 |---|---|
 | `P5-T01` | The **actual `olp_model` role** is refused by PostgreSQL on `market_snapshots`, `canonical_market`, `executable_market` and `market_movement` — by attempting the read and catching the error, **not** by inspecting grants |
 | `P5-T02` | The same role is refused on settled outcomes, grading tables, calibration results, CLV history and model standings (§3.1), again by attempt |
+| `P5-T02b` | The role is read-only — `INSERT` / `UPDATE` / `DELETE` / `CREATE` all refused by attempt |
 | `P5-T03` | No `model.` column name collides with a `market_intelligence` column |
 | `P5-T04` | Same inputs + same version → byte-identical output |
 | `P5-T05` | A belief bound to a superseded snapshot is reported stale |

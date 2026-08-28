@@ -22,6 +22,7 @@ from test_package2 import PACKAGE2
 from test_p2_boundary import BOUNDARY
 from test_package3 import PACKAGE3
 from test_package4 import PACKAGE4
+from test_package5 import PACKAGE5
 
 
 def run_group(title, tests, results):
@@ -75,6 +76,7 @@ def main():
     run_group("Package #2 -- boundary & concurrency", BOUNDARY, results)
     run_group("Package #3 -- provider integration & resilience", PACKAGE3, results)
     run_group("Package #4 -- market intelligence", PACKAGE4, results)
+    run_group("Package #5 -- model trust boundary", PACKAGE5, results)
 
     # ---- summary -----------------------------------------------------------
     def tally(tests):
@@ -91,6 +93,7 @@ def main():
     bnd = tally(BOUNDARY)
     pkg3 = tally(PACKAGE3)
     pkg4 = tally(PACKAGE4)
+    pkg5 = tally(PACKAGE5)
 
     total_pass = sum(1 for r in results if r[2] == "PASS")
     total = len(results)
@@ -138,6 +141,7 @@ def main():
     print(f"Circuit breaker: {verdict(group_ok({'P3-T18','P3-T19','P3-T20','P3-T21','P3-T22'}))}")
     print(f"Outage & fail-closed: {verdict(group_ok({'P3-T23','P3-T24','P3-T25','P3-T27','P3-T28','P3-T29'}))}")
     print(f"Package #3 authorization: {verdict(group_ok({'P3-T30'}))}")
+    print(f"Package #5 trust boundary: {verdict(group_ok({'P5-T01','P5-T02','P5-T02b'}))}")
 
     # The 29 test IDs the package's section 33 table actually enumerates.
     ENUMERATED = {

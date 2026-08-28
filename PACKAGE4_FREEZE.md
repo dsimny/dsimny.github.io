@@ -1,10 +1,17 @@
 # Package #4 — Market Intelligence Layer — Freeze Record
 
-**Status: PENDING LIVE SIGN-OFF.** Everything below is settled except §6, which
-one fresh live ingest fills in. Do not tag until §6 is complete.
+**Status: FROZEN as `pkg4-v1.0`, 2026-08-28.**
 
-Once tagged, this document is a **prospective contract**, on the same footing as
+This document is now a **prospective contract**, on the same footing as
 `PACKAGE2.md`: the semantics recorded here are not to be casually changed.
+
+Frozen with one open item accepted deliberately: **sign-off checks 8 and 9 are
+unexercised, not passed.** Three polls across two sessions produced zero price
+changes and zero line changes, because the captured slate has no event inside 24
+hours. Neither check can currently distinguish working code from code that
+always returns zero. They need a capture spanning real line movement — polling
+near kickoff — which is a scheduling matter, not a code one. Recorded in §6 and
+carried in §8.
 
 ---
 

@@ -116,35 +116,56 @@ invariant has to be tested on inputs that can actually violate it.** The modal
 bias hid because the invariance tests ran on totals; the comparator bug hid
 because the payout test used prices too far apart to collide.
 
-## 6. Live sign-off — 9 of 10 PASS, one open decision
+## 6. Live sign-off — 8 PASS, 2 unexercised, 1 FAIL
 
-Captured slate: **272 events, 4,560 quotes, 10 bookmakers** (The Odds API, NFL).
+Fresh capture, three polls: **272 events, 13,680 quotes, 10 bookmakers**
+(The Odds API, NFL), at `14:09:45`, `14:16:01` and `14:17:53` UTC on
+2026-08-28. Whole sign-off runs in **~16 s**; the first attempt, before `046`,
+died on check 3 after twenty minutes.
 
-The first attempt died on check 3, which ran over twenty minutes before being
-killed — the defect fixed in `046`. Re-run after the fix, the whole sign-off
-completes in **26 s**.
+*(The census line reads 273 events / 12 books: four stale `FIXTURE` quotes from
+a prior test run are also in the table. They are 663 s old, contribute **0**
+canonical rows and affect no check.)*
 
-| # | Check | Result |
-|---|---|---|
-| 1 | canonical rows = distinct fresh keys | **PASS** — 2,476 = 2,476 |
-| 2 | modal rows = one per event/market/selection | **PASS** — 1,632 = 1,632 |
-| 3 | executable subset, 0 orphans | **PASS** — 1,240 ⊂ 2,476, 0 orphans |
-| 4 | market-quality distribution | UNUSABLE 48.7%, DEGRADED 40.4%, OK 10.9% |
-| 5 | spread modal mirror violations | **FAIL** — 1 of 272 (see below) |
-| 6 | de-vig pair failures | **PASS** — 0 unpaired rows; 1,238 paired wagers, worst deviation from 1 is `0.000000` |
-| 7 | cross-line leakage (two probes) | **PASS** — 0 and 0 |
-| 8 | canonical-vs-executable substitutions | 0 of 1,240; 0 impossible improvements |
-| 9 | movement rows / direction sanity | **PASS** — 2,476 rows, 0 direction violations, 0 mirror violations |
-| 10 | execution handoff via `best_snapshot_id` | **PASS** — 0 failures on every sub-check |
+| # | Check | Result | Time |
+|---|---|---|---|
+| 1 | canonical = distinct fresh keys | **PASS** — 2,476 = 2,476 | 326 ms |
+| 2 | modal = one per event/market/selection | **PASS** — 1,632 = 1,632 | 299 ms |
+| 3 | executable subset, 0 orphans | **PASS** — 1,240 ⊂ 2,476 | 1,085 ms |
+| 4 | market-quality distribution | UNUSABLE 48.7%, DEGRADED 40.4%, OK 10.9% | 311 ms |
+| 5 | spread modal mirror violations | **FAIL** — 1 of 272 | 1.8 s |
+| 6 | de-vig pair failures | **PASS** — 0 unpaired; 1,238 paired wagers, worst deviation from 1 `0.000000` | 604 ms |
+| 7 | cross-line leakage (two probes) | **PASS** — 0 and 0 | 935 / 288 ms |
+| 8 | canonical-vs-executable substitutions | **UNEXERCISED** — 0 of 1,240, 0 impossible improvements | 2.1 s |
+| 9 | movement rows / direction sanity | **UNEXERCISED** — 2,476 rows, 0 violations on both probes | 444 ms |
+| 10 | execution handoff via `best_snapshot_id` | **PASS** — 0 on every sub-check | 427 ms |
 
 Reason codes: `SINGLE_BOOK` 48.7%, `LOW_BOOK_COUNT` 40.0%,
 `WIDE_DISPERSION` 1.2%, `LINE_FRAGMENTED` 0.3%. The large `SINGLE_BOOK` share is
-the alternate-line long tail failing closed, which is the designed behaviour.
+the alternate-line long tail failing closed — the designed behaviour, not a
+warning.
 
-Checks 8 and 9 could not be fully exercised by a single poll: with one
-observation per quote, opening equals current everywhere, so every row reads
-`FLAT` and no book has moved off a line. Both need a second poll to be
-meaningful. They are recorded as *not disconfirming* rather than as passes.
+### Why checks 8 and 9 are recorded as unexercised, not passed
+
+Across all three polls the market did not move **at all**:
+
+```
+4,560 quote series, 3 observations each
+      0 with a price change   (max distinct prices per series = 1)
+      0 with a line change
+```
+
+So `market_movement` reporting `FLAT` on all 2,476 rows is *correct*, and zero
+substitutions is *correct* — but neither result can distinguish working code
+from code that always returns zero. The cause is the slate, not the market being
+quiet by chance: **no captured event kicks off within 24 hours.** The nearest is
+298 hours out and the furthest 135 days. Lines that far from kickoff are close to
+static, and the provider very likely serves an unchanged snapshot.
+
+Validating these two checks requires a capture that spans real movement, which
+means polling a slate near kickoff. That is a scheduling question, not a code
+question, and it is carried forward as an open item rather than counted as a
+pass.
 
 ### The check 5 failure
 
@@ -154,28 +175,30 @@ Cleveland Browns vs Atlanta Falcons
     Cleveland Browns   modal_line  -1.50
 ```
 
-Both sides report themselves favoured by 1.5. This is a genuine incoherence in
-the surface, and it is **the exact residual case migration `043` documented as
-unresolvable by any sign-blind rule**: the line has crossed zero. Books are
-split on who is favoured in a near-pick'em, so Atlanta's lines are
-`{-1.5, +1.5}` and Cleveland's are `{-1.5, +1.5}`. Book counts tie, magnitudes
-tie at 1.5, and the final `line ASC` tie-break then picks the negative value
-**for both sides independently**.
+Both sides report themselves favoured. Reproduced identically on two independent
+captures, so it is deterministic, not a fluke.
+
+This is **the exact residual case migration `043` documented as unresolvable by
+any sign-blind rule**: the line has crossed zero. Books are split on who is
+favoured in a near-pick'em, so Atlanta's candidate lines are `{-1.5, +1.5}` and
+Cleveland's are `{-1.5, +1.5}`. Book counts tie, magnitudes tie at 1.5, and the
+final `line ASC` tie-break picks the negative value **for each side
+independently**.
 
 Rate: 1 of 272 spread wagers, 0.37%.
 
-No sign-blind, per-selection rule can fix this — for either selection the
-candidate set is identical, so any deterministic function of that set returns
-the same answer for both. A fix has to decide at the **wager** level and mirror
-outward: pick the modal line once per `(event, market_type)` from a fixed
-reference side (home for spreads, OVER for totals) and negate it for the other
-side. That is mirrored by construction and removes the last asymmetry.
+No sign-blind, per-selection rule can fix it — for either selection the candidate
+set is identical, so any deterministic function of that set returns the same
+answer for both. The fix has to decide at the **wager** level and mirror outward:
+pick the modal line once per `(event, market_type)` from a fixed reference side
+(home for spreads, `OVER` for totals) and negate it for the other side. Mirrored
+by construction; it changes nothing on the 271 wagers where the sides already
+agree, and it leaves bookmaker count as the only substantive criterion.
 
-It is a **semantic change** and is deliberately **not** made here. It needs the
-same treatment the rest of Package #4 got: a decision, then a test that fails
-without it.
+It is a **semantic change** and is deliberately **not** made here.
 
 **Package #4 is not frozen until this is decided.**
+
 ### 6a. Migration 046 equivalence proof
 
 `046` is a planner/performance correction, not a semantic change, and that is
@@ -240,3 +263,7 @@ Negative control — stripping `046`'s markers makes it report
   header. Only `028` (Package #2) still ranks with it.
 - Package #2 `beat_close` rounding collision — decision needed.
 - Nothing schedules the ingestion worker; 3 credits per poll.
+- **Sign-off checks 8 and 9 remain unexercised.** They need a capture spanning
+  real line movement, i.e. polls against a slate near kickoff. The 2026-08-28
+  capture had no event inside 24 hours (nearest 298 h out) and recorded zero
+  price and zero line changes across three polls.

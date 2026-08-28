@@ -362,6 +362,19 @@ already works, rather than one built alongside it and tuned to flatter it.
 | 6 | First modelled market | **LOCKED** — moneyline. Binary outcome, straightforward probability semantics, and no push handling, spread geometry or total thresholds to mix in while the grader is being validated. The **harness stays market-type agnostic**; only the first model experiment is narrowed. |
 | 7 | Model access to its own performance | **LOCKED** — none in v1. §3.1 |
 
+## 11.1 Migration correction rule
+
+**Until the first persistent Package #5 environment or the first non-disposable
+Package #5 data exists, migrations may still be corrected in place. After that
+point they are strictly append-only.**
+
+A clear transition rather than an ambiguous "sometimes we edit old migrations".
+The condition is factual and checkable: today no database holds Package #5 data,
+every environment rebuilds from scratch, and no hosted project exists. `051` was
+corrected in place under this rule when `market_snapshot_id` was renamed to
+`formation_snapshot_id` — a cosmetic `052` memorialising a rename on a table that
+had never held a row would have been permanent noise.
+
 ## 12. Phase A — the grader and the null model, and nothing else
 
 **No predictive model code is written in Phase A.** The deliverable is the
@@ -388,6 +401,23 @@ Proof 11 is the one that is easy to overlook and needs a negative control. A
 70% prediction that loses can still be an excellent probabilistic forecast; a
 51% prediction that wins is not thereby a good one. Betting-oriented systems
 drift toward win/loss grading by default, and this package must not.
+
+### 12.1 Increment order
+
+The grader is built **before** the null model, because the null model should be
+just another producer of beliefs and not a privileged special case. If `052`
+cannot correctly grade planted beliefs, there is no point testing the null model
+against it.
+
+| Increment | Scope |
+|---|---|
+| `052` | grading primitives — outcome resolution, Brier, log loss, market-relative deltas, CLV recorded as observation only. **No calibration aggregation.** |
+| `053` | calibration — equal-count bins, Wilson intervals, weighted error, per-bin failure rule, `calibration_status` separate from `standing` |
+| `054` | null model — emits the de-vigged formation probability back, proves exact zero divergence at formation, and runs through the **same** grader as any future model with no special scoring path |
+
+**The grader grades stored facts. It never reconstructs what the model "must
+have meant".** Any probability, binding or provenance fact needed for grading is
+already immutably present in the belief record, or the belief cannot be graded.
 
 Only when all eleven hold does a real model become worth writing — arriving with
 a scoreboard that already works, rather than one built beside it and tuned to

@@ -199,7 +199,7 @@ def t12_belief_is_formed_prospectively_and_bound_by_the_database():
     """The model proposes; the database determines.
 
     The model supplies a probability and its own provenance. It does NOT supply
-    the market side -- `market_snapshot_id` and `market_probability_at_formation`
+    the market side -- `formation_snapshot_id` and `market_probability_at_formation`
     are resolved from Package #4 and stamped. A model able to choose its own
     formation market probability could manufacture an edge that no later grading
     would detect.
@@ -215,10 +215,10 @@ def t12_belief_is_formed_prospectively_and_bound_by_the_database():
     row = h.row(admin, """
         SELECT b.model_probability, b.lower_bound, b.upper_bound,
                b.uncertainty_method, b.market_probability_at_formation,
-               b.market_snapshot_id, b.formed_at IS NOT NULL,
+               b.formation_snapshot_id, b.formed_at IS NOT NULL,
                s.event_id, s.market_type::text, s.selection, s.line
         FROM model.beliefs b
-        JOIN public.market_snapshots s ON s.id = b.market_snapshot_id
+        JOIN public.market_snapshots s ON s.id = b.formation_snapshot_id
         WHERE b.belief_id = %s""", (bid,))
 
     mkt = h.row(admin, """
@@ -256,9 +256,9 @@ def t13_binding_must_describe_the_same_wager():
     INS = """INSERT INTO model.beliefs
         (model_id, model_version, feature_version, event_id, market_type,
          selection_key, line, model_probability,
-         market_probability_at_formation, market_snapshot_id, formed_at,
-         inputs_hash)
-        VALUES ('m','1','f',%s,'MONEYLINE',%s,NULL,0.6,0.5,%s,NOW(),'h')"""
+         market_probability_at_formation, formation_snapshot_id,
+         market_input_hash, formed_at, inputs_hash)
+        VALUES ('m','1','f',%s,'MONEYLINE',%s,NULL,0.6,0.5,%s,'hash',NOW(),'h')"""
 
     for label, ev, sel, snap in (
             ("wrong event",     ev1, "DAL", snap2),
@@ -344,7 +344,7 @@ def t25_a_moved_market_earns_a_new_belief():
     second = _form(admin, ev, prob=0.71)
 
     rows = h.rows(admin, """
-        SELECT model_probability, market_snapshot_id FROM model.beliefs
+        SELECT model_probability, formation_snapshot_id FROM model.beliefs
         WHERE event_id=%s ORDER BY formed_at, model_probability""", (ev,))
     assert len(rows) == 2, rows
     assert rows[0][1] != rows[1][1], "both beliefs bound to the same observation"
@@ -366,9 +366,9 @@ def t26_model_cannot_write_beliefs_directly():
         ("INSERT", """INSERT INTO model.beliefs
              (model_id, model_version, feature_version, event_id, market_type,
               selection_key, line, model_probability,
-              market_probability_at_formation, market_snapshot_id, formed_at,
-              inputs_hash)
-             VALUES ('m','1','f',%s,'MONEYLINE','DAL',NULL,0.99,0.5,%s,NOW(),'h')""",
+              market_probability_at_formation, formation_snapshot_id,
+              market_input_hash, formed_at, inputs_hash)
+             VALUES ('m','1','f',%s,'MONEYLINE','DAL',NULL,0.99,0.5,%s,'hash',NOW(),'h')""",
          (ev, snap)),
         ("UPDATE", "UPDATE model.beliefs SET model_probability = 0.99", ()),
         ("DELETE", "DELETE FROM model.beliefs", ()),
@@ -387,6 +387,57 @@ def t26_model_cannot_write_beliefs_directly():
     assert bid is not None
     model.close(); admin.close()
     return "direct INSERT/UPDATE/DELETE refused (42501); form_belief() works"
+
+
+
+def t27_anchor_and_input_hash_prove_different_things():
+    """Two proofs, deliberately not one.
+
+    `formation_snapshot_id` says which executable quote anchored the belief and
+    whether it has since been superseded. It is an ANCHOR -- market_intelligence
+    encodes consensus, dispersion, book counts and movement derived from many
+    quotes, so calling one snapshot the belief's full provenance would overstate
+    what it proves.
+
+    `market_input_hash` says what market-intelligence state the model actually
+    received, so a later reconstruction of the input surface shows up as a
+    mismatch instead of being absorbed.
+    """
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _form(admin, ev)
+
+    stored, anchor = h.row(admin, """
+        SELECT market_input_hash, formation_snapshot_id
+        FROM model.beliefs WHERE belief_id = %s""", (bid,))
+
+    # the anchor is Package #4's executable observation, nothing invented
+    exec_snap = h.scalar(admin, """
+        SELECT executable_snapshot_id FROM public.market_intelligence
+        WHERE event_id=%s AND market_type='MONEYLINE' AND selection='DAL'""", (ev,))
+    assert anchor == exec_snap, "anchor is not the executable observation"
+
+    # the hash is over the surface the MODEL sees, and is reproducible
+    recomputed = h.scalar(admin, """
+        SELECT md5(to_jsonb(t)::text) FROM model_input.market_intelligence t
+        WHERE event_id=%s AND market_type='MONEYLINE' AND selection='DAL'""", (ev,))
+    assert stored == recomputed, (
+        f"stored input hash {stored} != recomputed {recomputed} -- the hash is "
+        "not over model_input.market_intelligence")
+
+    # the model cannot influence it: its own declared inputs_hash is separate
+    declared = h.scalar(admin, "SELECT inputs_hash FROM model.beliefs WHERE belief_id=%s", (bid,))
+    assert declared == M["inputs_hash"] and declared != stored
+
+    # a changed market surface changes the hash
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, -175, 150, bk)
+    bid2 = _form(admin, ev, prob=0.71)
+    stored2 = h.scalar(admin, "SELECT market_input_hash FROM model.beliefs WHERE belief_id=%s", (bid2,))
+    assert stored2 != stored, "the market moved but the input hash did not change"
+
+    admin.close()
+    return "anchor = executable observation; input hash reproducible and moves with the market"
 
 
 PACKAGE5 = [
@@ -408,4 +459,6 @@ PACKAGE5 = [
      t25_a_moved_market_earns_a_new_belief),
     ("P5-T26", "Model cannot write beliefs directly",
      t26_model_cannot_write_beliefs_directly),
+    ("P5-T27", "Anchor and input hash prove different things",
+     t27_anchor_and_input_hash_prove_different_things),
 ]

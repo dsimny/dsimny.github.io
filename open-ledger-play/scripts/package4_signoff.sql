@@ -68,15 +68,26 @@ FROM expected, actual;
 \echo ''
 \echo '=== 2. MODAL ROW COUNT (exactly one modal line per event/market/selection) ==='
 -- -----------------------------------------------------------------------------
-SELECT
-    count(*) FILTER (WHERE is_modal_line)                    AS modal_rows,
-    count(DISTINCT (event_id, market_type, selection))       AS selections,
-    count(*)                                                 AS canonical_rows,
-    CASE WHEN count(*) FILTER (WHERE is_modal_line)
-            = count(DISTINCT (event_id, market_type, selection))
-         THEN 'PASS' ELSE 'FAIL -- a selection has zero or several modal lines'
-    END AS verdict
-FROM public.canonical_market;
+-- Since 047 the modal line is decided per WAGER and mirrored, so a selection
+-- has a modal row only if it quotes the wager's centre. Several modal rows is
+-- always a defect; none means a genuinely one-sided market, which is worth
+-- naming separately rather than lumping together.
+WITH per_selection AS MATERIALIZED (
+    SELECT event_id, market_type, selection,
+           count(*) FILTER (WHERE is_modal_line) AS modal_rows
+    FROM public.canonical_market
+    GROUP BY 1, 2, 3
+)
+SELECT count(*) FILTER (WHERE modal_rows = 1) AS modal_rows,
+       count(*)                               AS selections,
+       count(*) FILTER (WHERE modal_rows > 1) AS several,
+       count(*) FILTER (WHERE modal_rows = 0) AS none_at_centre,
+       CASE WHEN count(*) FILTER (WHERE modal_rows > 1) > 0
+              THEN 'FAIL -- a selection has several modal lines'
+            WHEN count(*) FILTER (WHERE modal_rows = 0) > 0
+              THEN 'FAIL -- a selection has no row at its wager centre'
+            ELSE 'PASS' END                   AS verdict
+FROM per_selection;
 
 -- -----------------------------------------------------------------------------
 \echo ''

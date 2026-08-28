@@ -131,8 +131,8 @@ market it was formed against; anything comparative is derived downstream.
 | `market_binding_snapshot_id` | the market observation it was formed against |
 | `model_id`, `model_version`, `feature_version` | which model, which frozen version, which input transformation |
 | `formed_at` | when the claim was made |
+| — | *(`calibration_status` and `standing` are NOT belief columns — see §12.2 C2)* |
 | `inputs_hash` | hash of the exact inputs consumed |
-| `calibration_status`, `standing` | §6 |
 
 **Derived in an analytical view, never stored on the belief:**
 
@@ -450,6 +450,61 @@ already immutably present in the belief record, or the belief cannot be graded.
 Only when all eleven hold does a real model become worth writing — arriving with
 a scoreboard that already works, rather than one built beside it and tuned to
 flatter it.
+
+## 12.2 Pre-registration corrections
+
+Recorded as corrections to the contract, not as post-hoc model changes. The
+distinction matters: a pre-registration may fix a false theorem **before any
+model evidence exists**, and doing so openly is what makes the rest of the
+record trustworthy.
+
+### C1 — `P5-T22`
+
+```
+Original preregistered proof:
+    "70% loser must outscore 51% winner"
+
+Status:
+    RETRACTED -- mathematically false for a single observation.
+
+Replacement invariant:
+    The grading function contains no win/loss preference outside the
+    proper scoring-rule outcome term; aggregate probabilistic quality
+    must be judged by Brier/log loss, not ticket win rate.
+```
+
+On a single binary outcome a correct low-confidence winner can beat a
+high-confidence loser on **both** Brier and log loss, and should:
+
+```
+Brier(0.70, LOSS) = 0.4900     Brier(0.51, WIN) = 0.2401
+LogL (0.70, LOSS) = 1.2040     LogL (0.51, WIN) = 0.6733
+```
+
+The principle actually being protected is **the grader evaluates probabilistic
+quality, not betting win/loss status**. That is tested three ways instead:
+
+- **side-indifference** — `Brier(0.70, LOSS) == Brier(0.30, WIN)` exactly, and
+  likewise for log loss. The grade depends on the forecast and the outcome, never
+  on which side won.
+- **properness** — `Brier(0.90, LOSS) > Brier(0.60, LOSS)`.
+- **structural** — the grade record carries no win-rate, profit or ROI column, so
+  win/loss grading cannot creep in later.
+
+Where win/loss and probabilistic quality genuinely diverge is **over a set of
+forecasts**, not on one. That belongs to `053`, where a lucky low-skill model and
+a well-calibrated one are compared on aggregate Brier and log loss.
+
+Corrected in commit `ce9f270`, before the grader was written.
+
+### C2 — `calibration_status` and `standing` are not belief columns
+
+§4 lists them among the belief fields. That is wrong and is corrected here: a
+belief is formed **prospectively**, when no grading data exists, so it cannot
+carry a calibration verdict. Both are properties of a `(model_id, model_version)`
+over its graded sample, they change as evidence accumulates, and they live in the
+grading layer. Putting them on an immutable belief row would have required either
+mutating beliefs or freezing a verdict at the moment it was least informed.
 
 ## 13. Pre-registered tests
 

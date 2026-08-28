@@ -142,6 +142,7 @@ def main():
     print(f"Outage & fail-closed: {verdict(group_ok({'P3-T23','P3-T24','P3-T25','P3-T27','P3-T28','P3-T29'}))}")
     print(f"Package #3 authorization: {verdict(group_ok({'P3-T30'}))}")
     print(f"Package #5 trust boundary: {verdict(group_ok({'P5-T01','P5-T02','P5-T02b'}))}")
+    print(f"Package #5 belief formation: {verdict(group_ok({'P5-T12','P5-T13','P5-T06','P5-T24','P5-T25','P5-T26'}))}")
 
     # The 29 test IDs the package's section 33 table actually enumerates.
     ENUMERATED = {

@@ -27,6 +27,19 @@
 -- minutes, holding locks and blocking the investigation.
 SET statement_timeout = '120s';
 
+-- Refresh planner statistics before measuring anything.
+--
+-- A sign-off runs immediately after an ingest, which bulk-loads thousands of
+-- rows into a table that was just truncated. Until autovacuum catches up the
+-- planner is costing against reltuples = 0, and against a pipeline of CTEs that
+-- already carry no statistics of their own that is enough to turn hash joins
+-- into nested loops re-executed per output row. The same script that runs in
+-- seconds a minute later can crawl if it runs the instant the ingest returns.
+--
+-- ANALYZE touches statistics only -- no rows are read back or modified.
+ANALYZE public.market_snapshots;
+ANALYZE public.events;
+
 \echo ''
 \echo '######## PACKAGE #4 LIVE SIGN-OFF ########'
 
@@ -369,8 +382,16 @@ WHERE cfg.id;
 \echo ''
 \echo '=== 11. FINISH-LINE QUERY (one game, every question answered) ==='
 -- -----------------------------------------------------------------------------
-WITH game AS (
-    SELECT event_id FROM public.market_intelligence
+-- SINGLE PASS, like check 3. Naming market_intelligence twice -- once to pick
+-- the game and once to render it -- expanded the whole pipeline twice, and the
+-- second expansion carried an event_id predicate whose value is unknown at plan
+-- time, which turned the plan into nested loops. It exceeded the 120s timeout.
+-- One materialised pass, read twice.
+WITH mi AS MATERIALIZED (
+    SELECT * FROM public.market_intelligence
+),
+game AS (
+    SELECT event_id FROM mi
     WHERE is_executable
     GROUP BY 1 ORDER BY count(*) DESC, min(commence_time) LIMIT 1
 )
@@ -386,7 +407,7 @@ SELECT
     book_count, dispersion                    AS books_disagree_by,
     probability_movement, movement_direction, line_movement,
     market_quality, quality_reasons
-FROM public.market_intelligence
+FROM mi
 WHERE event_id = (SELECT event_id FROM game)
 ORDER BY market_type, selection, line;
 

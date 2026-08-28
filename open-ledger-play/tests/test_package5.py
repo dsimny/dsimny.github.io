@@ -189,6 +189,7 @@ def _seed_executable(admin, src="P5-BELIEF", books=("bookA", "bookB")):
 
 def _form(conn, ev, sel="DAL", prob=0.62, **over):
     kw = dict(M); kw.update(over)
+    kw["model_version"] = over.get("model_version", kw["model_version"])
     return h.scalar(conn, """
         SELECT model.form_belief(%s, %s, %s, %s::uuid, %s,
                                  %s, %s::numeric, %s::numeric, %s,
@@ -717,6 +718,243 @@ def t31_grading_permissions_point_one_way():
     return "grader reads beliefs and writes grades; cannot write beliefs; model refused both"
 
 
+
+# =============================================================================
+# Increment 4 -- calibration
+# =============================================================================
+
+def _tune(admin, **kw):
+    """Lower the thresholds so a test can exercise the full pipeline without
+    planting 500 beliefs. The shipped defaults are asserted separately by
+    t33; this only ever narrows the sample, never the maths."""
+    sets = ", ".join(f"{k} = {v}" for k, v in kw.items())
+    admin.execute(f"UPDATE grading.calibration_config SET {sets} WHERE id")
+
+
+def _market(admin, src, home_price, away_price):
+    """One executable moneyline market at a chosen price, two books."""
+    ev = event(admin, src)
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, home_price, away_price, bk)
+    return ev
+
+
+def _plant(admin, src, prob, outcome, home_price=-150, away_price=130,
+           model_id="planted", version="1"):
+    """Form one belief and grade it against a chosen outcome."""
+    ev = _market(admin, src, home_price, away_price)
+    bid = _form(admin, ev, prob=prob, model_id=model_id, model_version=version)
+    _resolve(admin, ev, "DAL", outcome)
+    _grade(admin, bid)
+    return bid
+
+
+def t16_bins_are_equal_count_and_wilson_matches_hand_values():
+    """Equal-count bins, not fixed 10%-wide buckets, and a Wilson interval
+    checked against an independently computed value."""
+    admin = h.connect(); h.reset(admin)
+
+    # Wilson 95% CI for 8/10, computed independently in Python:
+    #   z^2 = 3.8416, denom = 1.38416
+    #   centre = (0.8 + 3.8416/20) / 1.38416
+    #   margin = (1.96/1.38416) * sqrt(0.8*0.2/10 + 3.8416/400)
+    # -> [0.4901568467, 0.9433190520]. My first hand value was wrong at the
+    # sixth decimal place; the implementation was right.
+    lo = float(h.scalar(admin, "SELECT grading.wilson_low(8::bigint, 10::bigint, 1.96)"))
+    hi = float(h.scalar(admin, "SELECT grading.wilson_high(8::bigint, 10::bigint, 1.96)"))
+    assert abs(lo - 0.4901568467) < 1e-7, lo
+    assert abs(hi - 0.9433190520) < 1e-7, hi
+    # bounded to [0,1] at the extremes. Note the Wilson bound at 0/5 is NEAR
+    # zero, not exactly zero -- that is the interval being honest about a small
+    # sample, and the clamp guarantees the range, not the endpoint.
+    for s_, n_, lo_ok, hi_ok in ((0, 5, True, False), (5, 5, False, True)):
+        a = float(h.scalar(admin, f"SELECT grading.wilson_low({s_}::bigint, {n_}::bigint, 1.96)"))
+        b = float(h.scalar(admin, f"SELECT grading.wilson_high({s_}::bigint, {n_}::bigint, 1.96)"))
+        assert 0.0 <= a <= b <= 1.0, (s_, n_, a, b)
+        if lo_ok:
+            assert a < 0.01 and b > 0.4, (a, b)   # 0/5 says "could still be 40%"
+        if hi_ok:
+            assert b > 0.99 and a < 0.6, (a, b)   # 5/5 says "could be as low as 57%"
+
+    # equal-count binning: 12 beliefs, 3 bins -> 4 each, split by probability
+    # Deliberately CLUSTERED. An evenly spread fixture gives 4/4/4 under fixed
+    # WIDTH bucketing too, so it cannot tell the two schemes apart -- a negative
+    # control caught exactly that. Here fixed-width would give 8/1/3.
+    _tune(admin, min_sample=12, bin_count=3, min_bin_count=3)
+    probs = [0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.60, 0.70, 0.80, 0.90]
+    for i, pr in enumerate(probs):
+        _plant(admin, f"T16-{i}", pr, "WIN" if i % 2 == 0 else "LOSS")
+
+    bins = h.rows(admin, """
+        SELECT bin, n, mean_predicted FROM grading.calibration_bins('planted','1')""")
+    assert [r[1] for r in bins] == [4, 4, 4], (
+        f"bins are not equal-count: {bins}. Fixed-width bucketing would give "
+        "8/1/3 on this clustered fixture.")
+    means = [float(r[2]) for r in bins]
+    assert means[0] < means[1] < means[2], means
+    admin.close()
+    return f"Wilson [{lo:.4f}, {hi:.4f}] matched; 3 bins of 4, ordered by probability"
+
+
+def t23_a_single_bad_bin_fails_despite_a_good_weighted_average():
+    """The weighted average alone is not sufficient. A model can look fine
+    overall while being badly wrong in one region of the probability space.
+
+    This needs at least three bins to construct at all: with B equal bins and a
+    single bad bin of error e, the weighted error is e/B, so two bins can never
+    hold e above 7.5pp while the average stays under 3pp. Five bins of six.
+    """
+    admin = h.connect(); h.reset(admin)
+
+    def build(tag, last_p, last_wins):
+        _tune(admin, min_sample=30, bin_count=5, min_bin_count=6)
+        # four perfectly calibrated bins: predicted == observed exactly
+        plan = []
+        for k, pr in ((1, 1/6), (2, 2/6), (3, 0.5), (4, 4/6)):
+            plan += [(round(pr, 6), i < k) for i in range(6)]
+        plan += [(last_p, i < last_wins) for i in range(6)]
+        for i, (pr, won) in enumerate(plan):
+            _plant(admin, f"{tag}-{i}", pr, "WIN" if won else "LOSS")
+        return h.row(admin, "SELECT * FROM grading.calibration_report('planted','1')")
+
+    # top bin predicted 0.78, observed 4/6 = 0.667 -> 11.3pp out
+    n, eligible, werr, worst, wbin, status = build("T23a", 0.78, 4)
+    assert worst is not None, (
+        "no worst-bin error was reported -- the per-bin rule is not being "
+        "evaluated at all, so only the weighted average is in force")
+    werr, worst = float(werr), float(worst)
+    assert n == 30 and eligible is True, (n, eligible)
+    assert werr <= 0.03, f"fixture failed: weighted error {werr:.4f} is not inside 3pp"
+    assert worst > 0.075, f"fixture failed: worst bin {worst:.4f} is not outside 7.5pp"
+    assert status == "DEGRADED", (
+        f"weighted error {werr:.4f} passed and a bin at {worst:.4f} was ignored")
+
+    # control: same shape, top bin predicted 0.70 -> 3.3pp out, inside the bound
+    h.reset(admin)
+    _, _, werr2, worst2, _, status2 = build("T23b", 0.70, 4)
+    assert float(worst2) <= 0.075 and status2 == "CALIBRATED", (worst2, status2)
+
+    admin.close()
+    return (f"weighted {werr:.4f} inside 3pp but a bin at {worst:.4f} -> DEGRADED; "
+            f"same shape with the bin at {float(worst2):.4f} -> CALIBRATED")
+
+
+def t21_a_model_can_be_calibrated_and_still_add_nothing():
+    """The state the architecture must be able to express.
+
+    A model that always says ~0.5 into a market that knows which side is which
+    is calibrated and strictly worse than the market. If that cannot be
+    represented, the system quietly pressures everyone toward a flattering
+    conclusion.
+
+    The fixture is fiddly for an instructive reason. A first attempt gave every
+    sharp favourite the same jitter, so equal-count binning by MODEL probability
+    put all ten favourites in one bin, which then observed 0.8 against a
+    predicted 0.499 -- a 30pp calibration error. That is the binning doing its
+    job: a model whose 0.5s are secretly 0.8s is NOT calibrated. To be genuinely
+    calibrated at 0.5 each bin must hold a 50/50 mix.
+    """
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=20, bin_count=2, min_bin_count=5)
+
+    # ten sharp favourites, 8 win; ten sharp dogs, 2 win. Jitter assigns half of
+    # each group to each bin, so every bin is a 50/50 mix and observes 0.5.
+    for i in range(10):
+        _plant(admin, f"T21-H{i}", 0.499 if i < 5 else 0.501,
+               "WIN" if (i < 4 or 5 <= i < 9) else "LOSS",
+               home_price=-600, away_price=500)
+    for i in range(10):
+        _plant(admin, f"T21-L{i}", 0.499 if i < 5 else 0.501,
+               "WIN" if i in (0, 5) else "LOSS",
+               home_price=500, away_price=-600)
+
+    cal = h.row(admin, "SELECT * FROM grading.calibration_report('planted','1')")
+    st  = h.row(admin, "SELECT * FROM grading.standing_report('planted','1')")
+    calibration_status, werr, bss, standing = cal[5], float(cal[2]), float(st[3]), st[7]
+
+    assert calibration_status == "CALIBRATED", (calibration_status, cal)
+    assert bss < 0, (
+        f"Brier skill score came back {bss}; the model should be strictly worse "
+        "than the market here, so either the fixture or standing_report is wrong")
+    assert standing == "RESEARCH", standing
+    admin.close()
+    return (f"CALIBRATED (weighted error {werr:.4f}) and RESEARCH together; "
+            f"Brier skill score {bss:+.3f}")
+
+
+def t32_win_rate_and_probabilistic_quality_can_disagree():
+    """The aggregate form of the principle P5-T22 was originally trying to
+    state, and the form that is actually true.
+
+    Ranking by win rate and ranking by probabilistic quality are different
+    orderings. A badly calibrated model can win far more often and still be the
+    worse forecaster -- which is why the grader has no win-rate field to rank on.
+    """
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=10, bin_count=2, min_bin_count=3)
+
+    # LUCKY: says 0.52 every time; wins 9 of 10.
+    for i in range(10):
+        _plant(admin, f"T32-A{i}", 0.52, "WIN" if i < 9 else "LOSS",
+               model_id="lucky", version="1")
+    # HONEST: says 0.30 every time; wins 3 of 10 -- perfectly calibrated.
+    for i in range(10):
+        _plant(admin, f"T32-B{i}", 0.30, "WIN" if i < 3 else "LOSS",
+               model_id="honest", version="1")
+
+    def stats(mid):
+        n, mb, kb, bss, ml, kl, lli, st = h.row(
+            admin, "SELECT * FROM grading.standing_report(%s,'1')", (mid,))
+        wins = h.scalar(admin, """
+            SELECT count(*) FILTER (WHERE g.outcome='WIN')::numeric / count(*)
+            FROM grading.belief_grades g JOIN model.beliefs b
+              ON b.belief_id = g.belief_id WHERE b.model_id = %s""", (mid,))
+        return float(wins), float(mb)
+
+    lucky_wr, lucky_brier = stats("lucky")
+    honest_wr, honest_brier = stats("honest")
+
+    assert lucky_wr > honest_wr, (lucky_wr, honest_wr)
+    assert honest_brier < lucky_brier, (
+        f"fixture failed: the honest model ({honest_brier:.4f}) did not beat the "
+        f"lucky one ({lucky_brier:.4f}) on Brier")
+    admin.close()
+    return (f"win rate ranks lucky first ({lucky_wr:.0%} vs {honest_wr:.0%}); "
+            f"Brier ranks honest first ({honest_brier:.4f} vs {lucky_brier:.4f})")
+
+
+def t33_the_shipped_thresholds_are_the_pre_registered_ones():
+    """The tests above lower the sample size to stay fast, and they mutate the
+    config row to do it. So this asserts the COLUMN DEFAULTS -- what actually
+    ships -- which no test can tune, rather than whatever the row happens to
+    hold. A convenience tweak must not be able to become the contract.
+    """
+    admin = h.connect(); h.reset(admin)
+    defaults = dict(h.rows(admin, """
+        SELECT column_name, column_default FROM information_schema.columns
+        WHERE table_schema='grading' AND table_name='calibration_config'"""))
+    expected = {"min_sample": "500", "bin_count": "10",
+                "weighted_error_max": "0.0300", "bin_error_max": "0.0750",
+                "wilson_z": "1.96"}
+    for col, want in expected.items():
+        got = (defaults.get(col) or "").split("::")[0].strip()
+        assert got == want, f"{col} ships as {got}, pre-registered as {want}"
+
+    # restore the shipped values, then confirm one graded belief makes no claim
+    admin.execute("""
+        UPDATE grading.calibration_config SET
+            min_sample=500, bin_count=10, weighted_error_max=0.0300,
+            bin_error_max=0.0750, wilson_z=1.96, min_bin_count=30 WHERE id""")
+    _plant(admin, "T33", 0.60, "WIN")
+    cal = h.row(admin, "SELECT * FROM grading.calibration_report('planted','1')")
+    st  = h.row(admin, "SELECT * FROM grading.standing_report('planted','1')")
+    assert cal[1] is False and cal[5] == "PROVISIONAL", cal
+    assert st[7] == "RESEARCH", st
+    admin.close()
+    return ("defaults ship as N=500, 10 bins, 3pp / 7.5pp, z=1.96; "
+            "one graded belief is PROVISIONAL / RESEARCH")
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -756,4 +994,14 @@ PACKAGE5 = [
      t30_push_and_void_are_excluded_not_silently_scored),
     ("P5-T31", "Grading permissions point one way",
      t31_grading_permissions_point_one_way),
+    ("P5-T16", "Equal-count bins and Wilson intervals",
+     t16_bins_are_equal_count_and_wilson_matches_hand_values),
+    ("P5-T23", "One bad bin fails a good weighted average",
+     t23_a_single_bad_bin_fails_despite_a_good_weighted_average),
+    ("P5-T21", "Calibrated and still adding nothing",
+     t21_a_model_can_be_calibrated_and_still_add_nothing),
+    ("P5-T32", "Win rate and probabilistic quality disagree",
+     t32_win_rate_and_probabilistic_quality_can_disagree),
+    ("P5-T33", "Shipped thresholds are the pre-registered ones",
+     t33_the_shipped_thresholds_are_the_pre_registered_ones),
 ]

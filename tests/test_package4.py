@@ -775,6 +775,82 @@ def t26_best_price_ranks_on_exact_payout_not_rounded_money():
             "-142 beats -143 in canonical and executable")
 
 
+
+def t27_zero_crossing_wager_has_one_centre():
+    """The live sign-off's only failure, reproduced.
+
+        Cleveland Browns vs Atlanta Falcons
+            Atlanta Falcons    modal_line  -1.50
+            Cleveland Browns   modal_line  -1.50
+
+    A near-pick'em where books are split on direction gives BOTH selections the
+    same candidate set, {-1.5, +1.5}, with book counts tied and magnitudes tied.
+    `abs(line) ASC` cannot separate them, so the old per-selection rule fell
+    through to `line ASC` and picked the negative value for each side
+    independently -- two different wagers for one market.
+
+    047 decides the modal line once per (event, market_type) from the home side
+    and mirrors it, so this cannot happen for any market at all.
+    """
+    admin = h.connect(); h.reset(admin)
+    ev = event(admin, "T27")
+
+    # bookHOME makes DAL the 1.5-point favourite; bookAWAY makes PHI the
+    # favourite. Equal book counts on {-1.5, +1.5} for both selections.
+    two_sided(admin, ev, "SPREAD", -1.5, -110, -110, "bookHOME")
+    two_sided(admin, ev, "SPREAD",  1.5, -110, -110, "bookAWAY")
+
+    dal, phi = _modal_pair(admin, ev)
+    assert float(dal) == -float(phi), (
+        f"the two sides named different wagers: DAL {dal} / PHI {phi}")
+    assert float(dal) == -1.5 and float(phi) == 1.5, (dal, phi)
+
+    # Exactly one modal row per selection, and it sits on a real canonical row.
+    for sel in ("DAL", "PHI"):
+        n = h.scalar(admin, """SELECT count(*) FROM public.canonical_market
+                               WHERE event_id=%s AND market_type='SPREAD'
+                                 AND selection=%s AND is_modal_line""", (ev, sel))
+        assert n == 1, f"{sel} has {n} modal rows, expected exactly 1"
+
+    # Moneyline keeps a NULL centre on both sides.
+    for bk in ("bookHOME", "bookAWAY"):
+        two_sided(admin, ev, "MONEYLINE", None, -120, 100, bk)
+    ml = h.rows(admin, """SELECT selection, modal_line, is_modal_line
+                          FROM public.canonical_market
+                          WHERE event_id=%s AND market_type='MONEYLINE'
+                          ORDER BY selection""", (ev,))
+    assert len(ml) == 2 and all(r[1] is None and r[2] is True for r in ml), ml
+
+    admin.close()
+    return "-1.5/+1.5 split resolves to one wager centre, mirrored"
+
+
+def t28_reference_side_is_a_frame_not_a_preference():
+    """Choosing the home side as the reference must not change WHICH wager wins
+    when the sides are not tied -- only how a tie is resolved. Here the away
+    side carries more books at +3.5, and that must win for both selections even
+    though the reference is the home team."""
+    admin = h.connect(); h.reset(admin)
+    ev = event(admin, "T28")
+
+    # Three books at DAL -3.5 / PHI +3.5, one at DAL -3.0 / PHI +3.0.
+    for bk in ("bookA", "bookB", "bookC"):
+        two_sided(admin, ev, "SPREAD", -3.5, -110, -110, bk)
+    two_sided(admin, ev, "SPREAD", -3.0, -110, -110, "bookD")
+
+    dal, phi = _modal_pair(admin, ev)
+    assert float(dal) == -3.5 and float(phi) == 3.5, (dal, phi)
+
+    # And the count reported is the books quoting THAT side at the centre.
+    counts = dict(h.rows(admin, """SELECT selection, modal_line_book_count
+                                   FROM public.canonical_market
+                                   WHERE event_id=%s AND market_type='SPREAD'
+                                     AND is_modal_line""", (ev,)))
+    assert counts == {"DAL": 3, "PHI": 3}, counts
+    admin.close()
+    return "3 books at -3.5 beat 1 at -3.0 on both sides; counts 3/3"
+
+
 PACKAGE4 = [
     ("P4-T01", "Different lines are separate rows", t01_different_lines_are_separate_rows),
     ("P4-T02", "Best price never crosses lines", t02_best_price_never_crosses_lines),
@@ -802,4 +878,6 @@ PACKAGE4 = [
     ("P4-T24", "Live-shape row identity and bounded time", t24_live_shape_row_identity_and_bounded_time),
     ("P4-T25", "Modal symmetry across a fragmented board", t25_modal_symmetry_holds_across_a_fragmented_board),
     ("P4-T26", "Best price ranks on exact payout", t26_best_price_ranks_on_exact_payout_not_rounded_money),
+    ("P4-T27", "Zero-crossing wager has one centre", t27_zero_crossing_wager_has_one_centre),
+    ("P4-T28", "Reference side is a frame, not a preference", t28_reference_side_is_a_frame_not_a_preference),
 ]

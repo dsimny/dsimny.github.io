@@ -40,8 +40,9 @@ Package #4 **writes nothing.** It is a read layer.
 | `044` | Exact payout comparator (`olp_price_payout`) |
 | `045` | Total price ordering (`positive > negative` made absolute) |
 | `046` | Materialise the pipeline CTEs (stop per-row re-execution) |
+| `047` | Wager-level modal line (decided once, mirrored outward) |
 
-Migrations are append-only. `042`–`046` replace view bodies via
+Migrations are append-only. `042`–`047` replace view bodies via
 `CREATE OR REPLACE` rather than editing `038`/`039`/`040` in place, so any
 database that applied an earlier migration reaches the same final state.
 
@@ -55,7 +56,11 @@ database that applied an earlier migration reaches the same final state.
    and is **never** paired with the nearest line.
 3. **Modal line describes, never defines.** Bookmaker count is the only
    substantive criterion. `abs(line) ASC, line ASC` are deterministic
-   tie-breakers with no economic meaning.
+   tie-breakers with no economic meaning. The modal line is a property of the
+   **wager**: decided once per `(event, market_type)` from a fixed reference
+   side (home for spreads, `OVER` for totals) and mirrored to the other, so the
+   two sides can never name different wagers. The reference side is a frame of
+   reference, not a preference.
 4. **Executable ≠ filtered canonical.** `executable_market` recomputes best
    price over only still-placeable observations, because `place_ticket_rpc`'s
    `MARKET_MOVED` check is line-agnostic. The surface and the RPC cannot
@@ -95,12 +100,12 @@ database that applied an earlier migration reaches the same final state.
 
 `CHECK (mi_execution_min_book_count <= mi_min_book_count)`.
 
-## 5. Tests — 152/152
+## 5. Tests — 154/154
 
-26 Package #4 tests (`P4-T01`…`P4-T26`) inside a 152-test suite, green on
+28 Package #4 tests (`P4-T01`…`P4-T28`) inside a 154-test suite, green on
 **PostgreSQL 16.2** and **Supabase 17.6**.
 
-Five defects were found during the package and each has a negative control
+Six defects were found during the package and each has a negative control
 proving its test detects the defect rather than passing by construction:
 
 | Defect | Found by | Fix | Negative control |
@@ -110,6 +115,7 @@ proving its test detects the defect rather than passing by construction:
 | `best_price` ranked with a rounding money function → named a worse price as best | `package4_signoff.sql` on a seeded board | `044` | `P4-T26` → `(-143, 'bookB')` |
 | `+100` and `-100` tied on payout, so *positive > negative* was not absolute | review of the ordering rule | `045` | `P4-T26` → `(-100, 'bookA')` |
 | Pipeline CTEs inlined and re-executed per output row → quadratic; check 3 ran >20 min | the live sign-off | `046` | `P4-T24` → `full scan took 14.5s` |
+| Zero-crossing wager: both sides reported themselves favoured | the live sign-off, check 5 | `047` | `P4-T27` → `DAL -1.50 / PHI -1.50` |
 
 The recurring lesson, recorded in `PACKAGE4_PREREG.md` §12.1 and §12.5: **an
 invariant has to be tested on inputs that can actually violate it.** The modal
@@ -133,7 +139,7 @@ canonical rows and affect no check.)*
 | 2 | modal = one per event/market/selection | **PASS** — 1,632 = 1,632 | 299 ms |
 | 3 | executable subset, 0 orphans | **PASS** — 1,240 ⊂ 2,476 | 1,085 ms |
 | 4 | market-quality distribution | UNUSABLE 48.7%, DEGRADED 40.4%, OK 10.9% | 311 ms |
-| 5 | spread modal mirror violations | **FAIL** — 1 of 272 | 1.8 s |
+| 5 | spread modal mirror violations | **FAIL** — 1 of 272 — *fixed in `047`, see below* | 1.8 s |
 | 6 | de-vig pair failures | **PASS** — 0 unpaired; 1,238 paired wagers, worst deviation from 1 `0.000000` | 604 ms |
 | 7 | cross-line leakage (two probes) | **PASS** — 0 and 0 | 935 / 288 ms |
 | 8 | canonical-vs-executable substitutions | **UNEXERCISED** — 0 of 1,240, 0 impossible improvements | 2.1 s |
@@ -195,9 +201,28 @@ pick the modal line once per `(event, market_type)` from a fixed reference side
 by construction; it changes nothing on the 271 wagers where the sides already
 agree, and it leaves bookmaker count as the only substantive criterion.
 
-It is a **semantic change** and is deliberately **not** made here.
+### Resolved in migration 047
 
-**Package #4 is not frozen until this is decided.**
+The fix was approved and implemented. Re-run against the same captured board:
+
+```
+=== 5. SPREAD MODAL MIRROR VIOLATIONS (must be 0) ===
+ market_type | violations | wagers | verdict
+-------------+------------+--------+---------
+ SPREAD      |          0 |    272 | PASS
+ TOTAL       |          0 |    272 | PASS
+
+--- any violating wagers, named ---
+(0 rows)
+```
+
+The Browns/Falcons wager now reads Cleveland `-1.50` / Atlanta `+1.50`, and
+check 2 reports 1,634 modal rows across 1,634 selections with `several = 0` and
+`none_at_centre = 0`.
+
+**Remaining before freeze:** one clean sign-off from a fresh ingest — the run
+above was replayed against a capture that had aged past the TTL — and checks 8
+and 9 still need a slate near kickoff.
 
 ### 6a. Migration 046 equivalence proof
 

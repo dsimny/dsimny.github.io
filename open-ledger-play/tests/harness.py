@@ -53,6 +53,43 @@ def _guard_destructive_target(uri: str) -> None:
         )
 
 
+
+def _guard_captured_data() -> None:
+    """Refuse to drop a schema that holds a real provider capture.
+
+    The host check above cannot see this case: a live ingest lands in the SAME
+    local Supabase stack the suite runs against, so pointing at localhost is no
+    longer evidence the data is disposable. This was learned the direct way --
+    a 272-event / 4,560-quote captured slate, mid-investigation, was destroyed by
+    running the suite against the database holding it.
+
+    Anything whose source_provider is not 'FIXTURE' was written by a real
+    provider adapter and is not reproducible without spending API credits.
+    Override deliberately with OLP_ALLOW_WIPE_LIVE=1.
+    """
+    if os.environ.get("OLP_ALLOW_WIPE_LIVE") == "1":
+        return
+    try:
+        with connect() as conn, conn.cursor() as cur:
+            cur.execute("""
+                SELECT count(*), count(DISTINCT event_id)
+                FROM public.market_snapshots
+                WHERE source_provider <> 'FIXTURE'""")
+            quotes, events = cur.fetchone()
+    except Exception:
+        return          # no schema, no table, nothing to protect
+
+    if quotes:
+        raise RuntimeError(
+            "REFUSING TO MIGRATE: this database holds a real provider "
+            f"capture ({quotes} quotes across {events} events with "
+            "source_provider <> 'FIXTURE'). migrate() DROPS SCHEMA public, "
+            "which would destroy it, and re-capturing costs API credits. "
+            "Point the suite at a different database, or set "
+            "OLP_ALLOW_WIPE_LIVE=1 if you really mean it."
+        )
+
+
 def db_uri() -> str:
     """Boot (once) and return the connection URI.
 
@@ -121,6 +158,8 @@ def migrate(verbose: bool = False) -> list:
     """
     applied = []
     external = external_target()
+
+    _guard_captured_data()
 
     with connect() as conn, conn.cursor() as cur:
         cur.execute("DROP SCHEMA IF EXISTS olp_test CASCADE")

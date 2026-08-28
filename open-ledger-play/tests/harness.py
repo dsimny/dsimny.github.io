@@ -166,6 +166,7 @@ def migrate(verbose: bool = False) -> list:
         # Package #5's schemas. Dropped like public so each run rebuilds the
         # trust boundary from scratch; the olp_model ROLE is cluster-wide and
         # survives, which is why migration 050 revokes before it grants.
+        cur.execute("DROP SCHEMA IF EXISTS grading CASCADE")
         cur.execute("DROP SCHEMA IF EXISTS model CASCADE")
         cur.execute("DROP SCHEMA IF EXISTS model_input CASCADE")
         cur.execute("DROP SCHEMA IF EXISTS public CASCADE")

@@ -362,6 +362,19 @@ already works, rather than one built alongside it and tuned to flatter it.
 | 6 | First modelled market | **LOCKED** — moneyline. Binary outcome, straightforward probability semantics, and no push handling, spread geometry or total thresholds to mix in while the grader is being validated. The **harness stays market-type agnostic**; only the first model experiment is narrowed. |
 | 7 | Model access to its own performance | **LOCKED** — none in v1. §3.1 |
 
+## 11.1 Migration correction rule
+
+**Until the first persistent Package #5 environment or the first non-disposable
+Package #5 data exists, migrations may still be corrected in place. After that
+point they are strictly append-only.**
+
+A clear transition rather than an ambiguous "sometimes we edit old migrations".
+The condition is factual and checkable: today no database holds Package #5 data,
+every environment rebuilds from scratch, and no hosted project exists. `051` was
+corrected in place under this rule when `market_snapshot_id` was renamed to
+`formation_snapshot_id` — a cosmetic `052` memorialising a rename on a table that
+had never held a row would have been permanent noise.
+
 ## 12. Phase A — the grader and the null model, and nothing else
 
 **No predictive model code is written in Phase A.** The deliverable is the
@@ -384,10 +397,55 @@ end-to-end:
 | 10 | A planted **well-calibrated-but-useless** model legitimately ends `CALIBRATED / RESEARCH` |
 | 11 | The grader **does not care whether a belief would have won** |
 
-Proof 11 is the one that is easy to overlook and needs a negative control. A
-70% prediction that loses can still be an excellent probabilistic forecast; a
-51% prediction that wins is not thereby a good one. Betting-oriented systems
-drift toward win/loss grading by default, and this package must not.
+Proof 11 is the one that is easy to overlook and needs a negative control.
+Betting-oriented systems drift toward win/loss grading by default, and this
+package must not.
+
+**CORRECTION, made before implementation.** This proof was first written as
+*"a losing 70% forecast outscores a winning 51% forecast"*. That is
+**mathematically false** on a single observation, under both rules:
+
+```
+Brier(0.70, LOSS) = 0.4900     Brier(0.51, WIN) = 0.2401
+LogL (0.70, LOSS) = 1.2040     LogL (0.51, WIN) = 0.6733
+```
+
+The winner scores better, and it should — a proper scoring rule on one sample is
+dominated by the outcome. The intuition being reached for is real but it is an
+**aggregate** property, belonging to `053`: over a sample, a well-calibrated
+model beats a lucky one.
+
+The single-observation statement that is both true and load-bearing is
+**side-indifference plus properness**:
+
+```
+Brier(0.70, LOSS) == Brier(0.30, WIN)      exactly -- the grade depends on the
+LogL (0.70, LOSS) == LogL (0.30, WIN)      forecast and the outcome, never on
+                                           which side happened to win
+Brier(0.90, LOSS) >  Brier(0.60, LOSS)     confident-and-wrong is punished
+                                           harder: the rule is proper
+```
+
+plus the structural half: the grade record carries **no win-rate, profit, or
+"would this bet have won" field at all**, so win/loss grading cannot creep in
+later.
+
+### 12.1 Increment order
+
+The grader is built **before** the null model, because the null model should be
+just another producer of beliefs and not a privileged special case. If `052`
+cannot correctly grade planted beliefs, there is no point testing the null model
+against it.
+
+| Increment | Scope |
+|---|---|
+| `052` | grading primitives — outcome resolution, Brier, log loss, market-relative deltas, CLV recorded as observation only. **No calibration aggregation.** |
+| `053` | calibration — equal-count bins, Wilson intervals, weighted error, per-bin failure rule, `calibration_status` separate from `standing` |
+| `054` | null model — emits the de-vigged formation probability back, proves exact zero divergence at formation, and runs through the **same** grader as any future model with no special scoring path |
+
+**The grader grades stored facts. It never reconstructs what the model "must
+have meant".** Any probability, binding or provenance fact needed for grading is
+already immutably present in the belief record, or the belief cannot be graded.
 
 Only when all eleven hold does a real model become worth writing — arriving with
 a scoreboard that already works, rather than one built beside it and tuned to
@@ -430,7 +488,7 @@ including one latent since migration `038`.
 | `P5-T19` | 8 | Null model: formation-market divergence is **exactly** zero |
 | `P5-T20` | 9 | A planted bad model scores worse than the null on both proper scoring rules |
 | `P5-T21` | 10 | A planted well-calibrated-but-useless model ends `CALIBRATED` **and** `RESEARCH` |
-| `P5-T22` | 11 | The grader is indifferent to win/loss: a losing 70% forecast outscores a winning 51% forecast |
+| `P5-T22` | 11 | The grader scores forecasts, not bets: `Brier(0.70, LOSS) == Brier(0.30, WIN)` exactly, `Brier(0.90, LOSS) > Brier(0.60, LOSS)`, and the grade record has no win-rate or profit field |
 | `P5-T23` | — | Weighted calibration error ≤ 3pp passes, and a single bin at 8pp fails despite a good weighted average |
 
 ## 14. Out of scope

@@ -6,6 +6,8 @@ event/selections carry more than one line at once, so any blending across lines
 would quietly mix different wagers.
 """
 
+import re
+
 import harness as h
 from test_acceptance import new_user, open_chapter, place
 
@@ -862,18 +864,26 @@ def t28_reference_side_is_a_frame_not_a_preference():
 
 
 def _plan_nodes(admin, sql, timeout_s=60):
-    """EXPLAIN (ANALYZE) -> [(node_text, est_rows, act_rows, loops)].
+    """EXPLAIN (ANALYZE) -> ([(node, est, act, loops, self_ms)], total_ms).
+
+    self_ms is the node's OWN time: inclusive time minus its direct children's,
+    derived by tracking indentation to rebuild the plan tree. Inclusive time is
+    useless as a share -- a top-level join's inclusive time is essentially the
+    whole query, so every ancestor would look like it dominated.
+
+    Share of execution time is used rather than absolute row touches because
+    touches do not transfer between board sizes: the same healthy Materialize
+    measured 108,000 touches on an 1,800-quote fixture and 2,108,864 on a
+    4,552-quote live board.
 
     Bounded. EXPLAIN ANALYZE has to EXECUTE the query, so a pathological plan
-    makes the guard itself hang -- observed at over eight minutes on a
+    makes the guard itself hang -- observed at over eight minutes on an
     1,800-quote fixture. A plan that cannot be instrumented inside the bound is
     itself the finding, so the timeout is surfaced rather than swallowed.
     """
-    import re
     admin.execute(f"SET statement_timeout = '{timeout_s}s'")
-    rows = []
     try:
-        explained = h.rows(admin, "EXPLAIN (ANALYZE, TIMING OFF) " + sql)
+        explained = h.rows(admin, "EXPLAIN (ANALYZE) " + sql)
     except Exception as exc:
         if "statement timeout" not in str(exc).lower():
             raise
@@ -883,13 +893,36 @@ def _plan_nodes(admin, sql, timeout_s=60):
             f"it costs more than the fixture has rows to justify.") from None
     finally:
         admin.execute("SET statement_timeout = 0")
+
+    NODE = (r"(.*?)\s+\(cost=[\d.]+\.\.[\d.]+ rows=(\d+).*?\)"
+            r"\s+\(actual time=[\d.]+\.\.([\d.]+) rows=(\d+) loops=(\d+)\)")
+    parsed, total = [], 0.0
     for (line,) in explained:
-        m = re.search(r"(.*?)\s+\(cost=[\d.]+\.\.[\d.]+ rows=(\d+).*?\)"
-                      r"\s+\(actual rows=(\d+) loops=(\d+)\)", line)
-        if m:
-            rows.append((m.group(1).strip(), int(m.group(2)),
-                         int(m.group(3)), int(m.group(4))))
-    return rows
+        t = re.search(r"Execution Time: ([\d.]+)", line)
+        if t:
+            total = float(t.group(1))
+            continue
+        m = re.search(NODE, line)
+        if not m:
+            continue
+        indent = len(line) - len(line.lstrip())
+        incl = float(m.group(3)) * int(m.group(5))
+        parsed.append({"indent": indent, "node": m.group(1).strip(),
+                       "est": int(m.group(2)), "act": int(m.group(4)),
+                       "loops": int(m.group(5)), "incl": incl, "kids": 0.0})
+
+    # Attribute each node's inclusive time to its parent's children total.
+    stack = []
+    for n in parsed:
+        while stack and stack[-1]["indent"] >= n["indent"]:
+            stack.pop()
+        if stack:
+            stack[-1]["kids"] += n["incl"]
+        stack.append(n)
+
+    rows = [(n["node"], n["est"], n["act"], n["loops"],
+             max(n["incl"] - n["kids"], 0.0)) for n in parsed]
+    return rows, max(total, 0.001)
 
 
 def _seed_dense(admin):
@@ -1001,9 +1034,16 @@ def t29_no_pathological_rescan_on_either_board_shape():
     # planner CHOICE about how to combine relations, not a relation being
     # re-executed. A Materialize exists precisely to make rescans cheap, and a
     # Nested Loop with a high loop count is the symptom whose cause is already
-    # caught above. Both are reported, and only fail on evidence an order of
-    # magnitude stronger.
-    MAT_RATIO, MAT_LOOPS, MAT_REPEATED = 100, 100, 1_000_000
+    # caught above.
+    #
+    # Judged by SHARE OF EXECUTION TIME, not by absolute row touches, because
+    # row touches do not transfer between board sizes: the same healthy
+    # Materialize measured 108,000 touches on the 1,800-quote fixture and
+    # 2,108,864 on a 4,552-quote live board -- tripping every absolute
+    # threshold while consuming 13.8% of execution. Time share is
+    # scale-invariant; a node that genuinely dominates a plan does so at any
+    # size.
+    MAT_RATIO, MAT_LOOPS, MAT_SHARE = 100, 100, 0.50
 
     admin = h.connect()
     advisories, checked = [], 0
@@ -1014,10 +1054,12 @@ def t29_no_pathological_rescan_on_either_board_shape():
         # originates here, and instrumenting the full composition costs far
         # more than it reveals (it is what hung the guard for eight minutes).
         for view in ("canonical_market", "executable_market"):
-            for node, est, act, loops in _plan_nodes(
-                    admin, f"SELECT count(*) FROM public.{view}"):
+            nodes, total_ms = _plan_nodes(
+                admin, f"SELECT count(*) FROM public.{view}")
+            for node, est, act, loops, self_ms in nodes:
                 checked += 1
                 ratio, repeated = act / max(est, 1), act * loops
+                share = self_ms / total_ms
                 suspicious = (ratio >= RATIO and loops >= LOOPS
                               and repeated >= REPEATED)
                 if not suspicious:
@@ -1027,7 +1069,7 @@ def t29_no_pathological_rescan_on_either_board_shape():
                     fatal = True
                 else:
                     fatal = (ratio >= MAT_RATIO and loops >= MAT_LOOPS
-                             and repeated >= MAT_REPEATED)
+                             and share >= MAT_SHARE)
                 if fatal:
                     raise AssertionError(
                         f"{shape}/{view}: pathological repeated execution.\n"
@@ -1036,13 +1078,14 @@ def t29_no_pathological_rescan_on_either_board_shape():
                         f"  estimated  {est} rows, actual {act}, loops {loops}\n"
                         f"  ratio      {ratio:.0f}x underestimate\n"
                         f"  touches    {repeated:,} rows of repeated work\n"
+                        f"  self time  {share:.1%} of execution\n"
                         f"  Two statistics-free CTEs joined together estimate at "
                         f"one row, which makes a nested loop look free. Keep "
                         f"each stage a DISTINCT ON, aggregate or window over ONE "
                         f"relation -- see migrations 048 and 049.")
                 advisories.append(
                     f"{view}/{ntype} est={est} act={act} loops={loops} "
-                    f"touches={repeated:,}")
+                    f"touches={repeated:,} share={share:.0%}")
     admin.close()
     detail = f"{checked} plan nodes checked, 0 pathological"
     if advisories:

@@ -206,107 +206,61 @@ framework, and it immediately found an eleven-migration-old latent defect
 nobody was looking for.** Timing tests detect symptoms; plan-structure guards
 detect latent scaling failures.
 
-## 6. Live sign-off — 8 PASS, 2 unexercised, 1 FAIL
+## 6. Live sign-off — 8 PASS, 2 unexercised, 0 FAIL
 
-Fresh capture, three polls: **272 events, 13,680 quotes, 10 bookmakers**
-(The Odds API, NFL), at `14:09:45`, `14:16:01` and `14:17:53` UTC on
-2026-08-28. Whole sign-off runs in **~16 s**; the first attempt, before `046`,
-died on check 3 after twenty minutes.
+Fresh capture: **272 events, 4,552 quotes, 10 bookmakers** (The Odds API, NFL),
+2026-08-28. Whole sign-off ~10.5 s. The first attempt, before `046`, died on
+check 3 after twenty minutes.
 
-*(The census line reads 273 events / 12 books: four stale `FIXTURE` quotes from
-a prior test run are also in the table. They are 663 s old, contribute **0**
-canonical rows and affect no check.)*
+*(The census reads 332 events / 6,352 quotes / 15 books: an 1,800-quote
+synthetic fixture from a prior test run shares the table. It is 10,260 s old,
+contributes 0 canonical rows and affects no check.)*
 
 | # | Check | Result | Time |
 |---|---|---|---|
-| 1 | canonical = distinct fresh keys | **PASS** — 2,476 = 2,476 | 326 ms |
-| 2 | modal = one per event/market/selection | **PASS** — 1,632 = 1,632 | 299 ms |
-| 3 | executable subset, 0 orphans | **PASS** — 1,240 ⊂ 2,476 | 1,085 ms |
-| 4 | market-quality distribution | UNUSABLE 48.7%, DEGRADED 40.4%, OK 10.9% | 311 ms |
-| 5 | spread modal mirror violations | **FAIL** — 1 of 272 — *fixed in `047`, see below* | 1.8 s |
-| 6 | de-vig pair failures | **PASS** — 0 unpaired; 1,238 paired wagers, worst deviation from 1 `0.000000` | 604 ms |
-| 7 | cross-line leakage (two probes) | **PASS** — 0 and 0 | 935 / 288 ms |
-| 8 | canonical-vs-executable substitutions | **UNEXERCISED** — 0 of 1,240, 0 impossible improvements | 2.1 s |
-| 9 | movement rows / direction sanity | **UNEXERCISED** — 2,476 rows, 0 violations on both probes | 444 ms |
-| 10 | execution handoff via `best_snapshot_id` | **PASS** — 0 on every sub-check | 427 ms |
+| 1 | canonical = distinct fresh keys | **PASS** — 2,472 = 2,472 | 315 ms |
+| 2 | modal per selection; several / none-at-centre | **PASS** — 1,632 = 1,632, 0, 0 | 327 ms |
+| 3 | executable subset, 0 orphans | **PASS** — 1,240 ⊂ 2,472 | **779 ms** |
+| 4 | market-quality distribution | UNUSABLE 48.6%, DEGRADED 40.5%, OK 10.8% | 288 ms |
+| 5 | spread modal mirror violations | **PASS** — 0 of 272 spread, 0 of 272 total | 608 ms |
+| 6 | de-vig pair failures | **PASS** — 0 unpaired; 1,236 paired wagers, worst deviation `0.000000` | 571 ms |
+| 7 | cross-line leakage (two probes) | **PASS** — 0 and 0 | 307 / 300 ms |
+| 8 | canonical-vs-executable substitutions | **UNEXERCISED** — 0 of 1,240, 0 impossible improvements | 772 ms |
+| 9 | movement rows / direction sanity | **UNEXERCISED** — 2,472 rows, 0 violations on both probes | 485 ms |
+| 10 | execution handoff via `best_snapshot_id` | **PASS** — 0 on every sub-check | 496 ms |
 
-Reason codes: `SINGLE_BOOK` 48.7%, `LOW_BOOK_COUNT` 40.0%,
-`WIDE_DISPERSION` 1.2%, `LINE_FRAGMENTED` 0.3%. The large `SINGLE_BOOK` share is
-the alternate-line long tail failing closed — the designed behaviour, not a
-warning.
+**Check 3 went from over twenty minutes to 779 ms**, and **check 5 from 1
+violation to 0** — `047`/`048` confirmed on real data, not just on fixtures.
 
-### Why checks 8 and 9 are recorded as unexercised, not passed
+### Plan evidence on the live board
 
-Across all three polls the market did not move **at all**:
+The reason this closes, rather than merely passing:
 
 ```
-4,560 quote series, 3 observations each
-      0 with a price change   (max distinct prices per series = 1)
-      0 with a line change
+canonical_market   CTE Scan on modal      est 200 / act 1992 / loops 1   ratio 10x
+canonical_market   CTE Scan on best_ties  est 200 / act 3072 / loops 1   ratio 15x
+
+pathological relation-scan rescans: 0
 ```
 
-So `market_movement` reporting `FLAT` on all 2,476 rows is *correct*, and zero
-substitutions is *correct* — but neither result can distinguish working code
-from code that always returns zero. The cause is the slate, not the market being
-quiet by chance: **no captured event kicks off within 24 hours.** The nearest is
-298 hours out and the furthest 135 days. Lines that far from kickoff are close to
-static, and the provider very likely serves an unchanged snapshot.
+Under `047` that `modal` node was `est 1 / act 1634 / loops 2480`. The estimate
+is sane and nothing is rescanned, on the dense shape that caused the pathology
+in the first place.
 
-Validating these two checks requires a capture that spans real movement, which
-means polling a slate near kickoff. That is a scheduling question, not a code
-question, and it is carried forward as an open item rather than counted as a
-pass.
+One advisory node, and it is instructive: `executable_market`'s `Materialize`
+measured `est 32 / act 6352 / loops 332` — **2,108,864 row touches**, tripping
+every absolute threshold — while consuming **13.8%** of an 825 ms execution.
+That is what forced `P4-T29`'s second tier onto share-of-execution-time instead
+of row counts. Absolute counts do not transfer between board sizes; the same
+healthy node reads 108,000 touches on the 1,800-quote fixture.
 
-### The check 5 failure
+### Checks 8 and 9 remain unexercised
 
-```
-Cleveland Browns vs Atlanta Falcons
-    Atlanta Falcons    modal_line  -1.50
-    Cleveland Browns   modal_line  -1.50
-```
-
-Both sides report themselves favoured. Reproduced identically on two independent
-captures, so it is deterministic, not a fluke.
-
-This is **the exact residual case migration `043` documented as unresolvable by
-any sign-blind rule**: the line has crossed zero. Books are split on who is
-favoured in a near-pick'em, so Atlanta's candidate lines are `{-1.5, +1.5}` and
-Cleveland's are `{-1.5, +1.5}`. Book counts tie, magnitudes tie at 1.5, and the
-final `line ASC` tie-break picks the negative value **for each side
-independently**.
-
-Rate: 1 of 272 spread wagers, 0.37%.
-
-No sign-blind, per-selection rule can fix it — for either selection the candidate
-set is identical, so any deterministic function of that set returns the same
-answer for both. The fix has to decide at the **wager** level and mirror outward:
-pick the modal line once per `(event, market_type)` from a fixed reference side
-(home for spreads, `OVER` for totals) and negate it for the other side. Mirrored
-by construction; it changes nothing on the 271 wagers where the sides already
-agree, and it leaves bookmaker count as the only substantive criterion.
-
-### Resolved in migration 047
-
-The fix was approved and implemented. Re-run against the same captured board:
-
-```
-=== 5. SPREAD MODAL MIRROR VIOLATIONS (must be 0) ===
- market_type | violations | wagers | verdict
--------------+------------+--------+---------
- SPREAD      |          0 |    272 | PASS
- TOTAL       |          0 |    272 | PASS
-
---- any violating wagers, named ---
-(0 rows)
-```
-
-The Browns/Falcons wager now reads Cleveland `-1.50` / Atlanta `+1.50`, and
-check 2 reports 1,634 modal rows across 1,634 selections with `several = 0` and
-`none_at_centre = 0`.
-
-**Remaining before freeze:** one clean sign-off from a fresh ingest — the run
-above was replayed against a capture that had aged past the TTL — and checks 8
-and 9 still need a slate near kickoff.
+Recorded as *not disconfirming* rather than as passes. A single poll leaves
+opening equal to current, so every row reads `FLAT` and no book has moved off a
+line — the code cannot be distinguished from code that always returns zero.
+Validating them needs a capture spanning real movement, i.e. polls against a
+slate near kickoff. Carried forward as an open item.
 
 ### 6a. Migration 046 equivalence proof
 

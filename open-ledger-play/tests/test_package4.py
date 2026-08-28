@@ -869,6 +869,104 @@ def t28_reference_side_is_a_frame_not_a_preference():
     return "3 books at -3.5 beat 1 at -3.0 on both sides; counts 3/3"
 
 
+
+def _plan_nodes(admin, sql):
+    """EXPLAIN (ANALYZE) -> [(node_text, est_rows, act_rows, loops)]."""
+    import re
+    rows = []
+    for (line,) in h.rows(admin, "EXPLAIN (ANALYZE, TIMING OFF) " + sql):
+        m = re.search(r"(.*?)\s+\(cost=[\d.]+\.\.[\d.]+ rows=(\d+).*?\)"
+                      r"\s+\(actual rows=(\d+) loops=(\d+)\)", line)
+        if m:
+            rows.append((m.group(1).strip(), int(m.group(2)),
+                         int(m.group(3)), int(m.group(4))))
+    return rows
+
+
+def _seed_dense(admin):
+    """The dense board: many events, books and lines."""
+    admin.execute("""
+        SELECT olp_test.create_event('D-'||g, 'H'||g, 'A'||g, INTERVAL '4 hours')
+        FROM generate_series(1, 60) g""")
+    admin.execute("""
+        WITH ev AS (SELECT id, home_team, away_team,
+                           substring(source_event_id from 3)::int AS seq
+                    FROM public.events)
+        INSERT INTO public.market_snapshots (event_id, market_type, selection, line,
+                     price, sportsbook, source_provider, captured_at, is_in_play)
+        SELECT e.id, m.mt, sel.s,
+               CASE m.mt WHEN 'MONEYLINE' THEN NULL
+                         WHEN 'SPREAD' THEN (CASE WHEN sel.is_home THEN -1 ELSE 1 END)
+                                            * (3.0 + 0.5 * (b.n % 2))
+                         ELSE 44.5 + 0.5 * (b.n % 2) END,
+               -110, 'book'||b.n, 'FIXTURE', NOW(), FALSE
+        FROM ev e
+        CROSS JOIN LATERAL (VALUES ('MONEYLINE'::public.market_type),('SPREAD'),('TOTAL')) m(mt)
+        CROSS JOIN LATERAL (
+            SELECT CASE WHEN m.mt='TOTAL' THEN 'OVER'  ELSE e.home_team END, TRUE
+            UNION ALL
+            SELECT CASE WHEN m.mt='TOTAL' THEN 'UNDER' ELSE e.away_team END, FALSE
+        ) sel(s, is_home)
+        CROSS JOIN LATERAL generate_series(1, 5) b(n)""")
+
+
+def _seed_single(admin):
+    """The small board: one event, one market, two books -- the degenerate shape
+    where every cardinality is tiny and the planner has the least to work with."""
+    ev = event(admin, "SMALL")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "SPREAD", -3.0, -110, -110, bk)
+
+
+def t29_modal_node_stays_estimable_on_both_board_shapes():
+    """A structural guard, deliberately not a timing one.
+
+    Migration 047 built `modal` by joining two statistics-free CTEs. That
+    collapsed the planner's estimate for the node from 200 groups to 1 row, and
+    on the live board it then nested-looped and rescanned a 1,634-row CTE 2,480
+    times -- twenty minutes of check 3.
+
+    The collapse is present on a SYNTHETIC board too, but latent: the estimate
+    is equally wrong and the timing is fine, because the surrounding plan
+    happens not to choose a nested loop. So no wall-clock threshold on any
+    single fixture could have caught 047. The defect is visible in the ESTIMATE,
+    on every board, which is what this asserts.
+
+    Checked on both shapes because they exercise different planner regimes.
+    """
+    admin = h.connect()
+    verdicts = []
+    for shape, seed in (("dense", _seed_dense), ("single-event", _seed_single)):
+        h.reset(admin)
+        seed(admin)
+        admin.execute("ANALYZE public.market_snapshots")
+        admin.execute("ANALYZE public.events")
+
+        nodes = _plan_nodes(admin, "SELECT count(*) FROM public.canonical_market")
+        modal = [n for n in nodes if "CTE Scan on modal" in n[0]]
+        assert modal, f"{shape}: no `modal` CTE scan in the plan -- has the view changed shape?"
+        node, est, act, loops = modal[0]
+
+        # Proportionate, not absolute. On a degenerate board -- one event, two
+        # rows -- an estimate of 1 is reasonable and two rescans cost nothing;
+        # asserting loops == 1 there would fail on a healthy view. The defect
+        # only means anything once the CTE is big enough for a rescan to hurt.
+        if act >= 50:
+            assert loops == 1, (
+                f"{shape}: the modal CTE holds {act} rows and is rescanned "
+                f"{loops} times (est {est}). It is being re-executed per "
+                f"output row -- see migration 048.")
+            assert est * 10 > act, (
+                f"{shape}: the planner estimates the modal CTE at {est} row(s) "
+                f"against {act} actual, a collapse of more than 10x. A "
+                f"CTE-to-CTE join has no statistics on either side and bottoms "
+                f"out at 1, which makes nested loops look free. Keep `modal` a "
+                f"DISTINCT ON over ONE relation -- see migration 048.")
+        verdicts.append(f"{shape} est={est} act={act} loops={loops}")
+    admin.close()
+    return "; ".join(verdicts)
+
+
 PACKAGE4 = [
     ("P4-T01", "Different lines are separate rows", t01_different_lines_are_separate_rows),
     ("P4-T02", "Best price never crosses lines", t02_best_price_never_crosses_lines),
@@ -898,4 +996,5 @@ PACKAGE4 = [
     ("P4-T26", "Best price ranks on exact payout", t26_best_price_ranks_on_exact_payout_not_rounded_money),
     ("P4-T27", "Zero-crossing wager has one centre", t27_zero_crossing_wager_has_one_centre),
     ("P4-T28", "Reference side is a frame, not a preference", t28_reference_side_is_a_frame_not_a_preference),
+    ("P4-T29", "Modal node stays estimable on both board shapes", t29_modal_node_stays_estimable_on_both_board_shapes),
 ]

@@ -107,9 +107,9 @@ database that applied an earlier migration reaches the same final state.
 
 `CHECK (mi_execution_min_book_count <= mi_min_book_count)`.
 
-## 5. Tests — 154/154
+## 5. Tests — 155/155
 
-28 Package #4 tests (`P4-T01`…`P4-T28`) inside a 154-test suite, green on
+29 Package #4 tests (`P4-T01`…`P4-T29`) inside a 155-test suite, green on
 **PostgreSQL 16.2** and **Supabase 17.6**.
 
 Seven defects were found during the package and each has a negative control
@@ -129,6 +129,39 @@ The recurring lesson, recorded in `PACKAGE4_PREREG.md` §12.1 and §12.5: **an
 invariant has to be tested on inputs that can actually violate it.** The modal
 bias hid because the invariance tests ran on totals; the comparator bug hid
 because the payout test used prices too far apart to collide.
+
+### 5a. Performance acceptance needs two fixtures and a structural assertion
+
+Wall-clock acceptance on one dataset shape is not sufficient, and this package
+proved it twice.
+
+**Two benchmark fixtures are now required** for any change to these views:
+
+| Fixture | Shape | What it exercises |
+|---|---|---|
+| dense | 60 events × 3 markets × 2 sides × 5 books × 2 lines | high-cardinality planning, join ordering, rescans |
+| single-event | 1 event, 1 market, 2 books | the degenerate regime, where every estimate is tiny |
+
+**But timing on either fixture would have missed migration 047.** Its defect was
+a collapsed cardinality estimate on the `modal` node. On the dense live board
+that produced 2,480 rescans and a twenty-minute check 3; on the synthetic board
+the estimate was *equally wrong* and the timing was *fine*, because the
+surrounding plan happened not to choose a nested loop:
+
+```
+modal node        046  est 200 / act 1632  loops 1
+                  047  est   1 / act 1632  loops 1      <- collapsed but LATENT
+                  048  est 200 / act 1632  loops 1
+```
+
+So `P4-T29` asserts the **plan**, not the clock: on each fixture it reads
+`EXPLAIN (ANALYZE)`, finds the `modal` CTE scan, and — once the node holds
+enough rows for a rescan to matter — requires `loops = 1` and an estimate within
+10× of actual. Negative control: reverting `048` reports
+`dense: the modal CTE holds 360 rows and is rescanned 600 times (est 1)`.
+
+Timing thresholds remain in `P4-T24`, but as tripwires with deliberately loose
+bounds; they are not the acceptance criterion.
 
 ## 6. Live sign-off — 8 PASS, 2 unexercised, 1 FAIL
 

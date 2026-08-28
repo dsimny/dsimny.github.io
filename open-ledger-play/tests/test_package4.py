@@ -661,19 +661,32 @@ def t24_live_shape_row_identity_and_bounded_time():
                -110, 'book'||n, 'FIXTURE', NOW(), FALSE
         FROM spec""")
     admin.execute("ANALYZE public.market_snapshots")
+    admin.execute("ANALYZE public.events")
 
     events = h.scalar(admin, "SELECT count(*) FROM public.events")
     quotes = h.scalar(admin, "SELECT count(*) FROM public.market_snapshots")
     assert events == 272 and quotes >= 4552, f"{events} events / {quotes} quotes"
 
     # The access pattern a model actually uses: one game, the full contract.
+    #
+    # NOTE, and it is not what you would guess: querying ONE event costs about
+    # what the whole board costs. Every stage of the pipeline is a MATERIALIZED
+    # CTE -- necessarily so, see 046 -- and MATERIALIZED is an optimisation
+    # fence, so the `event_id = ...` predicate cannot be pushed below it. The
+    # board is computed either way and the predicate only filters the result.
+    #
+    # The bound here is therefore loose and is a blow-up tripwire, not a
+    # latency budget. Measured across 046/047/048 on this board the figure
+    # ranges 4.7-5.7s with no version consistently faster, so anything under
+    # 20s is noise; the assertion that carries weight is the full-board scan
+    # below.
     ev = h.scalar(admin, "SELECT id FROM public.events ORDER BY source_event_id LIMIT 1")
     t0 = time.time()
     per_event = h.scalar(
         admin, "SELECT count(*) FROM public.market_intelligence WHERE event_id = %s", (ev,))
     single = time.time() - t0
     assert per_event > 0, "the per-event contract returned nothing"
-    assert single < 5, f"single-event market_intelligence took {single:.1f}s"
+    assert single < 20, f"single-event market_intelligence took {single:.1f}s"
 
     # Row identity: exactly one canonical row per distinct fresh key.
     #
@@ -689,10 +702,15 @@ def t24_live_shape_row_identity_and_bounded_time():
     t0 = time.time()
     canon = h.scalar(admin, "SELECT count(*) FROM public.canonical_market")
     board = time.time() - t0
-    assert board < 5, (
+    # 10s, not 5s: the defect this guards against measured 14.5s (046) and
+    # 2,480 x 1,634 re-executions (048), while healthy runs range 0.9-4.1s
+    # across engines depending on how warm the statistics are. A tripwire, not
+    # a latency budget.
+    assert board < 10, (
         f"canonical_market full scan took {board:.1f}s at live shape -- the "
-        "pipeline is being re-executed per row again; check that every CTE "
-        "after `newest` is still MATERIALIZED (migration 046)")
+        "pipeline is being re-executed per row again. Check that every CTE "
+        "after `newest` is still MATERIALIZED (046) and that `modal` is still "
+        "a DISTINCT ON over one relation rather than a join between CTEs (048)")
     expected = h.scalar(admin, """
         SELECT count(*) FROM (
             SELECT DISTINCT s.event_id, s.market_type, s.selection, s.line

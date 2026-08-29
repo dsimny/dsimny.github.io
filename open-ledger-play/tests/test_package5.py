@@ -955,6 +955,195 @@ def t33_the_shipped_thresholds_are_the_pre_registered_ones():
             "one graded belief is PROVISIONAL / RESEARCH")
 
 
+
+# =============================================================================
+# Increment 5 -- the null producer
+# =============================================================================
+
+def _null(conn, ev, sel="DAL", line=None, version="1.0.0"):
+    return h.scalar(conn, """
+        SELECT model.null_model_belief(%s::uuid, %s, %s, %s::numeric, %s)""",
+        (ev, "MONEYLINE", sel, line, version))
+
+
+def _assert_zero_divergence(admin, belief_id):
+    """The null identity. EXACT, not close enough."""
+    p_model, p_market, delta = h.row(admin, """
+        SELECT model_probability, market_probability_at_formation, probability_delta
+        FROM model.belief_deltas WHERE belief_id = %s""", (belief_id,))
+    assert p_model == p_market, (
+        f"null model said {p_model}, market said {p_market} -- not an exact "
+        "reproduction")
+    assert float(delta) == 0.0, f"probability_delta is {delta}, not exactly zero"
+    return p_model
+
+
+def t34_the_null_producer_reproduces_the_market_exactly():
+    """Zero divergence at formation is an identity, and the binding and input
+    hash are stamped by the ordinary path with nothing special about them."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+
+    model = h.connect_as("olp_model")      # ordinary model authority, nothing more
+    bid = _null(model, ev)
+    model.close()
+
+    p = _assert_zero_divergence(admin, bid)
+
+    mkt, snap, hsh, lo, hi, meth, mid, ver = h.row(admin, """
+        SELECT b.market_probability_at_formation, b.formation_snapshot_id,
+               b.market_input_hash, b.lower_bound, b.upper_bound,
+               b.uncertainty_method, b.model_id, b.model_version
+        FROM model.beliefs b WHERE b.belief_id = %s""", (bid,))
+    exec_snap, recomputed = h.row(admin, """
+        SELECT executable_snapshot_id, md5(to_jsonb(t)::text)
+        FROM model_input.market_intelligence t
+        WHERE event_id=%s AND market_type='MONEYLINE' AND selection='DAL'""", (ev,))
+
+    assert snap == exec_snap, "binding is not the ordinary executable anchor"
+    assert hsh == recomputed, "input hash is not the ordinary stamped value"
+    # it states no interval, because it has no uncertainty model
+    assert (lo, hi, meth) == (None, None, None), (lo, hi, meth)
+    assert (mid, ver) == ("null", "1.0.0")
+    admin.close()
+    return f"null belief p={p} == market, delta exactly 0, ordinary binding and hash"
+
+
+def t35_the_null_producer_grades_and_calibrates_through_the_ordinary_path():
+    """No special grader path and no special calibration path. It goes through
+    052 and 053 exactly as any model would, and comes out AT_PARITY -- which is
+    the honest verdict for a model that reproduces the market."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=20, bin_count=2, min_bin_count=5)
+
+    # twenty markets; the market is well calibrated, so the null model is too
+    for i in range(10):
+        ev = _market(admin, f"T35-H{i}", -600, 500)
+        bid = _null(admin, ev)
+        _resolve(admin, ev, "DAL", "WIN" if i < 8 else "LOSS")
+        _grade(admin, bid)
+    for i in range(10):
+        ev = _market(admin, f"T35-L{i}", 500, -600)
+        bid = _null(admin, ev)
+        _resolve(admin, ev, "DAL", "WIN" if i < 2 else "LOSS")
+        _grade(admin, bid)
+
+    # graded by 052 with no special casing: model and market scores identical
+    same = h.scalar(admin, """
+        SELECT count(*) FROM grading.belief_grades
+        WHERE scoring_status='SCORED'
+          AND (model_brier IS DISTINCT FROM market_brier
+            OR model_log_loss IS DISTINCT FROM market_log_loss
+            OR brier_delta <> 0 OR log_loss_delta <> 0)""")
+    assert same == 0, f"{same} graded null beliefs diverged from the market"
+
+    st = h.row(admin, "SELECT * FROM grading.standing_report('null','1.0.0')")
+    n, bss, lli, standing = st[0], float(st[3]), float(st[6]), st[7]
+    assert n == 20, n
+    assert bss == 0.0 and lli == 0.0, (bss, lli)
+    assert standing == "AT_PARITY", standing
+
+    cal = h.row(admin, "SELECT * FROM grading.calibration_report('null','1.0.0')")
+    assert cal[0] == 20 and cal[5] in ("CALIBRATED", "DEGRADED"), cal
+    admin.close()
+    return (f"graded through 052 (brier_delta 0 on all {n}); 053 gives "
+            f"BSS {bss}, standing {standing}, calibration {cal[5]}")
+
+
+def t36_a_planted_clv_does_not_disturb_the_null_identity():
+    """Zero divergence at FORMATION is asserted. Zero future CLV is not, because
+    the closing probability moves -- an empirical expectation, not a fact."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    bid = _null(admin, ev)
+
+    form = h.row(admin, """
+        SELECT s.sportsbook, s.line FROM model.beliefs b
+        JOIN public.market_snapshots s ON s.id = b.formation_snapshot_id
+        WHERE b.belief_id = %s""", (bid,))
+    admin.execute("""
+        INSERT INTO public.market_snapshots
+            (event_id, market_type, selection, line, price, sportsbook,
+             source_provider, captured_at, is_in_play, is_closing_snapshot)
+        VALUES (%s,'MONEYLINE','DAL',%s,-260,%s,'FIXTURE',NOW(),FALSE,TRUE)""",
+        (ev, form[1], form[0]))
+
+    _resolve(admin, ev, "DAL", "WIN")
+    _grade(admin, bid)
+    status, delta, bd = h.row(admin, """
+        SELECT clv_status, clv_payout_delta, brier_delta
+        FROM grading.belief_grades WHERE belief_id = %s""", (bid,))
+
+    assert status == "OBSERVED" and float(delta) != 0.0, (status, delta)
+    _assert_zero_divergence(admin, bid)        # identity survives untouched
+    assert float(bd) == 0.0, "a non-zero CLV moved the model-vs-market score"
+    admin.close()
+    return f"CLV observed at {float(delta):+.4f}; formation identity still exact"
+
+
+def t37_a_perturbed_null_must_fail_the_identity():
+    """Proves the proof. 'Null' means EXACT market reproduction, not close
+    enough -- so a producer offset by a single thousandth must be rejected by
+    the same assertion that accepts the real one."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+
+    real = _null(admin, ev)
+    _assert_zero_divergence(admin, real)       # the genuine article passes
+
+    # the same market, one thousandth off
+    market_p = float(h.scalar(admin, """
+        SELECT consensus_probability FROM model_input.market_intelligence
+        WHERE event_id=%s AND market_type='MONEYLINE' AND selection='DAL'""", (ev,)))
+    for bk in ("bookA", "bookB"):               # move it so a second belief is allowed
+        two_sided(admin, ev, "MONEYLINE", None, -152, 132, bk)
+    market_p2 = float(h.scalar(admin, """
+        SELECT consensus_probability FROM model_input.market_intelligence
+        WHERE event_id=%s AND market_type='MONEYLINE' AND selection='DAL'""", (ev,)))
+    perturbed = _form(admin, ev, prob=round(market_p2 + 0.001, 6),
+                      model_id="null", model_version="1.0.0")
+
+    try:
+        _assert_zero_divergence(admin, perturbed)
+    except AssertionError:
+        admin.close()
+        return (f"exact reproduction accepted (p={market_p}); +0.001 offset "
+                "rejected by the same assertion")
+    raise AssertionError(
+        "a producer offset by 0.001 satisfied the zero-divergence proof -- "
+        "'null' has been allowed to mean 'close enough'")
+
+
+def t38_no_special_case_exists_for_the_null_model():
+    """Structural. If any grading or calibration routine names the null model,
+    every result it produces about that model is suspect."""
+    admin = h.connect(); h.reset(admin)
+
+    defs = h.rows(admin, """
+        SELECT n.nspname || '.' || p.proname, pg_get_functiondef(p.oid)
+        FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname IN ('grading', 'model')
+          AND p.proname NOT IN ('null_model_belief')""")
+    assert defs, "no functions found -- this test would pass vacuously"
+    for name, src in defs:
+        low = src.lower()
+        for needle in ("null_model", "'null'", "passthrough"):
+            assert needle not in low, (
+                f"{name} references {needle!r} -- the null model has a "
+                "special case in the measurement system")
+
+    # and nothing in the schema is shaped around it
+    cols = h.rows(admin, """
+        SELECT table_schema||'.'||table_name||'.'||column_name
+        FROM information_schema.columns
+        WHERE table_schema IN ('model','grading')
+          AND (column_name ILIKE '%%null_model%%' OR column_name ILIKE '%%baseline%%'
+            OR column_name ILIKE '%%reference_model%%')""")
+    assert not cols, f"schema carries null-model-specific columns: {cols}"
+    admin.close()
+    return f"{len(defs)} grading/model routines checked, none names the null model"
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -1004,4 +1193,14 @@ PACKAGE5 = [
      t32_win_rate_and_probabilistic_quality_can_disagree),
     ("P5-T33", "Shipped thresholds are the pre-registered ones",
      t33_the_shipped_thresholds_are_the_pre_registered_ones),
+    ("P5-T34", "Null producer reproduces the market exactly",
+     t34_the_null_producer_reproduces_the_market_exactly),
+    ("P5-T35", "Null grades and calibrates through the ordinary path",
+     t35_the_null_producer_grades_and_calibrates_through_the_ordinary_path),
+    ("P5-T36", "Planted CLV does not disturb the null identity",
+     t36_a_planted_clv_does_not_disturb_the_null_identity),
+    ("P5-T37", "A perturbed null must fail the identity",
+     t37_a_perturbed_null_must_fail_the_identity),
+    ("P5-T38", "No special case exists for the null model",
+     t38_no_special_case_exists_for_the_null_model),
 ]

@@ -2399,14 +2399,110 @@
    "actual_total": 7,
    "result": "WIN",
    "pnl": 0.909
+  },
+  {
+   "date": "2026-08-28",
+   "gamePk": 824231,
+   "game": "LAD @ DET",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (+105, Fanatics)",
+   "price": 105,
+   "book": "Fanatics",
+   "model_p": 0.544,
+   "edge": 0.0562,
+   "divergence": 0.0657,
+   "actual_total": 3,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-28",
+   "gamePk": 822691,
+   "game": "MIA @ WSH",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8.5 (+103, LowVig.ag)",
+   "price": 103,
+   "book": "LowVig.ag",
+   "model_p": 0.5628,
+   "edge": 0.0702,
+   "divergence": 0.0845,
+   "actual_total": 11,
+   "result": "WIN",
+   "pnl": 1.03
+  },
+  {
+   "date": "2026-08-28",
+   "gamePk": 824396,
+   "game": "KC @ CLE",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (+107, LowVig.ag)",
+   "price": 107,
+   "book": "LowVig.ag",
+   "model_p": 0.5203,
+   "edge": 0.0372,
+   "divergence": 0.0528,
+   "actual_total": 3,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-28",
+   "gamePk": 823013,
+   "game": "PIT @ STL",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (+105, BetRivers)",
+   "price": 105,
+   "book": "BetRivers",
+   "model_p": 0.5815,
+   "edge": 0.0937,
+   "divergence": 0.0923,
+   "actual_total": 5,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-08-28",
+   "gamePk": 823985,
+   "game": "PHI @ LAA",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8 (-108, BetRivers)",
+   "price": -108,
+   "book": "BetRivers",
+   "model_p": 0.5603,
+   "edge": 0.0411,
+   "divergence": 0.0603,
+   "actual_total": 8,
+   "result": "PUSH",
+   "pnl": 0.0
+  },
+  {
+   "date": "2026-08-28",
+   "gamePk": 823178,
+   "game": "AZ @ SF",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-104, MyBookie.ag)",
+   "price": -104,
+   "book": "MyBookie.ag",
+   "model_p": 0.5922,
+   "edge": 0.0824,
+   "divergence": 0.0944,
+   "actual_total": 16,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "80-67-3p",
-  "n_graded": 150,
-  "win_pct": 54.4,
-  "paper_units_net": 3.821,
-  "paper_roi_pct": 2.6,
+  "record": "81-71-4p",
+  "n_graded": 156,
+  "win_pct": 53.3,
+  "paper_units_net": 0.851,
+  "paper_roi_pct": 0.56,
   "by_tag": {
    "R8-hold": {
     "record": "12-2",
@@ -2423,11 +2519,11 @@
     "paper_roi_pct": -7.66
    },
    "market-proving": {
-    "record": "62-58-3p",
-    "n_graded": 123,
-    "win_pct": 51.7,
-    "paper_units_net": 1.058,
-    "paper_roi_pct": 0.88
+    "record": "63-62-4p",
+    "n_graded": 129,
+    "win_pct": 50.4,
+    "paper_units_net": -1.912,
+    "paper_roi_pct": -1.53
    }
   },
   "by_market": {
@@ -2439,14 +2535,14 @@
     "paper_roi_pct": 10.23
    },
    "total": {
-    "record": "62-58-3p",
-    "n_graded": 123,
-    "win_pct": 51.7,
-    "paper_units_net": 1.058,
-    "paper_roi_pct": 0.88
+    "record": "63-62-4p",
+    "n_graded": 129,
+    "win_pct": 50.4,
+    "paper_units_net": -1.912,
+    "paper_roi_pct": -1.53
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-08-27"
+  "last_graded": "2026-08-28"
  }
 }

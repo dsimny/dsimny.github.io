@@ -38,6 +38,80 @@ from ingest.http import redact                                           # noqa:
 from ingest.providers import TheOddsApiProvider                          # noqa: E402
 
 
+MARKET = "h2h"          # v0.1 is moneyline-only; 1 credit per call, not 3
+
+# Objects that must exist for the deployed code to be running against the
+# schema it expects. Probed at activation: deploying 058 code onto a 057
+# database would otherwise activate an experiment whose cohort view is missing.
+SCHEMA_MARKERS = {
+    "057": ["model.experiment_runs", "model.formation_claims"],
+    "058": ["model.experiments", "model.experiment_cohort",
+            "grading.evaluation_sample"],
+}
+
+
+def _git_head() -> str:
+    """The commit this runner was deployed from, read from its own checkout."""
+    import subprocess
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(pathlib.Path(__file__).resolve().parent.parent),
+            capture_output=True, text=True, timeout=10, check=True
+        ).stdout.strip() or None
+    except Exception:                                          # noqa: BLE001
+        return None
+
+
+def _fn_default(conn, schema: str, name: str, arg: str):
+    """Read a function's shipped default straight from the catalogue.
+
+    k, the horizon and the window are pre-registered parameters. Reporting them
+    from a constant in this file would record what the runner BELIEVES; reading
+    them from pg_proc records what the database will actually do.
+    """
+    import re
+    sig = _scalar(conn, """
+        SELECT pg_get_function_arguments(p.oid) FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = %s AND p.proname = %s LIMIT 1""", (schema, name))
+    if not sig:
+        return None
+    m = re.search(rf"\b{re.escape(arg)}\b[^,]*?DEFAULT\s+([^,]+)", sig)
+    return m.group(1).strip() if m else None
+
+
+def _schema_state(conn) -> tuple:
+    """Which migrations the FILES claim, and which the DATABASE actually has."""
+    mig_dir = pathlib.Path(__file__).resolve().parent.parent / "db" / "migrations"
+    files = sorted(f.name[:3] for f in mig_dir.glob("*.sql")) if mig_dir.is_dir() else []
+    files_max = files[-1] if files else None
+
+    verified = []
+    for version, objects in sorted(SCHEMA_MARKERS.items()):
+        present = all(
+            _scalar(conn, "SELECT to_regclass(%s) IS NOT NULL", (obj,))
+            for obj in objects)
+        if present:
+            verified.append(version)
+    return files_max, (verified[-1] if verified else None)
+
+
+def _provenance(conn, args) -> dict:
+    files_max, db_version = _schema_state(conn)
+    return {
+        "source_commit":     args.source_commit,
+        "deployment_commit": args.deployment_commit or _git_head(),
+        "schema_version":    db_version,
+        "schema_files_max":  files_max,
+        "model":             f"v01/{args.model_version}",
+        "k":                 _fn_default(conn, "model", "v01_probability", "k"),
+        "formation_target":  _fn_default(conn, "model", "schedule_v01", "p_horizon"),
+        "window_seconds":    _fn_default(conn, "model", "schedule_v01", "p_window_secs"),
+        "market":            MARKET,
+    }
+
+
 def _worker_name() -> str:
     return f"v01-runner@{socket.gethostname()}:{os.getpid()}"
 
@@ -134,8 +208,14 @@ def do_resolve(conn, dry_run: bool = False, sport: str = "americanfootball_nfl",
         return _finish(conn, cycle, run_id, rc=0)
 
     # ---- ONE targeted capture, through the ordinary Package #3 path --------
+    if provider is None and not os.environ.get("THE_ODDS_API_KEY"):
+        cycle["errors"] = ["THE_ODDS_API_KEY is not set"]
+        cycle["note"] = ("work is due but no API key is configured; nothing "
+                         "resolved, claims will lapse for the next tick")
+        return _finish(conn, cycle, run_id, rc=1)
+
     _scalar(conn, "SELECT model.record_ingestion_poll(%s::uuid)", (run_id,))
-    provider = provider or TheOddsApiProvider(sport=sport, markets="h2h")
+    provider = provider or TheOddsApiProvider(sport=sport, markets=MARKET)
     try:
         poll = run_poll_cycle(conn, provider, retry=RetryPolicy(),
                               limiter=RateLimiter(), quota=QuotaGuard())
@@ -293,6 +373,31 @@ def do_activate(conn, args) -> int:
     if not args.by:
         print("--activate requires --by (who is activating)", file=sys.stderr)
         return 2
+    if not args.source_commit:
+        print("--activate requires --source-commit (the commit that established "
+              "the evidence gate; it cannot be derived on the deploy host)",
+              file=sys.stderr)
+        return 2
+
+    prov = _provenance(conn, args)
+
+    # Refuse rather than activate into an ambiguous state. Activation is a
+    # one-time, un-movable act; doing it against a schema that is not the one
+    # the deployed code expects would stamp a boundary nobody can correct.
+    problems = [k for k in ("deployment_commit", "schema_version", "k",
+                            "formation_target", "window_seconds")
+                if not prov.get(k)]
+    if prov["schema_version"] != prov["schema_files_max"]:
+        problems.append(
+            f"schema mismatch: files ship {prov['schema_files_max']}, database "
+            f"verifies {prov['schema_version']}")
+    if problems:
+        print(json.dumps({"job": "v01.activate", "status": "REFUSED",
+                          "problems": problems, "provenance": prov},
+                         default=str))
+        return 2
+
+    args.note = json.dumps(prov, sort_keys=True)
     try:
         at = _scalar(conn, "SELECT model.activate_experiment('v01', %s, %s, %s)",
                      (args.model_version, args.by, args.note))
@@ -303,7 +408,7 @@ def do_activate(conn, args) -> int:
     print(json.dumps({"job": "v01.activate", "status": "OK",
                       "model": f"v01/{args.model_version}",
                       "activated_at": _iso(at), "activated_by": args.by,
-                      "note": args.note}, default=str))
+                      "provenance": prov}, default=str))
     return 0
 
 
@@ -322,7 +427,13 @@ def main() -> int:
     g.add_argument("--activate", action="store_true",
                    help="declare the experiment prospective; ONE TIME, never undone")
     ap.add_argument("--by", help="with --activate: who is activating")
-    ap.add_argument("--note", help="with --activate: why")
+    ap.add_argument("--note", help="with --declare: why")
+    ap.add_argument("--source-commit",
+                    help="with --activate: the source-project commit that "
+                         "established the evidence gate")
+    ap.add_argument("--deployment-commit",
+                    help="with --activate: overrides the deployed HEAD if the "
+                         "runner is not running from a git checkout")
     ap.add_argument("--model-version", default="0.1.0")
     ap.add_argument("--dry-run", action="store_true",
                     help="with --resolve: claim and report, but do not poll or resolve")
@@ -330,9 +441,12 @@ def main() -> int:
     args = ap.parse_args()
 
     if args.resolve and not args.dry_run and not os.environ.get("THE_ODDS_API_KEY"):
-        print("THE_ODDS_API_KEY is not set; --resolve needs it to capture.",
-              file=sys.stderr)
-        return 2
+        # A warning, not a refusal. A cycle with nothing due makes no provider
+        # call, so it must still succeed -- otherwise a missing key turns every
+        # idle five-minute tick into a red cron job. The refusal happens where
+        # the provider is actually constructed, which is the moment it matters.
+        print("warning: THE_ODDS_API_KEY is not set; a cycle with work due will "
+              "fail when it tries to capture.", file=sys.stderr)
 
     conn = _connect()
     try:

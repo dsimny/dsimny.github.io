@@ -143,6 +143,7 @@ def main():
     print(f"Package #3 authorization: {verdict(group_ok({'P3-T30'}))}")
     print(f"Package #5 trust boundary: {verdict(group_ok({'P5-T01','P5-T02','P5-T02b'}))}")
     print(f"Package #5 belief formation: {verdict(group_ok({'P5-T12','P5-T13','P5-T06','P5-T24','P5-T25','P5-T26','P5-T27'}))}")
+    print(f"Package #5 null producer: {verdict(group_ok({'P5-T34','P5-T35','P5-T36','P5-T37','P5-T38'}))}")
     print(f"Package #5 calibration: {verdict(group_ok({'P5-T16','P5-T23','P5-T21','P5-T32','P5-T33'}))}")
     print(f"Package #5 grading primitives: {verdict(group_ok({'P5-T14','P5-T15','P5-T22','P5-T17','P5-T18','P5-T28','P5-T29','P5-T30','P5-T31'}))}")
 

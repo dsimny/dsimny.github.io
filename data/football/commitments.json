@@ -1,0 +1,11 @@
+{
+ "_note": "Football commit-and-reveal log, append-only. The SHA-256 of each slate week's PLAINTEXT board, published before kickoff. Never mixed with data/commitments.json.",
+ "commitments": [
+  {
+   "slate_week": "2026-08-25",
+   "board_sha256": "709bca973de890af8b903f94366eea62f4372eb665bc96440ecf2553a8793f9f",
+   "committed_utc": "2026-08-29T18:21:20Z",
+   "revealed": false
+  }
+ ]
+}

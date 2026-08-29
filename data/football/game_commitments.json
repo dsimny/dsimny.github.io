@@ -1,0 +1,61 @@
+{
+ "_note": "Per-game commitments, append-only (spec s.4 step 0b). Each game's layer-1 block is fingerprinted the first time it becomes evaluable at its own T-24, and NEVER revised - a later capture does not get to change an evaluation that has already been published. This is what makes the weekly play a commitment rather than a running opinion.",
+ "games": {
+  "ncaaf|Hawaii Rainbow Warriors @ Stanford Cardinal|2026-08-29T23:00:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-29T23:00:00Z",
+   "matchup": "Hawaii Rainbow Warriors @ Stanford Cardinal",
+   "sha256": "34d561b80cdf2e51c4daaacb58b0de3eecfd3ee2fe403fe2f19215ad635fd821",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Jacksonville State Gamecocks @ North Dakota State Bison|2026-08-29T21:30:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-29T21:30:00Z",
+   "matchup": "Jacksonville State Gamecocks @ North Dakota State Bison",
+   "sha256": "f81e73194d4345f0b1dd42ff49ca70a4c8b24cc786219b48841b10d947ac31c6",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Memphis Tigers @ UNLV Rebels|2026-08-30T02:00:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-30T02:00:00Z",
+   "matchup": "Memphis Tigers @ UNLV Rebels",
+   "sha256": "2d64e2620a3fb788068b0439c4f6b944931b88d6a198f82b77df760c43b9c305",
+   "sport": "ncaaf"
+  },
+  "ncaaf|NC State Wolfpack @ Virginia Cavaliers|2026-08-29T19:30:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-29T19:30:00Z",
+   "matchup": "NC State Wolfpack @ Virginia Cavaliers",
+   "sha256": "514d1e45d9b65b19930419d924152d992787bc2d5cfef5da5630a12afc6fa754",
+   "sport": "ncaaf"
+  },
+  "ncaaf|New Mexico State Aggies @ Florida State Seminoles|2026-08-29T23:00:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-29T23:00:00Z",
+   "matchup": "New Mexico State Aggies @ Florida State Seminoles",
+   "sha256": "7a9cfd72f8bedffdd5f6298dc4e666a026429a7c14947ceeceb54188b7bda5ef",
+   "sport": "ncaaf"
+  },
+  "ncaaf|North Carolina Tar Heels @ TCU Horned Frogs|2026-08-29T16:00:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-29T16:00:00Z",
+   "matchup": "North Carolina Tar Heels @ TCU Horned Frogs",
+   "sha256": "2d9f2600dea4ce72cc5a147ce9e1cfa114e67e4bb6e8c9c506a7ea51b7c3cd7b",
+   "sport": "ncaaf"
+  },
+  "ncaaf|North Carolina Tar Heels @ TCU Horned Frogs|2026-08-29T16:08:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-29T16:08:00Z",
+   "matchup": "North Carolina Tar Heels @ TCU Horned Frogs",
+   "sha256": "e5c96b11ba5fd32d7ce09999614b9af7991cb21391d594b3f4ebe799e2c4b5d8",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Sacramento State Hornets @ Eastern Michigan Eagles|2026-08-29T22:30:00Z": {
+   "committed_utc": "2026-08-29T18:21:19Z",
+   "kickoff_utc": "2026-08-29T22:30:00Z",
+   "matchup": "Sacramento State Hornets @ Eastern Michigan Eagles",
+   "sha256": "118dff89cac3c2724e6506f3654765fc704af855c96749610b125ff1503c8631",
+   "sport": "ncaaf"
+  }
+ }
+}

@@ -11,6 +11,7 @@ grants; the database is the thing that decides.
 """
 
 import re
+import sys
 import threading
 import time
 
@@ -2418,67 +2419,34 @@ def t68_the_production_migration_path_installs_no_test_machinery():
             for name in manifest:
                 conn.execute((h.MIGRATIONS / name).read_text(encoding="utf-8"))
 
-            # ---- nothing test-shaped may exist -------------------------------
-            assert h.scalar(conn, """
-                SELECT count(*) FROM pg_namespace WHERE nspname = 'olp_test'""") == 0, (
-                "the olp_test schema was installed by the production path")
+            # The assertions are IMPORTED from the live verifier, not
+            # restated here. P5-T68 proves the manifest installs clean into a
+            # scratch database; scripts/verify_production_schema.py proves the
+            # same properties of a database that already exists -- which is the
+            # only form that works on hosted Supabase, where CREATE DATABASE is
+            # not permitted. Sharing one definition is what stops the gate and
+            # the commissioning check from drifting apart.
+            sys.path.insert(0, str(h.ROOT / "scripts"))
+            import verify_production_schema as vps
 
-            # Structural, not a name heuristic. An earlier draft flagged
-            # anything called *reset* and tripped on
-            # public.provider_reset_circuit_rpc -- a legitimate Package #3
-            # function. What actually matters is the capability, not the name:
-            # nothing installed may be able to truncate, and nothing may reach
-            # into the test schema. Patterns are passed as parameters because a
-            # literal %r in the SQL would be read as a psycopg placeholder.
-            truncators = h.rows(conn, """
-                SELECT n.nspname || '.' || p.proname FROM pg_proc p
-                JOIN pg_namespace n ON n.oid = p.pronamespace
-                WHERE n.nspname NOT IN ('pg_catalog','information_schema')
-                  AND p.prosrc ILIKE %s""", ("%TRUNCATE%",))
-            assert truncators == [], (
-                f"installed function(s) can TRUNCATE: {truncators}")
-
-            reaching = h.rows(conn, """
-                SELECT n.nspname || '.' || p.proname FROM pg_proc p
-                JOIN pg_namespace n ON n.oid = p.pronamespace
-                WHERE n.nspname NOT IN ('pg_catalog','information_schema')
-                  AND p.prosrc ILIKE %s""", ("%olp_test%",))
-            assert reaching == [], (
-                f"installed function(s) reference the test schema: {reaching}")
-
-            # ---- and everything production needs must exist ------------------
-            for obj in ("public.market_intelligence", "model.beliefs",
-                        "model.formation_schedule", "model.formation_attempts",
-                        "model.experiments", "model.experiment_cohort",
-                        "model.experiment_runs", "model.formation_claims",
-                        "model.v01_ledger", "model.due_opportunities",
-                        "grading.belief_grades", "grading.evaluation_sample"):
-                assert h.scalar(conn, "SELECT to_regclass(%s) IS NOT NULL",
-                                (obj,)), f"{obj} missing from a production install"
-
-            for fn in ("model.activate_experiment", "model.create_experiment",
-                       "model.schedule_v01", "model.resolve_v01",
-                       "model.claim_due_opportunities", "model.v01_probability",
-                       "grading.standing_report", "grading.calibration_bins"):
-                schema, name = fn.split(".")
-                assert h.scalar(conn, """
-                    SELECT count(*) FROM pg_proc p
-                    JOIN pg_namespace n ON n.oid = p.pronamespace
-                    WHERE n.nspname = %s AND p.proname = %s""",
-                    (schema, name)) > 0, f"{fn} missing from a production install"
+            problems = vps.check(conn)
+            assert problems == [], (
+                "a clean production install failed its own checks:\n  "
+                + "\n  ".join(problems))
 
             # the runner's provenance prerequisites resolve on this database
-            k = h.scalar(conn, "SELECT model.v01_probability(0.6::numeric)")
-            assert abs(float(k) - 0.609691) < 1e-6, k
             n_manifest = len(manifest)
+            n_checks = (len(vps.REQUIRED_RELATIONS) + len(vps.REQUIRED_FUNCTIONS)
+                        + len(vps.FORBIDDEN_SCHEMAS)
+                        + len(vps.FORBIDDEN_BODY_PATTERNS))
         finally:
             conn.close()
     finally:
         admin.execute(f'DROP DATABASE IF EXISTS {probe}')
         admin.close()
-    return (f"{n_manifest} production migrations installed clean; no olp_test "
-            f"schema, no function able to TRUNCATE or reach the test schema, "
-            f"all Package #5 objects present")
+    return (f"{n_manifest} production migrations installed clean; {n_checks} "
+            f"shared checks passed -- no olp_test schema, no function able to "
+            f"TRUNCATE or reach the test schema, all Package #5 objects present")
 
 
 PACKAGE5 = [

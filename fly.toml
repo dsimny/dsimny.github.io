@@ -27,7 +27,7 @@ primary_region = 'iad'
   # fixture migration, and REFUSES if an already-applied file has been edited.
   # This is scripts/migrate.py, never tests/harness.py -- the latter does
   # DROP SCHEMA public CASCADE and would destroy the database.
-  release_command = 'python scripts/migrate.py'
+  release_command = 'python scripts/migrate.py'   # uses OLP_DATABASE_DIRECT_URL
 
 [env]
   PORT = '8080'

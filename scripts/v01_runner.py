@@ -135,12 +135,31 @@ def _worker_name() -> str:
 
 
 def _connect():
+    """Connect the way a short-lived job should: pooled, no prepared statements.
+
+    OLP_DATABASE_URL is the TRANSACTION POOLER url (Supabase port 6543). The
+    runner opens one connection per cycle, issues a handful of statements and
+    closes it, which is exactly what a transaction pooler is for.
+
+    prepare_threshold=None is not a tuning knob, it is a correctness
+    requirement. psycopg3 auto-prepares a statement after it has been seen a
+    few times, and a prepared statement belongs to a BACKEND session. Under
+    transaction pooling the next statement can land on a different backend that
+    has never heard of it, which surfaces as an intermittent
+    "prepared statement does not exist" -- rare, load-dependent, and exactly the
+    kind of failure that would first appear on a Sunday slate. The runner issues
+    perhaps a dozen statements per cycle, so there is nothing to gain by keeping
+    them.
+
+    Schema administration uses OLP_DATABASE_DIRECT_URL instead; see
+    scripts/migrate.py.
+    """
     url = os.environ.get("OLP_DATABASE_URL")
     if not url:
         print("OLP_DATABASE_URL is not set.", file=sys.stderr)
         raise SystemExit(2)
     import psycopg
-    conn = psycopg.connect(url)
+    conn = psycopg.connect(url, prepare_threshold=None)
     conn.autocommit = True
     return conn
 

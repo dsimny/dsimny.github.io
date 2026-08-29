@@ -358,8 +358,15 @@ fly secrets set OLP_JOB_TOKEN="$(openssl rand -base64 48 | tr -d '/+=' | head -c
 ```
 
 ```bash
-fly secrets set OLP_DATABASE_URL='<supabase pooler url>' THE_ODDS_API_KEY='<rotated key>'
+fly secrets set OLP_DATABASE_URL='<supabase TRANSACTION POOLER url>' THE_ODDS_API_KEY='<rotated key>'
 ```
+
+```bash
+fly secrets set OLP_DATABASE_DIRECT_URL='<supabase DIRECT url>'
+```
+
+The runner uses the pooler; the release command's migrations use the direct
+connection. See **Commissioning the hosted database** for why they differ.
 
 ### Migrations run on deploy
 
@@ -415,6 +422,103 @@ Point both jobs at the Fly URL, `Authorization: Bearer <OLP_JOB_TOKEN>`. Allow a
 generous timeout on the first request after an idle period — the machine is
 starting from stopped. Retries stay **off** for the resolver, for the reason
 above.
+
+---
+
+## Commissioning the hosted database
+
+The first hosted Supabase project is a **commissioning environment**, not a
+production launch. Nothing is activated and no live experiment data is inserted
+until every step below matches.
+
+```
+fresh hosted Supabase
+      ↓  production manifest only
+schema validation  (verify_production_schema.py)
+      ↓
+provenance check   (v01_runner --activate refuses on mismatch)
+      ↓
+runner DRAFT shakedown
+      ↓
+activation, only after everything matches
+```
+
+### Two connection strings, for two different jobs
+
+| Variable | Endpoint | Used by | Why |
+|---|---|---|---|
+| `OLP_DATABASE_URL` | transaction pooler, `:6543` | the runner | one short connection per cycle, many ephemeral cycles |
+| `OLP_DATABASE_DIRECT_URL` | direct / session | `migrate.py`, `verify_production_schema.py` | multi-statement DDL, locks, session-scoped behaviour |
+
+Both go straight into the hosting environment. Neither belongs in `fly.toml`,
+a shell history, or anywhere it can be logged.
+
+`scripts/migrate.py` **refuses** a `:6543` or `pooler.` host outright rather than
+running DDL through a transaction pooler this stack has not been proven safe
+against.
+
+The runner connects with `prepare_threshold=None`. That is a correctness
+requirement, not tuning: psycopg3 auto-prepares a statement after a few uses,
+a prepared statement belongs to a backend session, and under transaction
+pooling the next statement can land on a backend that has never seen it. The
+symptom is an intermittent `prepared statement does not exist` — rare,
+load-dependent, and exactly the kind of thing that would first appear on a
+Sunday slate.
+
+### 1. Apply the manifest, and only the manifest
+
+```bash
+OLP_DATABASE_DIRECT_URL='<direct url>' python scripts/migrate.py --plan
+```
+
+```bash
+OLP_DATABASE_DIRECT_URL='<direct url>' python scripts/migrate.py
+```
+
+54 migrations. `tests/sql/` is not reachable from here, so no test scaffolding
+can be installed by following this path.
+
+### 2. Validate the live schema
+
+```bash
+OLP_DATABASE_DIRECT_URL='<direct url>' python scripts/verify_production_schema.py
+```
+
+Read-only. It asserts the same properties as `P5-T68` — the assertion set is
+imported from this script, so the test and the live check cannot drift.
+`P5-T68` builds a scratch database with `CREATE DATABASE`, which **hosted
+Supabase does not permit**, so this is the form that works against a real
+project.
+
+The single most important line in its output:
+
+```
+no olp_test schema
+```
+
+That is the external confirmation that the production/test separation is doing
+what it was built for.
+
+It also cross-checks `public.schema_migrations` against the manifest — every
+listed migration applied, and nothing applied that is not listed.
+
+### 3. Shakedown while the experiment is DRAFT
+
+```bash
+python scripts/v01_runner.py --declare --note "NFL moneyline, k=1.10, T-24h"
+```
+
+Then the schedule and resolve endpoints. Beliefs formed against a `DRAFT`
+experiment are **infrastructure validation, not evidence**: they have no
+cohort membership, `standing_report` reports `n = 0`, and they stay excluded
+forever because activation is stamped after them.
+
+### 4. Activate — last
+
+Only once the schema check passes, the provenance record matches, and the
+shakedown behaved. `--activate` derives its own provenance and refuses on a
+schema mismatch.
+
 
 ## Expected cost
 

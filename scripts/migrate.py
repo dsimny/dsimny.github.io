@@ -1,7 +1,13 @@
 """Apply migrations to a persistent database. NON-DESTRUCTIVE.
 
-    python scripts/migrate.py          # apply what is missing
-    python scripts/migrate.py --plan   # show what would run, change nothing
+    OLP_DATABASE_DIRECT_URL=... python scripts/migrate.py          # apply
+    OLP_DATABASE_DIRECT_URL=... python scripts/migrate.py --plan   # dry run
+
+USES THE DIRECT CONNECTION, NOT THE POOLER. Migrations run multi-statement DDL,
+take locks and depend on session-scoped behaviour; a transaction pooler is not
+the right place for that and this stack has not been proven pooler-safe for DDL.
+Pointing this at a :6543 pooler endpoint is refused outright. The runner is the
+opposite -- short-lived pooled connections, see scripts/v01_runner.py.
 
 This is NOT tests/harness.py. `harness.migrate()` does `DROP SCHEMA public
 CASCADE` and exists to give every test run a clean slate; pointing it at a
@@ -65,9 +71,29 @@ def main() -> int:
                     help="report what would run and exit without changing anything")
     args = ap.parse_args()
 
-    url = os.environ.get("OLP_DATABASE_URL")
+    # Schema administration uses the DIRECT (session) connection. Migrations
+    # run multi-statement DDL, take locks and rely on session-scoped behaviour;
+    # a transaction pooler is not the right place for any of that, and this
+    # stack has not been proven pooler-safe for DDL. The runner uses the pooler
+    # (OLP_DATABASE_URL); this does not.
+    url = os.environ.get("OLP_DATABASE_DIRECT_URL")
     if not url:
-        print("OLP_DATABASE_URL is not set.", file=sys.stderr)
+        url = os.environ.get("OLP_DATABASE_URL")
+        if url:
+            print("warning: OLP_DATABASE_DIRECT_URL is not set; falling back to "
+                  "OLP_DATABASE_URL.", file=sys.stderr)
+    if not url:
+        print("Set OLP_DATABASE_DIRECT_URL (preferred) or OLP_DATABASE_URL.",
+              file=sys.stderr)
+        return 2
+
+    host = url.split("@")[-1].split("/")[0]
+    if ":6543" in host or "pooler." in host:
+        print(f"REFUSED: {host} looks like a TRANSACTION POOLER endpoint. "
+              f"Migrations need the direct/session connection -- pooling changes "
+              f"session-scoped behaviour that DDL depends on. Set "
+              f"OLP_DATABASE_DIRECT_URL to the direct connection string.",
+              file=sys.stderr)
         return 2
 
     names = production_set()

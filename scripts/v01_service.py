@@ -116,6 +116,11 @@ class Handler(BaseHTTPRequestHandler):
         return self._reply(404, {"status": "NOT_FOUND", "path": self.path})
 
     def do_GET(self) -> None:                                  # noqa: N802
+        # Unauthenticated liveness only. It touches nothing and reveals
+        # nothing: no database connection, no experiment state, no counts.
+        # Fly needs a way to see the process is up without holding a secret.
+        if self.path.rstrip("/") == "/health":
+            return self._reply(200, {"status": "ok"})
         if not self._authorized():
             return self._reply(401, {"status": "UNAUTHORIZED"})
         if self.path.rstrip("/") == "/jobs/v01/status":
@@ -132,8 +137,9 @@ class Handler(BaseHTTPRequestHandler):
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--port", type=int, default=8787)
-    ap.add_argument("--host", default="127.0.0.1")
+    ap.add_argument("--port", type=int,
+                    default=int(os.environ.get("PORT", "8787")))
+    ap.add_argument("--host", default=os.environ.get("OLP_BIND_HOST", "127.0.0.1"))
     args = ap.parse_args()
 
     for var in ("OLP_JOB_TOKEN", "OLP_DATABASE_URL"):

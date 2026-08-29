@@ -1,0 +1,7 @@
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+supabase/
+*.md
+!V01_DEPLOYMENT.md

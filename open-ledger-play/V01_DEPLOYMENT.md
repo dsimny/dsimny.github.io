@@ -368,9 +368,15 @@ fly secrets set OLP_DATABASE_URL='<supabase pooler url>' THE_ODDS_API_KEY='<rota
 CASCADE` and would destroy a persistent database. `scripts/migrate.py`:
 
 - only ever **adds**; it never drops anything;
-- **skips every fixture migration** (any filename containing `fixtures`), so
-  `olp_test.reset()` — a function that `TRUNCATE`s every table — is never
-  installed in production;
+- installs exactly `db/migrations/production_manifest.txt` and **refuses** if a
+  migration exists on disk but is not listed — it is either an unlisted
+  production migration or test scaffolding in the wrong directory;
+- **cannot install test machinery at all.** The harness layer lives in
+  `tests/sql/` and is not reachable from `db/migrations/`, so `olp_test`,
+  `reset()`, fixture factories and destructive helpers have no path into a
+  production database. `P5-T68` installs the manifest alone into a clean
+  database and asserts no `olp_test` schema exists, no installed function can
+  `TRUNCATE`, and none references the test schema;
 - records each applied file with a **checksum**, and **refuses** if an
   already-applied migration was later edited. This project corrects migrations
   in place while no persistent environment exists (`PACKAGE5_PREREG` §11.1);

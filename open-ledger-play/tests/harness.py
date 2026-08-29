@@ -18,6 +18,8 @@ import psycopg
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 MIGRATIONS = ROOT / "db" / "migrations"
 TESTKIT = ROOT / "db" / "testkit"
+MANIFEST = MIGRATIONS / "production_manifest.txt"
+TEST_SQL = ROOT / "tests" / "sql"
 
 _SERVER = None
 _URI = None
@@ -144,6 +146,26 @@ def connect_as(role: str, user_id=None, autocommit: bool = True) -> psycopg.Conn
     return conn
 
 
+def production_manifest() -> list:
+    """The ordered production migration set, from the checked-in manifest.
+
+    Read rather than globbed so the harness, scripts/migrate.py and P5-T68
+    cannot disagree about what production receives.
+    """
+    names = [ln.strip() for ln in MANIFEST.read_text(encoding="utf-8").splitlines()]
+    names = [n for n in names if n and not n.startswith("#")]
+    missing = [n for n in names if not (MIGRATIONS / n).is_file()]
+    if missing:
+        raise FileNotFoundError(f"manifest lists missing migrations: {missing}")
+    unlisted = sorted({f.name for f in MIGRATIONS.glob("*.sql")} - set(names))
+    if unlisted:
+        raise AssertionError(
+            f"migrations present but absent from production_manifest.txt: "
+            f"{unlisted}. Add them, or move them to tests/sql/ if they are "
+            f"test scaffolding.")
+    return names
+
+
 def _apply(cur, path: pathlib.Path) -> None:
     cur.execute(path.read_text(encoding="utf-8"))
 
@@ -184,11 +206,21 @@ def migrate(verbose: bool = False) -> list:
             _apply(cur, TESTKIT / "000_local_auth_shim.sql")
             applied.append("testkit/000_local_auth_shim.sql")
 
-        for path in sorted(MIGRATIONS.glob("*.sql")):
-            _apply(cur, path)
-            applied.append(path.name)
+        # Exactly what production installs, in the manifest's order...
+        for name in production_manifest():
+            _apply(cur, MIGRATIONS / name)
+            applied.append(name)
             if verbose:
-                print(f"  applied {path.name}")
+                print(f"  applied {name}")
+
+        # ...then the test harness layer, which production never sees. Keeping
+        # these physically separate is why P5-T68 can install the production
+        # set alone and prove no destructive helper came with it.
+        for path in sorted(TEST_SQL.glob("*.sql")):
+            _apply(cur, path)
+            applied.append(f"tests/sql/{path.name}")
+            if verbose:
+                print(f"  applied tests/sql/{path.name}")
 
     return applied
 

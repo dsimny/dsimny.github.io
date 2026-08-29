@@ -1,17 +1,21 @@
 """Apply migrations to a persistent database. NON-DESTRUCTIVE.
 
-    python scripts/migrate.py                 # apply what is missing
-    python scripts/migrate.py --plan          # show what would run, change nothing
-    python scripts/migrate.py --with-fixtures # include test scaffolding (NEVER in production)
+    python scripts/migrate.py          # apply what is missing
+    python scripts/migrate.py --plan   # show what would run, change nothing
 
 This is NOT tests/harness.py. `harness.migrate()` does `DROP SCHEMA public
 CASCADE` and exists to give every test run a clean slate; pointing it at a
 persistent database would destroy it. This script only ever adds.
 
-FIXTURE MIGRATIONS ARE SKIPPED. Any file whose name contains "fixtures" builds
-test scaffolding -- including `olp_test.reset()`, which TRUNCATEs every table in
-the database. A skip list maintained by hand drifts; a naming convention the
-deployer can read does not.
+THE MANIFEST IS THE PRODUCTION SET. db/migrations/production_manifest.txt lists
+the exact ordered migrations a hosted database receives. Test scaffolding lives
+in tests/sql/ and is not reachable from here at all -- olp_test, reset(),
+fixture factories and destructive helpers cannot be installed by following the
+documented deploy path, because this script has no way to name them.
+
+A migration on disk but absent from the manifest is a REFUSAL, not a silent
+skip: it is either a production migration someone forgot to list, or test
+scaffolding in the wrong directory.
 
 CHECKSUMS ARE RECORDED AND VERIFIED. This project corrects migrations in place
 while no persistent environment exists (PACKAGE5_PREREG section 11.1) -- 051 and
@@ -29,6 +33,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 MIGRATIONS = ROOT / "db" / "migrations"
+MANIFEST = MIGRATIONS / "production_manifest.txt"
 
 LEDGER = """
 CREATE TABLE IF NOT EXISTS public.schema_migrations (
@@ -44,8 +49,9 @@ COMMENT ON TABLE public.schema_migrations IS
 """
 
 
-def is_fixture(path: pathlib.Path) -> bool:
-    return "fixture" in path.name.lower()
+def production_set() -> list:
+    names = [ln.strip() for ln in MANIFEST.read_text(encoding="utf-8").splitlines()]
+    return [n for n in names if n and not n.startswith("#")]
 
 
 def checksum(path: pathlib.Path) -> str:
@@ -57,8 +63,6 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--plan", action="store_true",
                     help="report what would run and exit without changing anything")
-    ap.add_argument("--with-fixtures", action="store_true",
-                    help="also apply test scaffolding; NEVER use in production")
     args = ap.parse_args()
 
     url = os.environ.get("OLP_DATABASE_URL")
@@ -66,12 +70,24 @@ def main() -> int:
         print("OLP_DATABASE_URL is not set.", file=sys.stderr)
         return 2
 
-    files = sorted(MIGRATIONS.glob("*.sql"))
-    if not files:
-        print(f"no migrations found under {MIGRATIONS}", file=sys.stderr)
+    names = production_set()
+    if not names:
+        print(f"{MANIFEST} lists no migrations", file=sys.stderr)
         return 2
-    wanted = [f for f in files if args.with_fixtures or not is_fixture(f)]
-    skipped = [f for f in files if f not in wanted]
+    on_disk = {f.name for f in MIGRATIONS.glob("*.sql")}
+    unlisted = sorted(on_disk - set(names))
+    if unlisted:
+        print(f"REFUSED: migrations present but not in the manifest: "
+              f"{', '.join(unlisted)}", file=sys.stderr)
+        print("Add them to production_manifest.txt, or move them to tests/sql/ "
+              "if they are test scaffolding.", file=sys.stderr)
+        return 3
+    missing = [n for n in names if n not in on_disk]
+    if missing:
+        print(f"REFUSED: manifest lists missing files: {', '.join(missing)}",
+              file=sys.stderr)
+        return 3
+    wanted = [MIGRATIONS / n for n in names]
 
     import psycopg
     with psycopg.connect(url, autocommit=False) as conn:
@@ -97,10 +113,8 @@ def main() -> int:
         pending = [f for f in wanted if f.name not in applied]
 
         print(f"database   : {url.split('@')[-1]}")
-        print(f"migrations : {len(files)} on disk, {len(applied)} already applied")
-        if skipped:
-            print(f"skipped    : {len(skipped)} fixture migration(s) -- "
-                  f"{', '.join(f.name for f in skipped)}")
+        print(f"manifest   : {len(wanted)} production migrations, "
+              f"{len(applied)} already applied")
         if not pending:
             print("nothing to apply")
             return 0

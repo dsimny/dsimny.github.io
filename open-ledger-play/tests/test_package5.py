@@ -10,6 +10,7 @@ PostgreSQL to refuse. Inspecting grants would only test our belief about the
 grants; the database is the thing that decides.
 """
 
+import re
 import threading
 import time
 
@@ -2376,6 +2377,110 @@ def t67_a_correct_cohort_belief_counts_everywhere():
             f"matching values computed independently")
 
 
+
+# =============================================================================
+# The production install gate
+# =============================================================================
+
+def t68_the_production_migration_path_installs_no_test_machinery():
+    """Install ONLY the production manifest into a clean database and prove no
+    test scaffolding came with it.
+
+    This class of bug was invisible to every other test in the suite, because
+    both normal engines already carry the fixture layer -- so 057's dependency
+    on olp_test.reset() looked fine everywhere and failed only on the topology
+    nobody was testing. The gate exists so the next hosted-only incompatibility
+    surfaces here rather than at deployment.
+
+    The desirable property is stronger than "057 installs now":
+
+        no production deployment can install a destructive test primitive by
+        following the documented migration path
+    """
+    admin = h.connect()
+    probe = "olp_t68_production_probe"
+    # CREATE DATABASE cannot run inside a transaction block.
+    admin.autocommit = True
+    admin.execute(f'DROP DATABASE IF EXISTS {probe}')
+    admin.execute(f'CREATE DATABASE {probe}')
+    try:
+        uri = re.sub(r"/[^/?]+(\?|$)", f"/{probe}\\1", h.db_uri(), count=1)
+        conn = psycopg.connect(uri, autocommit=True)
+        try:
+            # Supabase-compatible auth primitives. On a real hosted project
+            # these come from the platform; here they are the same shim the
+            # bundled server already uses, so the starting point is honest.
+            conn.execute((h.ROOT / "db" / "testkit" / "000_local_auth_shim.sql")
+                         .read_text(encoding="utf-8"))
+
+            manifest = h.production_manifest()
+            assert manifest, "the manifest is empty"
+            for name in manifest:
+                conn.execute((h.MIGRATIONS / name).read_text(encoding="utf-8"))
+
+            # ---- nothing test-shaped may exist -------------------------------
+            assert h.scalar(conn, """
+                SELECT count(*) FROM pg_namespace WHERE nspname = 'olp_test'""") == 0, (
+                "the olp_test schema was installed by the production path")
+
+            # Structural, not a name heuristic. An earlier draft flagged
+            # anything called *reset* and tripped on
+            # public.provider_reset_circuit_rpc -- a legitimate Package #3
+            # function. What actually matters is the capability, not the name:
+            # nothing installed may be able to truncate, and nothing may reach
+            # into the test schema. Patterns are passed as parameters because a
+            # literal %r in the SQL would be read as a psycopg placeholder.
+            truncators = h.rows(conn, """
+                SELECT n.nspname || '.' || p.proname FROM pg_proc p
+                JOIN pg_namespace n ON n.oid = p.pronamespace
+                WHERE n.nspname NOT IN ('pg_catalog','information_schema')
+                  AND p.prosrc ILIKE %s""", ("%TRUNCATE%",))
+            assert truncators == [], (
+                f"installed function(s) can TRUNCATE: {truncators}")
+
+            reaching = h.rows(conn, """
+                SELECT n.nspname || '.' || p.proname FROM pg_proc p
+                JOIN pg_namespace n ON n.oid = p.pronamespace
+                WHERE n.nspname NOT IN ('pg_catalog','information_schema')
+                  AND p.prosrc ILIKE %s""", ("%olp_test%",))
+            assert reaching == [], (
+                f"installed function(s) reference the test schema: {reaching}")
+
+            # ---- and everything production needs must exist ------------------
+            for obj in ("public.market_intelligence", "model.beliefs",
+                        "model.formation_schedule", "model.formation_attempts",
+                        "model.experiments", "model.experiment_cohort",
+                        "model.experiment_runs", "model.formation_claims",
+                        "model.v01_ledger", "model.due_opportunities",
+                        "grading.belief_grades", "grading.evaluation_sample"):
+                assert h.scalar(conn, "SELECT to_regclass(%s) IS NOT NULL",
+                                (obj,)), f"{obj} missing from a production install"
+
+            for fn in ("model.activate_experiment", "model.create_experiment",
+                       "model.schedule_v01", "model.resolve_v01",
+                       "model.claim_due_opportunities", "model.v01_probability",
+                       "grading.standing_report", "grading.calibration_bins"):
+                schema, name = fn.split(".")
+                assert h.scalar(conn, """
+                    SELECT count(*) FROM pg_proc p
+                    JOIN pg_namespace n ON n.oid = p.pronamespace
+                    WHERE n.nspname = %s AND p.proname = %s""",
+                    (schema, name)) > 0, f"{fn} missing from a production install"
+
+            # the runner's provenance prerequisites resolve on this database
+            k = h.scalar(conn, "SELECT model.v01_probability(0.6::numeric)")
+            assert abs(float(k) - 0.609691) < 1e-6, k
+            n_manifest = len(manifest)
+        finally:
+            conn.close()
+    finally:
+        admin.execute(f'DROP DATABASE IF EXISTS {probe}')
+        admin.close()
+    return (f"{n_manifest} production migrations installed clean; no olp_test "
+            f"schema, no function able to TRUNCATE or reach the test schema, "
+            f"all Package #5 objects present")
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -2493,4 +2598,6 @@ PACKAGE5 = [
      t66_fixture_rows_may_coexist_after_activation),
     ("P5-T67", "A correct cohort belief counts everywhere",
      t67_a_correct_cohort_belief_counts_everywhere),
+    ("P5-T68", "The production migration path installs no test machinery",
+     t68_the_production_migration_path_installs_no_test_machinery),
 ]

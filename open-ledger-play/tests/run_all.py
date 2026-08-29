@@ -149,6 +149,7 @@ def main():
     print(f"Package #5 eligibility ledger: {verdict(group_ok({'P5-T39','P5-T40','P5-T41','P5-T42'}))}")
     print(f"Package #5 null producer: {verdict(group_ok({'P5-T34','P5-T35','P5-T36','P5-T37','P5-T38'}))}")
     print(f"Package #5 calibration: {verdict(group_ok({'P5-T16','P5-T23','P5-T21','P5-T32','P5-T33'}))}")
+    print(f"Production install gate: {verdict(group_ok({'P5-T68'}))}")
     print(f"Package #5 grading primitives: {verdict(group_ok({'P5-T14','P5-T15','P5-T22','P5-T17','P5-T18','P5-T28','P5-T29','P5-T30','P5-T31'}))}")
 
     # The 29 test IDs the package's section 33 table actually enumerates.

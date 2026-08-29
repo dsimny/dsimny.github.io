@@ -1,0 +1,67 @@
+# Production migration manifest.
+#
+# THE ordered set a fresh hosted Supabase project receives. Nothing else is
+# installed. Read by scripts/migrate.py and by tests/harness.py, so the two
+# cannot drift, and by P5-T68 which installs exactly this list into a clean
+# database and asserts no test machinery came with it.
+#
+# Test scaffolding lives in tests/sql/ and is deliberately absent here --
+# olp_test, reset(), fixture factories, destructive helpers and negative-control
+# scaffolding must never be reachable by following the documented deploy path.
+#
+# Append only. One filename per line; order is the order of application.
+
+001_extensions_enums.sql
+002_users.sql
+003_ledger_chapters.sql
+004_wallet_transactions.sql
+005_events_schedule_history.sql
+006_market_snapshots.sql
+007_tickets.sql
+008_risk_reservations.sql
+009_ticket_results.sql
+010_result_adjustments.sql
+011_indexes_constraints.sql
+012_security_privileges_rls.sql
+013_open_chapter_rpc.sql
+014_place_ticket_rpc.sql
+015_settle_ticket_rpc.sql
+016_apply_settlement_correction_rpc.sql
+017_declare_bankruptcy_rpc.sql
+018_views.sql
+020_p2_config_and_provenance.sql
+021_void_event_tickets_rpc.sql
+022_reschedule_event_rpc.sql
+023_ingest_event_rpc.sql
+024_ingest_snapshots_rpc.sql
+025_closing_line_rpc.sql
+026_event_lifecycle_rpc.sql
+027_p2_privileges.sql
+028_p2_views.sql
+030_p2r_ticket_schedule_binding.sql
+031_p2r_ticket_relative_postponement.sql
+032_p2r_ingest_kickoff_guard.sql
+033_p3_provider_health.sql
+034_p3_feed_health.sql
+037_p4_config_and_odds_math.sql
+038_p4_canonical_market.sql
+039_p4_executable_market.sql
+040_p4_market_movement.sql
+041_p4_market_intelligence.sql
+042_p4_partner_join_performance.sql
+043_p4_modal_tiebreak_symmetry.sql
+044_p4_exact_payout_comparator.sql
+045_p4_total_price_order.sql
+046_p4_materialise_pipeline_ctes.sql
+047_p4_wager_level_modal.sql
+048_p4_modal_without_a_join.sql
+049_p4_best_ties_without_a_join.sql
+050_p5_trust_boundary.sql
+051_p5_belief_formation.sql
+052_p5_grading_primitives.sql
+053_p5_calibration.sql
+054_p5_null_model.sql
+055_p5_eligibility_ledger.sql
+056_p5_v01_formation_lifecycle.sql
+057_p5_experiment_runner.sql
+058_p5_experiment_activation.sql

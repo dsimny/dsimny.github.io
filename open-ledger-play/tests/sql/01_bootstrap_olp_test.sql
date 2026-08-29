@@ -1,4 +1,19 @@
 -- =============================================================================
+-- 01_bootstrap_olp_test.sql -- TEST HARNESS ONLY. NEVER INSTALLED IN PRODUCTION.
+-- =============================================================================
+-- This file lives in tests/sql/ and is not in db/migrations/production_manifest.txt.
+-- Nothing here may be depended on by a production migration; a migration whose
+-- installation needs olp_test couples executable product state to the test
+-- environment, which is what made 057 un-deployable.
+--
+-- Applied by tests/harness.py AFTER the full production manifest:
+--
+--     production manifest  ->  tests/sql/*  ->  run tests
+--
+-- Production does only the first step.
+-- =============================================================================
+
+-- =============================================================================
 -- 019_test_fixtures.sql -- Deterministic fixtures (isolated `olp_test` schema)
 -- =============================================================================
 -- Tests must never depend on a live odds provider. Everything the acceptance

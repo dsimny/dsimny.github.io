@@ -2188,6 +2188,194 @@ def t64_the_producer_cannot_declare_its_own_cohort():
     return "producer reads the cohort flag; declare/activate/advance/read all refused"
 
 
+
+def _reports(admin, mid, ver="1"):
+    """Every scoreboard surface for one model, as plain tuples."""
+    return {
+        "standing":    h.row(admin, "SELECT * FROM grading.standing_report(%s,%s)",
+                             (mid, ver)),
+        "calibration": h.row(admin, "SELECT * FROM grading.calibration_report(%s,%s)",
+                             (mid, ver)),
+        "bins":        h.rows(admin, """
+            SELECT bin, n, mean_predicted, observed_frequency, abs_error
+            FROM grading.calibration_bins(%s,%s)""", (mid, ver)),
+    }
+
+
+def _sample_six(admin, tag, mid, ver="1"):
+    """The identical cohort planted under every model in these tests:
+    three at 0.30 winning once, three at 0.70 winning twice."""
+    for i, (pr, won) in enumerate([(0.30, True), (0.30, False), (0.30, False),
+                                   (0.70, True), (0.70, True),  (0.70, False)]):
+        _plant(admin, f"{tag}-{i}", pr, "WIN" if won else "LOSS",
+               model_id=mid, version=ver)
+
+
+def _naive_aggregate(admin, mid, ver="1"):
+    """The pre-058 shape: every graded row carrying the right version string.
+    Used only to prove a contaminant fixture actually has teeth."""
+    return h.row(admin, """
+        SELECT count(*), round(avg(g.model_brier), 8)
+        FROM grading.belief_grades g
+        JOIN model.beliefs b ON b.belief_id = g.belief_id
+        WHERE g.scoring_status = 'SCORED'
+          AND b.model_id = %s AND b.model_version = %s""", (mid, ver))
+
+
+def t65_a_pre_activation_contaminant_changes_no_number():
+    """The regression assertion for what standing_report was doing.
+
+    An `n` assertion is necessary and not sufficient: it would pass while a
+    hidden aggregate path still averaged contaminated rows. This plants a
+    pre-activation contaminant EXTREME enough to visibly move Brier and the
+    skill score, then asserts every scoreboard number is bit-identical to a
+    model that never saw it."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=6, bin_count=2, min_bin_count=3)
+
+    # CLEAN: activated in the past, six cohort beliefs, nothing else.
+    _activate_back(admin, "clean", "1")
+    _sample_six(admin, "T65-C", "clean")
+
+    # DIRTY: three catastrophic beliefs formed BEFORE activation, then the
+    # identical six. Full lineage on all nine -- only the boundary separates
+    # them, so lineage cannot be what saves the numbers here.
+    _experiment(admin, "dirty", "1")
+    for i in range(3):
+        _plant(admin, f"T65-X{i}", 0.99, "LOSS", model_id="dirty", version="1")
+    h.scalar(admin, "SELECT model.activate_experiment('dirty','1','ops',NULL)")
+    _sample_six(admin, "T65-D", "dirty")
+
+    # the contaminant HAS teeth: the pre-058 aggregate moves a long way
+    n_naive, brier_naive = _naive_aggregate(admin, "dirty")
+    assert n_naive == 9, n_naive
+    n_clean, brier_clean = _naive_aggregate(admin, "clean")
+    assert n_clean == 6, n_clean
+    assert float(brier_naive) - float(brier_clean) > 0.25, (
+        f"fixture is toothless: contaminated Brier {brier_naive} is not far "
+        f"enough from {brier_clean} to prove anything")
+
+    clean, dirty = _reports(admin, "clean"), _reports(admin, "dirty")
+    for surface in ("standing", "calibration", "bins"):
+        assert clean[surface] == dirty[surface], (
+            f"{surface} differs: a contaminated aggregate path survives.\n"
+            f"  clean = {clean[surface]}\n  dirty = {dirty[surface]}")
+
+    # and the numbers are real, not two identical empties
+    assert clean["standing"][0] == 6, clean["standing"]
+    assert clean["standing"][1] is not None, "no Brier was computed at all"
+    admin.close()
+    return (f"3 pre-activation beliefs at Brier 0.9801 moved the naive average "
+            f"{float(brier_clean):.4f} -> {float(brier_naive):.4f}; every "
+            f"cohort number identical")
+
+
+def t66_fixture_rows_may_coexist_after_activation():
+    """Lineage does the protecting, not a clean database.
+
+    The database is deliberately filthy: post-activation beliefs formed
+    directly, beliefs through the producer's own attempt_belief path, and
+    beliefs belonging to a different experiment entirely. None carries the
+    experiment -> schedule -> attempt lineage, so none may move a number."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=6, bin_count=2, min_bin_count=3)
+
+    _activate_back(admin, "clean", "1")
+    _sample_six(admin, "T66-C", "clean")
+    before = _reports(admin, "clean")
+
+    _activate_back(admin, "dirty", "1")
+    _sample_six(admin, "T66-D", "dirty")
+
+    # (a) formed and graded directly -- no schedule, no attempt
+    for i in range(3):
+        ev = _market(admin, f"T66-loose-{i}", -150, 130)
+        bid = _form(admin, ev, prob=0.99, model_id="dirty", model_version="1")
+        _resolve(admin, ev, "DAL", "LOSS"); _grade(admin, bid)
+
+    # (b) the producer's own path: an attempt with no schedule_id
+    ev = _market(admin, "T66-attempt", -150, 130)
+    bid, reason = _attempt(admin, ev, prob=0.99, mid="dirty", ver="1")
+    assert reason == "ELIGIBLE"
+    _resolve(admin, ev, "DAL", "LOSS"); _grade(admin, bid)
+
+    # (c) a fully-formed belief enrolled under a DIFFERENT experiment
+    _activate_back(admin, "other", "1")
+    for i in range(2):
+        _plant(admin, f"T66-other-{i}", 0.99, "LOSS", model_id="other", version="1")
+
+    n_naive, brier_naive = _naive_aggregate(admin, "dirty")
+    assert n_naive == 10, n_naive
+    assert float(brier_naive) > 0.4, (
+        f"fixture is toothless: naive Brier {brier_naive} would barely move")
+
+    after = _reports(admin, "dirty")
+    for surface in ("standing", "calibration", "bins"):
+        assert before[surface] == after[surface], (
+            f"{surface} differs: post-activation fixture rows reached a "
+            f"scoreboard.\n  clean = {before[surface]}\n  dirty = {after[surface]}")
+    assert _sample_n(admin, "dirty") == 6
+    assert _sample_n(admin, "other") == 2, "the other experiment lost its own cohort"
+    admin.close()
+    return ("10 graded rows under one version, 4 of them junk; cohort held at 6 "
+            "and every number identical")
+
+
+def t67_a_correct_cohort_belief_counts_everywhere():
+    """Positive inclusion. Exclusion tests can all pass on a system that counts
+    NOTHING, so the four surfaces are checked against values computed here in
+    Python from the stored probabilities and outcomes."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=6, bin_count=2, min_bin_count=3)
+    _activate_back(admin, "clean", "1")
+    _sample_six(admin, "T67", "clean")
+
+    rows = h.rows(admin, """
+        SELECT b.model_probability, b.market_probability_at_formation,
+               (g.outcome = 'WIN')
+        FROM grading.evaluation_sample s
+        JOIN model.beliefs b       ON b.belief_id = s.belief_id
+        JOIN grading.belief_grades g ON g.belief_id = s.belief_id
+        WHERE s.model_id = 'clean'""")
+    assert len(rows) == 6, len(rows)
+
+    import math
+    mb = sum((float(p) - (1.0 if w else 0.0)) ** 2 for p, _, w in rows) / 6
+    kb = sum((float(m) - (1.0 if w else 0.0)) ** 2 for _, m, w in rows) / 6
+    ml = -sum(math.log(float(p) if w else 1 - float(p)) for p, _, w in rows) / 6
+    kl = -sum(math.log(float(m) if w else 1 - float(m)) for _, m, w in rows) / 6
+    bss = 1 - mb / kb
+
+    n, r_mb, r_kb, r_bss, r_ml, r_kl, r_lli, standing = h.row(
+        admin, "SELECT * FROM grading.standing_report('clean','1')")
+
+    assert n == 6, n
+    assert abs(float(r_mb) - mb) < 1e-8, (r_mb, mb)
+    assert abs(float(r_kb) - kb) < 1e-8, (r_kb, kb)
+    assert abs(float(r_ml) - ml) < 1e-8, (r_ml, ml)
+    assert abs(float(r_kl) - kl) < 1e-8, (r_kl, kl)
+    assert abs(float(r_bss) - bss) < 1e-6, (r_bss, bss)
+    assert abs(float(r_lli) - (kl - ml)) < 1e-6, r_lli
+
+    n_cal, eligible, werr, worst, wbin, status = h.row(
+        admin, "SELECT * FROM grading.calibration_report('clean','1')")
+    assert n_cal == 6 and eligible is True, (n_cal, eligible)
+    assert werr is not None and status is not None
+
+    bins = h.rows(admin, """
+        SELECT bin, n, mean_predicted, observed_frequency
+        FROM grading.calibration_bins('clean','1')""")
+    assert [b[1] for b in bins] == [3, 3], bins
+    assert abs(float(bins[0][2]) - 0.30) < 1e-6, bins[0]
+    assert abs(float(bins[1][2]) - 0.70) < 1e-6, bins[1]
+    assert abs(float(bins[0][3]) - 1/3) < 1e-5, bins[0]
+    assert abs(float(bins[1][3]) - 2/3) < 1e-5, bins[1]
+    admin.close()
+    return (f"n=6 on every surface; Brier {float(r_mb):.6f} vs market "
+            f"{float(r_kb):.6f}, BSS {float(r_bss):.6f}, bins 3/3 -- all "
+            f"matching values computed independently")
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -2299,4 +2487,10 @@ PACKAGE5 = [
      t63_activation_has_no_caller_supplied_timestamp),
     ("P5-T64", "The producer cannot declare its own cohort",
      t64_the_producer_cannot_declare_its_own_cohort),
+    ("P5-T65", "A pre-activation contaminant changes no number",
+     t65_a_pre_activation_contaminant_changes_no_number),
+    ("P5-T66", "Fixture rows may coexist after activation",
+     t66_fixture_rows_may_coexist_after_activation),
+    ("P5-T67", "A correct cohort belief counts everywhere",
+     t67_a_correct_cohort_belief_counts_everywhere),
 ]

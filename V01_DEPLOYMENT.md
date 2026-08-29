@@ -252,6 +252,37 @@ standing.
 A new `k` is a new model version and therefore a new experiment and a new
 sample from zero, which is what `MODEL_V0_1_PREREG.md` §4.1 already requires.
 
+### The four things the gate proves
+
+| | Proof | Test | Control |
+|---|---|---|---|
+| Pre-activation exclusion | a fully valid runner-produced belief before `activated_at` does not count | `P5-T59` | `NC-8` |
+| Lineage exclusion | a post-activation belief not produced through experiment → schedule → attempt → belief does not count | `P5-T60` | `NC-9` |
+| Positive inclusion | a correct cohort belief counts in calibration, standing, Brier/BSS/log-loss and `n` | `P5-T67` | `NC-16` |
+| Immutability | `activated_at` cannot move in either direction once ACTIVE | `P5-T61` | `NC-12` |
+
+Two of those need a word on why they are not what they look like.
+
+**`n` is necessary and not sufficient.** A count assertion passes happily while a
+hidden aggregate path still averages contaminated rows — which is exactly what
+`standing_report` was doing. `P5-T65` plants three pre-activation beliefs at
+Brier 0.9801, enough to move the naive average from **0.2233 to 0.4756** and
+flip the skill score, then asserts every scoreboard number is identical to a
+model that never saw them. `P5-T66` does the same for post-activation junk.
+`NC-14` and `NC-15` restore the old aggregation and both tests fail.
+
+**Lineage protects, not database cleanliness.** `P5-T66` runs against a
+deliberately filthy database: ten graded rows under one model version, four of
+them junk — beliefs formed directly, beliefs through the producer'''s own
+`attempt_belief` path, and beliefs belonging to a different experiment. The
+cohort holds at six and no number moves. Fixture and test rows may coexist with
+live evidence; they simply have no lineage.
+
+**Positive inclusion is not decoration.** Every exclusion test in the suite
+would pass on a system that counted nothing. `P5-T67` checks Brier, market
+Brier, BSS, both log losses, the bin counts and the bin means against values
+computed independently in Python. `NC-16` severs the lineage join and it fires.
+
 ## Expected cost
 
 `markets=h2h`, `regions=us` → **1 credit per call**, not 3.

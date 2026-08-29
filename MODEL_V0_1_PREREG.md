@@ -403,25 +403,39 @@ makes no provider call at all. A full Sunday slate of 16 games resolves as **one
 board refresh serving 32 opportunities, enforced by
 `model.experiment_runs.ck_one_poll_per_cycle` rather than by care.
 
-### 11.3 Activation defines the sample - migration 058
+### 11.3 The cohort defines the sample - migration 058
 
-> Anything formed after the activation timestamp belongs to the pre-registered
-> sample; anything before it does not.
+> A belief belongs to the Model v0.1 prospective evaluation sample only if its
+> scheduled formation opportunity was created and resolved under the activated
+> experiment, AND its formation occurred at or after `activated_at`.
 
-The deployment sequence deliberately invokes both endpoints once BEFORE enabling
-cron, so this had to become structural rather than a note here. Before `058`,
-`grading.calibration_bins` drew from every scored belief for a model version -
-those shakedown beliefs would have entered the sample and nothing would have
-distinguished them.
+Two INDEPENDENT requirements, not one:
 
-- `model.experiment_activation` is append-only, one row per model version.
-  Re-activating raises `ALREADY_ACTIVATED`; UPDATE/DELETE raise
-  `APPEND_ONLY_VIOLATION`. A movable boundary would be a free parameter capable
-  of excluding a disappointing month after the fact.
-- `model.activate_experiment` has **no timestamp parameter** - it stamps `NOW()`.
-- **No activation means an EMPTY sample, not an unfiltered one.** An experiment
-  nobody activated reports nothing, rather than accumulating a full sample and
-  publishing a standing on it.
+| | Requirement | Rules out |
+|---|---|---|
+| **Time** | `formed_at >= activated_at` | the deployment shakedown |
+| **Lineage** | experiment -> scheduled opportunity -> terminal attempt -> belief | manual inserts, fixtures, the producer'''s own `attempt_belief` path |
 
-Until activation, `model.formation_schedule` stays empty and no v0.1 belief
-counts. That is the correct state: the experiment has not started.
+A timestamp filter alone is too weak - it admits any belief carrying a late
+enough `formed_at`. `P5-T60` makes the point directly: eight beliefs all formed
+AFTER activation, of which only the four with lifecycle lineage count. `P5-T59`
+tests the time axis separately, so neither rule can silently carry the other.
+
+**Every scoreboard now draws from `grading.evaluation_sample`**, so Brier, the
+Brier Skill Score, log loss, calibration and the N = 500 gate see one cohort.
+Before `058`, `standing_report` aggregated on `model_id` + `model_version`
+alone: any graded row carrying the right version string entered the headline
+scoreboard and the sample count.
+
+**Lifecycle.** `DRAFT -> ACTIVE -> COLLECTION_COMPLETE -> EVALUATED`, forward
+only. `activated_at` is stamped once and is immutable thereafter: sliding it
+forward would erase early losses, sliding it backward would admit historical
+rows. `model.activate_experiment` has no timestamp parameter. The cohort
+survives the later states, so declaring collection complete does not empty the
+scoreboard.
+
+**Fails closed.** No activated experiment means an EMPTY sample, not an
+unfiltered one - the cohort is an inner join. An experiment nobody activated
+reports nothing rather than publishing a standing.
+
+Deployment and the two clock jobs: `V01_DEPLOYMENT.md`.

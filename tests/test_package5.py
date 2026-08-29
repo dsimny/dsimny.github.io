@@ -750,16 +750,34 @@ def _market(admin, src, home_price, away_price):
     return ev
 
 
-def _activate_back(admin, model_id="planted", version="1", hours=24):
-    """Declare an activated experiment whose boundary is already in the past, so
-    beliefs planted afterwards fall inside the pre-registered sample.
+def _experiment(admin, model_id="planted", version="1", note="test"):
+    """Declare a DRAFT experiment. Opportunities may be scheduled and resolved
+    against it and none of them count -- which is exactly what the deployment
+    shakedown needs."""
+    return h.scalar(admin, "SELECT model.create_experiment(%s, %s, %s)",
+                    (model_id, version, note))
 
-    Every calibration test needs this now. That is the point of 058: a sample is
-    something an experiment must DECLARE, and an unactivated model reports an
-    empty one rather than an unfiltered one."""
+
+def _activate_back(admin, model_id="planted", version="1", hours=24):
+    """An experiment already ACTIVE, with its boundary in the past, so beliefs
+    planted afterwards fall inside the cohort on the TIME axis.
+
+    Lineage is a separate requirement -- see _plant, which enrolls."""
     return h.scalar(admin, """
         SELECT olp_test.activate_experiment_at(%s, %s, NOW() - make_interval(hours => %s))""",
         (model_id, version, hours))
+
+
+def _enroll(admin, belief_id):
+    """Give a belief the experiment -> schedule -> attempt lineage a cohort
+    requires. A test proving EXCLUSION simply omits this."""
+    return h.scalar(admin, "SELECT olp_test.enroll_belief(%s::uuid)", (belief_id,))
+
+
+def _sample_n(admin, model_id="planted", version="1"):
+    return h.scalar(admin, """
+        SELECT count(*) FROM grading.evaluation_sample
+         WHERE model_id = %s AND model_version = %s""", (model_id, version))
 
 
 def _plant(admin, src, prob, outcome, home_price=-150, away_price=130,
@@ -767,6 +785,7 @@ def _plant(admin, src, prob, outcome, home_price=-150, away_price=130,
     """Form one belief and grade it against a chosen outcome."""
     ev = _market(admin, src, home_price, away_price)
     bid = _form(admin, ev, prob=prob, model_id=model_id, model_version=version)
+    _enroll(admin, bid)          # lineage: without this the belief is not cohort
     _resolve(admin, ev, "DAL", outcome)
     _grade(admin, bid)
     return bid
@@ -918,7 +937,7 @@ def t32_win_rate_and_probabilistic_quality_can_disagree():
     worse forecaster -- which is why the grader has no win-rate field to rank on.
     """
     admin = h.connect(); h.reset(admin)
-    for _mid in ("sharp", "lucky"):
+    for _mid in ("lucky", "honest"):
         _activate_back(admin, _mid, "1")
     _tune(admin, min_sample=10, bin_count=2, min_bin_count=3)
 
@@ -1050,12 +1069,12 @@ def t35_the_null_producer_grades_and_calibrates_through_the_ordinary_path():
     # twenty markets; the market is well calibrated, so the null model is too
     for i in range(10):
         ev = _market(admin, f"T35-H{i}", -600, 500)
-        bid = _null(admin, ev)
+        bid = _null(admin, ev); _enroll(admin, bid)
         _resolve(admin, ev, "DAL", "WIN" if i < 8 else "LOSS")
         _grade(admin, bid)
     for i in range(10):
         ev = _market(admin, f"T35-L{i}", 500, -600)
-        bid = _null(admin, ev)
+        bid = _null(admin, ev); _enroll(admin, bid)
         _resolve(admin, ev, "DAL", "WIN" if i < 2 else "LOSS")
         _grade(admin, bid)
 
@@ -1331,6 +1350,11 @@ def _event_at(admin, src, kickoff_in, home="DAL", away="PHI"):
 
 
 def _sched(admin, **kw):
+    # An opportunity with no experiment could never belong to a cohort, so
+    # schedule_v01 refuses to create one. DRAFT is enough to schedule against.
+    if not h.scalar(admin, """SELECT count(*) FROM model.experiments
+                               WHERE model_id='v01' AND model_version='0.1.0'"""):
+        _experiment(admin, "v01", "0.1.0", "test scheduling")
     return h.scalar(admin, "SELECT model.schedule_v01()")
 
 
@@ -1879,155 +1903,274 @@ def t57_the_runner_is_an_operator_not_the_model():
 
 
 # =============================================================================
-# 058 -- the activation timestamp and the sample boundary
+# 058 -- the experiment cohort and the activation boundary
 # =============================================================================
 
 def t58_an_unactivated_experiment_has_an_empty_sample():
-    """Fail closed. The tempting shape is "filter by activation IF one exists",
-    which lets an experiment nobody remembered to activate quietly accumulate a
-    full sample and report a standing on it."""
+    """Fail closed. "Filter by the experiment IF one exists" would let an
+    experiment nobody remembered to activate quietly accumulate a full sample
+    and publish a standing on it.
+
+    A/B on identical fixtures: one model ACTIVE, one still DRAFT."""
     admin = h.connect(); h.reset(admin)
     _tune(admin, min_sample=12, bin_count=3, min_bin_count=3)
-    for i, pr in enumerate([0.05, 0.06, 0.07, 0.08, 0.09, 0.10,
-                            0.11, 0.12, 0.60, 0.70, 0.80, 0.90]):
-        _plant(admin, f"T58-{i}", pr, "WIN" if i % 2 == 0 else "LOSS")
+    probs = [0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.60, 0.70, 0.80, 0.90]
 
-    # 12 scored beliefs exist and would bin perfectly well...
+    _activate_back(admin, "live", "1")          # ACTIVE, boundary in the past
+    _experiment(admin, "draft", "1")            # declared, never activated
+    for i, pr in enumerate(probs):
+        _plant(admin, f"T58-L{i}", pr, "WIN" if i % 2 == 0 else "LOSS",
+               model_id="live", version="1")
+        _plant(admin, f"T58-D{i}", pr, "WIN" if i % 2 == 0 else "LOSS",
+               model_id="draft", version="1")
+
+    # both sets are graded and identically shaped
     assert h.scalar(admin, """
         SELECT count(*) FROM grading.belief_grades
-         WHERE scoring_status = 'SCORED'""") == 12
-    # ...but none of them belong to a pre-registered sample, because none was
-    # ever declared.
-    assert h.rows(admin, """
-        SELECT bin, n FROM grading.calibration_bins('planted','1')""") == [], (
-        "an unactivated experiment reported a sample")
-    assert h.scalar(admin, "SELECT count(*) FROM model.prereg_sample") == 0
+         WHERE scoring_status = 'SCORED'""") == 24
 
-    # declaring it retroactively over the same beliefs brings them in
-    _activate_back(admin)
-    bins = h.rows(admin, "SELECT bin, n FROM grading.calibration_bins('planted','1')")
-    assert [b[1] for b in bins] == [4, 4, 4], bins
-    assert h.scalar(admin, "SELECT count(*) FROM model.prereg_sample") == 12
+    assert [b[1] for b in h.rows(admin,
+        "SELECT bin, n FROM grading.calibration_bins('live','1')")] == [4, 4, 4]
+    assert _sample_n(admin, "live", "1") == 12
+
+    assert h.rows(admin, "SELECT bin, n FROM grading.calibration_bins('draft','1')") == [], (
+        "a DRAFT experiment reported calibration bins")
+    assert _sample_n(admin, "draft", "1") == 0
+    n_draft = h.row(admin, "SELECT * FROM grading.standing_report('draft','1')")[0]
+    assert n_draft == 0, f"standing_report counted {n_draft} rows for a DRAFT experiment"
     admin.close()
-    return "12 scored beliefs, 0 binned before activation, 12 after"
+    return "identical fixtures: ACTIVE binned 4/4/4 (n=12), DRAFT n=0"
 
 
-def t59_pre_activation_beliefs_are_excluded_from_the_sample():
-    """The deployment sequence deliberately invokes both endpoints once BEFORE
-    enabling cron. Those shakedown beliefs must not enter the sample, and
-    nothing but the boundary distinguishes them."""
+def t59_pre_activation_beliefs_are_excluded():
+    """TIME membership, on its own.
+
+    The deployment sequence deliberately invokes both endpoints once BEFORE
+    activation. Those beliefs are infrastructure validation and must not become
+    evidence -- and nothing but the boundary distinguishes them."""
     admin = h.connect(); h.reset(admin)
     _tune(admin, min_sample=100, bin_count=2, min_bin_count=1)
+    _experiment(admin)
 
     shakedown = [_plant(admin, f"T59-pre-{i}", 0.60, "WIN") for i in range(3)]
-    at = h.scalar(admin, "SELECT model.activate_experiment('planted','1','deploy','go live')")
+    at = h.scalar(admin,
+        "SELECT model.activate_experiment('planted','1','deploy','go live')")
     live = [_plant(admin, f"T59-post-{i}", 0.60, "WIN") for i in range(4)]
 
     assert h.scalar(admin, """
         SELECT count(*) FROM grading.belief_grades
-         WHERE scoring_status = 'SCORED'""") == 7, "fixture did not grade all 7"
+         WHERE scoring_status='SCORED'""") == 7, "fixture did not grade all 7"
+    # every one of the 7 has full lineage -- only the boundary separates them
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_attempts
+         WHERE belief_id IS NOT NULL AND schedule_id IS NOT NULL""") == 7
 
-    in_sample = {r[0] for r in h.rows(admin,
-        "SELECT belief_id FROM model.prereg_sample")}
-    assert in_sample == set(live), (
-        f"sample should hold only the {len(live)} post-activation beliefs")
+    got = {r[0] for r in h.rows(admin,
+        "SELECT belief_id FROM grading.evaluation_sample")}
+    assert got == set(live), f"expected only the {len(live)} post-activation beliefs"
     for b in shakedown:
-        assert b not in in_sample, "a pre-activation shakedown belief entered the sample"
-
-    n = sum(r[1] for r in h.rows(admin,
-        "SELECT bin, n FROM grading.calibration_bins('planted','1')"))
-    assert n == 4, f"calibration binned {n} beliefs, expected the 4 in-sample ones"
+        assert b not in got, "a pre-activation shakedown belief became evidence"
+    assert _sample_n(admin) == 4
+    assert h.row(admin, "SELECT * FROM grading.standing_report('planted','1')")[0] == 4
     assert at is not None
     admin.close()
-    return f"3 pre-activation beliefs excluded, {n} in-sample beliefs binned"
+    return "7 beliefs, identical lineage; 3 pre-activation excluded, n = 4"
 
 
-def t60_activation_cannot_be_re_stamped():
-    """A movable activation timestamp is a free parameter: a disappointing first
-    month could be excluded by sliding it forward and the sample would still
-    look pre-registered."""
+def t60_beliefs_outside_the_scheduled_path_are_excluded():
+    """LINEAGE membership, on its own -- and the control that proves the
+    timestamp is not the entire definition of "prospective".
+
+    Every belief here is formed AFTER activation and would pass a
+    `formed_at >= activated_at` filter. Only the ones produced through the
+    pre-registered lifecycle count."""
     admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=100, bin_count=2, min_bin_count=1)
+    _activate_back(admin)
+
+    enrolled = [_plant(admin, f"T60-in-{i}", 0.60, "WIN") for i in range(4)]
+
+    # (a) a belief formed and graded directly -- no schedule, no attempt
+    loose = []
+    for i in range(3):
+        ev = _market(admin, f"T60-loose-{i}", -150, 130)
+        bid = _form(admin, ev, prob=0.60, model_id="planted", model_version="1")
+        _resolve(admin, ev, "DAL", "WIN")
+        _grade(admin, bid)
+        loose.append(bid)
+
+    # (b) a belief through the PRODUCER's own path: attempt_belief logs an
+    #     attempt, but with no schedule_id -- so it has no experiment
+    ev = _market(admin, "T60-attempt", -150, 130)
+    bid, reason = _attempt(admin, ev, prob=0.60, mid="planted", ver="1")
+    assert reason == "ELIGIBLE" and bid is not None
+    _resolve(admin, ev, "DAL", "WIN")
+    _grade(admin, bid)
+    loose.append(bid)
+
+    scored = h.scalar(admin, """
+        SELECT count(*) FROM grading.belief_grades WHERE scoring_status='SCORED'""")
+    assert scored == 8, scored
+    # all 8 are post-activation: a timestamp-only rule would admit every one
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.beliefs b
+         WHERE b.formed_at >= model.activated_at('planted','1')""") == 8, (
+        "fixture is wrong: some belief predates activation, so this test would "
+        "pass on the time axis and prove nothing about lineage")
+
+    got = {r[0] for r in h.rows(admin,
+        "SELECT belief_id FROM grading.evaluation_sample")}
+    assert got == set(enrolled), (
+        f"expected only the {len(enrolled)} beliefs produced through the "
+        f"scheduled lifecycle, got {len(got)}")
+    for b in loose:
+        assert b not in got, "a belief formed outside the scheduled path became evidence"
+
+    assert _sample_n(admin) == 4
+    assert h.row(admin, "SELECT * FROM grading.standing_report('planted','1')")[0] == 4, (
+        "standing_report counted beliefs with no experiment lineage")
+    admin.close()
+    return ("8 post-activation beliefs, all passing a timestamp filter; "
+            "only the 4 with lifecycle lineage counted")
+
+
+def t61_the_experiment_lifecycle_is_forward_only():
+    """A movable activated_at is a free parameter: slide it forward and early
+    losses vanish; slide it back and historical rows are admitted."""
+    admin = h.connect(); h.reset(admin)
+    _experiment(admin, "v01", "0.1.0")
+    assert h.scalar(admin, """
+        SELECT status::text FROM model.experiments WHERE model_id='v01'""") == "DRAFT"
+
     first = h.scalar(admin,
-        "SELECT model.activate_experiment('v01','0.1.0','ops','first activation')")
+        "SELECT model.activate_experiment('v01','0.1.0','ops','first')")
 
     h.expect_error(
         lambda: h.scalar(admin,
-            "SELECT model.activate_experiment('v01','0.1.0','ops','sliding it forward')"),
-        "ALREADY_ACTIVATED", "activating the same model version twice")
+            "SELECT model.activate_experiment('v01','0.1.0','ops','again')"),
+        "ALREADY_ACTIVATED", "activating twice")
 
-    for label, sql in (
-        ("UPDATE", "UPDATE model.experiment_activation "
-                   "SET activated_at = NOW() WHERE model_id='v01' RETURNING 1"),
-        ("DELETE", "DELETE FROM model.experiment_activation "
-                   "WHERE model_id='v01' RETURNING 1"),
+    for label, sql, frag in (
+        ("move the boundary forward",
+         "UPDATE model.experiments SET activated_at = NOW() + INTERVAL '1 day' "
+         "WHERE model_id='v01' RETURNING 1", "ACTIVATION_IMMUTABLE"),
+        ("move the boundary backward",
+         "UPDATE model.experiments SET activated_at = NOW() - INTERVAL '30 days' "
+         "WHERE model_id='v01' RETURNING 1", "ACTIVATION_IMMUTABLE"),
+        ("return to DRAFT",
+         "UPDATE model.experiments SET status='DRAFT' "
+         "WHERE model_id='v01' RETURNING 1", "ILLEGAL_TRANSITION"),
+        ("skip to EVALUATED",
+         "UPDATE model.experiments SET status='EVALUATED' "
+         "WHERE model_id='v01' RETURNING 1", "ILLEGAL_TRANSITION"),
+        ("rename the version",
+         "UPDATE model.experiments SET model_version='0.2.0' "
+         "WHERE model_id='v01' RETURNING 1", "EXPERIMENT_IMMUTABLE"),
+        ("delete it",
+         "DELETE FROM model.experiments WHERE model_id='v01' RETURNING 1",
+         "EXPERIMENT_IMMUTABLE"),
     ):
-        h.expect_error(lambda sql=sql: h.scalar(admin, sql),
-                       "APPEND_ONLY_VIOLATION", f"{label} an activation")
+        h.expect_error(lambda sql=sql: h.scalar(admin, sql), frag, label)
 
     assert h.scalar(admin, """
-        SELECT activated_at FROM model.experiment_activation
-         WHERE model_id='v01'""") == first
+        SELECT activated_at FROM model.experiments WHERE model_id='v01'""") == first
 
-    # a NEW version starts a NEW sample, which is the sanctioned route
-    second = h.scalar(admin,
-        "SELECT model.activate_experiment('v01','0.2.0','ops','new k, new sample')")
-    assert second is not None
-    assert h.scalar(admin, "SELECT count(*) FROM model.experiment_activation") == 2
+    # the sanctioned forward path
+    assert h.scalar(admin, """
+        SELECT model.advance_experiment('v01','0.1.0','COLLECTION_COMPLETE')""") \
+        == "COLLECTION_COMPLETE"
+    assert h.scalar(admin, """
+        SELECT model.advance_experiment('v01','0.1.0','EVALUATED')""") == "EVALUATED"
+    h.expect_error(
+        lambda: h.scalar(admin,
+            "SELECT model.advance_experiment('v01','0.1.0','ACTIVE')"),
+        "ILLEGAL_TRANSITION", "EVALUATED back to ACTIVE")
+
+    # a new version is the sanctioned route to a new sample
+    _experiment(admin, "v01", "0.2.0")
+    assert h.scalar(admin, "SELECT count(*) FROM model.experiments") == 2
     admin.close()
-    return "re-activation refused, UPDATE/DELETE refused, new version allowed"
+    return "DRAFT->ACTIVE->COLLECTION_COMPLETE->EVALUATED; 6 illegal moves refused"
 
 
-def t61_activation_has_no_caller_supplied_timestamp():
+def t62_the_cohort_survives_the_evaluation_states():
+    """Collection ending must not empty the sample. If it did, the scoreboard
+    would silently reset the moment an experiment was declared complete."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=100, bin_count=2, min_bin_count=1)
+    _activate_back(admin)
+    for i in range(4):
+        _plant(admin, f"T62-{i}", 0.60, "WIN")
+    assert _sample_n(admin) == 4
+
+    for state in ("COLLECTION_COMPLETE", "EVALUATED"):
+        h.scalar(admin, "SELECT model.advance_experiment('planted','1',%s)", (state,))
+        assert _sample_n(admin) == 4, f"the sample emptied at {state}"
+        assert h.row(admin,
+            "SELECT * FROM grading.standing_report('planted','1')")[0] == 4
+    admin.close()
+    return "n = 4 held across ACTIVE, COLLECTION_COMPLETE and EVALUATED"
+
+
+def t63_activation_has_no_caller_supplied_timestamp():
     """The production entry point stamps NOW(). A caller-supplied activation
-    time is exactly the free parameter the append-only rule removes, so it must
-    not exist on the sanctioned path -- only on an explicitly-named fixture."""
+    time is the free parameter the whole migration exists to remove."""
     admin = h.connect(); h.reset(admin)
     args = h.rows(admin, """
         SELECT p.proname, pg_get_function_arguments(p.oid)
         FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
-        WHERE n.nspname = 'model' AND p.proname = 'activate_experiment'""")
+        WHERE n.nspname='model' AND p.proname='activate_experiment'""")
     assert len(args) == 1, f"expected exactly one signature, got {args}"
     sig = args[0][1]
     assert "timestamp" not in sig.lower(), (
         f"model.activate_experiment accepts a caller-supplied time: {sig}")
 
+    _experiment(admin, "v01", "0.1.0")
     before = h.scalar(admin, "SELECT NOW()")
     at = h.scalar(admin, "SELECT model.activate_experiment('v01','0.1.0','ops',NULL)")
     after = h.scalar(admin, "SELECT NOW()")
     assert before <= at <= after, (before, at, after)
 
-    # the fixture that CAN back-date is named so it cannot be mistaken for it
+    # activating something never declared is refused, not silently created
+    h.expect_error(
+        lambda: h.scalar(admin,
+            "SELECT model.activate_experiment('ghost','1','ops',NULL)"),
+        "NO_SUCH_EXPERIMENT", "activating an undeclared experiment")
+
     assert "FIXTURE" in h.scalar(admin, """
         SELECT obj_description(p.oid) FROM pg_proc p
-        JOIN pg_namespace n ON n.oid = p.pronamespace
+        JOIN pg_namespace n ON n.oid=p.pronamespace
         WHERE n.nspname='olp_test' AND p.proname='activate_experiment_at'""")
     admin.close()
     return f"signature is ({sig}); stamped NOW() inside the observed interval"
 
 
-def t62_the_producer_cannot_declare_its_own_sample():
+def t64_the_producer_cannot_declare_its_own_cohort():
     """Activation decides which of the model's outputs are counted. A producer
-    that could set or move that boundary would be choosing its own denominator
-    one level above the ledger 055 and 056 built."""
+    that could declare, activate or advance an experiment would be choosing its
+    own denominator one level above the ledger 055 and 056 built."""
     admin = h.connect(); h.reset(admin)
-    _due_market(admin, "T62")
+    _due_market(admin, "T64")
     _sched(admin)
-    _assert_exists(admin, "model.experiment_activation")
+    for obj in ("model.experiments", "model.experiment_cohort",
+                "grading.evaluation_sample"):
+        _assert_exists(admin, obj)
     h.scalar(admin, "SELECT model.activate_experiment('v01','0.1.0','ops',NULL)")
 
     model = h.connect_as("olp_model")
-    # it keeps the 056 ledger read, and can therefore evaluate the new column
+    # keeps the 056 ledger read, and can therefore evaluate the cohort flag
     assert h.scalar(model, "SELECT count(*) FROM model.v01_ledger") == 2
     assert h.scalar(model, """
-        SELECT count(*) FROM model.v01_ledger WHERE in_prereg_sample IS NOT NULL
-           OR in_prereg_sample IS NULL""") == 2
+        SELECT count(*) FROM model.v01_ledger WHERE NOT in_prereg_sample""") == 2
 
     for label, sql in (
-        ("activate", "SELECT model.activate_experiment('v01','9.9.9','m',NULL)"),
-        ("read row", "SELECT count(*) FROM model.experiment_activation"),
-        ("read sample", "SELECT count(*) FROM model.prereg_sample"),
-        ("write", "INSERT INTO model.experiment_activation"
-                  "(model_id,model_version,activated_by) VALUES ('m','1','m')"),
+        ("declare",  "SELECT model.create_experiment('m','1','mine')"),
+        ("activate", "SELECT model.activate_experiment('v01','0.1.0','m',NULL)"),
+        ("advance",  "SELECT model.advance_experiment('v01','0.1.0','EVALUATED')"),
+        ("read experiments", "SELECT count(*) FROM model.experiments"),
+        ("read sample", "SELECT count(*) FROM grading.evaluation_sample"),
+        ("write", "INSERT INTO model.experiments(model_id,model_version) "
+                  "VALUES ('m','1')"),
     ):
         try:
             with model.cursor() as cur:
@@ -2035,13 +2178,14 @@ def t62_the_producer_cannot_declare_its_own_sample():
         except psycopg.Error as exc:
             assert exc.sqlstate == INSUFFICIENT_PRIVILEGE, (label, exc.sqlstate)
         else:
-            raise AssertionError(f"olp_model performed activation action: {label}")
+            raise AssertionError(f"olp_model performed cohort action: {label}")
     model.close()
 
     grader = h.connect_as("olp_grader")
-    assert h.scalar(grader, "SELECT count(*) FROM model.experiment_activation") == 1
+    assert h.scalar(grader, "SELECT count(*) FROM model.experiments") == 1
+    assert h.scalar(grader, "SELECT count(*) FROM grading.evaluation_sample") == 0
     grader.close(); admin.close()
-    return "producer reads the boundary flag; cannot set, read, or write the row"
+    return "producer reads the cohort flag; declare/activate/advance/read all refused"
 
 
 PACKAGE5 = [
@@ -2143,12 +2287,16 @@ PACKAGE5 = [
      t57_the_runner_is_an_operator_not_the_model),
     ("P5-T58", "An unactivated experiment has an empty sample",
      t58_an_unactivated_experiment_has_an_empty_sample),
-    ("P5-T59", "Pre-activation beliefs are excluded",
-     t59_pre_activation_beliefs_are_excluded_from_the_sample),
-    ("P5-T60", "Activation cannot be re-stamped",
-     t60_activation_cannot_be_re_stamped),
-    ("P5-T61", "Activation has no caller-supplied timestamp",
-     t61_activation_has_no_caller_supplied_timestamp),
-    ("P5-T62", "The producer cannot declare its own sample",
-     t62_the_producer_cannot_declare_its_own_sample),
+    ("P5-T59", "Pre-activation beliefs are excluded (time)",
+     t59_pre_activation_beliefs_are_excluded),
+    ("P5-T60", "Beliefs outside the scheduled path are excluded (lineage)",
+     t60_beliefs_outside_the_scheduled_path_are_excluded),
+    ("P5-T61", "The experiment lifecycle is forward-only",
+     t61_the_experiment_lifecycle_is_forward_only),
+    ("P5-T62", "The cohort survives the evaluation states",
+     t62_the_cohort_survives_the_evaluation_states),
+    ("P5-T63", "Activation has no caller-supplied timestamp",
+     t63_activation_has_no_caller_supplied_timestamp),
+    ("P5-T64", "The producer cannot declare its own cohort",
+     t64_the_producer_cannot_declare_its_own_cohort),
 ]

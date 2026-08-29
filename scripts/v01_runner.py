@@ -259,6 +259,28 @@ def show_status(conn) -> int:
     return 0
 
 
+def do_declare(conn, args) -> int:
+    """Create the experiment in DRAFT.
+
+    Opportunities can be scheduled and resolved against a DRAFT experiment and
+    none of them count -- which is exactly what the deployment shakedown needs.
+    schedule_v01 refuses to create an opportunity with no experiment, because
+    such an opportunity could never belong to a cohort.
+    """
+    try:
+        eid = _scalar(conn, "SELECT model.create_experiment('v01', %s, %s)",
+                      (args.model_version, args.note))
+    except Exception as exc:                                   # noqa: BLE001
+        print(json.dumps({"job": "v01.declare", "status": "REFUSED",
+                          "error": str(exc).splitlines()[0]}, default=str))
+        return 1
+    print(json.dumps({"job": "v01.declare", "status": "OK",
+                      "model": f"v01/{args.model_version}",
+                      "experiment_id": str(eid), "experiment_status": "DRAFT"},
+                     default=str))
+    return 0
+
+
 def do_activate(conn, args) -> int:
     """The one-time act that makes the experiment prospective.
 
@@ -295,6 +317,8 @@ def main() -> int:
                    help="capture and terminate what is due (every 5 min, <=1 credit)")
     g.add_argument("--status", action="store_true",
                    help="report the ledger without changing anything")
+    g.add_argument("--declare", action="store_true",
+                   help="create the experiment in DRAFT; required before scheduling")
     g.add_argument("--activate", action="store_true",
                    help="declare the experiment prospective; ONE TIME, never undone")
     ap.add_argument("--by", help="with --activate: who is activating")
@@ -315,6 +339,8 @@ def main() -> int:
         if args.schedule:
             do_schedule(conn)
             return 0
+        if args.declare:
+            return do_declare(conn, args)
         if args.activate:
             return do_activate(conn, args)
         if args.status:

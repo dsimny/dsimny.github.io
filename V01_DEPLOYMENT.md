@@ -146,7 +146,7 @@ The request line is logged with the query string stripped.
 
 ## Deployment sequence
 
-Exactly three actions before enabling either job.
+Four actions before enabling either job.
 
 ### 1. Rotate `THE_ODDS_API_KEY`
 
@@ -162,7 +162,18 @@ Migrations `001`–`058` applied. Verify:
 python scripts/v01_runner.py --status
 ```
 
-### 3. Verify both endpoints manually, then activate
+### 3. Declare the experiment
+
+```bash
+python scripts/v01_runner.py --declare --note "NFL moneyline, k=1.10, T-24h"
+```
+
+Creates it in `DRAFT`. `schedule_v01` refuses to create an opportunity with no
+experiment, because such an opportunity could never belong to a cohort. Nothing
+formed against a DRAFT experiment counts — which is exactly what the shakedown
+needs.
+
+### 4. Verify both endpoints manually, then activate
 
 ```bash
 curl -sS -X POST -H "Authorization: Bearer $OLP_JOB_TOKEN" https://<host>/jobs/v01/schedule
@@ -192,27 +203,54 @@ Finally enable both cron-job.org jobs.
 
 ## Activation is the moment the experiment becomes prospective
 
-> Anything formed after the activation timestamp belongs to the pre-registered
-> sample; anything before it does not.
+> A belief belongs to the v0.1 prospective evaluation sample only if its
+> scheduled formation opportunity was created and resolved under the activated
+> experiment, AND its formation occurred at or after `activated_at`.
 
-That is enforced, not merely written down (migration `058`):
+Two **independent** requirements, both enforced by `model.experiment_cohort`
+(migration `058`):
 
-- `model.experiment_activation` — one row per model version, **append-only**.
-  `UPDATE` and `DELETE` raise `APPEND_ONLY_VIOLATION`; a second
-  `activate_experiment` raises `ALREADY_ACTIVATED`. A movable boundary would be
-  a free parameter that could exclude a disappointing month after the fact.
+| | Requirement | What it rules out |
+|---|---|---|
+| **Time** | `formed_at >= activated_at` | shakedown beliefs from step 3 below |
+| **Lineage** | experiment → scheduled opportunity → terminal attempt → belief | a manual insert, a fixture row, or the producer'''s own `attempt_belief` path |
+
+A timestamp filter alone is too weak: it admits any belief carrying a late
+enough `formed_at`. `P5-T60` proves the point directly — eight beliefs all
+formed **after** activation, of which only the four with lifecycle lineage
+count.
+
+Every scoreboard draws from `grading.evaluation_sample`, so Brier, the Brier
+Skill Score, log loss, calibration and the **N = 500 gate** all see the same
+cohort. Before `058`, `standing_report` aggregated on `model_id` +
+`model_version` alone — any graded row carrying the right version string
+counted.
+
+### Lifecycle
+
+```
+DRAFT  ->  ACTIVE  ->  COLLECTION_COMPLETE  ->  EVALUATED
+```
+
+- `DRAFT → ACTIVE` stamps `activated_at` **once**.
+- Thereafter `activated_at` is **immutable** — `ACTIVATION_IMMUTABLE`. Sliding it
+  forward would erase early losses from the scoreboard; sliding it backward
+  would admit historical rows.
+- Forward-only. No return to `DRAFT`, no skipping — `ILLEGAL_TRANSITION`.
+- The experiment cannot be deleted or renamed — `EXPERIMENT_IMMUTABLE`.
+- The cohort **survives** `COLLECTION_COMPLETE` and `EVALUATED`, so declaring
+  collection finished does not silently empty the scoreboard (`P5-T62`).
 - `model.activate_experiment` has **no timestamp parameter**. It stamps `NOW()`.
-  Back-dating exists only as an explicitly-named test fixture.
-- `grading.calibration_bins` measures the **pre-registered sample**, so the
-  shakedown beliefs from step 3 above cannot leak into it.
-- **No activation means an EMPTY sample, not an unfiltered one.** An experiment
-  nobody remembered to activate reports nothing rather than quietly accumulating
-  a full sample and publishing a standing on it.
 
-A new model version (a different `k`) starts a new sample from zero, which is
-what `MODEL_V0_1_PREREG.md` §4.1 already requires.
+### Fails closed
 
----
+No activated experiment means an **EMPTY** sample, not an unfiltered one. The
+cohort is an inner join. `NC-10` proves the fail-open shape — *"filter by the
+experiment if it has been activated"* — would let a DRAFT experiment publish a
+standing.
+
+A new `k` is a new model version and therefore a new experiment and a new
+sample from zero, which is what `MODEL_V0_1_PREREG.md` §4.1 already requires.
 
 ## Expected cost
 

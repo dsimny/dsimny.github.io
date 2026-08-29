@@ -251,8 +251,8 @@ one belief per event x moneyline selection
 Target:
 T-24h
 
-Eligible formation window:
-T-24h +/- 30 minutes
+Eligible capture window:
+T-24h +/- 60 minutes
 
 Selection:
 use the eligible market observation closest to exactly T-24h
@@ -260,24 +260,49 @@ use the eligible market observation closest to exactly T-24h
 Tie:
 earlier observation wins
 
-If no eligible market exists inside the window:
-record the eligibility attempt/reason;
+If no eligible observation exists inside the window:
+record NO_WINDOW_CAPTURE;
 emit no belief.
 
+No substitution from outside the window.
 No later replacement.
 No second belief at T-12h, T-2h, or kickoff.
 ```
+
+`NO_WINDOW_CAPTURE` is kept **distinct from every market eligibility reason**.
+A market may have been perfectly executable at T−24h and the ingestion system
+simply failed to observe it inside the window. That is a **data-collection
+failure, not a market failure**, and conflating the two would corrupt any later
+analysis of missingness — the most likely place for a quiet bias to hide.
 
 **Why T−24h.** It keeps continuity with the earlier NFL result, where the market
 beat the model 9/9 **at T−24**. Moving the horizon after that result would be
 moving the goalposts. It also prevents six hourly observations of one game from
 being counted as six independent opportunities.
 
-**On the window width.** `±30m` is preregistered. If the polling infrastructure
-cannot reliably guarantee an observation inside it, **widen it to `±60m` now,
-before collection begins** — an honestly preregistered `±60m` is far better than
+**On the window width — `±60m`, decided before collection.** `±30m` was not
+operationally credible to pre-register: the question is not whether the system
+*could* occasionally hit ±30, but whether the capture mechanism can reliably
+produce that observation **without selective intervention**. With polling still
+manual, it cannot. An honestly pre-registered `±60m` is far better than
 accumulating missing games and loosening the rule afterwards to recover them.
-This is a decision to take against the ingestion cadence, not against the data.
+
+### 9.3.1 A tension in "closest to target" worth naming
+
+The selection rule implies choosing among candidate observations *after* the
+window closes. Doing that faithfully needs the market state as it stood at each
+candidate moment — which is the point-in-time reconstruction §9.2 rules out.
+
+`056` therefore resolves **live, inside the window**: the first run that finds an
+eligible observation forms the belief from the surface as it stands then, and
+`seconds_from_target` records how close to T−24h it actually got.
+
+At current polling density a ±60m window will usually contain **at most one**
+observation, so "closest to target" and "first inside the window" coincide. They
+stop coinciding if polling becomes dense — and that choice must be revisited
+**before** that happens, not after, or the selection rule silently changes
+meaning mid-experiment. Recorded here so it cannot be discovered later as a
+convenient reinterpretation.
 
 ### 9.4 Time-to-kickoff is part of the immutable record — **LOCKED**
 

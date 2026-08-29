@@ -1297,6 +1297,212 @@ def t42_the_evaluation_population_is_describable():
     return f"{eligible}/{total} attempts eligible ({rate:.0%}); exclusions retained"
 
 
+
+# =============================================================================
+# Increment 7 -- the v0.1 formation lifecycle
+# =============================================================================
+
+def _event_at(admin, src, kickoff_in, home="DAL", away="PHI"):
+    return h.scalar(admin, "SELECT olp_test.create_event(%s,%s,%s,%s::interval)",
+                    (src, home, away, kickoff_in))
+
+
+def _sched(admin, **kw):
+    return h.scalar(admin, "SELECT model.schedule_v01()")
+
+
+def t43_the_v01_transform_is_the_pre_registered_one():
+    """k = 1.10, and the two properties recorded before the data arrives:
+    p = 0.5 is a fixed point, and k = 1 reproduces the market exactly."""
+    admin = h.connect()
+    # hand-computed from logit(p_v01) = 1.10 * logit(p)
+    # Values computed independently in Python at 40-digit precision and
+    # confirmed identical in PostgreSQL numeric. An earlier version of this test
+    # carried constants transcribed from a one-decimal display rather than
+    # derived, and was wrong in the sixth place.
+    for p_, expect in ((0.50, 0.500000), (0.55, 0.554961), (0.60, 0.609691),
+                       (0.70, 0.717486), (0.80, 0.821262), (0.95, 0.962272)):
+        got = float(h.scalar(admin, "SELECT model.v01_probability(%s::numeric)", (p_,)))
+        assert abs(got - expect) < 1e-6, (p_, got, expect)
+
+    # 0.5 is a fixed point at any k -- pick'em markets contribute nothing
+    for k in (1.0, 1.10, 2.0, 0.5):
+        assert float(h.scalar(admin,
+            "SELECT model.v01_probability(0.5::numeric, %s::numeric)", (k,))) == 0.5
+
+    # k = 1 nests the null model exactly
+    for p_ in (0.2, 0.437, 0.83):
+        assert float(h.scalar(admin,
+            "SELECT model.v01_probability(%s::numeric, 1::numeric)", (p_,))) == p_
+    admin.close()
+    return "k=1.10 matches hand values; 0.5 fixed at any k; k=1 is the identity"
+
+
+def t44_the_schedule_creates_opportunities_before_the_model_runs():
+    """The producer no longer decides when to attempt. The schedule decides an
+    opportunity exists, one row per event x selection, once."""
+    admin = h.connect(); h.reset(admin)
+    inside  = _event_at(admin, "T44-IN",  "24 hours")
+    early   = _event_at(admin, "T44-FAR", "40 hours")   # target still ahead
+    late    = _event_at(admin, "T44-SOON", "2 hours")   # target long past
+
+    n = _sched(admin)
+    assert n == 2, f"expected 2 scheduled selections for one event, got {n}"
+
+    rows = h.rows(admin, """
+        SELECT event_id, selection_key, market_type::text, window_seconds
+        FROM model.formation_schedule ORDER BY selection_key""")
+    assert {r[0] for r in rows} == {inside}, "scheduled an event outside the window"
+    assert [r[1] for r in rows] == ["DAL", "PHI"]
+    assert all(r[2] == "MONEYLINE" and r[3] == 3600 for r in rows)
+
+    assert _sched(admin) == 0, "scheduling twice created duplicate opportunities"
+    admin.close()
+    return f"1 event in window -> 2 opportunities; {early is not None and late is not None}"
+
+
+def t45_every_scheduled_opportunity_terminates_exactly_once():
+    """scheduled = formed + ineligible. No opportunity may vanish."""
+    admin = h.connect(); h.reset(admin)
+    ev = _event_at(admin, "T45", "24 hours")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, -150, 130, bk)
+    _sched(admin)
+
+    for sid in [r[0] for r in h.rows(admin,
+            "SELECT schedule_id FROM model.formation_schedule")]:
+        h.scalar(admin, "SELECT model.resolve_v01(%s::uuid)", (sid,))
+        h.expect_error(
+            lambda sid=sid: h.scalar(admin, "SELECT model.resolve_v01(%s::uuid)", (sid,)),
+            "ALREADY_RESOLVED", "resolving twice")
+
+    sched, formed, ineligible, unresolved = h.row(admin, """
+        SELECT count(*), count(*) FILTER (WHERE belief_formed),
+               count(*) FILTER (WHERE NOT belief_formed AND NOT unresolved),
+               count(*) FILTER (WHERE unresolved)
+        FROM model.v01_ledger""")
+    assert unresolved == 0, f"{unresolved} opportunities vanished"
+    assert sched == formed + ineligible, (sched, formed, ineligible)
+    assert formed == 2, formed
+    admin.close()
+    return f"{sched} scheduled = {formed} formed + {ineligible} ineligible; 0 unresolved"
+
+
+def t46_the_model_is_invoked_only_after_eligibility():
+    """The load-bearing inversion. The model must never see its probability and
+    then decide whether the opportunity qualified."""
+    admin = h.connect(); h.reset(admin)
+    ok  = _event_at(admin, "T46-OK",  "24 hours")
+    thin = _event_at(admin, "T46-THIN", "24 hours")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ok, "MONEYLINE", None, -150, 130, bk)
+    two_sided(admin, thin, "MONEYLINE", None, -150, 130, "bookA")   # one book
+    _sched(admin)
+    for sid in [r[0] for r in h.rows(admin,
+            "SELECT schedule_id FROM model.formation_schedule")]:
+        h.scalar(admin, "SELECT model.resolve_v01(%s::uuid)", (sid,))
+
+    # the ineligible ones terminated with a reason and produced NO belief
+    reasons = dict(h.rows(admin, """
+        SELECT reason::text, count(*) FROM model.formation_attempts GROUP BY 1"""))
+    assert reasons.get("ELIGIBLE") == 2, reasons
+    assert reasons.get("NO_EXECUTABLE_MARKET") == 2, reasons
+    assert h.scalar(admin, "SELECT count(*) FROM model.beliefs") == 2
+
+    # the formed beliefs carry the v0.1 transform, not the raw market
+    for mkt, mdl in h.rows(admin, """
+            SELECT market_probability_at_formation, model_probability
+            FROM model.beliefs"""):
+        expect = float(h.scalar(admin,
+            "SELECT model.v01_probability(%s::numeric)", (mkt,)))
+        assert abs(float(mdl) - expect) < 1e-9, (mkt, mdl, expect)
+        assert float(mdl) != float(mkt), "v0.1 emitted the market unchanged"
+    admin.close()
+    return "eligible -> model invoked and sharpened; ineligible -> no model output at all"
+
+
+def t47_a_missed_window_is_a_collection_failure_not_a_market_one():
+    """NO_WINDOW_CAPTURE is kept distinct from every market reason. A market may
+    have been perfectly executable and the ingestion system simply failed to look
+    inside the window -- conflating those would corrupt any analysis of
+    missingness."""
+    admin = h.connect(); h.reset(admin)
+    ev = _event_at(admin, "T47", "24 hours")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, -150, 130, bk)
+    _sched(admin)
+    sid = h.scalar(admin, "SELECT schedule_id FROM model.formation_schedule LIMIT 1")
+
+    # the market is fine; only the clock has moved outside the window
+    assert h.scalar(admin, """
+        SELECT model.eligibility(event_id,'MONEYLINE',selection_key,line)
+        FROM model.formation_schedule WHERE schedule_id=%s""", (sid,)) == "ELIGIBLE"
+    admin.execute("""
+        INSERT INTO model.formation_schedule (model_id, model_version, event_id,
+            market_type, selection_key, line, target_formation_at, window_seconds)
+        SELECT 'v01','shifted',event_id,market_type,selection_key,line,
+               NOW() - INTERVAL '3 hours', 3600
+        FROM model.formation_schedule WHERE schedule_id=%s""", (sid,))
+    missed = h.scalar(admin, """
+        SELECT schedule_id FROM model.formation_schedule WHERE model_version='shifted'""")
+
+    reason = h.scalar(admin, "SELECT model.resolve_v01(%s::uuid)", (missed,))
+    assert reason == "NO_WINDOW_CAPTURE", reason
+    row = h.row(admin, """
+        SELECT belief_id, seconds_from_target, selected_observation_at
+        FROM model.formation_attempts WHERE schedule_id=%s""", (missed,))
+    assert row[0] is None, "a belief was formed outside the window"
+    assert row[1] > 3600, f"seconds_from_target {row[1]} does not show the miss"
+    assert row[2] is None
+    admin.close()
+    return f"executable market, missed window -> NO_WINDOW_CAPTURE at {row[1]}s from target"
+
+
+def t48_both_clocks_are_recorded_and_can_disagree():
+    """seconds_from_target and seconds_to_kickoff answer different questions. If
+    a game is rescheduled they diverge, and only both together show whether the
+    horizon actually held."""
+    admin = h.connect(); h.reset(admin)
+    ev = _event_at(admin, "T48", "24 hours")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, -150, 130, bk)
+    _sched(admin)
+    sid = h.scalar(admin, "SELECT schedule_id FROM model.formation_schedule LIMIT 1")
+
+    # the game is pushed back three hours AFTER the opportunity was scheduled
+    admin.execute("""UPDATE public.events
+                     SET current_scheduled_start = current_scheduled_start
+                         + INTERVAL '3 hours' WHERE id = %s""", (ev,))
+    h.scalar(admin, "SELECT model.resolve_v01(%s::uuid)", (sid,))
+
+    frm, kick, target = h.row(admin, """
+        SELECT seconds_from_target, seconds_to_kickoff, target_formation_at
+        FROM model.formation_attempts WHERE schedule_id=%s""", (sid,))
+    assert abs(frm) <= 3600, f"seconds_from_target {frm} is outside the window"
+    assert kick > 24 * 3600 + 2 * 3600, (
+        f"seconds_to_kickoff {kick} did not follow the reschedule")
+    admin.close()
+    return (f"from_target {frm}s (horizon held) vs to_kickoff {kick}s "
+            "(game moved) -- the divergence is visible")
+
+
+def t49_the_schedule_is_immutable(admin=None):
+    """A schedule that can be edited after the fact is not a denominator."""
+    admin = h.connect(); h.reset(admin)
+    ev = _event_at(admin, "T49", "24 hours")
+    _sched(admin)
+    sid = h.scalar(admin, "SELECT schedule_id FROM model.formation_schedule LIMIT 1")
+    h.expect_error(lambda: admin.execute(
+        "UPDATE model.formation_schedule SET target_formation_at = NOW()"),
+        "APPEND_ONLY_VIOLATION", "UPDATE a scheduled opportunity")
+    h.expect_error(lambda: admin.execute(
+        "DELETE FROM model.formation_schedule WHERE schedule_id=%s", (sid,)),
+        "APPEND_ONLY_VIOLATION", "DELETE a scheduled opportunity")
+    assert h.scalar(admin, "SELECT count(*) FROM model.formation_schedule") == 2
+    admin.close()
+    return "scheduled opportunities cannot be edited or removed"
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -1364,4 +1570,18 @@ PACKAGE5 = [
      t41_the_two_eligibility_evaluations_agree),
     ("P5-T42", "The evaluation population is describable",
      t42_the_evaluation_population_is_describable),
+    ("P5-T43", "The v0.1 transform is the pre-registered one",
+     t43_the_v01_transform_is_the_pre_registered_one),
+    ("P5-T44", "Schedule creates opportunities before the model runs",
+     t44_the_schedule_creates_opportunities_before_the_model_runs),
+    ("P5-T45", "Every opportunity terminates exactly once",
+     t45_every_scheduled_opportunity_terminates_exactly_once),
+    ("P5-T46", "Model invoked only after eligibility",
+     t46_the_model_is_invoked_only_after_eligibility),
+    ("P5-T47", "Missed window is a collection failure",
+     t47_a_missed_window_is_a_collection_failure_not_a_market_one),
+    ("P5-T48", "Both clocks recorded and can disagree",
+     t48_both_clocks_are_recorded_and_can_disagree),
+    ("P5-T49", "The schedule is immutable",
+     t49_the_schedule_is_immutable),
 ]

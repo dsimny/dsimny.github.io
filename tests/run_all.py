@@ -144,6 +144,7 @@ def main():
     print(f"Package #5 trust boundary: {verdict(group_ok({'P5-T01','P5-T02','P5-T02b'}))}")
     print(f"Package #5 belief formation: {verdict(group_ok({'P5-T12','P5-T13','P5-T06','P5-T24','P5-T25','P5-T26','P5-T27'}))}")
     print(f"Package #5 v0.1 lifecycle: {verdict(group_ok({'P5-T43','P5-T44','P5-T45','P5-T46','P5-T47','P5-T48','P5-T49'}))}")
+    print(f"Package #5 activation boundary: {verdict(group_ok({'P5-T58','P5-T59','P5-T60','P5-T61','P5-T62'}))}")
     print(f"Package #5 experiment runner: {verdict(group_ok({'P5-T50','P5-T51','P5-T52','P5-T53','P5-T54','P5-T55','P5-T56','P5-T57'}))}")
     print(f"Package #5 eligibility ledger: {verdict(group_ok({'P5-T39','P5-T40','P5-T41','P5-T42'}))}")
     print(f"Package #5 null producer: {verdict(group_ok({'P5-T34','P5-T35','P5-T36','P5-T37','P5-T38'}))}")

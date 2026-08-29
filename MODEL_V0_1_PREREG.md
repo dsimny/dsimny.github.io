@@ -386,19 +386,42 @@ it does not create a second experiment observation.
 ```
 cron                    NOT CONFIGURED  <-- the only remaining blocker
 scripts/v01_runner.py   built, exercised end-to-end on fixtures
+scripts/v01_service.py  built, smoked over real HTTP
 ```
 
-Two jobs, both idempotent and both safe to run more often than needed:
+The two jobs, the hosted HTTP contract, the secrets boundary and the deployment
+sequence are specified in `V01_DEPLOYMENT.md`. cron is the clock only; it carries
+no experiment semantics.
 
 | Job | Cadence | Cost |
 |---|---|---|
-| `v01_runner.py --schedule` | hourly | free — no provider call |
-| `v01_runner.py --resolve` | every 5 minutes | ≤1 credit, and only when work is actually due |
+| `POST /jobs/v01/schedule` | hourly at HH:00:15 | free - no provider call |
+| `POST /jobs/v01/resolve` | every 5 min at HH:02:00... | <=1 credit, only when work is due |
 
 Five-minute wakeups do **not** mean five-minute polling. A tick with nothing due
 makes no provider call at all. A full Sunday slate of 16 games resolves as **one**
-board refresh serving 32 opportunities, an invariant enforced by
+board refresh serving 32 opportunities, enforced by
 `model.experiment_runs.ck_one_poll_per_cycle` rather than by care.
 
-Until cron is configured, `model.formation_schedule` stays empty and no v0.1
-belief exists. That is the correct state: the experiment has not started.
+### 11.3 Activation defines the sample - migration 058
+
+> Anything formed after the activation timestamp belongs to the pre-registered
+> sample; anything before it does not.
+
+The deployment sequence deliberately invokes both endpoints once BEFORE enabling
+cron, so this had to become structural rather than a note here. Before `058`,
+`grading.calibration_bins` drew from every scored belief for a model version -
+those shakedown beliefs would have entered the sample and nothing would have
+distinguished them.
+
+- `model.experiment_activation` is append-only, one row per model version.
+  Re-activating raises `ALREADY_ACTIVATED`; UPDATE/DELETE raise
+  `APPEND_ONLY_VIOLATION`. A movable boundary would be a free parameter capable
+  of excluding a disappointing month after the fact.
+- `model.activate_experiment` has **no timestamp parameter** - it stamps `NOW()`.
+- **No activation means an EMPTY sample, not an unfiltered one.** An experiment
+  nobody activated reports nothing, rather than accumulating a full sample and
+  publishing a standing on it.
+
+Until activation, `model.formation_schedule` stays empty and no v0.1 belief
+counts. That is the correct state: the experiment has not started.

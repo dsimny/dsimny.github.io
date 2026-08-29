@@ -750,6 +750,18 @@ def _market(admin, src, home_price, away_price):
     return ev
 
 
+def _activate_back(admin, model_id="planted", version="1", hours=24):
+    """Declare an activated experiment whose boundary is already in the past, so
+    beliefs planted afterwards fall inside the pre-registered sample.
+
+    Every calibration test needs this now. That is the point of 058: a sample is
+    something an experiment must DECLARE, and an unactivated model reports an
+    empty one rather than an unfiltered one."""
+    return h.scalar(admin, """
+        SELECT olp_test.activate_experiment_at(%s, %s, NOW() - make_interval(hours => %s))""",
+        (model_id, version, hours))
+
+
 def _plant(admin, src, prob, outcome, home_price=-150, away_price=130,
            model_id="planted", version="1"):
     """Form one belief and grade it against a chosen outcome."""
@@ -791,6 +803,7 @@ def t16_bins_are_equal_count_and_wilson_matches_hand_values():
     # Deliberately CLUSTERED. An evenly spread fixture gives 4/4/4 under fixed
     # WIDTH bucketing too, so it cannot tell the two schemes apart -- a negative
     # control caught exactly that. Here fixed-width would give 8/1/3.
+    _activate_back(admin)
     _tune(admin, min_sample=12, bin_count=3, min_bin_count=3)
     probs = [0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.60, 0.70, 0.80, 0.90]
     for i, pr in enumerate(probs):
@@ -816,6 +829,7 @@ def t23_a_single_bad_bin_fails_despite_a_good_weighted_average():
     hold e above 7.5pp while the average stays under 3pp. Five bins of six.
     """
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "planted", "1")
 
     def build(tag, last_p, last_wins):
         _tune(admin, min_sample=30, bin_count=5, min_bin_count=6)
@@ -842,6 +856,7 @@ def t23_a_single_bad_bin_fails_despite_a_good_weighted_average():
 
     # control: same shape, top bin predicted 0.70 -> 3.3pp out, inside the bound
     h.reset(admin)
+    _activate_back(admin, "planted", "1")   # reset clears the activation too
     _, _, werr2, worst2, _, status2 = build("T23b", 0.70, 4)
     assert float(worst2) <= 0.075 and status2 == "CALIBRATED", (worst2, status2)
 
@@ -866,6 +881,7 @@ def t21_a_model_can_be_calibrated_and_still_add_nothing():
     calibrated at 0.5 each bin must hold a 50/50 mix.
     """
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "planted", "1")
     _tune(admin, min_sample=20, bin_count=2, min_bin_count=5)
 
     # ten sharp favourites, 8 win; ten sharp dogs, 2 win. Jitter assigns half of
@@ -902,6 +918,8 @@ def t32_win_rate_and_probabilistic_quality_can_disagree():
     worse forecaster -- which is why the grader has no win-rate field to rank on.
     """
     admin = h.connect(); h.reset(admin)
+    for _mid in ("sharp", "lucky"):
+        _activate_back(admin, _mid, "1")
     _tune(admin, min_sample=10, bin_count=2, min_bin_count=3)
 
     # LUCKY: says 0.52 every time; wins 9 of 10.
@@ -941,6 +959,7 @@ def t33_the_shipped_thresholds_are_the_pre_registered_ones():
     hold. A convenience tweak must not be able to become the contract.
     """
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "planted", "1")
     defaults = dict(h.rows(admin, """
         SELECT column_name, column_default FROM information_schema.columns
         WHERE table_schema='grading' AND table_name='calibration_config'"""))
@@ -1025,6 +1044,7 @@ def t35_the_null_producer_grades_and_calibrates_through_the_ordinary_path():
     052 and 053 exactly as any model would, and comes out AT_PARITY -- which is
     the honest verdict for a model that reproduces the market."""
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "null", "1.0.0")
     _tune(admin, min_sample=20, bin_count=2, min_bin_count=5)
 
     # twenty markets; the market is well calibrated, so the null model is too
@@ -1857,6 +1877,173 @@ def t57_the_runner_is_an_operator_not_the_model():
             "(42501) while keeping its 056 ledger view")
 
 
+
+# =============================================================================
+# 058 -- the activation timestamp and the sample boundary
+# =============================================================================
+
+def t58_an_unactivated_experiment_has_an_empty_sample():
+    """Fail closed. The tempting shape is "filter by activation IF one exists",
+    which lets an experiment nobody remembered to activate quietly accumulate a
+    full sample and report a standing on it."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=12, bin_count=3, min_bin_count=3)
+    for i, pr in enumerate([0.05, 0.06, 0.07, 0.08, 0.09, 0.10,
+                            0.11, 0.12, 0.60, 0.70, 0.80, 0.90]):
+        _plant(admin, f"T58-{i}", pr, "WIN" if i % 2 == 0 else "LOSS")
+
+    # 12 scored beliefs exist and would bin perfectly well...
+    assert h.scalar(admin, """
+        SELECT count(*) FROM grading.belief_grades
+         WHERE scoring_status = 'SCORED'""") == 12
+    # ...but none of them belong to a pre-registered sample, because none was
+    # ever declared.
+    assert h.rows(admin, """
+        SELECT bin, n FROM grading.calibration_bins('planted','1')""") == [], (
+        "an unactivated experiment reported a sample")
+    assert h.scalar(admin, "SELECT count(*) FROM model.prereg_sample") == 0
+
+    # declaring it retroactively over the same beliefs brings them in
+    _activate_back(admin)
+    bins = h.rows(admin, "SELECT bin, n FROM grading.calibration_bins('planted','1')")
+    assert [b[1] for b in bins] == [4, 4, 4], bins
+    assert h.scalar(admin, "SELECT count(*) FROM model.prereg_sample") == 12
+    admin.close()
+    return "12 scored beliefs, 0 binned before activation, 12 after"
+
+
+def t59_pre_activation_beliefs_are_excluded_from_the_sample():
+    """The deployment sequence deliberately invokes both endpoints once BEFORE
+    enabling cron. Those shakedown beliefs must not enter the sample, and
+    nothing but the boundary distinguishes them."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=100, bin_count=2, min_bin_count=1)
+
+    shakedown = [_plant(admin, f"T59-pre-{i}", 0.60, "WIN") for i in range(3)]
+    at = h.scalar(admin, "SELECT model.activate_experiment('planted','1','deploy','go live')")
+    live = [_plant(admin, f"T59-post-{i}", 0.60, "WIN") for i in range(4)]
+
+    assert h.scalar(admin, """
+        SELECT count(*) FROM grading.belief_grades
+         WHERE scoring_status = 'SCORED'""") == 7, "fixture did not grade all 7"
+
+    in_sample = {r[0] for r in h.rows(admin,
+        "SELECT belief_id FROM model.prereg_sample")}
+    assert in_sample == set(live), (
+        f"sample should hold only the {len(live)} post-activation beliefs")
+    for b in shakedown:
+        assert b not in in_sample, "a pre-activation shakedown belief entered the sample"
+
+    n = sum(r[1] for r in h.rows(admin,
+        "SELECT bin, n FROM grading.calibration_bins('planted','1')"))
+    assert n == 4, f"calibration binned {n} beliefs, expected the 4 in-sample ones"
+    assert at is not None
+    admin.close()
+    return f"3 pre-activation beliefs excluded, {n} in-sample beliefs binned"
+
+
+def t60_activation_cannot_be_re_stamped():
+    """A movable activation timestamp is a free parameter: a disappointing first
+    month could be excluded by sliding it forward and the sample would still
+    look pre-registered."""
+    admin = h.connect(); h.reset(admin)
+    first = h.scalar(admin,
+        "SELECT model.activate_experiment('v01','0.1.0','ops','first activation')")
+
+    h.expect_error(
+        lambda: h.scalar(admin,
+            "SELECT model.activate_experiment('v01','0.1.0','ops','sliding it forward')"),
+        "ALREADY_ACTIVATED", "activating the same model version twice")
+
+    for label, sql in (
+        ("UPDATE", "UPDATE model.experiment_activation "
+                   "SET activated_at = NOW() WHERE model_id='v01' RETURNING 1"),
+        ("DELETE", "DELETE FROM model.experiment_activation "
+                   "WHERE model_id='v01' RETURNING 1"),
+    ):
+        h.expect_error(lambda sql=sql: h.scalar(admin, sql),
+                       "APPEND_ONLY_VIOLATION", f"{label} an activation")
+
+    assert h.scalar(admin, """
+        SELECT activated_at FROM model.experiment_activation
+         WHERE model_id='v01'""") == first
+
+    # a NEW version starts a NEW sample, which is the sanctioned route
+    second = h.scalar(admin,
+        "SELECT model.activate_experiment('v01','0.2.0','ops','new k, new sample')")
+    assert second is not None
+    assert h.scalar(admin, "SELECT count(*) FROM model.experiment_activation") == 2
+    admin.close()
+    return "re-activation refused, UPDATE/DELETE refused, new version allowed"
+
+
+def t61_activation_has_no_caller_supplied_timestamp():
+    """The production entry point stamps NOW(). A caller-supplied activation
+    time is exactly the free parameter the append-only rule removes, so it must
+    not exist on the sanctioned path -- only on an explicitly-named fixture."""
+    admin = h.connect(); h.reset(admin)
+    args = h.rows(admin, """
+        SELECT p.proname, pg_get_function_arguments(p.oid)
+        FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'model' AND p.proname = 'activate_experiment'""")
+    assert len(args) == 1, f"expected exactly one signature, got {args}"
+    sig = args[0][1]
+    assert "timestamp" not in sig.lower(), (
+        f"model.activate_experiment accepts a caller-supplied time: {sig}")
+
+    before = h.scalar(admin, "SELECT NOW()")
+    at = h.scalar(admin, "SELECT model.activate_experiment('v01','0.1.0','ops',NULL)")
+    after = h.scalar(admin, "SELECT NOW()")
+    assert before <= at <= after, (before, at, after)
+
+    # the fixture that CAN back-date is named so it cannot be mistaken for it
+    assert "FIXTURE" in h.scalar(admin, """
+        SELECT obj_description(p.oid) FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname='olp_test' AND p.proname='activate_experiment_at'""")
+    admin.close()
+    return f"signature is ({sig}); stamped NOW() inside the observed interval"
+
+
+def t62_the_producer_cannot_declare_its_own_sample():
+    """Activation decides which of the model's outputs are counted. A producer
+    that could set or move that boundary would be choosing its own denominator
+    one level above the ledger 055 and 056 built."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T62")
+    _sched(admin)
+    _assert_exists(admin, "model.experiment_activation")
+    h.scalar(admin, "SELECT model.activate_experiment('v01','0.1.0','ops',NULL)")
+
+    model = h.connect_as("olp_model")
+    # it keeps the 056 ledger read, and can therefore evaluate the new column
+    assert h.scalar(model, "SELECT count(*) FROM model.v01_ledger") == 2
+    assert h.scalar(model, """
+        SELECT count(*) FROM model.v01_ledger WHERE in_prereg_sample IS NOT NULL
+           OR in_prereg_sample IS NULL""") == 2
+
+    for label, sql in (
+        ("activate", "SELECT model.activate_experiment('v01','9.9.9','m',NULL)"),
+        ("read row", "SELECT count(*) FROM model.experiment_activation"),
+        ("read sample", "SELECT count(*) FROM model.prereg_sample"),
+        ("write", "INSERT INTO model.experiment_activation"
+                  "(model_id,model_version,activated_by) VALUES ('m','1','m')"),
+    ):
+        try:
+            with model.cursor() as cur:
+                cur.execute(sql)
+        except psycopg.Error as exc:
+            assert exc.sqlstate == INSUFFICIENT_PRIVILEGE, (label, exc.sqlstate)
+        else:
+            raise AssertionError(f"olp_model performed activation action: {label}")
+    model.close()
+
+    grader = h.connect_as("olp_grader")
+    assert h.scalar(grader, "SELECT count(*) FROM model.experiment_activation") == 1
+    grader.close(); admin.close()
+    return "producer reads the boundary flag; cannot set, read, or write the row"
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -1954,4 +2141,14 @@ PACKAGE5 = [
      t56_a_missed_window_stays_on_the_work_list),
     ("P5-T57", "The runner is an operator, not the model",
      t57_the_runner_is_an_operator_not_the_model),
+    ("P5-T58", "An unactivated experiment has an empty sample",
+     t58_an_unactivated_experiment_has_an_empty_sample),
+    ("P5-T59", "Pre-activation beliefs are excluded",
+     t59_pre_activation_beliefs_are_excluded_from_the_sample),
+    ("P5-T60", "Activation cannot be re-stamped",
+     t60_activation_cannot_be_re_stamped),
+    ("P5-T61", "Activation has no caller-supplied timestamp",
+     t61_activation_has_no_caller_supplied_timestamp),
+    ("P5-T62", "The producer cannot declare its own sample",
+     t62_the_producer_cannot_declare_its_own_sample),
 ]

@@ -194,7 +194,27 @@ Check, in the responses:
 Then, and only then:
 
 ```bash
-python scripts/v01_runner.py --activate --by "<name>" --note "enabling hourly schedule + 5-minute resolve"
+python scripts/v01_runner.py --activate --by "<name>" --source-commit 9e7c59b
+```
+
+The provenance is **derived, not typed**. The runner reads `k`, the horizon and
+the window from `pg_proc` — what the database will actually do, rather than what
+a constant in the runner claims — takes the deployment commit from its own
+checked-out HEAD, and establishes the schema version by probing for marker
+objects. It **refuses to activate** when the shipped migration files and the
+live database disagree: activating `058` code against a `057` database would
+stamp an un-movable boundary nobody could correct.
+
+Only `--source-commit` has to be supplied, because it names the source project
+and cannot be derived on the deploy host.
+
+Recorded on the activation:
+
+```json
+{"source_commit": "9e7c59b", "deployment_commit": "5981050",
+ "schema_version": "058", "schema_files_max": "058", "model": "v01/0.1.0",
+ "k": "1.10", "formation_target": "'24:00:00'::interval",
+ "window_seconds": "3600", "market": "h2h"}
 ```
 
 Finally enable both cron-job.org jobs.

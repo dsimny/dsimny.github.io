@@ -51,7 +51,15 @@ SCHEMA_MARKERS = {
 
 
 def _git_head() -> str:
-    """The commit this runner was deployed from, read from its own checkout."""
+    """The commit this runner was deployed from.
+
+    In a container there is no .git -- the commit is baked at build time
+    (OLP_DEPLOYMENT_COMMIT). Falling back to a checkout is for running the
+    runner directly from a working tree.
+    """
+    baked = os.environ.get("OLP_DEPLOYMENT_COMMIT")
+    if baked:
+        return baked.strip()
     import subprocess
     try:
         return subprocess.run(
@@ -84,7 +92,12 @@ def _fn_default(conn, schema: str, name: str, arg: str):
 def _schema_state(conn) -> tuple:
     """Which migrations the FILES claim, and which the DATABASE actually has."""
     mig_dir = pathlib.Path(__file__).resolve().parent.parent / "db" / "migrations"
-    files = sorted(f.name[:3] for f in mig_dir.glob("*.sql")) if mig_dir.is_dir() else []
+    # Fixture migrations are excluded, exactly as scripts/migrate.py excludes
+    # them. Counting 059_p5_fixtures.sql here would make files_max permanently
+    # exceed what any production database can verify, and --activate would
+    # refuse forever on a mismatch that is not one.
+    files = sorted(f.name[:3] for f in mig_dir.glob("*.sql")
+                   if "fixture" not in f.name.lower()) if mig_dir.is_dir() else []
     files_max = files[-1] if files else None
 
     verified = []

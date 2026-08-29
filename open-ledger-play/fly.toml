@@ -1,0 +1,72 @@
+# Model v0.1 experiment runner on Fly.io.
+#
+# This app is a JOB ENDPOINT, not a website. It is woken by cron-job.org twice
+# a cadence -- hourly for /jobs/v01/schedule, every five minutes for
+# /jobs/v01/resolve -- and does nothing in between.
+#
+# Deploy:
+#   fly deploy --build-arg DEPLOYMENT_COMMIT=$(git rev-parse --short HEAD)
+#
+# Secrets are NEVER in this file. Set them once with `fly secrets set`:
+#   OLP_JOB_TOKEN       long random bearer token (>= 32 chars)
+#   OLP_DATABASE_URL    the hosted Supabase pooler URL
+#   THE_ODDS_API_KEY    the ROTATED key
+#
+# The database must be a hosted SUPABASE project, not Fly Postgres. The schema
+# depends on Supabase's auth schema -- migration 012 uses auth.uid() for RLS,
+# and 002 references auth.users. Fly Postgres has none of that. See
+# V01_DEPLOYMENT.md.
+
+app = 'olp-v01-runner'
+primary_region = 'iad'
+
+[build]
+
+[deploy]
+  # Non-destructive and idempotent: applies only what is missing, skips every
+  # fixture migration, and REFUSES if an already-applied file has been edited.
+  # This is scripts/migrate.py, never tests/harness.py -- the latter does
+  # DROP SCHEMA public CASCADE and would destroy the database.
+  release_command = 'python scripts/migrate.py'
+
+[env]
+  PORT = '8080'
+  OLP_BIND_HOST = '0.0.0.0'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+
+  # Scale to zero between ticks. A resolve cycle runs roughly 12 times an hour
+  # and does nothing on most of them, so paying for an idle machine all day is
+  # waste. Fly starts the machine on the incoming request.
+  #
+  # A cycle killed mid-flight by an auto-stop is safe by construction: the
+  # claims it holds carry a lease, the lease expires, and the next ordinary
+  # five-minute tick picks the work up. Nothing is resolved, so no opportunity
+  # is spent on a partial capture.
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+
+  # One cycle at a time. The service already refuses an overlapping request
+  # with 409 BUSY and the database lease makes concurrent runners safe; this
+  # just stops Fly from adding machines that would immediately contend.
+  [http_service.concurrency]
+    type = 'requests'
+    hard_limit = 2
+    soft_limit = 1
+
+# NO health check is configured, deliberately. Fly polls checks continuously,
+# which would hold the machine awake and defeat scale-to-zero for a service
+# that is genuinely idle 95% of the time. GET /health exists and is
+# unauthenticated for manual verification:
+#
+#   curl https://olp-v01-runner.fly.dev/health
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '256mb'
+  # One machine. A second would not double throughput -- the database lease
+  # serialises opportunity claims anyway -- and would only add cold starts.
+  count = 1

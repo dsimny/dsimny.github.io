@@ -154,13 +154,16 @@ The previous key was pasted into a chat transcript and **must not be used**.
 Rotate it at the-odds-api.com, put the new value in the hosted runner's
 environment only, and never pass it as a command-line argument.
 
-### 2. Deploy the runner at `058`
+### 2. Deploy the runner
 
-Migrations `001`–`058` applied. Verify:
+See **Hosting: Fly.io** below for the app, the database choice and the deploy
+command. Migrations are applied by the release command; confirm with:
 
 ```bash
-python scripts/v01_runner.py --status
+fly ssh console -C "python scripts/migrate.py --plan"
 ```
+
+It should report `nothing to apply` and list the 5 skipped fixture migrations.
 
 ### 3. Declare the experiment
 
@@ -302,6 +305,110 @@ live evidence; they simply have no lineage.
 would pass on a system that counted nothing. `P5-T67` checks Brier, market
 Brier, BSS, both log losses, the bin counts and the bin means against values
 computed independently in Python. `NC-16` severs the lineage join and it fires.
+
+---
+
+## Hosting: Fly.io
+
+```
+cron-job.org                 the clock
+olp-v01-runner.fly.dev       the endpoint      (scale-to-zero, 1 machine)
+hosted Supabase project      the database
+```
+
+Files: `Dockerfile`, `fly.toml`, `.dockerignore`, `requirements.txt`.
+
+### The database must be hosted Supabase, not Fly Postgres
+
+This is not a preference. The schema is Supabase-coupled: migration `002`
+references `auth.users`, and `012` builds RLS policies on `auth.uid()`. Applying
+the migration set to a bare PostgreSQL database fails at `002` with
+`schema "auth" does not exist`, and at `012` with `function auth.uid() does not
+exist`. Fly Postgres has neither.
+
+It is also what the suite is tested against — 213/213 on Supabase 17.6 — so a
+hosted Supabase project keeps production on the engine the tests actually cover.
+
+Point `OLP_DATABASE_URL` at the project's **pooler** URL. The runner opens one
+short connection per cycle and closes it, so the pooler suits it and the machine
+sleeping between ticks costs nothing.
+
+### Scale to zero, deliberately
+
+`auto_stop_machines = 'stop'` with `min_machines_running = 0`. A resolve cycle
+runs ~12 times an hour and does nothing on most of them; paying for an idle
+machine all day is waste. Fly starts the machine on the incoming request.
+
+A cycle killed mid-flight by an auto-stop is safe **by construction**: the claims
+it holds carry a lease, the lease expires, and the next ordinary five-minute tick
+picks the work up. Nothing was resolved, so no opportunity is spent on a partial
+capture — the same property that makes external retries unnecessary.
+
+No Fly health check is configured, on purpose: Fly polls checks continuously,
+which would hold the machine awake and defeat scale-to-zero. `GET /health` exists
+and is unauthenticated for manual verification, and touches nothing — no database
+connection, no experiment state.
+
+### Secrets
+
+Never in `fly.toml`. Set once:
+
+```bash
+fly secrets set OLP_JOB_TOKEN="$(openssl rand -base64 48 | tr -d '/+=' | head -c 48)"
+```
+
+```bash
+fly secrets set OLP_DATABASE_URL='<supabase pooler url>' THE_ODDS_API_KEY='<rotated key>'
+```
+
+### Migrations run on deploy
+
+`fly.toml` sets `release_command = 'python scripts/migrate.py'`. That is
+**not** `tests/harness.py` — `harness.migrate()` does `DROP SCHEMA public
+CASCADE` and would destroy a persistent database. `scripts/migrate.py`:
+
+- only ever **adds**; it never drops anything;
+- **skips every fixture migration** (any filename containing `fixtures`), so
+  `olp_test.reset()` — a function that `TRUNCATE`s every table — is never
+  installed in production;
+- records each applied file with a **checksum**, and **refuses** if an
+  already-applied migration was later edited. This project corrects migrations
+  in place while no persistent environment exists (`PACKAGE5_PREREG` §11.1);
+  the moment one exists that rule expires, and the failure it leaves behind is
+  silent divergence between code and database.
+
+A release_command failure aborts the deploy, so a bad migration never reaches a
+running machine.
+
+### Deploy
+
+```bash
+fly launch --no-deploy --name olp-v01-runner --region iad
+```
+
+```bash
+fly deploy --build-arg DEPLOYMENT_COMMIT=$(git rev-parse --short HEAD)
+```
+
+The commit is baked into the image rather than read from a `.git` directory, so
+the image carries no repository history and provenance cannot come from a stale
+checkout inside the container.
+
+### Verify
+
+```bash
+curl -sS https://olp-v01-runner.fly.dev/health
+```
+
+Then the authenticated checks from step 4 above, against
+`https://olp-v01-runner.fly.dev/jobs/v01/...`.
+
+### cron-job.org
+
+Point both jobs at the Fly URL, `Authorization: Bearer <OLP_JOB_TOKEN>`. Allow a
+generous timeout on the first request after an idle period — the machine is
+starting from stopped. Retries stay **off** for the resolver, for the reason
+above.
 
 ## Expected cost
 

@@ -1,0 +1,3 @@
+# The only runtime dependency. Everything else the runner and the ingestion
+# worker use is stdlib -- the provider transport is urllib, not requests.
+psycopg[binary]==3.3.4

@@ -211,8 +211,15 @@ def t12_belief_is_formed_prospectively_and_bound_by_the_database():
     admin = h.connect(); h.reset(admin)
     ev = _seed_executable(admin)
 
+    # via attempt_belief -- since 055 that is the only path a model has, so the
+    # denominator cannot be bypassed
     model = h.connect_as("olp_model")
-    bid = _form(model, ev, lower=0.55, upper=0.68, method="bootstrap")
+    bid = h.row(model, """
+        SELECT * FROM model.attempt_belief(%s,%s,%s,%s::uuid,'MONEYLINE','DAL',
+            NULL::numeric, 0.62::numeric, %s, 0.55::numeric, 0.68::numeric,
+            'bootstrap')""",
+        (M["model_id"], M["model_version"], M["feature_version"], ev,
+         M["inputs_hash"]))[0]
     model.close()
     assert bid is not None
 
@@ -386,9 +393,10 @@ def t26_model_cannot_write_beliefs_directly():
             continue
         raise AssertionError(f"olp_model performed a direct {label} on beliefs")
 
-    # ...but the sanctioned path works
-    bid = _form(model, ev)
-    assert bid is not None
+    # ...but the sanctioned path works. Since 055 that path is attempt_belief;
+    # form_belief is no longer reachable by the model at all.
+    bid, reason = _attempt(model, ev, mid=M["model_id"], ver=M["model_version"])
+    assert bid is not None and reason == "ELIGIBLE"
     model.close(); admin.close()
     return "direct INSERT/UPDATE/DELETE refused (42501); form_belief() works"
 
@@ -1144,6 +1152,151 @@ def t38_no_special_case_exists_for_the_null_model():
     return f"{len(defs)} grading/model routines checked, none names the null model"
 
 
+
+# =============================================================================
+# Increment 6 -- the eligibility ledger (the denominator)
+# =============================================================================
+
+def _attempt(conn, ev, sel="DAL", line=None, prob=0.62, mid="planted", ver="1"):
+    return h.row(conn, """
+        SELECT * FROM model.attempt_belief(%s, %s, 'f', %s::uuid, 'MONEYLINE',
+                                           %s, %s::numeric, %s::numeric, 'h')""",
+        (mid, ver, ev, sel, line, prob))
+
+
+def _elig(admin, ev, sel="DAL", line=None):
+    return h.scalar(admin, """
+        SELECT model.eligibility(%s::uuid, 'MONEYLINE', %s, %s::numeric)""",
+        (ev, sel, line))
+
+
+def t39_every_attempt_is_recorded_with_a_reason():
+    """The denominator. Without it a model can look well calibrated partly
+    because the system quietly filtered out the hard cases."""
+    admin = h.connect(); h.reset(admin)
+
+    # ELIGIBLE -- two books, fresh, pre-kickoff
+    ok = _seed_executable(admin, "T39-OK")
+    # NO_EXECUTABLE_MARKET -- one book only, fails closed below the floor
+    one = event(admin, "T39-ONE")
+    two_sided(admin, one, "MONEYLINE", None, -150, 130, "bookA")
+    # STALE -- quotes older than the TTL
+    old = event(admin, "T39-STALE")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, old, "MONEYLINE", None, -150, 130, bk, age=400)
+    # POST_KICKOFF
+    late = event(admin, "T39-LATE", starts_in="4 hours")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, late, "MONEYLINE", None, -150, 130, bk)
+    admin.execute("UPDATE public.events SET is_live = TRUE WHERE id = %s", (late,))
+    # NO_MARKET_ROW -- a wager nobody quotes
+    ghost = _seed_executable(admin, "T39-GHOST")
+
+    cases = [(ok, "DAL", "ELIGIBLE"), (one, "DAL", "NO_EXECUTABLE_MARKET"),
+             (old, "DAL", "STALE"), (late, "DAL", "POST_KICKOFF"),
+             (ghost, "NOBODY", "NO_MARKET_ROW")]
+
+    model = h.connect_as("olp_model")
+    for ev, sel, expect in cases:
+        bid, reason = _attempt(model, ev, sel)
+        assert reason == expect, f"{expect}: got {reason}"
+        assert (bid is not None) == (expect == "ELIGIBLE"), (expect, bid)
+    model.close()
+
+    rows = dict(h.rows(admin, """
+        SELECT reason::text, count(*) FROM model.formation_attempts GROUP BY 1"""))
+    assert rows == {"ELIGIBLE": 1, "NO_EXECUTABLE_MARKET": 1, "STALE": 1,
+                    "POST_KICKOFF": 1, "NO_MARKET_ROW": 1}, rows
+
+    # the rejected rows carry market context so exclusions can be characterised
+    ctx = h.scalar(admin, """
+        SELECT count(*) FROM model.formation_attempts
+        WHERE reason = 'NO_EXECUTABLE_MARKET' AND market_quality IS NOT NULL""")
+    assert ctx == 1, "a rejected attempt recorded no market context"
+    admin.close()
+    return f"5 reasons recorded: {sorted(rows)}"
+
+
+def t40_the_model_cannot_bypass_the_ledger():
+    """If the model could still reach form_belief directly the denominator would
+    be incomplete by construction -- worse than having none, because it would
+    still look like one."""
+    admin = h.connect(); h.reset(admin)
+    ev = _seed_executable(admin)
+    model = h.connect_as("olp_model")
+    try:
+        with model.cursor() as cur:
+            cur.execute("""SELECT model.form_belief('m','1','f',%s::uuid,
+                'MONEYLINE','DAL',NULL,0.6::numeric,'h')""", (ev,))
+    except psycopg.Error as exc:
+        assert exc.sqlstate == INSUFFICIENT_PRIVILEGE, exc.sqlstate
+    else:
+        raise AssertionError("olp_model reached form_belief directly")
+
+    bid, reason = _attempt(model, ev)        # the sanctioned path still works
+    assert bid is not None and reason == "ELIGIBLE"
+    model.close()
+    assert h.scalar(admin, "SELECT count(*) FROM model.formation_attempts") == 1
+    admin.close()
+    return "form_belief refused (42501); attempt_belief works and logs"
+
+
+def t41_the_two_eligibility_evaluations_agree():
+    """`attempt_belief` decides from `model.eligibility`; `form_belief` keeps its
+    own guards as defence in depth. Two evaluations that can drift are a
+    liability, so their agreement is asserted rather than assumed."""
+    admin = h.connect(); h.reset(admin)
+    fixtures = []
+    ok = _seed_executable(admin, "T41-OK");                     fixtures.append((ok, "DAL"))
+    one = event(admin, "T41-ONE")
+    two_sided(admin, one, "MONEYLINE", None, -150, 130, "bookA"); fixtures.append((one, "DAL"))
+    old = event(admin, "T41-STALE")
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, old, "MONEYLINE", None, -150, 130, bk, age=400)
+    fixtures.append((old, "DAL"))
+    ghost = _seed_executable(admin, "T41-GHOST");               fixtures.append((ghost, "NOBODY"))
+
+    checked = 0
+    for ev, sel in fixtures:
+        reason = _elig(admin, ev, sel)
+        raised = False
+        try:
+            _form(admin, ev, sel=sel, prob=0.6)
+        except psycopg.Error:
+            raised = True
+        assert raised == (reason != "ELIGIBLE"), (
+            f"eligibility says {reason} but form_belief "
+            f"{'raised' if raised else 'accepted'} -- the two evaluations have drifted")
+        checked += 1
+    admin.close()
+    return f"{checked} fixtures: form_belief raises exactly when eligibility is not ELIGIBLE"
+
+
+def t42_the_evaluation_population_is_describable():
+    """The point of the ledger: included and excluded can be compared, so a
+    calibration result can be labelled honestly as describing the
+    EXECUTION-ELIGIBLE population rather than 'the market'."""
+    admin = h.connect(); h.reset(admin)
+    for i in range(6):
+        _attempt(admin, _seed_executable(admin, f"T42-OK{i}"))
+    for i in range(4):
+        one = event(admin, f"T42-ONE{i}")
+        two_sided(admin, one, "MONEYLINE", None, -150, 130, "bookA")
+        _attempt(admin, one)
+
+    total, eligible = h.row(admin, """
+        SELECT count(*), count(*) FILTER (WHERE reason='ELIGIBLE')
+        FROM model.formation_attempts""")
+    beliefs = h.scalar(admin, "SELECT count(*) FROM model.beliefs")
+    assert (total, eligible, beliefs) == (10, 6, 6), (total, eligible, beliefs)
+
+    # the ledger, not the belief table, is what a denominator is computed from
+    rate = float(eligible) / float(total)
+    assert abs(rate - 0.6) < 1e-9
+    admin.close()
+    return f"{eligible}/{total} attempts eligible ({rate:.0%}); exclusions retained"
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -1203,4 +1356,12 @@ PACKAGE5 = [
      t37_a_perturbed_null_must_fail_the_identity),
     ("P5-T38", "No special case exists for the null model",
      t38_no_special_case_exists_for_the_null_model),
+    ("P5-T39", "Every attempt recorded with a reason",
+     t39_every_attempt_is_recorded_with_a_reason),
+    ("P5-T40", "Model cannot bypass the ledger",
+     t40_the_model_cannot_bypass_the_ledger),
+    ("P5-T41", "The two eligibility evaluations agree",
+     t41_the_two_eligibility_evaluations_agree),
+    ("P5-T42", "The evaluation population is describable",
+     t42_the_evaluation_population_is_describable),
 ]

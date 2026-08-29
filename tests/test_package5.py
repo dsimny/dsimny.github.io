@@ -10,6 +10,9 @@ PostgreSQL to refuse. Inspecting grants would only test our belief about the
 grants; the database is the thing that decides.
 """
 
+import threading
+import time
+
 import psycopg
 
 import harness as h
@@ -1503,6 +1506,357 @@ def t49_the_schedule_is_immutable(admin=None):
     return "scheduled opportunities cannot be edited or removed"
 
 
+
+# =============================================================================
+# 057 -- the v0.1 experiment runner contract
+# =============================================================================
+
+def _run(admin, worker="runner-1"):
+    return h.scalar(admin, "SELECT model.start_experiment_run(%s)", (worker,))
+
+
+def _claim(conn, run_id, worker="runner-1", lease=600, limit=1000):
+    return [r[0] for r in h.rows(conn, """
+        SELECT model.claim_due_opportunities(%s::uuid, %s, %s::int, %s::int)""",
+        (run_id, worker, lease, limit))]
+
+
+def _due_market(admin, src, kickoff="24 hours"):
+    """One event whose T-24h target is live now, with an executable board."""
+    ev = _event_at(admin, src, kickoff)
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, -150, 130, bk)
+    return ev
+
+
+def t50_overlapping_workers_receive_disjoint_claims():
+    """Two cron invocations overlap. The database decides who owns an
+    opportunity -- not process timing, and not an application-side lock."""
+    admin = h.connect(); h.reset(admin)
+    for i in range(4):
+        _due_market(admin, f"T50-{i}", f"24 hours {i} minutes")
+    assert _sched(admin) == 8
+
+    a, b = h.connect(), h.connect()
+    run_a, run_b = _run(a, "worker-A"), _run(b, "worker-B")
+    got_a = _claim(a, run_a, "worker-A", limit=4)
+    got_b = _claim(b, run_b, "worker-B")
+
+    assert set(got_a) & set(got_b) == set(), (
+        f"both workers claimed {set(got_a) & set(got_b)}")
+    assert set(got_a) | set(got_b) == {r[0] for r in h.rows(admin,
+        "SELECT schedule_id FROM model.formation_schedule")}, (
+        "an opportunity was claimed by nobody")
+    assert len(got_a) == 4 and len(got_b) == 4, (len(got_a), len(got_b))
+
+    # claimed_count is the runner's own accounting of the same fact
+    assert h.scalar(admin,
+        "SELECT claimed_count FROM model.experiment_runs WHERE run_id=%s::uuid",
+        (run_a,)) == 4
+    a.close(); b.close(); admin.close()
+
+    # -- the genuine race ----------------------------------------------------
+    # Everything above is served by the "skip actively claimed" filter, which
+    # only works because the first worker had already COMMITTED. The lease guard
+    # on ON CONFLICT is what handles the case that filter cannot see: two
+    # workers whose snapshots were both taken before either committed. Cron
+    # invocations overlapping by a few milliseconds land exactly there, so it is
+    # provoked deliberately rather than assumed unreachable.
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T50-RACE")
+    _sched(admin)
+    run_x, run_y = _run(admin, "X"), _run(admin, "Y")
+
+    x = h.connect(autocommit=False)
+    y = h.connect(autocommit=False)
+    out = {}
+
+    def claim_y():
+        try:
+            with y.cursor() as cur:
+                cur.execute("""SELECT model.claim_due_opportunities(
+                                   %s::uuid,'Y',600,1000)""", (run_y,))
+                out["y"] = [r[0] for r in cur.fetchall()]
+            y.commit()
+        except Exception as exc:            # noqa: BLE001 -- reported, not hidden
+            out["y_error"] = exc
+
+    with x.cursor() as cur:
+        cur.execute("SELECT model.claim_due_opportunities(%s::uuid,'X',600,1000)",
+                    (run_x,))
+        out["x"] = [r[0] for r in cur.fetchall()]
+
+    t = threading.Thread(target=claim_y)
+    t.start()
+    time.sleep(0.4)          # Y is now blocked on the primary key X is holding
+    x.commit()
+    t.join(20)
+    assert not t.is_alive(), "claim deadlocked"
+    assert "y_error" not in out, out.get("y_error")
+
+    assert len(out["x"]) == 2, out["x"]
+    assert out["y"] == [], (
+        f"the second worker stole a live lease: {out['y']} -- both cron "
+        f"invocations would now fire an ingestion cycle for the same board")
+    assert h.scalar(admin, """
+        SELECT count(DISTINCT worker) FROM model.formation_claims""") == 1
+    x.close(); y.close(); admin.close()
+    return ("8 opportunities partitioned 4/4; and in a true snapshot race the "
+            "live lease held (X 2, Y 0)")
+
+
+def t51_one_poll_serves_the_whole_slate():
+    """Sixteen games x two moneyline selections is ONE board refresh, not 32
+    provider calls. Enforced by CHECK rather than by care."""
+    admin = h.connect(); h.reset(admin)
+    for i in range(16):
+        _due_market(admin, f"T51-{i}", f"24 hours {i} minutes")
+    assert _sched(admin) == 32
+
+    run = _run(admin)
+    claimed = _claim(admin, run)
+    assert len(claimed) == 32, len(claimed)
+
+    h.scalar(admin, "SELECT model.record_ingestion_poll(%s::uuid)", (run,))
+    for sid in claimed:
+        h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)", (sid, run))
+    h.scalar(admin, "SELECT model.finish_experiment_run(%s::uuid)", (run,))
+
+    polls, resolved, per_poll = h.row(admin, """
+        SELECT ingestion_polls, resolved_count, opportunities_per_poll
+        FROM model.runner_efficiency WHERE run_id = %s::uuid""", (run,))
+    assert polls == 1, f"{polls} polls for one board refresh"
+    assert resolved == 32, resolved
+    assert float(per_poll) == 32.0, per_poll
+
+    # a second poll inside the same cycle is refused, not merely discouraged
+    h.expect_error(
+        lambda: h.scalar(admin,
+                         "SELECT model.record_ingestion_poll(%s::uuid)", (run,)),
+        "ONE_POLL_PER_CYCLE", "polling twice in one cycle")
+
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_attempts
+        WHERE experiment_run_id = %s::uuid""", (run,)) == 32
+    admin.close()
+    return "32 opportunities resolved on 1 poll; second poll refused"
+
+
+def t52_expired_leases_recover_crashed_work():
+    """A worker that dies holding claims must not park them forever. The lease
+    expires and the work returns to the pool -- with no reaper job to write,
+    schedule, or forget to run."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T52")
+    _sched(admin)
+
+    dead = _run(admin, "worker-crashed")
+    held = _claim(admin, dead, "worker-crashed", lease=600)
+    assert len(held) == 2
+
+    # while the lease is live, nobody else may take the work
+    live = _run(admin, "worker-live")
+    assert _claim(admin, live, "worker-live") == [], "stole a live lease"
+
+    # expire it exactly as a crash would, by letting the clock pass it
+    h.scalar(admin, """
+        UPDATE model.formation_claims
+           SET lease_expires_at = NOW() - INTERVAL '1 second' RETURNING 1""")
+
+    rescuer = _run(admin, "worker-rescue")
+    recovered = _claim(admin, rescuer, "worker-rescue")
+    assert set(recovered) == set(held), (recovered, held)
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_claims
+        WHERE worker = 'worker-rescue'""") == 2
+
+    for sid in recovered:
+        assert h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                        (sid, rescuer)) == "ELIGIBLE"
+    assert h.scalar(admin,
+        "SELECT count(*) FROM model.v01_ledger WHERE unresolved") == 0
+    admin.close()
+    return "live lease held; expired lease recovered by a second worker; 0 unresolved"
+
+
+def t53_claims_are_not_what_protects_the_record():
+    """The load-bearing guarantee. Even with the claim mechanism removed
+    entirely, two overlapping workers cannot produce two beliefs or two
+    denominator entries for one opportunity.
+
+    NEGATIVE CONTROL: the claim table is wiped mid-flight so both workers
+    believe they own the row. If duplicate protection lived in the lease rather
+    than in the attempt uniqueness, this test would fail."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T53")
+    _sched(admin)
+    sid = h.scalar(admin, "SELECT schedule_id FROM model.formation_schedule LIMIT 1")
+
+    a, b = h.connect(), h.connect()
+    run_a, run_b = _run(a, "A"), _run(b, "B")
+    _claim(a, run_a, "A")
+    h.scalar(admin, "DELETE FROM model.formation_claims RETURNING 1")
+    _claim(b, run_b, "B")
+
+    assert h.scalar(a, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                    (sid, run_a)) == "ELIGIBLE"
+    h.expect_error(
+        lambda: h.scalar(b, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                         (sid, run_b)),
+        "ALREADY_RESOLVED", "second worker resolving the same opportunity")
+
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_attempts
+        WHERE schedule_id=%s::uuid""", (sid,)) == 1, "duplicate denominator entry"
+    assert h.scalar(admin, "SELECT count(*) FROM model.beliefs") == 1, "duplicate belief"
+    a.close(); b.close(); admin.close()
+    return "claims disabled mid-flight; still exactly 1 attempt and 1 belief"
+
+
+def t54_resolution_is_terminal_and_spends_the_claim():
+    """A resolved opportunity leaves the work list for good. If it did not, the
+    runner would offer it again every five minutes until kickoff."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T54")
+    _sched(admin)
+    run = _run(admin)
+    claimed = _claim(admin, run)
+    assert h.scalar(admin, "SELECT count(*) FROM model.due_opportunities") == 2
+
+    for sid in claimed:
+        h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)", (sid, run))
+
+    assert h.scalar(admin, "SELECT count(*) FROM model.due_opportunities") == 0, (
+        "a resolved opportunity is still being offered as work")
+    assert h.scalar(admin, "SELECT count(*) FROM model.formation_claims") == 0, (
+        "claim outlived the opportunity it protected")
+    assert _claim(admin, _run(admin, "later"), "later") == []
+    admin.close()
+    return "2 resolved -> 0 due, 0 claims, nothing re-offered"
+
+
+def t55_attempts_are_attributable_and_still_immutable():
+    """experiment_run_id is an INPUT to the attempt insert, not an annotation
+    applied afterwards -- because formation_attempts is append-only and an
+    after-the-fact stamp would be blocked. That is the correct failure, so it is
+    asserted here rather than assumed."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T55")
+    _sched(admin)
+    run = _run(admin)
+    sid = _claim(admin, run)[0]
+    h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)", (sid, run))
+
+    got = h.scalar(admin, """
+        SELECT experiment_run_id FROM model.formation_attempts
+        WHERE schedule_id = %s::uuid""", (sid,))
+    assert str(got) == str(run), (got, run)
+
+    # the append-only rule that forced that design still holds
+    h.expect_error(
+        lambda: h.scalar(admin, """
+            UPDATE model.formation_attempts SET experiment_run_id = NULL
+             WHERE schedule_id = %s::uuid RETURNING 1""", (sid,)),
+        "APPEND_ONLY_VIOLATION", "re-stamping a resolved attempt")
+
+    # the 056 signature still works, and reads as 'resolved outside a cycle'
+    other = h.scalar(admin, "SELECT schedule_id FROM model.due_opportunities")
+    h.scalar(admin, "SELECT model.resolve_v01(%s::uuid)", (other,))
+    assert h.scalar(admin, """
+        SELECT experiment_run_id FROM model.formation_attempts
+        WHERE schedule_id = %s::uuid""", (other,)) is None
+    admin.close()
+    return "run id stamped at insert; UPDATE still refused; 1-arg form still valid"
+
+
+def t56_a_missed_window_stays_on_the_work_list():
+    """The denominator must not leak exactly the games the collector failed on.
+    An opportunity whose window has closed stays visible as work and terminates
+    as NO_WINDOW_CAPTURE."""
+    admin = h.connect(); h.reset(admin)
+    ev = _due_market(admin, "T56")
+
+    # the scheduled capture never executed: its target passed three hours ago.
+    # Inserted directly rather than by editing a scheduled row -- the schedule is
+    # append-only and staying inside that rule is the point.
+    sid = h.scalar(admin, """
+        INSERT INTO model.formation_schedule
+            (model_id, model_version, event_id, market_type, selection_key,
+             line, target_formation_at, window_seconds)
+        VALUES ('v01','0.1.0',%s::uuid,'MONEYLINE','DAL',NULL,
+                NOW() - INTERVAL '3 hours', 3600)
+        RETURNING schedule_id""", (ev,))
+
+    due = h.rows(admin, """
+        SELECT schedule_id, inside_window, seconds_from_target
+        FROM model.due_opportunities""")
+    assert len(due) == 1, "a missed opportunity vanished from the work list"
+    assert due[0][1] is False, "a 3h-late capture reported itself inside the window"
+    assert 10700 < due[0][2] < 10900, due[0][2]
+
+    run = _run(admin)
+    assert h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                    (sid, run)) == "NO_WINDOW_CAPTURE"
+    assert h.scalar(admin, """
+        SELECT belief_id FROM model.formation_attempts
+        WHERE schedule_id=%s::uuid""", (sid,)) is None, (
+        "formed a belief outside the pre-registered window")
+    admin.close()
+    return "missed capture still offered as work; NO_WINDOW_CAPTURE, no belief"
+
+
+def t57_the_runner_is_an_operator_not_the_model():
+    """The work queue is operator-only. The producer cannot claim work, spend a
+    provider credit, or terminate an opportunity -- and cannot even READ the
+    pending queue, because advance sight of which opportunities are about to
+    arrive is foreknowledge of the shape of its own denominator."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T57")
+    _sched(admin)
+    for obj in ("model.due_opportunities", "model.experiment_runs",
+                "model.formation_claims", "model.runner_efficiency"):
+        _assert_exists(admin, obj)
+    sid = h.scalar(admin, "SELECT schedule_id FROM model.formation_schedule LIMIT 1")
+    run = _run(admin)
+
+    # The grader CAN read the queue. Without this the denial below would pass
+    # just as happily against a view that is broken for everyone -- which is
+    # exactly how the first draft of this migration shipped: olp_model was
+    # granted the view but not the formation_claims it joins, so the "grant"
+    # was an unusable read dressed up as an allowance.
+    grader = h.connect_as("olp_grader")
+    assert h.scalar(grader, "SELECT count(*) FROM model.due_opportunities") == 2
+    assert h.scalar(grader, """
+        SELECT count(*) FROM model.runner_efficiency WHERE run_id = %s::uuid""",
+        (run,)) == 1
+    grader.close()
+
+    model = h.connect_as("olp_model")
+    # ...and the producer still sees the denominator it is entitled to (056)
+    assert h.scalar(model, "SELECT count(*) FROM model.v01_ledger") == 2
+
+    for label, sql, params in (
+        ("read queue", "SELECT count(*) FROM model.due_opportunities",      ()),
+        ("read runs",  "SELECT count(*) FROM model.experiment_runs",        ()),
+        ("claim",   "SELECT model.claim_due_opportunities(%s::uuid,'m')", (run,)),
+        ("poll",    "SELECT model.record_ingestion_poll(%s::uuid)",       (run,)),
+        ("resolve", "SELECT model.resolve_v01(%s::uuid, %s::uuid)",       (sid, run)),
+        ("start",   "SELECT model.start_experiment_run('m')",             ()),
+        ("write",   "INSERT INTO model.formation_claims(schedule_id,worker,"
+                    "lease_expires_at) VALUES (%s::uuid,'m',NOW())",      (sid,)),
+    ):
+        try:
+            with model.cursor() as cur:
+                cur.execute(sql, params)
+        except psycopg.Error as exc:
+            assert exc.sqlstate == INSUFFICIENT_PRIVILEGE, (label, exc.sqlstate)
+        else:
+            raise AssertionError(f"olp_model performed runner action: {label}")
+    model.close(); admin.close()
+    return ("grader reads the queue; producer refused on all 7 runner actions "
+            "(42501) while keeping its 056 ledger view")
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -1584,4 +1938,20 @@ PACKAGE5 = [
      t48_both_clocks_are_recorded_and_can_disagree),
     ("P5-T49", "The schedule is immutable",
      t49_the_schedule_is_immutable),
+    ("P5-T50", "Overlapping workers receive disjoint claims",
+     t50_overlapping_workers_receive_disjoint_claims),
+    ("P5-T51", "One poll serves the whole slate",
+     t51_one_poll_serves_the_whole_slate),
+    ("P5-T52", "Expired leases recover crashed work",
+     t52_expired_leases_recover_crashed_work),
+    ("P5-T53", "Claims are not what protects the record",
+     t53_claims_are_not_what_protects_the_record),
+    ("P5-T54", "Resolution is terminal and spends the claim",
+     t54_resolution_is_terminal_and_spends_the_claim),
+    ("P5-T55", "Attempts are attributable and still immutable",
+     t55_attempts_are_attributable_and_still_immutable),
+    ("P5-T56", "A missed window stays on the work list",
+     t56_a_missed_window_stays_on_the_work_list),
+    ("P5-T57", "The runner is an operator, not the model",
+     t57_the_runner_is_an_operator_not_the_model),
 ]

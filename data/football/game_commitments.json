@@ -29,6 +29,13 @@
    "sha256": "514d1e45d9b65b19930419d924152d992787bc2d5cfef5da5630a12afc6fa754",
    "sport": "ncaaf"
   },
+  "ncaaf|NC State Wolfpack @ Virginia Cavaliers|2026-08-29T19:45:00Z": {
+   "committed_utc": "2026-08-29T20:37:25Z",
+   "kickoff_utc": "2026-08-29T19:45:00Z",
+   "matchup": "NC State Wolfpack @ Virginia Cavaliers",
+   "sha256": "3d7099450b9f77825ac267e923d000338951f0d885c2866d17059c35114fab8a",
+   "sport": "ncaaf"
+  },
   "ncaaf|New Mexico State Aggies @ Florida State Seminoles|2026-08-29T23:00:00Z": {
    "committed_utc": "2026-08-29T18:21:19Z",
    "kickoff_utc": "2026-08-29T23:00:00Z",

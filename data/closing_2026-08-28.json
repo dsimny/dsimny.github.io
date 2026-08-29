@@ -396,8 +396,8 @@
   "mins_to_first_pitch": 190
  },
  "823178": {
-  "away_ml": -115,
-  "home_ml": 104,
+  "away_ml": -114,
+  "home_ml": 103,
   "total": 8.0,
   "over_price": -112,
   "under_price": -108,
@@ -420,9 +420,17 @@
     "over_price": -112,
     "under_price": -108,
     "captured_utc": "2026-08-28T22:30:26Z"
+   },
+   {
+    "away_ml": -114,
+    "home_ml": 103,
+    "total": 8.0,
+    "over_price": -112,
+    "under_price": -108,
+    "captured_utc": "2026-08-29T01:30:20Z"
    }
   ],
-  "captured_utc": "2026-08-28T22:30:26Z",
-  "mins_to_first_pitch": 225
+  "captured_utc": "2026-08-29T01:30:20Z",
+  "mins_to_first_pitch": 45
  }
 }

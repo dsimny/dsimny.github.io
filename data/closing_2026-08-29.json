@@ -22,11 +22,11 @@
   "mins_to_first_pitch": 35
  },
  "823501": {
-  "away_ml": 115,
-  "home_ml": -126,
-  "total": 7.5,
-  "over_price": -115,
-  "under_price": -105,
+  "away_ml": -116,
+  "home_ml": 100,
+  "total": 8.0,
+  "over_price": -109,
+  "under_price": -110,
   "away_name": "Boston Red Sox",
   "home_name": "New York Yankees",
   "utc": "2026-08-29T23:15:00Z",
@@ -38,10 +38,18 @@
     "over_price": -115,
     "under_price": -105,
     "captured_utc": "2026-08-29T16:30:26Z"
+   },
+   {
+    "away_ml": -116,
+    "home_ml": 100,
+    "total": 8.0,
+    "over_price": -109,
+    "under_price": -110,
+    "captured_utc": "2026-08-29T22:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-29T16:30:26Z",
-  "mins_to_first_pitch": 405
+  "captured_utc": "2026-08-29T22:30:28Z",
+  "mins_to_first_pitch": 45
  },
  "824230": {
   "away_ml": -183,
@@ -176,11 +184,11 @@
   "mins_to_first_pitch": 215
  },
  "823176": {
-  "away_ml": -122,
-  "home_ml": 105,
-  "total": 7.5,
-  "over_price": -110,
-  "under_price": -110,
+  "away_ml": -124,
+  "home_ml": 111,
+  "total": 8.0,
+  "over_price": -105,
+  "under_price": -115,
   "away_name": "Arizona Diamondbacks",
   "home_name": "San Francisco Giants",
   "utc": "2026-08-30T02:05:00Z",
@@ -192,10 +200,18 @@
     "over_price": -110,
     "under_price": -110,
     "captured_utc": "2026-08-29T16:30:26Z"
+   },
+   {
+    "away_ml": -124,
+    "home_ml": 111,
+    "total": 8.0,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-08-29T22:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-29T16:30:26Z",
-  "mins_to_first_pitch": 575
+  "captured_utc": "2026-08-29T22:30:28Z",
+  "mins_to_first_pitch": 215
  },
  "822690": {
   "away_ml": -105,
@@ -308,11 +324,11 @@
   "mins_to_first_pitch": 220
  },
  "823741": {
-  "away_ml": 142,
-  "home_ml": -160,
-  "total": 8.0,
-  "over_price": -115,
-  "under_price": -105,
+  "away_ml": 141,
+  "home_ml": -165,
+  "total": 8.5,
+  "over_price": -109,
+  "under_price": -110,
   "away_name": "Texas Rangers",
   "home_name": "Milwaukee Brewers",
   "utc": "2026-08-29T23:15:00Z",
@@ -324,17 +340,25 @@
     "over_price": -115,
     "under_price": -105,
     "captured_utc": "2026-08-29T16:30:26Z"
+   },
+   {
+    "away_ml": 141,
+    "home_ml": -165,
+    "total": 8.5,
+    "over_price": -109,
+    "under_price": -110,
+    "captured_utc": "2026-08-29T22:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-29T16:30:26Z",
-  "mins_to_first_pitch": 405
+  "captured_utc": "2026-08-29T22:30:28Z",
+  "mins_to_first_pitch": 45
  },
  "824961": {
-  "away_ml": -140,
-  "home_ml": 126,
-  "total": 9.5,
-  "over_price": -115,
-  "under_price": -105,
+  "away_ml": -155,
+  "home_ml": 130,
+  "total": 10.5,
+  "over_price": -110,
+  "under_price": -110,
   "away_name": "Baltimore Orioles",
   "home_name": "Athletics",
   "utc": "2026-08-30T02:05:00Z",
@@ -346,17 +370,25 @@
     "over_price": -115,
     "under_price": -105,
     "captured_utc": "2026-08-29T16:30:26Z"
+   },
+   {
+    "away_ml": -155,
+    "home_ml": 130,
+    "total": 10.5,
+    "over_price": -110,
+    "under_price": -110,
+    "captured_utc": "2026-08-29T22:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-29T16:30:26Z",
-  "mins_to_first_pitch": 575
+  "captured_utc": "2026-08-29T22:30:28Z",
+  "mins_to_first_pitch": 215
  },
  "823986": {
-  "away_ml": -233,
-  "home_ml": 200,
+  "away_ml": -188,
+  "home_ml": 161,
   "total": 8.0,
-  "over_price": -105,
-  "under_price": -114,
+  "over_price": -110,
+  "under_price": -109,
   "away_name": "Philadelphia Phillies",
   "home_name": "Los Angeles Angels",
   "utc": "2026-08-30T02:07:00Z",
@@ -368,9 +400,17 @@
     "over_price": -105,
     "under_price": -114,
     "captured_utc": "2026-08-29T16:30:26Z"
+   },
+   {
+    "away_ml": -188,
+    "home_ml": 161,
+    "total": 8.0,
+    "over_price": -110,
+    "under_price": -109,
+    "captured_utc": "2026-08-29T22:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-29T16:30:26Z",
-  "mins_to_first_pitch": 577
+  "captured_utc": "2026-08-29T22:30:28Z",
+  "mins_to_first_pitch": 217
  }
 }

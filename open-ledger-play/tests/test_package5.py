@@ -10,6 +10,9 @@ PostgreSQL to refuse. Inspecting grants would only test our belief about the
 grants; the database is the thing that decides.
 """
 
+import threading
+import time
+
 import psycopg
 
 import harness as h
@@ -747,11 +750,42 @@ def _market(admin, src, home_price, away_price):
     return ev
 
 
+def _experiment(admin, model_id="planted", version="1", note="test"):
+    """Declare a DRAFT experiment. Opportunities may be scheduled and resolved
+    against it and none of them count -- which is exactly what the deployment
+    shakedown needs."""
+    return h.scalar(admin, "SELECT model.create_experiment(%s, %s, %s)",
+                    (model_id, version, note))
+
+
+def _activate_back(admin, model_id="planted", version="1", hours=24):
+    """An experiment already ACTIVE, with its boundary in the past, so beliefs
+    planted afterwards fall inside the cohort on the TIME axis.
+
+    Lineage is a separate requirement -- see _plant, which enrolls."""
+    return h.scalar(admin, """
+        SELECT olp_test.activate_experiment_at(%s, %s, NOW() - make_interval(hours => %s))""",
+        (model_id, version, hours))
+
+
+def _enroll(admin, belief_id):
+    """Give a belief the experiment -> schedule -> attempt lineage a cohort
+    requires. A test proving EXCLUSION simply omits this."""
+    return h.scalar(admin, "SELECT olp_test.enroll_belief(%s::uuid)", (belief_id,))
+
+
+def _sample_n(admin, model_id="planted", version="1"):
+    return h.scalar(admin, """
+        SELECT count(*) FROM grading.evaluation_sample
+         WHERE model_id = %s AND model_version = %s""", (model_id, version))
+
+
 def _plant(admin, src, prob, outcome, home_price=-150, away_price=130,
            model_id="planted", version="1"):
     """Form one belief and grade it against a chosen outcome."""
     ev = _market(admin, src, home_price, away_price)
     bid = _form(admin, ev, prob=prob, model_id=model_id, model_version=version)
+    _enroll(admin, bid)          # lineage: without this the belief is not cohort
     _resolve(admin, ev, "DAL", outcome)
     _grade(admin, bid)
     return bid
@@ -788,6 +822,7 @@ def t16_bins_are_equal_count_and_wilson_matches_hand_values():
     # Deliberately CLUSTERED. An evenly spread fixture gives 4/4/4 under fixed
     # WIDTH bucketing too, so it cannot tell the two schemes apart -- a negative
     # control caught exactly that. Here fixed-width would give 8/1/3.
+    _activate_back(admin)
     _tune(admin, min_sample=12, bin_count=3, min_bin_count=3)
     probs = [0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.60, 0.70, 0.80, 0.90]
     for i, pr in enumerate(probs):
@@ -813,6 +848,7 @@ def t23_a_single_bad_bin_fails_despite_a_good_weighted_average():
     hold e above 7.5pp while the average stays under 3pp. Five bins of six.
     """
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "planted", "1")
 
     def build(tag, last_p, last_wins):
         _tune(admin, min_sample=30, bin_count=5, min_bin_count=6)
@@ -839,6 +875,7 @@ def t23_a_single_bad_bin_fails_despite_a_good_weighted_average():
 
     # control: same shape, top bin predicted 0.70 -> 3.3pp out, inside the bound
     h.reset(admin)
+    _activate_back(admin, "planted", "1")   # reset clears the activation too
     _, _, werr2, worst2, _, status2 = build("T23b", 0.70, 4)
     assert float(worst2) <= 0.075 and status2 == "CALIBRATED", (worst2, status2)
 
@@ -863,6 +900,7 @@ def t21_a_model_can_be_calibrated_and_still_add_nothing():
     calibrated at 0.5 each bin must hold a 50/50 mix.
     """
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "planted", "1")
     _tune(admin, min_sample=20, bin_count=2, min_bin_count=5)
 
     # ten sharp favourites, 8 win; ten sharp dogs, 2 win. Jitter assigns half of
@@ -899,6 +937,8 @@ def t32_win_rate_and_probabilistic_quality_can_disagree():
     worse forecaster -- which is why the grader has no win-rate field to rank on.
     """
     admin = h.connect(); h.reset(admin)
+    for _mid in ("lucky", "honest"):
+        _activate_back(admin, _mid, "1")
     _tune(admin, min_sample=10, bin_count=2, min_bin_count=3)
 
     # LUCKY: says 0.52 every time; wins 9 of 10.
@@ -938,6 +978,7 @@ def t33_the_shipped_thresholds_are_the_pre_registered_ones():
     hold. A convenience tweak must not be able to become the contract.
     """
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "planted", "1")
     defaults = dict(h.rows(admin, """
         SELECT column_name, column_default FROM information_schema.columns
         WHERE table_schema='grading' AND table_name='calibration_config'"""))
@@ -1022,17 +1063,18 @@ def t35_the_null_producer_grades_and_calibrates_through_the_ordinary_path():
     052 and 053 exactly as any model would, and comes out AT_PARITY -- which is
     the honest verdict for a model that reproduces the market."""
     admin = h.connect(); h.reset(admin)
+    _activate_back(admin, "null", "1.0.0")
     _tune(admin, min_sample=20, bin_count=2, min_bin_count=5)
 
     # twenty markets; the market is well calibrated, so the null model is too
     for i in range(10):
         ev = _market(admin, f"T35-H{i}", -600, 500)
-        bid = _null(admin, ev)
+        bid = _null(admin, ev); _enroll(admin, bid)
         _resolve(admin, ev, "DAL", "WIN" if i < 8 else "LOSS")
         _grade(admin, bid)
     for i in range(10):
         ev = _market(admin, f"T35-L{i}", 500, -600)
-        bid = _null(admin, ev)
+        bid = _null(admin, ev); _enroll(admin, bid)
         _resolve(admin, ev, "DAL", "WIN" if i < 2 else "LOSS")
         _grade(admin, bid)
 
@@ -1308,6 +1350,11 @@ def _event_at(admin, src, kickoff_in, home="DAL", away="PHI"):
 
 
 def _sched(admin, **kw):
+    # An opportunity with no experiment could never belong to a cohort, so
+    # schedule_v01 refuses to create one. DRAFT is enough to schedule against.
+    if not h.scalar(admin, """SELECT count(*) FROM model.experiments
+                               WHERE model_id='v01' AND model_version='0.1.0'"""):
+        _experiment(admin, "v01", "0.1.0", "test scheduling")
     return h.scalar(admin, "SELECT model.schedule_v01()")
 
 
@@ -1503,6 +1550,832 @@ def t49_the_schedule_is_immutable(admin=None):
     return "scheduled opportunities cannot be edited or removed"
 
 
+
+# =============================================================================
+# 057 -- the v0.1 experiment runner contract
+# =============================================================================
+
+def _run(admin, worker="runner-1"):
+    return h.scalar(admin, "SELECT model.start_experiment_run(%s)", (worker,))
+
+
+def _claim(conn, run_id, worker="runner-1", lease=600, limit=1000):
+    return [r[0] for r in h.rows(conn, """
+        SELECT model.claim_due_opportunities(%s::uuid, %s, %s::int, %s::int)""",
+        (run_id, worker, lease, limit))]
+
+
+def _due_market(admin, src, kickoff="24 hours"):
+    """One event whose T-24h target is live now, with an executable board."""
+    ev = _event_at(admin, src, kickoff)
+    for bk in ("bookA", "bookB"):
+        two_sided(admin, ev, "MONEYLINE", None, -150, 130, bk)
+    return ev
+
+
+def t50_overlapping_workers_receive_disjoint_claims():
+    """Two cron invocations overlap. The database decides who owns an
+    opportunity -- not process timing, and not an application-side lock."""
+    admin = h.connect(); h.reset(admin)
+    for i in range(4):
+        _due_market(admin, f"T50-{i}", f"24 hours {i} minutes")
+    assert _sched(admin) == 8
+
+    a, b = h.connect(), h.connect()
+    run_a, run_b = _run(a, "worker-A"), _run(b, "worker-B")
+    got_a = _claim(a, run_a, "worker-A", limit=4)
+    got_b = _claim(b, run_b, "worker-B")
+
+    assert set(got_a) & set(got_b) == set(), (
+        f"both workers claimed {set(got_a) & set(got_b)}")
+    assert set(got_a) | set(got_b) == {r[0] for r in h.rows(admin,
+        "SELECT schedule_id FROM model.formation_schedule")}, (
+        "an opportunity was claimed by nobody")
+    assert len(got_a) == 4 and len(got_b) == 4, (len(got_a), len(got_b))
+
+    # claimed_count is the runner's own accounting of the same fact
+    assert h.scalar(admin,
+        "SELECT claimed_count FROM model.experiment_runs WHERE run_id=%s::uuid",
+        (run_a,)) == 4
+    a.close(); b.close(); admin.close()
+
+    # -- the genuine race ----------------------------------------------------
+    # Everything above is served by the "skip actively claimed" filter, which
+    # only works because the first worker had already COMMITTED. The lease guard
+    # on ON CONFLICT is what handles the case that filter cannot see: two
+    # workers whose snapshots were both taken before either committed. Cron
+    # invocations overlapping by a few milliseconds land exactly there, so it is
+    # provoked deliberately rather than assumed unreachable.
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T50-RACE")
+    _sched(admin)
+    run_x, run_y = _run(admin, "X"), _run(admin, "Y")
+
+    x = h.connect(autocommit=False)
+    y = h.connect(autocommit=False)
+    out = {}
+
+    def claim_y():
+        try:
+            with y.cursor() as cur:
+                cur.execute("""SELECT model.claim_due_opportunities(
+                                   %s::uuid,'Y',600,1000)""", (run_y,))
+                out["y"] = [r[0] for r in cur.fetchall()]
+            y.commit()
+        except Exception as exc:            # noqa: BLE001 -- reported, not hidden
+            out["y_error"] = exc
+
+    with x.cursor() as cur:
+        cur.execute("SELECT model.claim_due_opportunities(%s::uuid,'X',600,1000)",
+                    (run_x,))
+        out["x"] = [r[0] for r in cur.fetchall()]
+
+    t = threading.Thread(target=claim_y)
+    t.start()
+    time.sleep(0.4)          # Y is now blocked on the primary key X is holding
+    x.commit()
+    t.join(20)
+    assert not t.is_alive(), "claim deadlocked"
+    assert "y_error" not in out, out.get("y_error")
+
+    assert len(out["x"]) == 2, out["x"]
+    assert out["y"] == [], (
+        f"the second worker stole a live lease: {out['y']} -- both cron "
+        f"invocations would now fire an ingestion cycle for the same board")
+    assert h.scalar(admin, """
+        SELECT count(DISTINCT worker) FROM model.formation_claims""") == 1
+    x.close(); y.close(); admin.close()
+    return ("8 opportunities partitioned 4/4; and in a true snapshot race the "
+            "live lease held (X 2, Y 0)")
+
+
+def t51_one_poll_serves_the_whole_slate():
+    """Sixteen games x two moneyline selections is ONE board refresh, not 32
+    provider calls. Enforced by CHECK rather than by care."""
+    admin = h.connect(); h.reset(admin)
+    for i in range(16):
+        _due_market(admin, f"T51-{i}", f"24 hours {i} minutes")
+    assert _sched(admin) == 32
+
+    run = _run(admin)
+    claimed = _claim(admin, run)
+    assert len(claimed) == 32, len(claimed)
+
+    h.scalar(admin, "SELECT model.record_ingestion_poll(%s::uuid)", (run,))
+    for sid in claimed:
+        h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)", (sid, run))
+    h.scalar(admin, "SELECT model.finish_experiment_run(%s::uuid)", (run,))
+
+    polls, resolved, per_poll = h.row(admin, """
+        SELECT ingestion_polls, resolved_count, opportunities_per_poll
+        FROM model.runner_efficiency WHERE run_id = %s::uuid""", (run,))
+    assert polls == 1, f"{polls} polls for one board refresh"
+    assert resolved == 32, resolved
+    assert float(per_poll) == 32.0, per_poll
+
+    # a second poll inside the same cycle is refused, not merely discouraged
+    h.expect_error(
+        lambda: h.scalar(admin,
+                         "SELECT model.record_ingestion_poll(%s::uuid)", (run,)),
+        "ONE_POLL_PER_CYCLE", "polling twice in one cycle")
+
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_attempts
+        WHERE experiment_run_id = %s::uuid""", (run,)) == 32
+    admin.close()
+    return "32 opportunities resolved on 1 poll; second poll refused"
+
+
+def t52_expired_leases_recover_crashed_work():
+    """A worker that dies holding claims must not park them forever. The lease
+    expires and the work returns to the pool -- with no reaper job to write,
+    schedule, or forget to run."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T52")
+    _sched(admin)
+
+    dead = _run(admin, "worker-crashed")
+    held = _claim(admin, dead, "worker-crashed", lease=600)
+    assert len(held) == 2
+
+    # while the lease is live, nobody else may take the work
+    live = _run(admin, "worker-live")
+    assert _claim(admin, live, "worker-live") == [], "stole a live lease"
+
+    # expire it exactly as a crash would, by letting the clock pass it
+    h.scalar(admin, """
+        UPDATE model.formation_claims
+           SET lease_expires_at = NOW() - INTERVAL '1 second' RETURNING 1""")
+
+    rescuer = _run(admin, "worker-rescue")
+    recovered = _claim(admin, rescuer, "worker-rescue")
+    assert set(recovered) == set(held), (recovered, held)
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_claims
+        WHERE worker = 'worker-rescue'""") == 2
+
+    for sid in recovered:
+        assert h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                        (sid, rescuer)) == "ELIGIBLE"
+    assert h.scalar(admin,
+        "SELECT count(*) FROM model.v01_ledger WHERE unresolved") == 0
+    admin.close()
+    return "live lease held; expired lease recovered by a second worker; 0 unresolved"
+
+
+def t53_claims_are_not_what_protects_the_record():
+    """The load-bearing guarantee. Even with the claim mechanism removed
+    entirely, two overlapping workers cannot produce two beliefs or two
+    denominator entries for one opportunity.
+
+    NEGATIVE CONTROL: the claim table is wiped mid-flight so both workers
+    believe they own the row. If duplicate protection lived in the lease rather
+    than in the attempt uniqueness, this test would fail."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T53")
+    _sched(admin)
+    sid = h.scalar(admin, "SELECT schedule_id FROM model.formation_schedule LIMIT 1")
+
+    a, b = h.connect(), h.connect()
+    run_a, run_b = _run(a, "A"), _run(b, "B")
+    _claim(a, run_a, "A")
+    h.scalar(admin, "DELETE FROM model.formation_claims RETURNING 1")
+    _claim(b, run_b, "B")
+
+    assert h.scalar(a, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                    (sid, run_a)) == "ELIGIBLE"
+    h.expect_error(
+        lambda: h.scalar(b, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                         (sid, run_b)),
+        "ALREADY_RESOLVED", "second worker resolving the same opportunity")
+
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_attempts
+        WHERE schedule_id=%s::uuid""", (sid,)) == 1, "duplicate denominator entry"
+    assert h.scalar(admin, "SELECT count(*) FROM model.beliefs") == 1, "duplicate belief"
+    a.close(); b.close(); admin.close()
+    return "claims disabled mid-flight; still exactly 1 attempt and 1 belief"
+
+
+def t54_resolution_is_terminal_and_spends_the_claim():
+    """A resolved opportunity leaves the work list for good. If it did not, the
+    runner would offer it again every five minutes until kickoff."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T54")
+    _sched(admin)
+    run = _run(admin)
+    claimed = _claim(admin, run)
+    assert h.scalar(admin, "SELECT count(*) FROM model.due_opportunities") == 2
+
+    for sid in claimed:
+        h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)", (sid, run))
+
+    assert h.scalar(admin, "SELECT count(*) FROM model.due_opportunities") == 0, (
+        "a resolved opportunity is still being offered as work")
+    assert h.scalar(admin, "SELECT count(*) FROM model.formation_claims") == 0, (
+        "claim outlived the opportunity it protected")
+    assert _claim(admin, _run(admin, "later"), "later") == []
+    admin.close()
+    return "2 resolved -> 0 due, 0 claims, nothing re-offered"
+
+
+def t55_attempts_are_attributable_and_still_immutable():
+    """experiment_run_id is an INPUT to the attempt insert, not an annotation
+    applied afterwards -- because formation_attempts is append-only and an
+    after-the-fact stamp would be blocked. That is the correct failure, so it is
+    asserted here rather than assumed."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T55")
+    _sched(admin)
+    run = _run(admin)
+    sid = _claim(admin, run)[0]
+    h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)", (sid, run))
+
+    got = h.scalar(admin, """
+        SELECT experiment_run_id FROM model.formation_attempts
+        WHERE schedule_id = %s::uuid""", (sid,))
+    assert str(got) == str(run), (got, run)
+
+    # the append-only rule that forced that design still holds
+    h.expect_error(
+        lambda: h.scalar(admin, """
+            UPDATE model.formation_attempts SET experiment_run_id = NULL
+             WHERE schedule_id = %s::uuid RETURNING 1""", (sid,)),
+        "APPEND_ONLY_VIOLATION", "re-stamping a resolved attempt")
+
+    # the 056 signature still works, and reads as 'resolved outside a cycle'
+    other = h.scalar(admin, "SELECT schedule_id FROM model.due_opportunities")
+    h.scalar(admin, "SELECT model.resolve_v01(%s::uuid)", (other,))
+    assert h.scalar(admin, """
+        SELECT experiment_run_id FROM model.formation_attempts
+        WHERE schedule_id = %s::uuid""", (other,)) is None
+    admin.close()
+    return "run id stamped at insert; UPDATE still refused; 1-arg form still valid"
+
+
+def t56_a_missed_window_stays_on_the_work_list():
+    """The denominator must not leak exactly the games the collector failed on.
+    An opportunity whose window has closed stays visible as work and terminates
+    as NO_WINDOW_CAPTURE."""
+    admin = h.connect(); h.reset(admin)
+    ev = _due_market(admin, "T56")
+
+    # the scheduled capture never executed: its target passed three hours ago.
+    # Inserted directly rather than by editing a scheduled row -- the schedule is
+    # append-only and staying inside that rule is the point.
+    sid = h.scalar(admin, """
+        INSERT INTO model.formation_schedule
+            (model_id, model_version, event_id, market_type, selection_key,
+             line, target_formation_at, window_seconds)
+        VALUES ('v01','0.1.0',%s::uuid,'MONEYLINE','DAL',NULL,
+                NOW() - INTERVAL '3 hours', 3600)
+        RETURNING schedule_id""", (ev,))
+
+    due = h.rows(admin, """
+        SELECT schedule_id, inside_window, seconds_from_target
+        FROM model.due_opportunities""")
+    assert len(due) == 1, "a missed opportunity vanished from the work list"
+    assert due[0][1] is False, "a 3h-late capture reported itself inside the window"
+    assert 10700 < due[0][2] < 10900, due[0][2]
+
+    run = _run(admin)
+    assert h.scalar(admin, "SELECT model.resolve_v01(%s::uuid, %s::uuid)",
+                    (sid, run)) == "NO_WINDOW_CAPTURE"
+    assert h.scalar(admin, """
+        SELECT belief_id FROM model.formation_attempts
+        WHERE schedule_id=%s::uuid""", (sid,)) is None, (
+        "formed a belief outside the pre-registered window")
+    admin.close()
+    return "missed capture still offered as work; NO_WINDOW_CAPTURE, no belief"
+
+
+def t57_the_runner_is_an_operator_not_the_model():
+    """The work queue is operator-only. The producer cannot claim work, spend a
+    provider credit, or terminate an opportunity -- and cannot even READ the
+    pending queue, because advance sight of which opportunities are about to
+    arrive is foreknowledge of the shape of its own denominator."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T57")
+    _sched(admin)
+    for obj in ("model.due_opportunities", "model.experiment_runs",
+                "model.formation_claims", "model.runner_efficiency"):
+        _assert_exists(admin, obj)
+    sid = h.scalar(admin, "SELECT schedule_id FROM model.formation_schedule LIMIT 1")
+    run = _run(admin)
+
+    # The grader CAN read the queue. Without this the denial below would pass
+    # just as happily against a view that is broken for everyone -- which is
+    # exactly how the first draft of this migration shipped: olp_model was
+    # granted the view but not the formation_claims it joins, so the "grant"
+    # was an unusable read dressed up as an allowance.
+    grader = h.connect_as("olp_grader")
+    assert h.scalar(grader, "SELECT count(*) FROM model.due_opportunities") == 2
+    assert h.scalar(grader, """
+        SELECT count(*) FROM model.runner_efficiency WHERE run_id = %s::uuid""",
+        (run,)) == 1
+    grader.close()
+
+    model = h.connect_as("olp_model")
+    # ...and the producer still sees the denominator it is entitled to (056)
+    assert h.scalar(model, "SELECT count(*) FROM model.v01_ledger") == 2
+
+    for label, sql, params in (
+        ("read queue", "SELECT count(*) FROM model.due_opportunities",      ()),
+        ("read runs",  "SELECT count(*) FROM model.experiment_runs",        ()),
+        ("claim",   "SELECT model.claim_due_opportunities(%s::uuid,'m')", (run,)),
+        ("poll",    "SELECT model.record_ingestion_poll(%s::uuid)",       (run,)),
+        ("resolve", "SELECT model.resolve_v01(%s::uuid, %s::uuid)",       (sid, run)),
+        ("start",   "SELECT model.start_experiment_run('m')",             ()),
+        ("write",   "INSERT INTO model.formation_claims(schedule_id,worker,"
+                    "lease_expires_at) VALUES (%s::uuid,'m',NOW())",      (sid,)),
+    ):
+        try:
+            with model.cursor() as cur:
+                cur.execute(sql, params)
+        except psycopg.Error as exc:
+            assert exc.sqlstate == INSUFFICIENT_PRIVILEGE, (label, exc.sqlstate)
+        else:
+            raise AssertionError(f"olp_model performed runner action: {label}")
+    model.close(); admin.close()
+    return ("grader reads the queue; producer refused on all 7 runner actions "
+            "(42501) while keeping its 056 ledger view")
+
+
+
+# =============================================================================
+# 058 -- the experiment cohort and the activation boundary
+# =============================================================================
+
+def t58_an_unactivated_experiment_has_an_empty_sample():
+    """Fail closed. "Filter by the experiment IF one exists" would let an
+    experiment nobody remembered to activate quietly accumulate a full sample
+    and publish a standing on it.
+
+    A/B on identical fixtures: one model ACTIVE, one still DRAFT."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=12, bin_count=3, min_bin_count=3)
+    probs = [0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.60, 0.70, 0.80, 0.90]
+
+    _activate_back(admin, "live", "1")          # ACTIVE, boundary in the past
+    _experiment(admin, "draft", "1")            # declared, never activated
+    for i, pr in enumerate(probs):
+        _plant(admin, f"T58-L{i}", pr, "WIN" if i % 2 == 0 else "LOSS",
+               model_id="live", version="1")
+        _plant(admin, f"T58-D{i}", pr, "WIN" if i % 2 == 0 else "LOSS",
+               model_id="draft", version="1")
+
+    # both sets are graded and identically shaped
+    assert h.scalar(admin, """
+        SELECT count(*) FROM grading.belief_grades
+         WHERE scoring_status = 'SCORED'""") == 24
+
+    assert [b[1] for b in h.rows(admin,
+        "SELECT bin, n FROM grading.calibration_bins('live','1')")] == [4, 4, 4]
+    assert _sample_n(admin, "live", "1") == 12
+
+    assert h.rows(admin, "SELECT bin, n FROM grading.calibration_bins('draft','1')") == [], (
+        "a DRAFT experiment reported calibration bins")
+    assert _sample_n(admin, "draft", "1") == 0
+    n_draft = h.row(admin, "SELECT * FROM grading.standing_report('draft','1')")[0]
+    assert n_draft == 0, f"standing_report counted {n_draft} rows for a DRAFT experiment"
+    admin.close()
+    return "identical fixtures: ACTIVE binned 4/4/4 (n=12), DRAFT n=0"
+
+
+def t59_pre_activation_beliefs_are_excluded():
+    """TIME membership, on its own.
+
+    The deployment sequence deliberately invokes both endpoints once BEFORE
+    activation. Those beliefs are infrastructure validation and must not become
+    evidence -- and nothing but the boundary distinguishes them."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=100, bin_count=2, min_bin_count=1)
+    _experiment(admin)
+
+    shakedown = [_plant(admin, f"T59-pre-{i}", 0.60, "WIN") for i in range(3)]
+    at = h.scalar(admin,
+        "SELECT model.activate_experiment('planted','1','deploy','go live')")
+    live = [_plant(admin, f"T59-post-{i}", 0.60, "WIN") for i in range(4)]
+
+    assert h.scalar(admin, """
+        SELECT count(*) FROM grading.belief_grades
+         WHERE scoring_status='SCORED'""") == 7, "fixture did not grade all 7"
+    # every one of the 7 has full lineage -- only the boundary separates them
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.formation_attempts
+         WHERE belief_id IS NOT NULL AND schedule_id IS NOT NULL""") == 7
+
+    got = {r[0] for r in h.rows(admin,
+        "SELECT belief_id FROM grading.evaluation_sample")}
+    assert got == set(live), f"expected only the {len(live)} post-activation beliefs"
+    for b in shakedown:
+        assert b not in got, "a pre-activation shakedown belief became evidence"
+    assert _sample_n(admin) == 4
+    assert h.row(admin, "SELECT * FROM grading.standing_report('planted','1')")[0] == 4
+    assert at is not None
+    admin.close()
+    return "7 beliefs, identical lineage; 3 pre-activation excluded, n = 4"
+
+
+def t60_beliefs_outside_the_scheduled_path_are_excluded():
+    """LINEAGE membership, on its own -- and the control that proves the
+    timestamp is not the entire definition of "prospective".
+
+    Every belief here is formed AFTER activation and would pass a
+    `formed_at >= activated_at` filter. Only the ones produced through the
+    pre-registered lifecycle count."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=100, bin_count=2, min_bin_count=1)
+    _activate_back(admin)
+
+    enrolled = [_plant(admin, f"T60-in-{i}", 0.60, "WIN") for i in range(4)]
+
+    # (a) a belief formed and graded directly -- no schedule, no attempt
+    loose = []
+    for i in range(3):
+        ev = _market(admin, f"T60-loose-{i}", -150, 130)
+        bid = _form(admin, ev, prob=0.60, model_id="planted", model_version="1")
+        _resolve(admin, ev, "DAL", "WIN")
+        _grade(admin, bid)
+        loose.append(bid)
+
+    # (b) a belief through the PRODUCER's own path: attempt_belief logs an
+    #     attempt, but with no schedule_id -- so it has no experiment
+    ev = _market(admin, "T60-attempt", -150, 130)
+    bid, reason = _attempt(admin, ev, prob=0.60, mid="planted", ver="1")
+    assert reason == "ELIGIBLE" and bid is not None
+    _resolve(admin, ev, "DAL", "WIN")
+    _grade(admin, bid)
+    loose.append(bid)
+
+    scored = h.scalar(admin, """
+        SELECT count(*) FROM grading.belief_grades WHERE scoring_status='SCORED'""")
+    assert scored == 8, scored
+    # all 8 are post-activation: a timestamp-only rule would admit every one
+    assert h.scalar(admin, """
+        SELECT count(*) FROM model.beliefs b
+         WHERE b.formed_at >= model.activated_at('planted','1')""") == 8, (
+        "fixture is wrong: some belief predates activation, so this test would "
+        "pass on the time axis and prove nothing about lineage")
+
+    got = {r[0] for r in h.rows(admin,
+        "SELECT belief_id FROM grading.evaluation_sample")}
+    assert got == set(enrolled), (
+        f"expected only the {len(enrolled)} beliefs produced through the "
+        f"scheduled lifecycle, got {len(got)}")
+    for b in loose:
+        assert b not in got, "a belief formed outside the scheduled path became evidence"
+
+    assert _sample_n(admin) == 4
+    assert h.row(admin, "SELECT * FROM grading.standing_report('planted','1')")[0] == 4, (
+        "standing_report counted beliefs with no experiment lineage")
+    admin.close()
+    return ("8 post-activation beliefs, all passing a timestamp filter; "
+            "only the 4 with lifecycle lineage counted")
+
+
+def t61_the_experiment_lifecycle_is_forward_only():
+    """A movable activated_at is a free parameter: slide it forward and early
+    losses vanish; slide it back and historical rows are admitted."""
+    admin = h.connect(); h.reset(admin)
+    _experiment(admin, "v01", "0.1.0")
+    assert h.scalar(admin, """
+        SELECT status::text FROM model.experiments WHERE model_id='v01'""") == "DRAFT"
+
+    first = h.scalar(admin,
+        "SELECT model.activate_experiment('v01','0.1.0','ops','first')")
+
+    h.expect_error(
+        lambda: h.scalar(admin,
+            "SELECT model.activate_experiment('v01','0.1.0','ops','again')"),
+        "ALREADY_ACTIVATED", "activating twice")
+
+    for label, sql, frag in (
+        ("move the boundary forward",
+         "UPDATE model.experiments SET activated_at = NOW() + INTERVAL '1 day' "
+         "WHERE model_id='v01' RETURNING 1", "ACTIVATION_IMMUTABLE"),
+        ("move the boundary backward",
+         "UPDATE model.experiments SET activated_at = NOW() - INTERVAL '30 days' "
+         "WHERE model_id='v01' RETURNING 1", "ACTIVATION_IMMUTABLE"),
+        ("return to DRAFT",
+         "UPDATE model.experiments SET status='DRAFT' "
+         "WHERE model_id='v01' RETURNING 1", "ILLEGAL_TRANSITION"),
+        ("skip to EVALUATED",
+         "UPDATE model.experiments SET status='EVALUATED' "
+         "WHERE model_id='v01' RETURNING 1", "ILLEGAL_TRANSITION"),
+        ("rename the version",
+         "UPDATE model.experiments SET model_version='0.2.0' "
+         "WHERE model_id='v01' RETURNING 1", "EXPERIMENT_IMMUTABLE"),
+        ("delete it",
+         "DELETE FROM model.experiments WHERE model_id='v01' RETURNING 1",
+         "EXPERIMENT_IMMUTABLE"),
+    ):
+        h.expect_error(lambda sql=sql: h.scalar(admin, sql), frag, label)
+
+    assert h.scalar(admin, """
+        SELECT activated_at FROM model.experiments WHERE model_id='v01'""") == first
+
+    # the sanctioned forward path
+    assert h.scalar(admin, """
+        SELECT model.advance_experiment('v01','0.1.0','COLLECTION_COMPLETE')""") \
+        == "COLLECTION_COMPLETE"
+    assert h.scalar(admin, """
+        SELECT model.advance_experiment('v01','0.1.0','EVALUATED')""") == "EVALUATED"
+    h.expect_error(
+        lambda: h.scalar(admin,
+            "SELECT model.advance_experiment('v01','0.1.0','ACTIVE')"),
+        "ILLEGAL_TRANSITION", "EVALUATED back to ACTIVE")
+
+    # a new version is the sanctioned route to a new sample
+    _experiment(admin, "v01", "0.2.0")
+    assert h.scalar(admin, "SELECT count(*) FROM model.experiments") == 2
+    admin.close()
+    return "DRAFT->ACTIVE->COLLECTION_COMPLETE->EVALUATED; 6 illegal moves refused"
+
+
+def t62_the_cohort_survives_the_evaluation_states():
+    """Collection ending must not empty the sample. If it did, the scoreboard
+    would silently reset the moment an experiment was declared complete."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=100, bin_count=2, min_bin_count=1)
+    _activate_back(admin)
+    for i in range(4):
+        _plant(admin, f"T62-{i}", 0.60, "WIN")
+    assert _sample_n(admin) == 4
+
+    for state in ("COLLECTION_COMPLETE", "EVALUATED"):
+        h.scalar(admin, "SELECT model.advance_experiment('planted','1',%s)", (state,))
+        assert _sample_n(admin) == 4, f"the sample emptied at {state}"
+        assert h.row(admin,
+            "SELECT * FROM grading.standing_report('planted','1')")[0] == 4
+    admin.close()
+    return "n = 4 held across ACTIVE, COLLECTION_COMPLETE and EVALUATED"
+
+
+def t63_activation_has_no_caller_supplied_timestamp():
+    """The production entry point stamps NOW(). A caller-supplied activation
+    time is the free parameter the whole migration exists to remove."""
+    admin = h.connect(); h.reset(admin)
+    args = h.rows(admin, """
+        SELECT p.proname, pg_get_function_arguments(p.oid)
+        FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname='model' AND p.proname='activate_experiment'""")
+    assert len(args) == 1, f"expected exactly one signature, got {args}"
+    sig = args[0][1]
+    assert "timestamp" not in sig.lower(), (
+        f"model.activate_experiment accepts a caller-supplied time: {sig}")
+
+    _experiment(admin, "v01", "0.1.0")
+    before = h.scalar(admin, "SELECT NOW()")
+    at = h.scalar(admin, "SELECT model.activate_experiment('v01','0.1.0','ops',NULL)")
+    after = h.scalar(admin, "SELECT NOW()")
+    assert before <= at <= after, (before, at, after)
+
+    # activating something never declared is refused, not silently created
+    h.expect_error(
+        lambda: h.scalar(admin,
+            "SELECT model.activate_experiment('ghost','1','ops',NULL)"),
+        "NO_SUCH_EXPERIMENT", "activating an undeclared experiment")
+
+    assert "FIXTURE" in h.scalar(admin, """
+        SELECT obj_description(p.oid) FROM pg_proc p
+        JOIN pg_namespace n ON n.oid=p.pronamespace
+        WHERE n.nspname='olp_test' AND p.proname='activate_experiment_at'""")
+    admin.close()
+    return f"signature is ({sig}); stamped NOW() inside the observed interval"
+
+
+def t64_the_producer_cannot_declare_its_own_cohort():
+    """Activation decides which of the model's outputs are counted. A producer
+    that could declare, activate or advance an experiment would be choosing its
+    own denominator one level above the ledger 055 and 056 built."""
+    admin = h.connect(); h.reset(admin)
+    _due_market(admin, "T64")
+    _sched(admin)
+    for obj in ("model.experiments", "model.experiment_cohort",
+                "grading.evaluation_sample"):
+        _assert_exists(admin, obj)
+    h.scalar(admin, "SELECT model.activate_experiment('v01','0.1.0','ops',NULL)")
+
+    model = h.connect_as("olp_model")
+    # keeps the 056 ledger read, and can therefore evaluate the cohort flag
+    assert h.scalar(model, "SELECT count(*) FROM model.v01_ledger") == 2
+    assert h.scalar(model, """
+        SELECT count(*) FROM model.v01_ledger WHERE NOT in_prereg_sample""") == 2
+
+    for label, sql in (
+        ("declare",  "SELECT model.create_experiment('m','1','mine')"),
+        ("activate", "SELECT model.activate_experiment('v01','0.1.0','m',NULL)"),
+        ("advance",  "SELECT model.advance_experiment('v01','0.1.0','EVALUATED')"),
+        ("read experiments", "SELECT count(*) FROM model.experiments"),
+        ("read sample", "SELECT count(*) FROM grading.evaluation_sample"),
+        ("write", "INSERT INTO model.experiments(model_id,model_version) "
+                  "VALUES ('m','1')"),
+    ):
+        try:
+            with model.cursor() as cur:
+                cur.execute(sql)
+        except psycopg.Error as exc:
+            assert exc.sqlstate == INSUFFICIENT_PRIVILEGE, (label, exc.sqlstate)
+        else:
+            raise AssertionError(f"olp_model performed cohort action: {label}")
+    model.close()
+
+    grader = h.connect_as("olp_grader")
+    assert h.scalar(grader, "SELECT count(*) FROM model.experiments") == 1
+    assert h.scalar(grader, "SELECT count(*) FROM grading.evaluation_sample") == 0
+    grader.close(); admin.close()
+    return "producer reads the cohort flag; declare/activate/advance/read all refused"
+
+
+
+def _reports(admin, mid, ver="1"):
+    """Every scoreboard surface for one model, as plain tuples."""
+    return {
+        "standing":    h.row(admin, "SELECT * FROM grading.standing_report(%s,%s)",
+                             (mid, ver)),
+        "calibration": h.row(admin, "SELECT * FROM grading.calibration_report(%s,%s)",
+                             (mid, ver)),
+        "bins":        h.rows(admin, """
+            SELECT bin, n, mean_predicted, observed_frequency, abs_error
+            FROM grading.calibration_bins(%s,%s)""", (mid, ver)),
+    }
+
+
+def _sample_six(admin, tag, mid, ver="1"):
+    """The identical cohort planted under every model in these tests:
+    three at 0.30 winning once, three at 0.70 winning twice."""
+    for i, (pr, won) in enumerate([(0.30, True), (0.30, False), (0.30, False),
+                                   (0.70, True), (0.70, True),  (0.70, False)]):
+        _plant(admin, f"{tag}-{i}", pr, "WIN" if won else "LOSS",
+               model_id=mid, version=ver)
+
+
+def _naive_aggregate(admin, mid, ver="1"):
+    """The pre-058 shape: every graded row carrying the right version string.
+    Used only to prove a contaminant fixture actually has teeth."""
+    return h.row(admin, """
+        SELECT count(*), round(avg(g.model_brier), 8)
+        FROM grading.belief_grades g
+        JOIN model.beliefs b ON b.belief_id = g.belief_id
+        WHERE g.scoring_status = 'SCORED'
+          AND b.model_id = %s AND b.model_version = %s""", (mid, ver))
+
+
+def t65_a_pre_activation_contaminant_changes_no_number():
+    """The regression assertion for what standing_report was doing.
+
+    An `n` assertion is necessary and not sufficient: it would pass while a
+    hidden aggregate path still averaged contaminated rows. This plants a
+    pre-activation contaminant EXTREME enough to visibly move Brier and the
+    skill score, then asserts every scoreboard number is bit-identical to a
+    model that never saw it."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=6, bin_count=2, min_bin_count=3)
+
+    # CLEAN: activated in the past, six cohort beliefs, nothing else.
+    _activate_back(admin, "clean", "1")
+    _sample_six(admin, "T65-C", "clean")
+
+    # DIRTY: three catastrophic beliefs formed BEFORE activation, then the
+    # identical six. Full lineage on all nine -- only the boundary separates
+    # them, so lineage cannot be what saves the numbers here.
+    _experiment(admin, "dirty", "1")
+    for i in range(3):
+        _plant(admin, f"T65-X{i}", 0.99, "LOSS", model_id="dirty", version="1")
+    h.scalar(admin, "SELECT model.activate_experiment('dirty','1','ops',NULL)")
+    _sample_six(admin, "T65-D", "dirty")
+
+    # the contaminant HAS teeth: the pre-058 aggregate moves a long way
+    n_naive, brier_naive = _naive_aggregate(admin, "dirty")
+    assert n_naive == 9, n_naive
+    n_clean, brier_clean = _naive_aggregate(admin, "clean")
+    assert n_clean == 6, n_clean
+    assert float(brier_naive) - float(brier_clean) > 0.25, (
+        f"fixture is toothless: contaminated Brier {brier_naive} is not far "
+        f"enough from {brier_clean} to prove anything")
+
+    clean, dirty = _reports(admin, "clean"), _reports(admin, "dirty")
+    for surface in ("standing", "calibration", "bins"):
+        assert clean[surface] == dirty[surface], (
+            f"{surface} differs: a contaminated aggregate path survives.\n"
+            f"  clean = {clean[surface]}\n  dirty = {dirty[surface]}")
+
+    # and the numbers are real, not two identical empties
+    assert clean["standing"][0] == 6, clean["standing"]
+    assert clean["standing"][1] is not None, "no Brier was computed at all"
+    admin.close()
+    return (f"3 pre-activation beliefs at Brier 0.9801 moved the naive average "
+            f"{float(brier_clean):.4f} -> {float(brier_naive):.4f}; every "
+            f"cohort number identical")
+
+
+def t66_fixture_rows_may_coexist_after_activation():
+    """Lineage does the protecting, not a clean database.
+
+    The database is deliberately filthy: post-activation beliefs formed
+    directly, beliefs through the producer's own attempt_belief path, and
+    beliefs belonging to a different experiment entirely. None carries the
+    experiment -> schedule -> attempt lineage, so none may move a number."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=6, bin_count=2, min_bin_count=3)
+
+    _activate_back(admin, "clean", "1")
+    _sample_six(admin, "T66-C", "clean")
+    before = _reports(admin, "clean")
+
+    _activate_back(admin, "dirty", "1")
+    _sample_six(admin, "T66-D", "dirty")
+
+    # (a) formed and graded directly -- no schedule, no attempt
+    for i in range(3):
+        ev = _market(admin, f"T66-loose-{i}", -150, 130)
+        bid = _form(admin, ev, prob=0.99, model_id="dirty", model_version="1")
+        _resolve(admin, ev, "DAL", "LOSS"); _grade(admin, bid)
+
+    # (b) the producer's own path: an attempt with no schedule_id
+    ev = _market(admin, "T66-attempt", -150, 130)
+    bid, reason = _attempt(admin, ev, prob=0.99, mid="dirty", ver="1")
+    assert reason == "ELIGIBLE"
+    _resolve(admin, ev, "DAL", "LOSS"); _grade(admin, bid)
+
+    # (c) a fully-formed belief enrolled under a DIFFERENT experiment
+    _activate_back(admin, "other", "1")
+    for i in range(2):
+        _plant(admin, f"T66-other-{i}", 0.99, "LOSS", model_id="other", version="1")
+
+    n_naive, brier_naive = _naive_aggregate(admin, "dirty")
+    assert n_naive == 10, n_naive
+    assert float(brier_naive) > 0.4, (
+        f"fixture is toothless: naive Brier {brier_naive} would barely move")
+
+    after = _reports(admin, "dirty")
+    for surface in ("standing", "calibration", "bins"):
+        assert before[surface] == after[surface], (
+            f"{surface} differs: post-activation fixture rows reached a "
+            f"scoreboard.\n  clean = {before[surface]}\n  dirty = {after[surface]}")
+    assert _sample_n(admin, "dirty") == 6
+    assert _sample_n(admin, "other") == 2, "the other experiment lost its own cohort"
+    admin.close()
+    return ("10 graded rows under one version, 4 of them junk; cohort held at 6 "
+            "and every number identical")
+
+
+def t67_a_correct_cohort_belief_counts_everywhere():
+    """Positive inclusion. Exclusion tests can all pass on a system that counts
+    NOTHING, so the four surfaces are checked against values computed here in
+    Python from the stored probabilities and outcomes."""
+    admin = h.connect(); h.reset(admin)
+    _tune(admin, min_sample=6, bin_count=2, min_bin_count=3)
+    _activate_back(admin, "clean", "1")
+    _sample_six(admin, "T67", "clean")
+
+    rows = h.rows(admin, """
+        SELECT b.model_probability, b.market_probability_at_formation,
+               (g.outcome = 'WIN')
+        FROM grading.evaluation_sample s
+        JOIN model.beliefs b       ON b.belief_id = s.belief_id
+        JOIN grading.belief_grades g ON g.belief_id = s.belief_id
+        WHERE s.model_id = 'clean'""")
+    assert len(rows) == 6, len(rows)
+
+    import math
+    mb = sum((float(p) - (1.0 if w else 0.0)) ** 2 for p, _, w in rows) / 6
+    kb = sum((float(m) - (1.0 if w else 0.0)) ** 2 for _, m, w in rows) / 6
+    ml = -sum(math.log(float(p) if w else 1 - float(p)) for p, _, w in rows) / 6
+    kl = -sum(math.log(float(m) if w else 1 - float(m)) for _, m, w in rows) / 6
+    bss = 1 - mb / kb
+
+    n, r_mb, r_kb, r_bss, r_ml, r_kl, r_lli, standing = h.row(
+        admin, "SELECT * FROM grading.standing_report('clean','1')")
+
+    assert n == 6, n
+    assert abs(float(r_mb) - mb) < 1e-8, (r_mb, mb)
+    assert abs(float(r_kb) - kb) < 1e-8, (r_kb, kb)
+    assert abs(float(r_ml) - ml) < 1e-8, (r_ml, ml)
+    assert abs(float(r_kl) - kl) < 1e-8, (r_kl, kl)
+    assert abs(float(r_bss) - bss) < 1e-6, (r_bss, bss)
+    assert abs(float(r_lli) - (kl - ml)) < 1e-6, r_lli
+
+    n_cal, eligible, werr, worst, wbin, status = h.row(
+        admin, "SELECT * FROM grading.calibration_report('clean','1')")
+    assert n_cal == 6 and eligible is True, (n_cal, eligible)
+    assert werr is not None and status is not None
+
+    bins = h.rows(admin, """
+        SELECT bin, n, mean_predicted, observed_frequency
+        FROM grading.calibration_bins('clean','1')""")
+    assert [b[1] for b in bins] == [3, 3], bins
+    assert abs(float(bins[0][2]) - 0.30) < 1e-6, bins[0]
+    assert abs(float(bins[1][2]) - 0.70) < 1e-6, bins[1]
+    assert abs(float(bins[0][3]) - 1/3) < 1e-5, bins[0]
+    assert abs(float(bins[1][3]) - 2/3) < 1e-5, bins[1]
+    admin.close()
+    return (f"n=6 on every surface; Brier {float(r_mb):.6f} vs market "
+            f"{float(r_kb):.6f}, BSS {float(r_bss):.6f}, bins 3/3 -- all "
+            f"matching values computed independently")
+
+
 PACKAGE5 = [
     ("P5-T01", "Model cannot reach behind Package #4",
      t01_model_role_cannot_reach_behind_package_4),
@@ -1584,4 +2457,40 @@ PACKAGE5 = [
      t48_both_clocks_are_recorded_and_can_disagree),
     ("P5-T49", "The schedule is immutable",
      t49_the_schedule_is_immutable),
+    ("P5-T50", "Overlapping workers receive disjoint claims",
+     t50_overlapping_workers_receive_disjoint_claims),
+    ("P5-T51", "One poll serves the whole slate",
+     t51_one_poll_serves_the_whole_slate),
+    ("P5-T52", "Expired leases recover crashed work",
+     t52_expired_leases_recover_crashed_work),
+    ("P5-T53", "Claims are not what protects the record",
+     t53_claims_are_not_what_protects_the_record),
+    ("P5-T54", "Resolution is terminal and spends the claim",
+     t54_resolution_is_terminal_and_spends_the_claim),
+    ("P5-T55", "Attempts are attributable and still immutable",
+     t55_attempts_are_attributable_and_still_immutable),
+    ("P5-T56", "A missed window stays on the work list",
+     t56_a_missed_window_stays_on_the_work_list),
+    ("P5-T57", "The runner is an operator, not the model",
+     t57_the_runner_is_an_operator_not_the_model),
+    ("P5-T58", "An unactivated experiment has an empty sample",
+     t58_an_unactivated_experiment_has_an_empty_sample),
+    ("P5-T59", "Pre-activation beliefs are excluded (time)",
+     t59_pre_activation_beliefs_are_excluded),
+    ("P5-T60", "Beliefs outside the scheduled path are excluded (lineage)",
+     t60_beliefs_outside_the_scheduled_path_are_excluded),
+    ("P5-T61", "The experiment lifecycle is forward-only",
+     t61_the_experiment_lifecycle_is_forward_only),
+    ("P5-T62", "The cohort survives the evaluation states",
+     t62_the_cohort_survives_the_evaluation_states),
+    ("P5-T63", "Activation has no caller-supplied timestamp",
+     t63_activation_has_no_caller_supplied_timestamp),
+    ("P5-T64", "The producer cannot declare its own cohort",
+     t64_the_producer_cannot_declare_its_own_cohort),
+    ("P5-T65", "A pre-activation contaminant changes no number",
+     t65_a_pre_activation_contaminant_changes_no_number),
+    ("P5-T66", "Fixture rows may coexist after activation",
+     t66_fixture_rows_may_coexist_after_activation),
+    ("P5-T67", "A correct cohort belief counts everywhere",
+     t67_a_correct_cohort_belief_counts_everywhere),
 ]

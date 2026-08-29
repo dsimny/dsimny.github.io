@@ -344,19 +344,98 @@ how much to stake is Package #7.
 
 No result from this experiment licenses a wager.
 
-## 11. What is not built yet
+## 11. Collection machinery — BUILT
 
-The pre-registration is complete. The machinery to honour it is not, and beliefs
-must not begin accumulating until it exists — a belief emitted under a rule the
-system cannot enforce is not a pre-registered observation.
+The pre-registration governs the collection mechanism, not merely how we hope
+the producer behaves. A belief emitted under a rule the system cannot enforce is
+not a pre-registered observation, so none were allowed to accumulate until the
+rules were structural.
 
-| Needed | Why |
-|---|---|
-| `model.v01_probability(p)` | the transform, as a pure immutable function |
-| a formation **schedule** | §9.5: scheduled attempts must exist independently of the model, or the denominator is unenforceable |
-| a resolution step | evaluates eligibility, then asks the model — in that order |
-| `seconds_to_kickoff` | §9.4, stamped on attempts and beliefs |
-| the T−24h ± window selector | §9.3, including the closest-to-target and earlier-wins-ties rules |
+| Needed | Migration | Status |
+|---|---|---|
+| `model.v01_probability(p)` — the transform as a pure immutable function | `056` | built |
+| a formation **schedule**, created independently of the model (§9.5) | `056` | built |
+| a resolution step: eligibility first, then the model | `056` | built |
+| `seconds_to_kickoff` stamped on attempts and beliefs (§9.4) | `056` | built |
+| the T−24h ± window gate (§9.3) | `056` | built |
+| `NO_WINDOW_CAPTURE` as a collection failure, not a market one | `056` | built |
+| atomic claiming, so overlapping runners cannot duplicate work | `057` | built |
+| one provider poll per cycle, however many opportunities it serves | `057` | built |
+| crash recovery for claimed-but-unresolved work | `057` | built |
+| `scripts/v01_runner.py` — the orchestrator cron wakes | — | built |
 
-That is migration `056`, and it is the last thing between this document and the
-first real belief.
+### 11.1 The window is execution tolerance, not a polling licence
+
+§9.3.1 recorded a tension: "closest to exactly T−24h" implies choosing among
+candidates after the window closes, which needs the point-in-time reconstruction
+§9.2 forbids. Under manual polling that stayed theoretical. **Automation would
+have made it real immediately** — a five-minute cron inside a ±60m window
+produces up to 24 competing observations per wager.
+
+`057` dissolves it rather than managing it. The runner performs **one targeted
+capture** at the target and resolves against that fresh state. `±60m` is how
+late the scheduled capture may actually *execute*; it is not permission to
+gather candidates. One observation per event × selection, as pre-registered,
+with nothing to select after the fact.
+
+Package #3's per-request retry is unaffected. That is transport resilience, and
+it does not create a second experiment observation.
+
+### 11.2 What still gates the first real belief
+
+```
+cron                    NOT CONFIGURED  <-- the only remaining blocker
+scripts/v01_runner.py   built, exercised end-to-end on fixtures
+scripts/v01_service.py  built, smoked over real HTTP
+```
+
+The two jobs, the hosted HTTP contract, the secrets boundary and the deployment
+sequence are specified in `V01_DEPLOYMENT.md`. cron is the clock only; it carries
+no experiment semantics.
+
+| Job | Cadence | Cost |
+|---|---|---|
+| `POST /jobs/v01/schedule` | hourly at HH:00:15 | free - no provider call |
+| `POST /jobs/v01/resolve` | every 5 min at HH:02:00... | <=1 credit, only when work is due |
+
+Five-minute wakeups do **not** mean five-minute polling. A tick with nothing due
+makes no provider call at all. A full Sunday slate of 16 games resolves as **one**
+board refresh serving 32 opportunities, enforced by
+`model.experiment_runs.ck_one_poll_per_cycle` rather than by care.
+
+### 11.3 The cohort defines the sample - migration 058
+
+> A belief belongs to the Model v0.1 prospective evaluation sample only if its
+> scheduled formation opportunity was created and resolved under the activated
+> experiment, AND its formation occurred at or after `activated_at`.
+
+Two INDEPENDENT requirements, not one:
+
+| | Requirement | Rules out |
+|---|---|---|
+| **Time** | `formed_at >= activated_at` | the deployment shakedown |
+| **Lineage** | experiment -> scheduled opportunity -> terminal attempt -> belief | manual inserts, fixtures, the producer'''s own `attempt_belief` path |
+
+A timestamp filter alone is too weak - it admits any belief carrying a late
+enough `formed_at`. `P5-T60` makes the point directly: eight beliefs all formed
+AFTER activation, of which only the four with lifecycle lineage count. `P5-T59`
+tests the time axis separately, so neither rule can silently carry the other.
+
+**Every scoreboard now draws from `grading.evaluation_sample`**, so Brier, the
+Brier Skill Score, log loss, calibration and the N = 500 gate see one cohort.
+Before `058`, `standing_report` aggregated on `model_id` + `model_version`
+alone: any graded row carrying the right version string entered the headline
+scoreboard and the sample count.
+
+**Lifecycle.** `DRAFT -> ACTIVE -> COLLECTION_COMPLETE -> EVALUATED`, forward
+only. `activated_at` is stamped once and is immutable thereafter: sliding it
+forward would erase early losses, sliding it backward would admit historical
+rows. `model.activate_experiment` has no timestamp parameter. The cohort
+survives the later states, so declaring collection complete does not empty the
+scoreboard.
+
+**Fails closed.** No activated experiment means an EMPTY sample, not an
+unfiltered one - the cohort is an inner join. An experiment nobody activated
+reports nothing rather than publishing a standing.
+
+Deployment and the two clock jobs: `V01_DEPLOYMENT.md`.

@@ -91,13 +91,18 @@ def _fn_default(conn, schema: str, name: str, arg: str):
 
 def _schema_state(conn) -> tuple:
     """Which migrations the FILES claim, and which the DATABASE actually has."""
-    mig_dir = pathlib.Path(__file__).resolve().parent.parent / "db" / "migrations"
-    # Fixture migrations are excluded, exactly as scripts/migrate.py excludes
-    # them. Counting 059_p5_fixtures.sql here would make files_max permanently
-    # exceed what any production database can verify, and --activate would
-    # refuse forever on a mismatch that is not one.
-    files = sorted(f.name[:3] for f in mig_dir.glob("*.sql")
-                   if "fixture" not in f.name.lower()) if mig_dir.is_dir() else []
+    # Read from production_manifest.txt, the same source scripts/migrate.py and
+    # tests/harness.py use, so the three cannot disagree about what production
+    # receives. Globbing the directory instead once counted a fixture migration
+    # here, which made files_max permanently exceed what any production database
+    # could verify and would have made --activate refuse forever.
+    manifest = (pathlib.Path(__file__).resolve().parent.parent
+                / "db" / "migrations" / "production_manifest.txt")
+    files = []
+    if manifest.is_file():
+        files = sorted(ln.strip()[:3] for ln in
+                       manifest.read_text(encoding="utf-8").splitlines()
+                       if ln.strip() and not ln.startswith("#"))
     files_max = files[-1] if files else None
 
     verified = []

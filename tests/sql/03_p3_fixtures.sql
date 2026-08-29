@@ -1,4 +1,19 @@
 -- =============================================================================
+-- 03_p3_fixtures.sql -- TEST HARNESS ONLY. NEVER INSTALLED IN PRODUCTION.
+-- =============================================================================
+-- This file lives in tests/sql/ and is not in db/migrations/production_manifest.txt.
+-- Nothing here may be depended on by a production migration; a migration whose
+-- installation needs olp_test couples executable product state to the test
+-- environment, which is what made 057 un-deployable.
+--
+-- Applied by tests/harness.py AFTER the full production manifest:
+--
+--     production manifest  ->  tests/sql/*  ->  run tests
+--
+-- Production does only the first step.
+-- =============================================================================
+
+-- =============================================================================
 -- 035_p3_fixtures.sql -- Package #3 fixture support (development only)
 -- =============================================================================
 -- provider_health is DURABLE BY DESIGN: an open circuit has to survive a worker

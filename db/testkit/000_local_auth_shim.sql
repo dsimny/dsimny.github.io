@@ -23,7 +23,20 @@ BEGIN
 END $$;
 
 -- Supabase's service_role carries BYPASSRLS; mirror it so RLS behaviour matches.
-ALTER ROLE service_role BYPASSRLS;
+-- On a managed platform (Supabase) service_role is a RESERVED role that
+-- already carries BYPASSRLS, and only a superuser may alter it. P5-T68 applies
+-- this shim into a scratch database on whichever engine it is running against,
+-- so the statement has to be a no-op there rather than an error.
+DO $shim$
+BEGIN
+    IF NOT COALESCE((SELECT rolbypassrls FROM pg_roles
+                      WHERE rolname = 'service_role'), FALSE) THEN
+        ALTER ROLE service_role BYPASSRLS;
+    END IF;
+EXCEPTION WHEN insufficient_privilege THEN
+    NULL;   -- reserved and already correct
+END
+$shim$;
 
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
 

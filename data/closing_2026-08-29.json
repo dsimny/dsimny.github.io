@@ -184,8 +184,8 @@
   "mins_to_first_pitch": 215
  },
  "823176": {
-  "away_ml": -124,
-  "home_ml": 111,
+  "away_ml": -127,
+  "home_ml": 112,
   "total": 8.0,
   "over_price": -105,
   "under_price": -115,
@@ -208,10 +208,18 @@
     "over_price": -105,
     "under_price": -115,
     "captured_utc": "2026-08-29T22:30:28Z"
+   },
+   {
+    "away_ml": -127,
+    "home_ml": 112,
+    "total": 8.0,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-08-30T01:30:23Z"
    }
   ],
-  "captured_utc": "2026-08-29T22:30:28Z",
-  "mins_to_first_pitch": 215
+  "captured_utc": "2026-08-30T01:30:23Z",
+  "mins_to_first_pitch": 35
  },
  "822690": {
   "away_ml": -105,
@@ -380,15 +388,15 @@
     "captured_utc": "2026-08-29T22:30:28Z"
    }
   ],
-  "captured_utc": "2026-08-29T22:30:28Z",
-  "mins_to_first_pitch": 215
+  "captured_utc": "2026-08-30T01:30:23Z",
+  "mins_to_first_pitch": 35
  },
  "823986": {
   "away_ml": -188,
-  "home_ml": 161,
+  "home_ml": 160,
   "total": 8.0,
   "over_price": -110,
-  "under_price": -109,
+  "under_price": -110,
   "away_name": "Philadelphia Phillies",
   "home_name": "Los Angeles Angels",
   "utc": "2026-08-30T02:07:00Z",
@@ -408,9 +416,17 @@
     "over_price": -110,
     "under_price": -109,
     "captured_utc": "2026-08-29T22:30:28Z"
+   },
+   {
+    "away_ml": -188,
+    "home_ml": 160,
+    "total": 8.0,
+    "over_price": -110,
+    "under_price": -110,
+    "captured_utc": "2026-08-30T01:30:23Z"
    }
   ],
-  "captured_utc": "2026-08-29T22:30:28Z",
-  "mins_to_first_pitch": 217
+  "captured_utc": "2026-08-30T01:30:23Z",
+  "mins_to_first_pitch": 37
  }
 }

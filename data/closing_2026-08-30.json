@@ -287,11 +287,11 @@
   "mins_to_first_pitch": 217
  },
  "824636": {
-  "away_ml": 138,
-  "home_ml": -155,
+  "away_ml": 137,
+  "home_ml": -156,
   "total": 9.0,
-  "over_price": -120,
-  "under_price": 100,
+  "over_price": -115,
+  "under_price": -105,
   "away_name": "Cincinnati Reds",
   "home_name": "Chicago Cubs",
   "utc": "2026-08-30T23:20:00Z",
@@ -303,9 +303,17 @@
     "over_price": -120,
     "under_price": 100,
     "captured_utc": "2026-08-30T16:30:24Z"
+   },
+   {
+    "away_ml": 137,
+    "home_ml": -156,
+    "total": 9.0,
+    "over_price": -115,
+    "under_price": -105,
+    "captured_utc": "2026-08-30T22:30:26Z"
    }
   ],
-  "captured_utc": "2026-08-30T16:30:24Z",
-  "mins_to_first_pitch": 410
+  "captured_utc": "2026-08-30T22:30:26Z",
+  "mins_to_first_pitch": 50
  }
 }

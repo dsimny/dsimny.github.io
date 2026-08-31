@@ -264,7 +264,7 @@
    "board_sha256": "a94530679a33ed30d88fe6b7c9b3a0c0d3c862ad393c5f00cf666bccee4c5abb",
    "snapshot_sha256": "b0365b908de8425104f9e6078213e94d24fe3e1c777110e4542ff7509d79a6b9",
    "committed_utc": "2026-08-30T15:10:32Z",
-   "revealed": false
+   "revealed": true
   }
  ]
 }

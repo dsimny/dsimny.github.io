@@ -206,22 +206,6 @@
   },
   {
    "date": "2026-09-01",
-   "mode": "fb_free",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-01T14:47:32Z"
-  },
-  {
-   "date": "2026-09-01",
-   "mode": "fb_slate",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-01T14:47:33Z"
-  },
-  {
-   "date": "2026-09-01",
    "mode": "pick",
    "result": "posted",
    "http_status": 200,
@@ -254,6 +238,22 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-09-01T15:10:26Z"
+  },
+  {
+   "date": "2026-09-01",
+   "mode": "fb_free",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-01T15:37:20Z"
+  },
+  {
+   "date": "2026-09-01",
+   "mode": "fb_slate",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-01T15:37:20Z"
   }
  ]
 }

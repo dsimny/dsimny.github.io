@@ -5,7 +5,8 @@
    "committed_utc": "2026-09-02T17:37:29Z",
    "kickoff_utc": "2026-09-03T23:00:00Z",
    "later_disagreements": [
-    "c8842eb79e8d178b5c2edc5af5e975261f1b64272f7ec79d39373bbee86ae4bb"
+    "c8842eb79e8d178b5c2edc5af5e975261f1b64272f7ec79d39373bbee86ae4bb",
+    "d6bcde793358a4cf1891f7db9640677c766c6d50a8281f0ed97cb2d8188a8ef3"
    ],
    "matchup": "Akron Zips @ Wake Forest Demon Deacons",
    "sha256": "5348fd9c10d0dd31ac6935d60adbd2abbbd1073298dc747d5e96936a81f8e230",
@@ -15,7 +16,8 @@
    "committed_utc": "2026-09-02T17:37:29Z",
    "kickoff_utc": "2026-09-03T23:00:00Z",
    "later_disagreements": [
-    "2ac596bee5d6fb70e76536c4fede98fdef1af472a4288112d09c16aea96dc0de"
+    "2ac596bee5d6fb70e76536c4fede98fdef1af472a4288112d09c16aea96dc0de",
+    "185108603ae04fbe73ddb53639e2b7ef4c367e85e6d1dccb12097e1a5adc9c97"
    ],
    "matchup": "Albany @ Buffalo Bulls",
    "sha256": "a44a774e35c92de174cd988d3e667e5b6613d730c2f8dcd1e907f99c8e4e1368",
@@ -24,6 +26,9 @@
   "ncaaf|Colorado Buffaloes @ Georgia Tech Yellow Jackets|2026-09-04T00:00:00Z": {
    "committed_utc": "2026-09-02T18:34:43Z",
    "kickoff_utc": "2026-09-04T00:00:00Z",
+   "later_disagreements": [
+    "b863f25909609993b6833869a61d5abb078bb380ac9028dfd89728478eae1560"
+   ],
    "matchup": "Colorado Buffaloes @ Georgia Tech Yellow Jackets",
    "sha256": "0e6b678c7d77b76b1567db69a87febef182cb71cd37f4fe8b8461d42ff359f0e",
    "sport": "ncaaf"
@@ -91,9 +96,19 @@
    "sha256": "118dff89cac3c2724e6506f3654765fc704af855c96749610b125ff1503c8631",
    "sport": "ncaaf"
   },
+  "ncaaf|UAB Blazers @ Illinois Fighting Illini|2026-09-04T01:00:00Z": {
+   "committed_utc": "2026-09-02T19:37:24Z",
+   "kickoff_utc": "2026-09-04T01:00:00Z",
+   "matchup": "UAB Blazers @ Illinois Fighting Illini",
+   "sha256": "a2a510c797a5df7a3ff5d3fdbeee771d48962111cfd1142e78c898d809a342f6",
+   "sport": "ncaaf"
+  },
   "ncaaf|West Georgia Wolves @ Kennesaw State Owls|2026-09-03T23:00:00Z": {
    "committed_utc": "2026-09-02T17:37:29Z",
    "kickoff_utc": "2026-09-03T23:00:00Z",
+   "later_disagreements": [
+    "5e6db479f2c40b164ed434b3891bc42d24e323a9d322c19820d9420500514e92"
+   ],
    "matchup": "West Georgia Wolves @ Kennesaw State Owls",
    "sha256": "e63f2a53db90258ea95be22d0027289a7ce567b12d92fcf227f984f33a7e7ee6",
    "sport": "ncaaf"

@@ -1,6 +1,20 @@
 {
  "_note": "Per-game commitments, append-only (spec s.4 step 0b). Each game's layer-1 block is fingerprinted the first time it becomes evaluable at its own T-24, and NEVER revised - a later capture does not get to change an evaluation that has already been published. This is what makes the weekly play a commitment rather than a running opinion.",
  "games": {
+  "ncaaf|Akron Zips @ Wake Forest Demon Deacons|2026-09-03T23:00:00Z": {
+   "committed_utc": "2026-09-02T17:37:29Z",
+   "kickoff_utc": "2026-09-03T23:00:00Z",
+   "matchup": "Akron Zips @ Wake Forest Demon Deacons",
+   "sha256": "5348fd9c10d0dd31ac6935d60adbd2abbbd1073298dc747d5e96936a81f8e230",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Albany @ Buffalo Bulls|2026-09-03T23:00:00Z": {
+   "committed_utc": "2026-09-02T17:37:29Z",
+   "kickoff_utc": "2026-09-03T23:00:00Z",
+   "matchup": "Albany @ Buffalo Bulls",
+   "sha256": "a44a774e35c92de174cd988d3e667e5b6613d730c2f8dcd1e907f99c8e4e1368",
+   "sport": "ncaaf"
+  },
   "ncaaf|Hawaii Rainbow Warriors @ Stanford Cardinal|2026-08-29T23:00:00Z": {
    "committed_utc": "2026-08-29T18:21:19Z",
    "kickoff_utc": "2026-08-29T23:00:00Z",
@@ -62,6 +76,13 @@
    "kickoff_utc": "2026-08-29T22:30:00Z",
    "matchup": "Sacramento State Hornets @ Eastern Michigan Eagles",
    "sha256": "118dff89cac3c2724e6506f3654765fc704af855c96749610b125ff1503c8631",
+   "sport": "ncaaf"
+  },
+  "ncaaf|West Georgia Wolves @ Kennesaw State Owls|2026-09-03T23:00:00Z": {
+   "committed_utc": "2026-09-02T17:37:29Z",
+   "kickoff_utc": "2026-09-03T23:00:00Z",
+   "matchup": "West Georgia Wolves @ Kennesaw State Owls",
+   "sha256": "e63f2a53db90258ea95be22d0027289a7ce567b12d92fcf227f984f33a7e7ee6",
    "sport": "ncaaf"
   }
  }

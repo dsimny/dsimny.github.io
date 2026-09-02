@@ -479,24 +479,48 @@
    "close_ml": -101,
    "clv_pts": -0.21,
    "beat_close": false
+  },
+  {
+   "date": "2026-09-01",
+   "gamePk": 824148,
+   "game": "CWS @ HOU",
+   "pick": "Chicago White Sox ML (-102, DraftKings)",
+   "market": "moneyline",
+   "price": -102,
+   "book": "DraftKings",
+   "model_p": 0.5531,
+   "blend_p": 0.5265,
+   "edge": 0.0216,
+   "score": 0.6529,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "5-1",
+   "result": "WIN",
+   "pnl_paper": 0.245,
+   "pnl_staked": 0.0,
+   "open_ml": -106,
+   "close_ml": 111,
+   "clv_pts": -4.56,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "12-8",
-  "wins": 12,
+  "record": "13-8",
+  "wins": 13,
   "losses": 8,
   "voids": 0,
-  "paper_units_net": 0.886,
-  "paper_roi_pct": 17.72,
+  "paper_units_net": 1.131,
+  "paper_roi_pct": 21.54,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 20,
-   "avg_clv_pts": -0.44,
-   "beat_close_pct": 25.0
+   "graded_with_clv": 21,
+   "avg_clv_pts": -0.64,
+   "beat_close_pct": 23.8
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-08-31"
+  "last_graded": "2026-09-01"
  }
 }

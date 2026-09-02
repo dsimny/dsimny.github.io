@@ -4,6 +4,9 @@
   "ncaaf|Akron Zips @ Wake Forest Demon Deacons|2026-09-03T23:00:00Z": {
    "committed_utc": "2026-09-02T17:37:29Z",
    "kickoff_utc": "2026-09-03T23:00:00Z",
+   "later_disagreements": [
+    "c8842eb79e8d178b5c2edc5af5e975261f1b64272f7ec79d39373bbee86ae4bb"
+   ],
    "matchup": "Akron Zips @ Wake Forest Demon Deacons",
    "sha256": "5348fd9c10d0dd31ac6935d60adbd2abbbd1073298dc747d5e96936a81f8e230",
    "sport": "ncaaf"
@@ -11,8 +14,18 @@
   "ncaaf|Albany @ Buffalo Bulls|2026-09-03T23:00:00Z": {
    "committed_utc": "2026-09-02T17:37:29Z",
    "kickoff_utc": "2026-09-03T23:00:00Z",
+   "later_disagreements": [
+    "2ac596bee5d6fb70e76536c4fede98fdef1af472a4288112d09c16aea96dc0de"
+   ],
    "matchup": "Albany @ Buffalo Bulls",
    "sha256": "a44a774e35c92de174cd988d3e667e5b6613d730c2f8dcd1e907f99c8e4e1368",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Colorado Buffaloes @ Georgia Tech Yellow Jackets|2026-09-04T00:00:00Z": {
+   "committed_utc": "2026-09-02T18:34:43Z",
+   "kickoff_utc": "2026-09-04T00:00:00Z",
+   "matchup": "Colorado Buffaloes @ Georgia Tech Yellow Jackets",
+   "sha256": "0e6b678c7d77b76b1567db69a87febef182cb71cd37f4fe8b8461d42ff359f0e",
    "sport": "ncaaf"
   },
   "ncaaf|Hawaii Rainbow Warriors @ Stanford Cardinal|2026-08-29T23:00:00Z": {

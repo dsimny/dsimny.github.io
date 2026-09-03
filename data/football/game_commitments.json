@@ -96,6 +96,13 @@
    "sha256": "118dff89cac3c2724e6506f3654765fc704af855c96749610b125ff1503c8631",
    "sport": "ncaaf"
   },
+  "ncaaf|San Jose State Spartans @ Eastern Michigan Eagles|2026-09-04T22:30:00Z": {
+   "committed_utc": "2026-09-03T16:37:20Z",
+   "kickoff_utc": "2026-09-04T22:30:00Z",
+   "matchup": "San Jose State Spartans @ Eastern Michigan Eagles",
+   "sha256": "320810cf2fc6ef15c30d978465b6d9f25c683b121e99b13d9df65e27f41c85fc",
+   "sport": "ncaaf"
+  },
   "ncaaf|UAB Blazers @ Illinois Fighting Illini|2026-09-04T01:00:00Z": {
    "committed_utc": "2026-09-02T19:37:24Z",
    "kickoff_utc": "2026-09-04T01:00:00Z",

@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-08-29",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-08-30T08:10:19Z"
-  },
-  {
-   "date": "2026-08-29",
-   "mode": "x",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-08-30T08:10:19Z"
-  },
-  {
-   "date": "2026-08-29",
-   "mode": "facebook",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-08-30T08:10:19Z"
-  },
-  {
    "date": "2026-08-30",
    "mode": "pick",
    "result": "posted",
@@ -255,6 +230,31 @@
    "http_status": null,
    "detail": "",
    "at_utc": "2026-09-03T07:47:23Z"
+  },
+  {
+   "date": "2026-09-02",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-03T08:10:26Z"
+  },
+  {
+   "date": "2026-09-02",
+   "mode": "x",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-03T08:10:26Z"
+  },
+  {
+   "date": "2026-09-02",
+   "mode": "facebook",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-03T08:10:26Z"
   }
  ]
 }

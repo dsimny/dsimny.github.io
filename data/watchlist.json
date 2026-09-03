@@ -3183,14 +3183,78 @@
    "actual_total": 8,
    "result": "WIN",
    "pnl": 0.909
+  },
+  {
+   "date": "2026-09-02",
+   "gamePk": 824312,
+   "game": "BAL @ COL",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 11.5 (+103, LowVig.ag)",
+   "price": 103,
+   "book": "LowVig.ag",
+   "model_p": 0.5138,
+   "edge": 0.0212,
+   "divergence": 0.0355,
+   "actual_total": 11,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-09-02",
+   "gamePk": 825037,
+   "game": "PHI @ AZ",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 9 (+101, LowVig.ag)",
+   "price": 101,
+   "book": "LowVig.ag",
+   "model_p": 0.5544,
+   "edge": 0.0569,
+   "divergence": 0.0752,
+   "actual_total": 1,
+   "result": "WIN",
+   "pnl": 1.01
+  },
+  {
+   "date": "2026-09-02",
+   "gamePk": 824634,
+   "game": "MIL @ CHC",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8.5 (+106, LowVig.ag)",
+   "price": 106,
+   "book": "LowVig.ag",
+   "model_p": 0.5461,
+   "edge": 0.0607,
+   "divergence": 0.0678,
+   "actual_total": 14,
+   "result": "WIN",
+   "pnl": 1.06
+  },
+  {
+   "date": "2026-09-02",
+   "gamePk": 824147,
+   "game": "CWS @ HOU",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8.5 (+100, Bovada)",
+   "price": 100,
+   "book": "Bovada",
+   "model_p": 0.5499,
+   "edge": 0.0499,
+   "divergence": 0.0607,
+   "actual_total": 2,
+   "result": "WIN",
+   "pnl": 1.0
   }
  ],
  "aggregates": {
-  "record": "105-87-7p",
-  "n_graded": 199,
-  "win_pct": 54.7,
-  "paper_units_net": 6.175,
-  "paper_roi_pct": 3.22,
+  "record": "108-88-7p",
+  "n_graded": 203,
+  "win_pct": 55.1,
+  "paper_units_net": 8.245,
+  "paper_roi_pct": 4.21,
   "by_tag": {
    "R8-hold": {
     "record": "16-2",
@@ -3207,11 +3271,11 @@
     "paper_roi_pct": 12.06
    },
    "market-proving": {
-    "record": "80-78-7p",
-    "n_graded": 165,
-    "win_pct": 50.6,
-    "paper_units_net": -1.511,
-    "paper_roi_pct": -0.96
+    "record": "83-79-7p",
+    "n_graded": 169,
+    "win_pct": 51.2,
+    "paper_units_net": 0.559,
+    "paper_roi_pct": 0.35
    }
   },
   "by_market": {
@@ -3223,14 +3287,14 @@
     "paper_roi_pct": 22.61
    },
    "total": {
-    "record": "80-78-7p",
-    "n_graded": 165,
-    "win_pct": 50.6,
-    "paper_units_net": -1.511,
-    "paper_roi_pct": -0.96
+    "record": "83-79-7p",
+    "n_graded": 169,
+    "win_pct": 51.2,
+    "paper_units_net": 0.559,
+    "paper_roi_pct": 0.35
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-09-01"
+  "last_graded": "2026-09-02"
  }
 }

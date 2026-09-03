@@ -103,6 +103,13 @@
    "sha256": "320810cf2fc6ef15c30d978465b6d9f25c683b121e99b13d9df65e27f41c85fc",
    "sport": "ncaaf"
   },
+  "ncaaf|Toledo Rockets @ Michigan State Spartans|2026-09-05T00:00:00Z": {
+   "committed_utc": "2026-09-03T18:32:33Z",
+   "kickoff_utc": "2026-09-05T00:00:00Z",
+   "matchup": "Toledo Rockets @ Michigan State Spartans",
+   "sha256": "63ce15dfa07de5e1cde34de7e94340bf36b23f7ceb8ea174a3ff95f0e1138a0a",
+   "sport": "ncaaf"
+  },
   "ncaaf|UAB Blazers @ Illinois Fighting Illini|2026-09-04T01:00:00Z": {
    "committed_utc": "2026-09-02T19:37:24Z",
    "kickoff_utc": "2026-09-04T01:00:00Z",

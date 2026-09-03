@@ -54,6 +54,13 @@
    "sha256": "2d64e2620a3fb788068b0439c4f6b944931b88d6a198f82b77df760c43b9c305",
    "sport": "ncaaf"
   },
+  "ncaaf|Miami Hurricanes @ Stanford Cardinal|2026-09-05T01:00:00Z": {
+   "committed_utc": "2026-09-03T19:37:23Z",
+   "kickoff_utc": "2026-09-05T01:00:00Z",
+   "matchup": "Miami Hurricanes @ Stanford Cardinal",
+   "sha256": "30bbaf73c0ed2bc45fb48a69aaf807ac238fce7dd49e1738de94eb8bf0213b48",
+   "sport": "ncaaf"
+  },
   "ncaaf|NC State Wolfpack @ Virginia Cavaliers|2026-08-29T19:30:00Z": {
    "committed_utc": "2026-08-29T18:21:19Z",
    "kickoff_utc": "2026-08-29T19:30:00Z",
@@ -99,6 +106,9 @@
   "ncaaf|San Jose State Spartans @ Eastern Michigan Eagles|2026-09-04T22:30:00Z": {
    "committed_utc": "2026-09-03T16:37:20Z",
    "kickoff_utc": "2026-09-04T22:30:00Z",
+   "later_disagreements": [
+    "80eeb4417077e1368be4065e524438d3d62e876d232a31651cac934e0832e4f5"
+   ],
    "matchup": "San Jose State Spartans @ Eastern Michigan Eagles",
    "sha256": "320810cf2fc6ef15c30d978465b6d9f25c683b121e99b13d9df65e27f41c85fc",
    "sport": "ncaaf"
@@ -106,6 +116,9 @@
   "ncaaf|Toledo Rockets @ Michigan State Spartans|2026-09-05T00:00:00Z": {
    "committed_utc": "2026-09-03T18:32:33Z",
    "kickoff_utc": "2026-09-05T00:00:00Z",
+   "later_disagreements": [
+    "7a71780a1ee6f173f9e009909fab48b87f4a25e9b2941319a450824e74631cea"
+   ],
    "matchup": "Toledo Rockets @ Michigan State Spartans",
    "sha256": "63ce15dfa07de5e1cde34de7e94340bf36b23f7ceb8ea174a3ff95f0e1138a0a",
    "sport": "ncaaf"

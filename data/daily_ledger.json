@@ -527,24 +527,48 @@
    "close_ml": -115,
    "clv_pts": 0.46,
    "beat_close": true
+  },
+  {
+   "date": "2026-09-03",
+   "gamePk": 824069,
+   "game": "MIA @ KC",
+   "pick": "Miami Marlins ML (+105, Caesars)",
+   "market": "moneyline",
+   "price": 105,
+   "book": "Caesars",
+   "model_p": 0.5195,
+   "blend_p": 0.5026,
+   "edge": 0.0147,
+   "score": 0.7567,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "3-7",
+   "result": "LOSS",
+   "pnl_paper": -0.25,
+   "pnl_staked": -0.0,
+   "open_ml": -102,
+   "close_ml": 100,
+   "clv_pts": -0.35,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "13-9",
+  "record": "13-10",
   "wins": 13,
-  "losses": 9,
+  "losses": 10,
   "voids": 0,
-  "paper_units_net": 0.881,
-  "paper_roi_pct": 16.02,
+  "paper_units_net": 0.631,
+  "paper_roi_pct": 10.97,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 22,
-   "avg_clv_pts": -0.59,
-   "beat_close_pct": 27.3
+   "graded_with_clv": 23,
+   "avg_clv_pts": -0.58,
+   "beat_close_pct": 26.1
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-09-02"
+  "last_graded": "2026-09-03"
  }
 }

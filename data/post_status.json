@@ -2,41 +2,6 @@
  "posts": [
   {
    "date": "2026-08-31",
-   "mode": "pick",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-08-31T15:10:27Z"
-  },
-  {
-   "date": "2026-08-31",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-08-31T15:10:27Z"
-  },
-  {
-   "date": "2026-08-31",
-   "mode": "email",
-   "result": "failed",
-   "http_status": 422,
-   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
-   "at_utc": "2026-08-31T15:10:28Z"
-  },
-  {
-   "date": "2026-08-31",
-   "mode": "blog",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-08-31T15:10:28Z"
-  },
-  {
-   "date": "2026-08-31",
    "mode": "recap",
    "result": "nothing_to_post",
    "http_status": null,
@@ -255,6 +220,41 @@
    "http_status": null,
    "detail": "",
    "at_utc": "2026-09-04T14:47:27Z"
+  },
+  {
+   "date": "2026-09-04",
+   "mode": "pick",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-04T15:10:25Z"
+  },
+  {
+   "date": "2026-09-04",
+   "mode": "board",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354298436354048",
+   "detail": "",
+   "at_utc": "2026-09-04T15:10:26Z"
+  },
+  {
+   "date": "2026-09-04",
+   "mode": "email",
+   "result": "sent",
+   "http_status": 200,
+   "detail": "dcc5d487-1895-4a44-957b-84e43f624974",
+   "at_utc": "2026-09-04T15:10:27Z"
+  },
+  {
+   "date": "2026-09-04",
+   "mode": "blog",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-04T15:10:27Z"
   }
  ]
 }

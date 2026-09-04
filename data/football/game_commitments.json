@@ -26,6 +26,9 @@
   "ncaaf|Coastal Carolina Chanticleers @ West Virginia Mountaineers|2026-09-05T16:00:00Z": {
    "committed_utc": "2026-09-04T10:37:25Z",
    "kickoff_utc": "2026-09-05T16:00:00Z",
+   "later_disagreements": [
+    "f53d761d547c7641a90d060c3d7c229ce04fea09a7c3c80ea7041e360a74b798"
+   ],
    "matchup": "Coastal Carolina Chanticleers @ West Virginia Mountaineers",
    "sha256": "529d20343414fc3d1fbd889352915e7db8234ebb81171288ec39859a2b970550",
    "sport": "ncaaf"
@@ -43,6 +46,9 @@
   "ncaaf|East Carolina Pirates @ Alabama Crimson Tide|2026-09-05T16:00:00Z": {
    "committed_utc": "2026-09-04T10:37:25Z",
    "kickoff_utc": "2026-09-05T16:00:00Z",
+   "later_disagreements": [
+    "923880584707894db8d6a7b3b399d6fa7ebd183daed86da3d0d668e48f772da3"
+   ],
    "matchup": "East Carolina Pirates @ Alabama Crimson Tide",
    "sha256": "d3aa18c34d45270d6f591401ef256e4e40d804340f445ceb61d84434d02dbfb0",
    "sport": "ncaaf"
@@ -64,6 +70,9 @@
   "ncaaf|Lafayette Leopards @ UConn Huskies|2026-09-05T16:00:00Z": {
    "committed_utc": "2026-09-04T10:37:25Z",
    "kickoff_utc": "2026-09-05T16:00:00Z",
+   "later_disagreements": [
+    "9338368abcaad6b5a9f9735448ff2d8a120c4a4ac0fa0a7d95a31df228d4aca9"
+   ],
    "matchup": "Lafayette Leopards @ UConn Huskies",
    "sha256": "d89df1f6f3d9d850e3eb537a63473c6782f0bf1dc4ab443a4a3d373884473aa2",
    "sport": "ncaaf"
@@ -71,6 +80,9 @@
   "ncaaf|Liberty Flames @ James Madison Dukes|2026-09-05T16:00:00Z": {
    "committed_utc": "2026-09-04T10:37:25Z",
    "kickoff_utc": "2026-09-05T16:00:00Z",
+   "later_disagreements": [
+    "cc5b6444779d0e55b0d5f0b6354138a30b86e57597bcab1bbe9b5ecfa7bc90fd"
+   ],
    "matchup": "Liberty Flames @ James Madison Dukes",
    "sha256": "74a6980f7db099b970de7054b6ad387052368e7b5e3621d2333b317156bc2b60",
    "sport": "ncaaf"
@@ -127,6 +139,9 @@
   "ncaaf|Ohio Bobcats @ Nebraska Cornhuskers|2026-09-05T16:00:00Z": {
    "committed_utc": "2026-09-04T10:37:25Z",
    "kickoff_utc": "2026-09-05T16:00:00Z",
+   "later_disagreements": [
+    "3700cc74719c5589b731d2894c30d83ba99eec9538a42a094d71a37c7e5878ba"
+   ],
    "matchup": "Ohio Bobcats @ Nebraska Cornhuskers",
    "sha256": "14be23a4b836cb5a92eda46d2b327eaecf29a98b98c5178e4eff2b350711230e",
    "sport": "ncaaf"
@@ -134,8 +149,18 @@
   "ncaaf|Oregon State Beavers @ Houston Cougars|2026-09-05T16:00:00Z": {
    "committed_utc": "2026-09-04T10:37:25Z",
    "kickoff_utc": "2026-09-05T16:00:00Z",
+   "later_disagreements": [
+    "925a043360e0824062a05e2fa157ffc88e1fef3fc59ed93dcb233996e2690f41"
+   ],
    "matchup": "Oregon State Beavers @ Houston Cougars",
    "sha256": "ee9104021156d3f1670f05c7e128b64cd85a3173aa29f496d3957ff5f94237c7",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Rhode Island Rams @ Temple Owls|2026-09-05T18:00:00Z": {
+   "committed_utc": "2026-09-04T12:37:26Z",
+   "kickoff_utc": "2026-09-05T18:00:00Z",
+   "matchup": "Rhode Island Rams @ Temple Owls",
+   "sha256": "084f373803f8662f44cfb6ce5f9c4ae67e9aea941d168600afa7eb9d73e07ca8",
    "sport": "ncaaf"
   },
   "ncaaf|Sacramento State Hornets @ Eastern Michigan Eagles|2026-08-29T22:30:00Z": {
@@ -158,6 +183,9 @@
   "ncaaf|Tarleton State Texans @ Bowling Green Falcons|2026-09-05T16:00:00Z": {
    "committed_utc": "2026-09-04T10:37:25Z",
    "kickoff_utc": "2026-09-05T16:00:00Z",
+   "later_disagreements": [
+    "ba01122167434125f1ee7c7a97927ea748a422bdfe9713c981db1384482d5816"
+   ],
    "matchup": "Tarleton State Texans @ Bowling Green Falcons",
    "sha256": "60f8ff12875f3d7490faccdd76cf0ca76712b9af830614d6755d93393c56502f",
    "sport": "ncaaf"

@@ -217,11 +217,11 @@
   "mins_to_first_pitch": 190
  },
  "823907": {
-  "away_ml": 234,
+  "away_ml": 235,
   "home_ml": -285,
   "total": 7.5,
-  "over_price": -110,
-  "under_price": -110,
+  "over_price": -105,
+  "under_price": -115,
   "away_name": "St. Louis Cardinals",
   "home_name": "Los Angeles Dodgers",
   "utc": "2026-09-04T02:10:00Z",
@@ -241,9 +241,17 @@
     "over_price": -110,
     "under_price": -110,
     "captured_utc": "2026-09-03T22:30:23Z"
+   },
+   {
+    "away_ml": 235,
+    "home_ml": -285,
+    "total": 7.5,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-09-04T01:30:22Z"
    }
   ],
-  "captured_utc": "2026-09-03T22:30:23Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-04T01:30:22Z",
+  "mins_to_first_pitch": 40
  }
 }

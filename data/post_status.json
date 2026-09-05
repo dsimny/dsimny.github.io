@@ -216,22 +216,6 @@
    "at_utc": "2026-09-04T15:10:27Z"
   },
   {
-   "date": "2026-09-01",
-   "mode": "fb_free",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-05T07:47:28Z"
-  },
-  {
-   "date": "2026-09-01",
-   "mode": "fb_slate",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-05T07:47:28Z"
-  },
-  {
    "date": "2026-09-04",
    "mode": "recap",
    "result": "nothing_to_post",
@@ -255,6 +239,22 @@
    "http_status": null,
    "detail": "",
    "at_utc": "2026-09-05T08:10:19Z"
+  },
+  {
+   "date": "2026-09-01",
+   "mode": "fb_free",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-05T08:37:24Z"
+  },
+  {
+   "date": "2026-09-01",
+   "mode": "fb_slate",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-05T08:37:24Z"
   }
  ]
 }

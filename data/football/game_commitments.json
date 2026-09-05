@@ -521,6 +521,13 @@
    "sha256": "89797d44cb11d7147c90572a6140faa880c0d69fcb30e1c89a5c5e371491e025",
    "sport": "ncaaf"
   },
+  "ncaaf|Washington State Cougars @ Washington Huskies|2026-09-06T20:00:00Z": {
+   "committed_utc": "2026-09-05T14:37:30Z",
+   "kickoff_utc": "2026-09-06T20:00:00Z",
+   "matchup": "Washington State Cougars @ Washington Huskies",
+   "sha256": "7da203bdf9dd792f84277bb0881b86a15c83fd14eced86409277412b2025561e",
+   "sport": "ncaaf"
+  },
   "ncaaf|West Georgia Wolves @ Kennesaw State Owls|2026-09-03T23:00:00Z": {
    "committed_utc": "2026-09-02T17:37:29Z",
    "kickoff_utc": "2026-09-03T23:00:00Z",

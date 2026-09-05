@@ -56,6 +56,13 @@
    "sha256": "28f73ccd018424f5749c61a352c32e3c0b47d4368aa882c8d58bbd861951dbdd",
    "sport": "ncaaf"
   },
+  "ncaaf|Baylor Bears @ Auburn Tigers|2026-09-05T19:45:00Z": {
+   "committed_utc": "2026-09-05T20:37:23Z",
+   "kickoff_utc": "2026-09-05T19:45:00Z",
+   "matchup": "Baylor Bears @ Auburn Tigers",
+   "sha256": "d52413316336e6dafb2fb1b64e5809ec87fde2ae2e4bca4d5f5649e0ab001e7b",
+   "sport": "ncaaf"
+  },
   "ncaaf|Boise State Broncos @ Oregon Ducks|2026-09-05T19:30:00Z": {
    "committed_utc": "2026-09-04T13:37:20Z",
    "kickoff_utc": "2026-09-05T19:30:00Z",
@@ -127,6 +134,13 @@
    "kickoff_utc": "2026-09-05T19:45:00Z",
    "matchup": "Citadel Bulldogs @ Charlotte 49ers",
    "sha256": "7b198721fcd7bf89e6808adbb569f3505954b1e1b64f89264f98ecd8451233cb",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Citadel Bulldogs @ Charlotte 49ers|2026-09-05T20:45:00Z": {
+   "committed_utc": "2026-09-05T20:37:23Z",
+   "kickoff_utc": "2026-09-05T20:45:00Z",
+   "matchup": "Citadel Bulldogs @ Charlotte 49ers",
+   "sha256": "80a11a7f76768a622218f0837f5880515874ea56d226077e1a8e603588348d83",
    "sport": "ncaaf"
   },
   "ncaaf|Clemson Tigers @ LSU Tigers|2026-09-05T23:30:00Z": {
@@ -313,7 +327,8 @@
    "committed_utc": "2026-09-05T17:37:32Z",
    "kickoff_utc": "2026-09-06T23:30:00Z",
    "later_disagreements": [
-    "9d4ef06685d01bbfd784395fa05a9a74860d0ca9997d2c93f751bb70cf8accd5"
+    "9d4ef06685d01bbfd784395fa05a9a74860d0ca9997d2c93f751bb70cf8accd5",
+    "dc2698abaaa9901af631d7d14436ab7e607486a1e40065153b95cb5e1ce4047f"
    ],
    "matchup": "Louisville Cardinals @ Ole Miss Rebels",
    "sha256": "308546272cdafc60ea7786015f477c7d98606632668c1d8f222def33171830ce",
@@ -589,6 +604,13 @@
    "sha256": "629b0d09e77665845d97731e4e7ebb69a17b82001451cfd73077f0cec7004706",
    "sport": "ncaaf"
   },
+  "ncaaf|Tulane Green Wave @ Duke Blue Devils|2026-09-05T21:00:00Z": {
+   "committed_utc": "2026-09-05T20:37:23Z",
+   "kickoff_utc": "2026-09-05T21:00:00Z",
+   "matchup": "Tulane Green Wave @ Duke Blue Devils",
+   "sha256": "cf0a4b9cc6633bda861257fcdc82fbbcdfdc738c552986e6624ef15297c6e4b6",
+   "sport": "ncaaf"
+  },
   "ncaaf|UAB Blazers @ Illinois Fighting Illini|2026-09-04T01:00:00Z": {
    "committed_utc": "2026-09-02T19:37:24Z",
    "kickoff_utc": "2026-09-04T01:00:00Z",
@@ -667,7 +689,8 @@
    "committed_utc": "2026-09-05T17:37:32Z",
    "kickoff_utc": "2026-09-06T23:30:00Z",
    "later_disagreements": [
-    "9a3fc38949179d5069ae52cc90c7665402e4dcdb0a514e198ddd6bf5e533cca2"
+    "9a3fc38949179d5069ae52cc90c7665402e4dcdb0a514e198ddd6bf5e533cca2",
+    "b5a7c06699d7389c26caf99bc08a1859a623621d52feaa0d69819493c37d5b35"
    ],
    "matchup": "Wisconsin Badgers @ Notre Dame Fighting Irish",
    "sha256": "92466a91dd8405b4898b7c783fcfc576e7cfea66342782c6eb19dc22cdcff549",

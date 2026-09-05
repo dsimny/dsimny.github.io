@@ -281,6 +281,20 @@
    "sha256": "84ebe3b745a2bbf18259a5039455f5ba3eab54a3ca38b0faf4de4e4e41369cff",
    "sport": "ncaaf"
   },
+  "ncaaf|Liberty Flames @ James Madison Dukes|2026-09-05T16:21:28Z": {
+   "committed_utc": "2026-09-05T17:37:32Z",
+   "kickoff_utc": "2026-09-05T16:21:28Z",
+   "matchup": "Liberty Flames @ James Madison Dukes",
+   "sha256": "e854ad34962a6ef830fdbb222806970e3493b4a566204e59d85c5cac105e8c28",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Louisville Cardinals @ Ole Miss Rebels|2026-09-06T23:30:00Z": {
+   "committed_utc": "2026-09-05T17:37:32Z",
+   "kickoff_utc": "2026-09-06T23:30:00Z",
+   "matchup": "Louisville Cardinals @ Ole Miss Rebels",
+   "sha256": "308546272cdafc60ea7786015f477c7d98606632668c1d8f222def33171830ce",
+   "sport": "ncaaf"
+  },
   "ncaaf|Maine Black Bears @ Appalachian State Mountaineers|2026-09-05T19:30:00Z": {
    "committed_utc": "2026-09-04T13:37:20Z",
    "kickoff_utc": "2026-09-05T19:30:00Z",
@@ -567,7 +581,8 @@
    "committed_utc": "2026-09-05T14:37:30Z",
    "kickoff_utc": "2026-09-06T20:00:00Z",
    "later_disagreements": [
-    "7a1b8c7c0315274e142a07133eccaedebc65e14508fd9490adcc1575f696031a"
+    "7a1b8c7c0315274e142a07133eccaedebc65e14508fd9490adcc1575f696031a",
+    "92608038e797088b30d788495358fa6fe041be45787da92e7cba664a7f870c16"
    ],
    "matchup": "Washington State Cougars @ Washington Huskies",
    "sha256": "7da203bdf9dd792f84277bb0881b86a15c83fd14eced86409277412b2025561e",
@@ -600,6 +615,13 @@
    ],
    "matchup": "Western Michigan Broncos @ Michigan Wolverines",
    "sha256": "6e0617d639c557f0d59470a2b43dc3fbd8c3cb7d85481c894b4adffec1ce372b",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Wisconsin Badgers @ Notre Dame Fighting Irish|2026-09-06T23:30:00Z": {
+   "committed_utc": "2026-09-05T17:37:32Z",
+   "kickoff_utc": "2026-09-06T23:30:00Z",
+   "matchup": "Wisconsin Badgers @ Notre Dame Fighting Irish",
+   "sha256": "92466a91dd8405b4898b7c783fcfc576e7cfea66342782c6eb19dc22cdcff549",
    "sport": "ncaaf"
   },
   "ncaaf|Wyoming Cowboys @ Colorado State Rams|2026-09-05T22:00:00Z": {

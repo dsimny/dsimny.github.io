@@ -396,8 +396,8 @@
   "mins_to_first_pitch": 190
  },
  "823905": {
-  "away_ml": 188,
-  "home_ml": -220,
+  "away_ml": 195,
+  "home_ml": -231,
   "total": 8.0,
   "over_price": -105,
   "under_price": -115,
@@ -420,17 +420,25 @@
     "over_price": -105,
     "under_price": -115,
     "captured_utc": "2026-09-04T22:30:21Z"
+   },
+   {
+    "away_ml": 195,
+    "home_ml": -231,
+    "total": 8.0,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-09-05T01:30:21Z"
    }
   ],
-  "captured_utc": "2026-09-04T22:30:21Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-05T01:30:21Z",
+  "mins_to_first_pitch": 40
  },
  "823093": {
-  "away_ml": 190,
-  "home_ml": -225,
+  "away_ml": 194,
+  "home_ml": -232,
   "total": 7.0,
   "over_price": -120,
-  "under_price": 100,
+  "under_price": -101,
   "away_name": "Athletics",
   "home_name": "Seattle Mariners",
   "utc": "2026-09-05T02:10:00Z",
@@ -450,9 +458,17 @@
     "over_price": -120,
     "under_price": 100,
     "captured_utc": "2026-09-04T22:30:21Z"
+   },
+   {
+    "away_ml": 194,
+    "home_ml": -232,
+    "total": 7.0,
+    "over_price": -120,
+    "under_price": -101,
+    "captured_utc": "2026-09-05T01:30:21Z"
    }
   ],
-  "captured_utc": "2026-09-04T22:30:21Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-05T01:30:21Z",
+  "mins_to_first_pitch": 40
  }
 }

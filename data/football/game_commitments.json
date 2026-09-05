@@ -133,6 +133,13 @@
    "sha256": "529d20343414fc3d1fbd889352915e7db8234ebb81171288ec39859a2b970550",
    "sport": "ncaaf"
   },
+  "ncaaf|Coastal Carolina Chanticleers @ West Virginia Mountaineers|2026-09-05T16:03:08Z": {
+   "committed_utc": "2026-09-05T16:37:30Z",
+   "kickoff_utc": "2026-09-05T16:03:08Z",
+   "matchup": "Coastal Carolina Chanticleers @ West Virginia Mountaineers",
+   "sha256": "076b58b243063bdd2ba07bdf75527ee5aa517e8cb43d0b51846a752a93aa11b8",
+   "sport": "ncaaf"
+  },
   "ncaaf|Colorado Buffaloes @ Georgia Tech Yellow Jackets|2026-09-04T00:00:00Z": {
    "committed_utc": "2026-09-02T18:34:43Z",
    "kickoff_utc": "2026-09-04T00:00:00Z",
@@ -154,6 +161,13 @@
    ],
    "matchup": "East Carolina Pirates @ Alabama Crimson Tide",
    "sha256": "d3aa18c34d45270d6f591401ef256e4e40d804340f445ceb61d84434d02dbfb0",
+   "sport": "ncaaf"
+  },
+  "ncaaf|East Carolina Pirates @ Alabama Crimson Tide|2026-09-05T16:10:00Z": {
+   "committed_utc": "2026-09-05T16:37:30Z",
+   "kickoff_utc": "2026-09-05T16:10:00Z",
+   "matchup": "East Carolina Pirates @ Alabama Crimson Tide",
+   "sha256": "8e5f599fd4a764f997e69005e7d5c6e0c59c0b97916a12d27834e3606d53fa1e",
    "sport": "ncaaf"
   },
   "ncaaf|Florida Atlantic Owls @ Florida Gators|2026-09-05T23:45:00Z": {
@@ -230,6 +244,13 @@
    "sha256": "d89df1f6f3d9d850e3eb537a63473c6782f0bf1dc4ab443a4a3d373884473aa2",
    "sport": "ncaaf"
   },
+  "ncaaf|Lafayette Leopards @ UConn Huskies|2026-09-05T16:03:40Z": {
+   "committed_utc": "2026-09-05T16:37:30Z",
+   "kickoff_utc": "2026-09-05T16:03:40Z",
+   "matchup": "Lafayette Leopards @ UConn Huskies",
+   "sha256": "5ef93a809324b081d80bb14c6931582e5729bc6015280d7e874b31a1c1bd0328",
+   "sport": "ncaaf"
+  },
   "ncaaf|Lamar Cardinals @ Louisiana Ragin Cajuns|2026-09-06T00:00:00Z": {
    "committed_utc": "2026-09-04T18:18:27Z",
    "kickoff_utc": "2026-09-06T00:00:00Z",
@@ -251,6 +272,13 @@
    ],
    "matchup": "Liberty Flames @ James Madison Dukes",
    "sha256": "74a6980f7db099b970de7054b6ad387052368e7b5e3621d2333b317156bc2b60",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Liberty Flames @ James Madison Dukes|2026-09-05T16:15:00Z": {
+   "committed_utc": "2026-09-05T16:37:30Z",
+   "kickoff_utc": "2026-09-05T16:15:00Z",
+   "matchup": "Liberty Flames @ James Madison Dukes",
+   "sha256": "84ebe3b745a2bbf18259a5039455f5ba3eab54a3ca38b0faf4de4e4e41369cff",
    "sport": "ncaaf"
   },
   "ncaaf|Maine Black Bears @ Appalachian State Mountaineers|2026-09-05T19:30:00Z": {
@@ -355,6 +383,13 @@
    "sha256": "14be23a4b836cb5a92eda46d2b327eaecf29a98b98c5178e4eff2b350711230e",
    "sport": "ncaaf"
   },
+  "ncaaf|Ohio Bobcats @ Nebraska Cornhuskers|2026-09-05T16:03:44Z": {
+   "committed_utc": "2026-09-05T16:37:30Z",
+   "kickoff_utc": "2026-09-05T16:03:44Z",
+   "matchup": "Ohio Bobcats @ Nebraska Cornhuskers",
+   "sha256": "d7f2388f1a0406549024f1e8b55426ee321f3359e8ea8037881364b4de359808",
+   "sport": "ncaaf"
+  },
   "ncaaf|Oklahoma State Cowboys @ Tulsa Golden Hurricane|2026-09-05T19:45:00Z": {
    "committed_utc": "2026-09-04T13:47:28Z",
    "kickoff_utc": "2026-09-05T19:45:00Z",
@@ -379,6 +414,13 @@
    ],
    "matchup": "Oregon State Beavers @ Houston Cougars",
    "sha256": "ee9104021156d3f1670f05c7e128b64cd85a3173aa29f496d3957ff5f94237c7",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Oregon State Beavers @ Houston Cougars|2026-09-05T16:05:00Z": {
+   "committed_utc": "2026-09-05T16:37:30Z",
+   "kickoff_utc": "2026-09-05T16:05:00Z",
+   "matchup": "Oregon State Beavers @ Houston Cougars",
+   "sha256": "01c5127963d359963da62aaaee57ed0d0184af5cac171838176413258b32e39b",
    "sport": "ncaaf"
   },
   "ncaaf|Rhode Island Rams @ Temple Owls|2026-09-05T18:00:00Z": {
@@ -524,6 +566,9 @@
   "ncaaf|Washington State Cougars @ Washington Huskies|2026-09-06T20:00:00Z": {
    "committed_utc": "2026-09-05T14:37:30Z",
    "kickoff_utc": "2026-09-06T20:00:00Z",
+   "later_disagreements": [
+    "7a1b8c7c0315274e142a07133eccaedebc65e14508fd9490adcc1575f696031a"
+   ],
    "matchup": "Washington State Cougars @ Washington Huskies",
    "sha256": "7da203bdf9dd792f84277bb0881b86a15c83fd14eced86409277412b2025561e",
    "sport": "ncaaf"

@@ -551,24 +551,48 @@
    "close_ml": 100,
    "clv_pts": -0.35,
    "beat_close": false
+  },
+  {
+   "date": "2026-09-04",
+   "gamePk": 823418,
+   "game": "ATL @ PHI",
+   "pick": "Atlanta Braves ML (+105, Caesars)",
+   "market": "moneyline",
+   "price": 105,
+   "book": "Caesars",
+   "model_p": 0.5245,
+   "blend_p": 0.5044,
+   "edge": 0.0166,
+   "score": 0.7627,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "5-2",
+   "result": "WIN",
+   "pnl_paper": 0.263,
+   "pnl_staked": 0.0,
+   "open_ml": -101,
+   "close_ml": -101,
+   "clv_pts": 0.2,
+   "beat_close": true
   }
  ],
  "aggregates": {
-  "record": "13-10",
-  "wins": 13,
+  "record": "14-10",
+  "wins": 14,
   "losses": 10,
   "voids": 0,
-  "paper_units_net": 0.631,
-  "paper_roi_pct": 10.97,
+  "paper_units_net": 0.894,
+  "paper_roi_pct": 14.9,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 23,
-   "avg_clv_pts": -0.58,
-   "beat_close_pct": 26.1
+   "graded_with_clv": 24,
+   "avg_clv_pts": -0.54,
+   "beat_close_pct": 29.2
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-09-03"
+  "last_graded": "2026-09-04"
  }
 }

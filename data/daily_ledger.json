@@ -575,24 +575,48 @@
    "close_ml": -101,
    "clv_pts": 0.2,
    "beat_close": true
+  },
+  {
+   "date": "2026-09-05",
+   "gamePk": 822850,
+   "game": "TB @ TEX",
+   "pick": "Tampa Bay Rays ML (-105, BetOnline.ag)",
+   "market": "moneyline",
+   "price": -105,
+   "book": "BetOnline.ag",
+   "model_p": 0.537,
+   "blend_p": 0.5185,
+   "edge": 0.0063,
+   "score": 0.5565,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "6-3",
+   "result": "WIN",
+   "pnl_paper": 0.238,
+   "pnl_staked": 0.0,
+   "open_ml": -108,
+   "close_ml": -105,
+   "clv_pts": -0.77,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "14-10",
-  "wins": 14,
+  "record": "15-10",
+  "wins": 15,
   "losses": 10,
   "voids": 0,
-  "paper_units_net": 0.894,
-  "paper_roi_pct": 14.9,
+  "paper_units_net": 1.132,
+  "paper_roi_pct": 18.11,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 24,
-   "avg_clv_pts": -0.54,
-   "beat_close_pct": 29.2
+   "graded_with_clv": 25,
+   "avg_clv_pts": -0.55,
+   "beat_close_pct": 28.0
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-09-04"
+  "last_graded": "2026-09-05"
  }
 }

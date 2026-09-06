@@ -69,6 +69,62 @@ and each lean and pass row carries its status as a chip.
 House Rule 6 applies unchanged: a week with nothing worth playing publishes
 "no official pick this week", never a manufactured one.
 
+## 2b. Operating rules
+
+Adopted 2026-09-06, before the first card. These govern how the Spotlight is
+run, not how the code behaves, except where noted.
+
+### Public commitment
+
+**A Mercer selection is not considered publicly committed until its fingerprint
+has been pushed to the public Open Ledger repository before kickoff. A
+fingerprint existing only on a local machine is not public evidence.**
+
+There are two timestamps and only the second one counts to a reader:
+
+| | what it is | who can verify it |
+|---|---|---|
+| internal commitment | `commit` writes the SHA-256 into `data/mercer/commitments.json` | nobody but the author |
+| **public commitment** | that file is pushed to GitHub | anyone, forever |
+
+The tool enforces the first and cannot enforce the second, because pushing is a
+network act outside it. So it is an operating rule with a mechanical
+consequence: a pick whose fingerprint reaches the public repository after
+kickoff is worth exactly as much as a screenshot, and should be voided by hand
+rather than counted. Commit and push in the same sitting.
+
+### Week 1 commissioning rule
+
+**For the inaugural Mercer card, no additional official selections may be added
+after the first public Week 1 card is pushed.**
+
+This is a Week 1 rule only. Its purpose is to test one clean pass through
+research → publication → commitment → kickoff → grading → ledger → public
+display with no state changes midway. Even a selection that would be perfectly
+legal under the commit gate (its game has not started) is out of scope once the
+card is public.
+
+It may be reviewed after one complete cycle succeeds. Nothing in the code
+enforces it, and nothing should: `commit` is deliberately incremental so that
+mid-week additions work in normal weeks.
+
+### Conviction ladder
+
+| level | meaning |
+|---|---|
+| **Standard** | Qualifies for the official Mercer ledger. |
+| **Strong** | Materially stronger than an ordinary qualifying play. |
+| **Spotlight** | Reserved for genuinely exceptional setups, and expected to be rare. There may be weeks with zero Spotlight selections. |
+
+**Conviction never changes stake automatically, and it is not a probability
+estimate.** It is an ordering of the author's own confidence, published so that
+the record can later be read by conviction level and the ladder checked against
+results. If Spotlight picks do not outperform Standard ones over a real sample,
+that is a finding about the ladder and it gets published like any other.
+
+A label that appears every week means nothing. Spotlight is expected to be rare,
+and its rarity is the only thing that makes it informative.
+
 ## 3. The record, and why it cannot be flattered
 
 ### Requirement 1 — ledger separation

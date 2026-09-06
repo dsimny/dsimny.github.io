@@ -26,10 +26,22 @@ FAIL LOUD ON IDENTITY: an unmatched team name ABORTS. Attaching a price to the
 wrong game is a silent corruption, and it is exactly the kind of error that
 shows up later as an edge.
 
+RESEARCH CAPTURES GO SOMEWHERE ELSE ON PURPOSE (--out-dir). The default
+directory, data/football/odds/, is the MODEL'S EVIDENCE TRAIL: every file in it
+was written by the scheduled capture job, and grade_football.py books the record
+against those prices. A hand-run pull dropped in beside them is indistinguishable
+afterwards, and one that happens to land inside a T-24 window silently becomes
+the price the model grades against. So an ad-hoc pull for the D.J. Mercer
+Spotlight writes to data/mercer/odds/ instead, where it is Mercer's own evidence
+and nothing the model reads. The file format is identical; only the location
+differs, and the location is what preserves the provenance of each record.
+
 Run:
   python scripts/football/fetch_odds.py --sport preseason --dry-run
   python scripts/football/fetch_odds.py --sport preseason
   python scripts/football/fetch_odds.py --sport nfl
+  python scripts/football/fetch_odds.py --sport nfl --markets h2h,spreads,totals \
+      --out-dir data/mercer/odds            # Mercer research pull, 3 credits
 """
 import argparse, json, os, sys
 from datetime import datetime, timezone
@@ -161,6 +173,13 @@ def main():
     # that trade is being made deliberately.
     ap.add_argument("--markets", default="h2h")
     ap.add_argument("--regions", default="us")
+    # Additive and defaulted, so every existing caller - the workflows,
+    # capture_schedule.py - keeps writing exactly where it always has.
+    ap.add_argument("--out-dir", default=None,
+                    help="where to write the snapshot (default: "
+                         "data/football/odds, the model's evidence trail). Point "
+                         "this at data/mercer/odds for a research pull so the "
+                         "model's captures stay exactly what the scheduler wrote.")
     ap.add_argument("--dry-run", action="store_true",
                     help="show the call and its credit cost; spend nothing")
     args = ap.parse_args()
@@ -257,13 +276,29 @@ def main():
             "NOT sufficient for grading, which needs a results join."),
         "markets": args.markets,
         "regions": args.regions,
+        # Says what this file IS, so provenance survives a file being copied
+        # out of the directory that would otherwise imply it.
+        "capture_role": "research" if args.out_dir else "scheduled",
+        "_capture_role_note": (
+            "scheduled: written by the capture job into the model's evidence "
+            "trail; grade_football.py may book the record against it. "
+            "research: a deliberate ad-hoc pull (e.g. the D.J. Mercer "
+            "Spotlight). No model reads it."),
         "credits": credits,
         "n_events": len(rows),
         "events": rows,
     }
-    os.makedirs(ODDS_DIR, exist_ok=True)
-    path = os.path.join(ODDS_DIR,
+    out_dir = os.path.join(ROOT, args.out_dir) if args.out_dir else ODDS_DIR
+    os.makedirs(out_dir, exist_ok=True)
+    path = os.path.join(out_dir,
                         f"{args.sport}_{stamp.strftime('%Y%m%dT%H%M%SZ')}.json")
+    # NEVER OVERWRITE A CAPTURED QUOTE. The filename carries the capture second,
+    # so a collision means two pulls in the same second; refuse rather than
+    # silently replace a price we already recorded.
+    if os.path.exists(path):
+        print(f"REFUSING to overwrite an existing capture: "
+              f"{os.path.relpath(path, ROOT)}")
+        return 1
     with open(path, "w", encoding="utf-8") as f:
         json.dump(snap, f, indent=1, sort_keys=True)
 

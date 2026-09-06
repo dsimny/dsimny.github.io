@@ -975,9 +975,13 @@ HOW_THE_RECORD_WORKS = """
 <h2>How the record works</h2>
 <ul>
   <li><strong>Fingerprinted before kickoff, or not at all.</strong> Each official pick is hashed
-  (SHA-256) and timestamped when it is filed, and that stamp is committed to a public repository.
-  The tool <em>refuses</em> to stamp a pick whose game has already started, so a late selection
-  never enters the record in the first place. The stamp is printed on every card.</li>
+  (SHA-256) and timestamped when it is filed. The tool <em>refuses</em> to stamp a pick whose game
+  has already started, so a late selection never enters the record in the first place. The stamp is
+  printed on every card.</li>
+  <li><strong>A pick counts only once its fingerprint is public.</strong> A stamp sitting on a
+  private machine proves nothing to you, so it is not treated as evidence. The commitment is the
+  moment the fingerprint reaches the public repository, before kickoff, where you or anyone else
+  can read the timestamp without our help. Both times are printed on every card.</li>
   <li><strong>Nothing is backfilled.</strong> This record begins at the first publicly committed
   pick. Older opinions cannot be added later, because every one of them would fail the test above.
   A short honest record is the point; a long retrospective one would be worthless.</li>
@@ -998,8 +1002,12 @@ HOW_THE_RECORD_WORKS = """
   line, and none of it mixes with the site's model-driven football ledger.</li>
   <li><strong>Pushes return the stake.</strong> ROI is profit divided by units risked on decided
   picks (wins, losses and pushes); void picks are excluded from both.</li>
-  <li><strong>Conviction is three words, not a percentage.</strong> Standard, Strong or Spotlight.
-  Mercer has no calibrated model, so no number is invented to look like one.</li>
+  <li><strong>Conviction is three words, not a percentage.</strong>
+  <em>Standard</em> qualifies for the ledger. <em>Strong</em> is materially better than an
+  ordinary qualifying play. <em>Spotlight</em> is reserved for genuinely exceptional setups and is
+  expected to be rare, so there will be weeks with none at all. Conviction never changes the stake
+  by itself and is not a probability estimate. Mercer has no calibrated model, so no number is
+  invented to look like one, and the ladder itself will be checked against results in public.</li>
 </ul>
 <p class="mut">Not yet tracked: closing-line value on Mercer's picks, and whether Mercer and the
 model agreeing on a game means anything. Agreement will be counted before it is ever described as
@@ -1212,6 +1220,21 @@ refuses it.</p>
 <p>Official Mercer selections are fingerprinted and published before the event and become part of
 the permanent record. The winners stay. So do the losers. Because credibility shouldn't come from
 one great weekend. It should come from what the ledger says over time.</p>
+<p>There is a stricter version of that promise, and it is the one that actually binds:
+<strong>a selection does not count until its fingerprint is public before kickoff.</strong> A
+timestamp on a private machine is not evidence of anything, because you cannot see it. The
+fingerprint has to be pushed to the public repository while the game is still unplayed, and every
+card prints both the moment it was stamped and how long before kickoff that was.</p>
+
+<h2>Conviction, and why Spotlight should be rare</h2>
+<p>Three levels, no percentages. <strong>Standard</strong> qualifies for the ledger.
+<strong>Strong</strong> is materially better than an ordinary qualifying play.
+<strong>Spotlight</strong> is reserved for genuinely exceptional setups.</p>
+<p>There will be weeks with no Spotlight selection at all, and that is the point. A label applied
+every week carries no information. Conviction never changes the stake on its own, and it is not a
+probability estimate: it is an ordering of one analyst's confidence, published in advance so the
+record can be read back by level. If Spotlight picks do not outperform Standard ones over a real
+sample, that is a finding about the ladder, and it gets published like everything else.</p>
 
 <h2>Mercer and the model</h2>
 <p>Open Ledger Sports also publishes a <a href="/football/">model-driven football record</a> built

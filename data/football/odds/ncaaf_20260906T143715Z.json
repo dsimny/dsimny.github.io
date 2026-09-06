@@ -1,0 +1,2450 @@
+{
+ "_identity_note": "canonical: away/home are teams.py franchise keys, verified, unresolvable names aborted the run. verbatim: away/home are the API's own strings and NO canonical key is claimed - sufficient for price capture and the selection rule, NOT sufficient for grading, which needs a results join.",
+ "_tier_note": "Tier A: first-party pull, stamped with the UTC moment WE received it. Eligible for CLV precisely because that timestamp exists.",
+ "captured_utc": "2026-09-06T14:37:15Z",
+ "credits": {
+  "http_status": 200,
+  "last_call_cost": 1,
+  "markets": "h2h",
+  "read_utc": "2026-09-06T14:37:15Z",
+  "regions": "us",
+  "remaining": 99921,
+  "source": "football_fetch_odds:ncaaf",
+  "used": 79
+ },
+ "events": [
+  {
+   "away": "Washington State Cougars",
+   "away_raw": "Washington State Cougars",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2800
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1300
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1050
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2200
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1096
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-09-06T14:36:22Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2200
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1096
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -3500
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1200
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2500
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1250
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -3335
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1150
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-09-06T14:36:59Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -3300
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1100
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-09-06T14:36:57Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2524
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1005
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-09-06T14:36:55Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2200
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1200
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-09-06T14:33:21Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -2500
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 1200
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-06T20:00:00Z",
+   "home": "Washington Huskies",
+   "home_raw": "Washington Huskies",
+   "n_books": 11,
+   "odds_api_event_id": "36c2a063d7a55e85488fbe0e89015686"
+  },
+  {
+   "away": "Louisville Cardinals",
+   "away_raw": "Louisville Cardinals",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 210
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -258
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 195
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -265
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-09-06T14:36:57Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 210
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -265
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 219
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -265
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 218
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -260
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-09-06T14:33:21Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 210
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -265
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-09-06T14:36:59Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 215
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -260
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 205
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -250
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-09-06T14:36:55Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 210
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -260
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": 220
+       },
+       {
+        "name": "Ole Miss Rebels",
+        "point": null,
+        "price": -275
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-06T23:30:00Z",
+   "home": "Ole Miss Rebels",
+   "home_raw": "Ole Miss Rebels",
+   "n_books": 10,
+   "odds_api_event_id": "4f0e1900bdc8d12bf0cc91ae291c104e"
+  },
+  {
+   "away": "Wisconsin Badgers",
+   "away_raw": "Wisconsin Badgers",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1800
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 980
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-09-06T14:36:59Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -2200
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 1000
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1650
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 950
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1600
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 1000
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-09-06T14:33:21Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 1000
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 850
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-09-06T14:36:55Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1500
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 900
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-09-06T14:36:57Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -2019
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 931
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1700
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 945
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-09-06T14:36:22Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1700
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 945
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1700
+       },
+       {
+        "name": "Wisconsin Badgers",
+        "point": null,
+        "price": 950
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-06T23:30:00Z",
+   "home": "Notre Dame Fighting Irish",
+   "home_raw": "Notre Dame Fighting Irish",
+   "n_books": 11,
+   "odds_api_event_id": "b460f3aa4235ec2485f25182755304d6"
+  },
+  {
+   "away": "SMU Mustangs",
+   "away_raw": "SMU Mustangs",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 130
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -155
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 125
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -150
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-09-06T14:36:59Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 130
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -150
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-09-06T14:36:57Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 123
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -151
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-09-06T14:36:22Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 130
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -150
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 130
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -150
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 125
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -145
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-09-06T14:33:21Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 127
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -150
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 125
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -150
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 125
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -157
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-09-06T14:36:55Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": 125
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -150
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-07T23:30:00Z",
+   "home": "Florida State Seminoles",
+   "home_raw": "Florida State Seminoles",
+   "n_books": 11,
+   "odds_api_event_id": "a570687d47661da4982cfd885cdb4a44"
+  },
+  {
+   "away": "Florida A&M Rattlers",
+   "away_raw": "Florida A&M Rattlers",
+   "books": [],
+   "commence_time": "2026-09-11T00:00:00Z",
+   "home": "Miami Hurricanes",
+   "home_raw": "Miami Hurricanes",
+   "n_books": 0,
+   "odds_api_event_id": "18dec56516beb8daed598bc5c7a6872d"
+  },
+  {
+   "away": "Villanova Wildcats",
+   "away_raw": "Villanova Wildcats",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -10000
+       },
+       {
+        "name": "Villanova Wildcats",
+        "point": null,
+        "price": 2400
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-11T23:00:00Z",
+   "home": "Louisville Cardinals",
+   "home_raw": "Louisville Cardinals",
+   "n_books": 1,
+   "odds_api_event_id": "340ecb016288a69dfc2227500f14bc46"
+  },
+  {
+   "away": "Richmond Spiders",
+   "away_raw": "Richmond Spiders",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "NC State Wolfpack",
+        "point": null,
+        "price": -10000
+       },
+       {
+        "name": "Richmond Spiders",
+        "point": null,
+        "price": 3000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-11T23:00:00Z",
+   "home": "NC State Wolfpack",
+   "home_raw": "NC State Wolfpack",
+   "n_books": 1,
+   "odds_api_event_id": "b008dac7f2b726219adf07d9857e2c66"
+  },
+  {
+   "away": "Norfolk State Spartans",
+   "away_raw": "Norfolk State Spartans",
+   "books": [],
+   "commence_time": "2026-09-11T23:00:00Z",
+   "home": "Virginia Cavaliers",
+   "home_raw": "Virginia Cavaliers",
+   "n_books": 0,
+   "odds_api_event_id": "d70ad98172b9cd2090eb75ff32866e04"
+  },
+  {
+   "away": "Rutgers Scarlet Knights",
+   "away_raw": "Rutgers Scarlet Knights",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boston College Eagles",
+        "point": null,
+        "price": -184
+       },
+       {
+        "name": "Rutgers Scarlet Knights",
+        "point": null,
+        "price": 152
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boston College Eagles",
+        "point": null,
+        "price": -175
+       },
+       {
+        "name": "Rutgers Scarlet Knights",
+        "point": null,
+        "price": 145
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-11T23:30:00Z",
+   "home": "Boston College Eagles",
+   "home_raw": "Boston College Eagles",
+   "n_books": 2,
+   "odds_api_event_id": "db698f29983406d35dea606edfdc5922"
+  },
+  {
+   "away": "Cal Poly Mustangs",
+   "away_raw": "Cal Poly Mustangs",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cal Poly Mustangs",
+        "point": null,
+        "price": 1060
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": -2300
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T00:00:00Z",
+   "home": "San Jose State Spartans",
+   "home_raw": "San Jose State Spartans",
+   "n_books": 1,
+   "odds_api_event_id": "8b553ed3cc951140812595c0ac1d14b2"
+  },
+  {
+   "away": "Missouri Tigers",
+   "away_raw": "Missouri Tigers",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": 205
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -260
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": 195
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -238
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-09-06T14:36:55Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": 210
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -260
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": 215
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -278
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T00:00:00Z",
+   "home": "Kansas Jayhawks",
+   "home_raw": "Kansas Jayhawks",
+   "n_books": 4,
+   "odds_api_event_id": "912c15dcb8dd09eacabdcb80673d9d72"
+  },
+  {
+   "away": "Appalachian State Mountaineers",
+   "away_raw": "Appalachian State Mountaineers",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 260
+       },
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -330
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "East Carolina Pirates",
+   "home_raw": "East Carolina Pirates",
+   "n_books": 1,
+   "odds_api_event_id": "6dbd3546b178b91878131862fd719e1e"
+  },
+  {
+   "away": "Arizona State Sun Devils",
+   "away_raw": "Arizona State Sun Devils",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona State Sun Devils",
+        "point": null,
+        "price": 470
+       },
+       {
+        "name": "Texas A&M Aggies",
+        "point": null,
+        "price": -650
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona State Sun Devils",
+        "point": null,
+        "price": 550
+       },
+       {
+        "name": "Texas A&M Aggies",
+        "point": null,
+        "price": -820
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Texas A&M Aggies",
+   "home_raw": "Texas A&M Aggies",
+   "n_books": 2,
+   "odds_api_event_id": "cad3845e3f9f9e746c4bbf45487eed02"
+  },
+  {
+   "away": "Arkansas Razorbacks",
+   "away_raw": "Arkansas Razorbacks",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 370
+       },
+       {
+        "name": "Utah Utes",
+        "point": null,
+        "price": -485
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 300
+       },
+       {
+        "name": "Utah Utes",
+        "point": null,
+        "price": -385
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Utah Utes",
+   "home_raw": "Utah Utes",
+   "n_books": 2,
+   "odds_api_event_id": "c12cd73c4077a0265acec205a572c2ec"
+  },
+  {
+   "away": "South Florida Bulls",
+   "away_raw": "South Florida Bulls",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": -184
+       },
+       {
+        "name": "South Florida Bulls",
+        "point": null,
+        "price": 152
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Army Black Knights",
+   "home_raw": "Army Black Knights",
+   "n_books": 1,
+   "odds_api_event_id": "a7c7e0143d5131ee3e2d78f356f0089d"
+  },
+  {
+   "away": "East Tennessee State Buccaneers",
+   "away_raw": "East Tennessee State Buccaneers",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Tennessee State Buccaneers",
+        "point": null,
+        "price": 4000
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": -30000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "North Carolina Tar Heels",
+   "home_raw": "North Carolina Tar Heels",
+   "n_books": 1,
+   "odds_api_event_id": "287a959c0717526161988214cb4e01ce"
+  },
+  {
+   "away": "Washington State Cougars",
+   "away_raw": "Washington State Cougars",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas State Wildcats",
+        "point": null,
+        "price": -1400
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 800
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Kansas State Wildcats",
+   "home_raw": "Kansas State Wildcats",
+   "n_books": 1,
+   "odds_api_event_id": "3b3054849b678fcfa0b6a5a9994557bf"
+  },
+  {
+   "away": "Oklahoma Sooners",
+   "away_raw": "Oklahoma Sooners",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Michigan Wolverines",
+        "point": null,
+        "price": 176
+       },
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": -210
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Michigan Wolverines",
+        "point": null,
+        "price": 170
+       },
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": -230
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Michigan Wolverines",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Michigan Wolverines",
+   "home_raw": "Michigan Wolverines",
+   "n_books": 3,
+   "odds_api_event_id": "b38f4f63351c15767e64a76a73589574"
+  },
+  {
+   "away": "Oregon Ducks",
+   "away_raw": "Oregon Ducks",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": 1060
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": -2100
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": 1100
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": -2100
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Oklahoma State Cowboys",
+   "home_raw": "Oklahoma State Cowboys",
+   "n_books": 2,
+   "odds_api_event_id": "d652c7bc0594f13ef0a2a04e31ef5666"
+  },
+  {
+   "away": "Old Dominion Monarchs",
+   "away_raw": "Old Dominion Monarchs",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Old Dominion Monarchs",
+        "point": null,
+        "price": 660
+       },
+       {
+        "name": "Virginia Tech Hokies",
+        "point": null,
+        "price": -1050
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Virginia Tech Hokies",
+   "home_raw": "Virginia Tech Hokies",
+   "n_books": 1,
+   "odds_api_event_id": "cdbde17fe5ba072172683681026c6312"
+  },
+  {
+   "away": "Penn State Nittany Lions",
+   "away_raw": "Penn State Nittany Lions",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -3500
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 1280
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Temple Owls",
+   "home_raw": "Temple Owls",
+   "n_books": 1,
+   "odds_api_event_id": "eee54863c6c50d585de1919f1fca51e5"
+  },
+  {
+   "away": "Wake Forest Demon Deacons",
+   "away_raw": "Wake Forest Demon Deacons",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 152
+       },
+       {
+        "name": "Wake Forest Demon Deacons",
+        "point": null,
+        "price": -184
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T16:00:00Z",
+   "home": "Purdue Boilermakers",
+   "home_raw": "Purdue Boilermakers",
+   "n_books": 1,
+   "odds_api_event_id": "5a8d98c3147d18b683d90a536e76eb64"
+  },
+  {
+   "away": "Stony Brook Seawolves",
+   "away_raw": "Stony Brook Seawolves",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ball State Cardinals",
+        "point": null,
+        "price": -880
+       },
+       {
+        "name": "Stony Brook Seawolves",
+        "point": null,
+        "price": 580
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T18:00:00Z",
+   "home": "Ball State Cardinals",
+   "home_raw": "Ball State Cardinals",
+   "n_books": 1,
+   "odds_api_event_id": "50ca382289647d24354223aa3512c02f"
+  },
+  {
+   "away": "Alabama Crimson Tide",
+   "away_raw": "Alabama Crimson Tide",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Alabama Crimson Tide",
+        "point": null,
+        "price": -410
+       },
+       {
+        "name": "Kentucky Wildcats",
+        "point": null,
+        "price": 320
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Alabama Crimson Tide",
+        "point": null,
+        "price": -430
+       },
+       {
+        "name": "Kentucky Wildcats",
+        "point": null,
+        "price": 330
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Kentucky Wildcats",
+   "home_raw": "Kentucky Wildcats",
+   "n_books": 2,
+   "odds_api_event_id": "2cb6f8436ba0f1fbcdcd7871a03466d5"
+  },
+  {
+   "away": "Arizona Wildcats",
+   "away_raw": "Arizona Wildcats",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Wildcats",
+        "point": null,
+        "price": 240
+       },
+       {
+        "name": "BYU Cougars",
+        "point": null,
+        "price": -298
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Wildcats",
+        "point": null,
+        "price": 225
+       },
+       {
+        "name": "BYU Cougars",
+        "point": null,
+        "price": -280
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "BYU Cougars",
+   "home_raw": "BYU Cougars",
+   "n_books": 2,
+   "odds_api_event_id": "6e781bfdb712f185fb1be983bc10af15"
+  },
+  {
+   "away": "California Golden Bears",
+   "away_raw": "California Golden Bears",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "California Golden Bears",
+        "point": null,
+        "price": -111
+       },
+       {
+        "name": "Syracuse Orange",
+        "point": null,
+        "price": -108
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Syracuse Orange",
+   "home_raw": "Syracuse Orange",
+   "n_books": 1,
+   "odds_api_event_id": "1427645d6020f742eece986c58bdb29d"
+  },
+  {
+   "away": "Duke Blue Devils",
+   "away_raw": "Duke Blue Devils",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Duke Blue Devils",
+        "point": null,
+        "price": 240
+       },
+       {
+        "name": "Illinois Fighting Illini",
+        "point": null,
+        "price": -298
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Duke Blue Devils",
+        "point": null,
+        "price": 198
+       },
+       {
+        "name": "Illinois Fighting Illini",
+        "point": null,
+        "price": -245
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Illinois Fighting Illini",
+   "home_raw": "Illinois Fighting Illini",
+   "n_books": 2,
+   "odds_api_event_id": "52e9b0f6515766724ee70457912bdc18"
+  },
+  {
+   "away": "Eastern Michigan Eagles",
+   "away_raw": "Eastern Michigan Eagles",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Eastern Michigan Eagles",
+        "point": null,
+        "price": 640
+       },
+       {
+        "name": "Michigan State Spartans",
+        "point": null,
+        "price": -1000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Michigan State Spartans",
+   "home_raw": "Michigan State Spartans",
+   "n_books": 1,
+   "odds_api_event_id": "db05b8a09b0efd8546a13a2cb5e457fc"
+  },
+  {
+   "away": "Maryland Terrapins",
+   "away_raw": "Maryland Terrapins",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Maryland Terrapins",
+        "point": null,
+        "price": -610
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 440
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "UConn Huskies",
+   "home_raw": "UConn Huskies",
+   "n_books": 1,
+   "odds_api_event_id": "70a4d83a64789d57f114b077a570ea27"
+  },
+  {
+   "away": "Mississippi State Bulldogs",
+   "away_raw": "Mississippi State Bulldogs",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 105
+       },
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": -125
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": -106
+       },
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": -113
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Minnesota Golden Gophers",
+   "home_raw": "Minnesota Golden Gophers",
+   "n_books": 2,
+   "odds_api_event_id": "25c198f097870d531920ba524262737d"
+  },
+  {
+   "away": "UCF Knights",
+   "away_raw": "UCF Knights",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -300
+       },
+       {
+        "name": "UCF Knights",
+        "point": null,
+        "price": 240
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -340
+       },
+       {
+        "name": "UCF Knights",
+        "point": null,
+        "price": 270
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Pittsburgh Panthers",
+   "home_raw": "Pittsburgh Panthers",
+   "n_books": 2,
+   "odds_api_event_id": "dd880570288831c4fc55cb68f19f9667"
+  },
+  {
+   "away": "UTSA Roadrunners",
+   "away_raw": "UTSA Roadrunners",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": -110
+       },
+       {
+        "name": "UTSA Roadrunners",
+        "point": null,
+        "price": -110
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Texas State Bobcats",
+   "home_raw": "Texas State Bobcats",
+   "n_books": 1,
+   "odds_api_event_id": "08c5bac0240cbc3ba996fb55a75504f2"
+  },
+  {
+   "away": "UL Monroe Warhawks",
+   "away_raw": "UL Monroe Warhawks",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "UAB Blazers",
+        "point": null,
+        "price": -365
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 285
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "UAB Blazers",
+   "home_raw": "UAB Blazers",
+   "n_books": 1,
+   "odds_api_event_id": "61700ad2942d0c633b9c6cd402964356"
+  },
+  {
+   "away": "Utah State Aggies",
+   "away_raw": "Utah State Aggies",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Utah State Aggies",
+        "point": null,
+        "price": 1600
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": -4500
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:30:00Z",
+   "home": "Washington Huskies",
+   "home_raw": "Washington Huskies",
+   "n_books": 1,
+   "odds_api_event_id": "2186fba5726dbd7fee2ce72477bdaa2b"
+  },
+  {
+   "away": "UNLV Rebels",
+   "away_raw": "UNLV Rebels",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Texas Mean Green",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T19:45:00Z",
+   "home": "North Texas Mean Green",
+   "home_raw": "North Texas Mean Green",
+   "n_books": 1,
+   "odds_api_event_id": "50b6e6aec0bd3f2fcb9dc18c113ddd12"
+  },
+  {
+   "away": "Delaware Blue Hens",
+   "away_raw": "Delaware Blue Hens",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Delaware Blue Hens",
+        "point": null,
+        "price": 890
+       },
+       {
+        "name": "Vanderbilt Commodores",
+        "point": null,
+        "price": -1700
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T20:15:00Z",
+   "home": "Vanderbilt Commodores",
+   "home_raw": "Vanderbilt Commodores",
+   "n_books": 1,
+   "odds_api_event_id": "04d0c72553f17ebc22509fb1b5926600"
+  },
+  {
+   "away": "Memphis Tigers",
+   "away_raw": "Memphis Tigers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -325
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": 260
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -385
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": 300
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T22:00:00Z",
+   "home": "Boise State Broncos",
+   "home_raw": "Boise State Broncos",
+   "n_books": 2,
+   "odds_api_event_id": "c46b118e570bf1fa1b2724f1fd7e4b24"
+  },
+  {
+   "away": "Buffalo Bulls",
+   "away_raw": "Buffalo Bulls",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bulls",
+        "point": null,
+        "price": 330
+       },
+       {
+        "name": "Florida International Panthers",
+        "point": null,
+        "price": -430
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T22:00:00Z",
+   "home": "Florida International Panthers",
+   "home_raw": "Florida International Panthers",
+   "n_books": 1,
+   "odds_api_event_id": "a2b7711390532d0014249f295a6d02b8"
+  },
+  {
+   "away": "Jacksonville State Gamecocks",
+   "away_raw": "Jacksonville State Gamecocks",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville State Gamecocks",
+        "point": null,
+        "price": 104
+       },
+       {
+        "name": "Ohio Bobcats",
+        "point": null,
+        "price": -125
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T22:00:00Z",
+   "home": "Ohio Bobcats",
+   "home_raw": "Ohio Bobcats",
+   "n_books": 1,
+   "odds_api_event_id": "3cff947fac86cab5c41d4f7c0e9393ce"
+  },
+  {
+   "away": "Bowling Green Falcons",
+   "away_raw": "Bowling Green Falcons",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Bowling Green Falcons",
+        "point": null,
+        "price": 2400
+       },
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -10000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:00:00Z",
+   "home": "Nebraska Cornhuskers",
+   "home_raw": "Nebraska Cornhuskers",
+   "n_books": 1,
+   "odds_api_event_id": "5cc49501cef64287d2f6b5afe9526a16"
+  },
+  {
+   "away": "Tennessee Volunteers",
+   "away_raw": "Tennessee Volunteers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 425
+       },
+       {
+        "name": "Tennessee Volunteers",
+        "point": null,
+        "price": -575
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 400
+       },
+       {
+        "name": "Tennessee Volunteers",
+        "point": null,
+        "price": -550
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:00:00Z",
+   "home": "Georgia Tech Yellow Jackets",
+   "home_raw": "Georgia Tech Yellow Jackets",
+   "n_books": 2,
+   "odds_api_event_id": "2fef91bee444782036d23f91abe0a5da"
+  },
+  {
+   "away": "Tulsa Golden Hurricane",
+   "away_raw": "Tulsa Golden Hurricane",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Sam Houston State Bearkats",
+        "point": null,
+        "price": 520
+       },
+       {
+        "name": "Tulsa Golden Hurricane",
+        "point": null,
+        "price": -750
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:00:00Z",
+   "home": "Sam Houston State Bearkats",
+   "home_raw": "Sam Houston State Bearkats",
+   "n_books": 1,
+   "odds_api_event_id": "a7402ec89d227ff9b9bf936a8679d313"
+  },
+  {
+   "away": "South Alabama Jaguars",
+   "away_raw": "South Alabama Jaguars",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "South Alabama Jaguars",
+        "point": null,
+        "price": 360
+       },
+       {
+        "name": "Tulane Green Wave",
+        "point": null,
+        "price": -480
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:00:00Z",
+   "home": "Tulane Green Wave",
+   "home_raw": "Tulane Green Wave",
+   "n_books": 1,
+   "odds_api_event_id": "18c682b142ecfadb8d6d801f5fb9aac7"
+  },
+  {
+   "away": "San Diego State Aztecs",
+   "away_raw": "San Diego State Aztecs",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": 320
+       },
+       {
+        "name": "UCLA Bruins",
+        "point": null,
+        "price": -420
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:15:00Z",
+   "home": "UCLA Bruins",
+   "home_raw": "UCLA Bruins",
+   "n_books": 1,
+   "odds_api_event_id": "14620ae05bec8eaa19ca94156c71dff2"
+  },
+  {
+   "away": "Iowa State Cyclones",
+   "away_raw": "Iowa State Cyclones",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa Hawkeyes",
+        "point": null,
+        "price": -820
+       },
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 550
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa Hawkeyes",
+        "point": null,
+        "price": -700
+       },
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 500
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:30:00Z",
+   "home": "Iowa Hawkeyes",
+   "home_raw": "Iowa Hawkeyes",
+   "n_books": 2,
+   "odds_api_event_id": "0633819fa9e60ac71609cd40e1596b1b"
+  },
+  {
+   "away": "Ohio State Buckeyes",
+   "away_raw": "Ohio State Buckeyes",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -104
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -115
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-09-06T14:36:56Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -103
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -125
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -105
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -115
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:30:00Z",
+   "home": "Texas Longhorns",
+   "home_raw": "Texas Longhorns",
+   "n_books": 3,
+   "odds_api_event_id": "08c34029ecc85b4a6d519f90f9082e56"
+  },
+  {
+   "away": "Texas Tech Red Raiders",
+   "away_raw": "Texas Tech Red Raiders",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-09-06T14:36:19Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": 1600
+       },
+       {
+        "name": "Texas Tech Red Raiders",
+        "point": null,
+        "price": -4500
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-12T23:30:00Z",
+   "home": "Oregon State Beavers",
+   "home_raw": "Oregon State Beavers",
+   "n_books": 1,
+   "odds_api_event_id": "f0d4ea035d6edfabda0c2b298c7d42d2"
+  },
+  {
+   "away": "SMU Mustangs",
+   "away_raw": "SMU Mustangs",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -115
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": -105
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-09-19T19:30:00Z",
+   "home": "Louisville Cardinals",
+   "home_raw": "Louisville Cardinals",
+   "n_books": 1,
+   "odds_api_event_id": "dbcfc3184e20d1ea45e910b89585071f"
+  },
+  {
+   "away": "SMU Mustangs",
+   "away_raw": "SMU Mustangs",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-09-06T14:35:46Z",
+     "markets": {
+      "h2h": [
+       {
+        "name": "Notre Dame Fighting Irish",
+        "point": null,
+        "price": -1200
+       },
+       {
+        "name": "SMU Mustangs",
+        "point": null,
+        "price": 750
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T00:30:00Z",
+   "home": "Notre Dame Fighting Irish",
+   "home_raw": "Notre Dame Fighting Irish",
+   "n_books": 1,
+   "odds_api_event_id": "fa98066b4b400fb6af0672e170cc584a"
+  }
+ ],
+ "identity": "verbatim",
+ "markets": "h2h",
+ "n_events": 49,
+ "regions": "us",
+ "sport_key": "americanfootball_ncaaf",
+ "tier": "A"
+}

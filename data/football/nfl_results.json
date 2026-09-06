@@ -1,6 +1,25 @@
 {
  "_note": "NFL results from ESPN's public scoreboard, keyed by ESPN event id. home/away are CANONICAL franchise keys (teams.py), matching what an NFL odds capture stores. Scores are None until STATUS_FINAL - an unplayed game has no score, not a score of zero. season_type is recorded on every row; ONLY type 2 (regular-season) is gradeable, per docs/FOOTBALL_PIPELINE.md section 3a. Grading reads this; nothing here writes to a ledger.",
  "events": {
+  "401872656": {
+   "away": "NE",
+   "away_abbr": "NE",
+   "away_name": "New England Patriots",
+   "away_score": null,
+   "espn_event_id": "401872656",
+   "final": false,
+   "home": "SEA",
+   "home_abbr": "SEA",
+   "home_name": "Seattle Seahawks",
+   "home_score": null,
+   "kickoff_utc": "2026-09-10T00:20:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401872657": {
    "away": "SF",
    "away_abbr": "SF",
@@ -1199,5 +1218,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-08-26T13:34:10Z"
+ "updated_utc": "2026-09-06T16:23:00Z"
 }

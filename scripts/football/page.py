@@ -306,32 +306,112 @@ def render_hub():
     wl = "".join(f'<li><a href="/football/{w}/">Week of {nice_date(w)}</a></li>'
                  for w in weeks) or "<li>No weeks published yet.</li>"
 
-    if entries:
-        rows = "".join(
+    # THE HIERARCHY IS THE POINT OF THIS PAGE.
+    #
+    # The ledger books EVERY covered game - the rule's chosen side on all of
+    # them - because that is the honest characterisation of what the rule does.
+    # But only the tiered plays are OFFERED as positions. Rendered as one flat
+    # table, 43 rows reading 10-33 look exactly like a betting record, and a
+    # visitor cannot tell which four rows were actually committed. On a product
+    # whose entire promise is that the record is easy to check, a headline
+    # number that is technically accurate and reliably misread is worse than a
+    # missing one.
+    #
+    # SEPARATION, NEVER OMISSION. The 39 research rows stay on the page in full,
+    # under their own heading and labelled. Hiding them would trade one
+    # transparency failure for a worse one.
+    official = [e for e in entries if e.get("tier") in ("premium", "free")]
+    research = [e for e in entries if e.get("tier") not in ("premium", "free")]
+
+    def _rec(rows):
+        w = sum(1 for e in rows if e.get("result") == "win")
+        l = sum(1 for e in rows if e.get("result") == "loss")
+        p_ = sum(1 for e in rows if e.get("result") == "push")
+        return w, l, p_
+
+    # "COVERED" is what the pipeline emits, and it is the wrong word to show a
+    # reader: it says the game was evaluated, not that no position was taken.
+    # This whole change exists so the two cannot be confused, so the label has
+    # to carry that itself rather than rely on the heading above it.
+    STATUS = {"premium": "PREMIUM", "free": "FREE", "covered": "RESEARCH ONLY"}
+
+    def _table(rows, tier_col):
+        body = "".join(
             f'<tr><td>{E(e.get("slate_week",""))}</td>'
+            f'<td>{E(STATUS.get(e.get(tier_col[1]), str(e.get(tier_col[1], "")).upper()))}</td>'
             f'<td>{E(e.get("matchup",""))}</td><td>{E(str(e.get("side","")))}</td>'
             f'<td>{money(e.get("price"))}</td><td>{E(str(e.get("result","")))}</td>'
-            f'<td>{e.get("clv_pts","")}</td></tr>' for e in entries)
-        table = (f'<div class="tablewrap"><table><thead><tr><th>Week</th>'
-                 f'<th>Game</th><th>Side</th><th>Price</th><th>Result</th>'
-                 f'<th>CLV</th></tr></thead><tbody>{rows}</tbody></table></div>')
+            f'<td>{e.get("clv_pts","")}</td></tr>' for e in rows)
+        return (f'<div class="tablewrap"><table><thead><tr><th>Week</th>'
+                f'<th>{tier_col[0]}</th><th>Game</th><th>Side</th><th>Price</th>'
+                f'<th>Result</th><th>CLV</th></tr></thead>'
+                f'<tbody>{body}</tbody></table></div>')
+
+    if entries:
+        w, l, pu = _rec(official)
+        pnl = sum(e.get("pnl_per_unit", 0) or 0 for e in official)
+        clvs = [e.get("clv_pts") for e in official if e.get("clv_pts") is not None]
+        avg_clv = sum(clvs) / len(clvs) if clvs else 0.0
+        rec = f"{w}–{l}" + (f"–{pu}" if pu else "")
+
+        # NO ROI AND NO UNITS FIGURE, deliberately, and this is not pedantry.
+        # Football is staked at ZERO units (spec section 6) - the ledger's own
+        # note says pnl_per_unit is "what one unit WOULD have returned, not
+        # money risked". Printing "+2.4 units" or "ROI 8%" in a headline card
+        # would state a return on money that was never placed, which House
+        # Rules 4 and 8 forbid and which no later footnote undoes. The
+        # hypothetical is shown, labelled as hypothetical, next to the 0.
+        headline = f'''
+  <div class="commit">
+    <p class="commitlead">Official football record</p>
+    <p class="commithash">{rec} &nbsp;|&nbsp; {len(official)} committed plays
+    &nbsp;|&nbsp; <strong>0 units staked</strong> &nbsp;|&nbsp; avg CLV
+    {avg_clv:+.2f} pts</p>
+    <p class="commitsub">At one unit these would have returned
+    <strong>{pnl:+.2f}u</strong> — hypothetical, shown because it is
+    checkable, not because anything was risked. Football does not size stakes.</p>
+  </div>'''
+
+        scope = ('<p class="mut"><strong>Only committed plays count toward the '
+                 'Open Ledger record.</strong> Covered-game analysis is '
+                 'published for transparency but is not included in W–L or '
+                 'ROI.</p>')
+
+        official_tbl = _table(official, ("Tier", "tier"))
+        research_tbl = _table(research, ("Status", "tier"))
+        research_note = (
+            f'<p class="mut">These {len(research)} games were evaluated and the '
+            f'rule\'s chosen side is recorded, so its behaviour can be checked '
+            f'rather than described — but none was offered as a position and '
+            f'none counts toward the record above. Games that failed the '
+            f'coverage markers never reach this table at all; they are listed '
+            f'as NO MARKET on each week\'s page, with the reason.</p>')
     else:
-        table = ('<p class="mut"><strong>No week has been graded yet.</strong> '
-                 'This table is empty because the season has not started, not '
-                 'because nothing has been published — an empty record and '
-                 'a hidden one look identical, so we say which this is.</p>')
+        headline = ""
+        scope = ""
+        official_tbl = ('<p class="mut"><strong>No week has been graded yet.</strong> '
+                        'This table is empty because the season has not started, not '
+                        'because nothing has been published — an empty record and '
+                        'a hidden one look identical, so we say which this is.</p>')
+        research_tbl = ""
+        research_note = ""
 
     inner = f'''
 <div class="idx">
   <span class="kicker">Football</span>
   <h1>The football record</h1>
   <p class="lede">{NOCLAIM}</p>
-  <h2>Every graded play</h2>
+  {headline}
+  {scope}
+  <h2>Official record — committed plays</h2>
   <p class="mut">Append-only. Nothing is edited, nothing is deleted, losses
-  publish exactly like wins. Zero units throughout — the P&amp;L column is
-  what one unit would have returned, not money risked.</p>
-  {table}
+  publish exactly like wins. Every one of these was fingerprinted before
+  kickoff.</p>
+  {official_tbl}
   {upgrade_block()}
+  <h2>Full covered slate — research, not the record</h2>
+  {research_note}
+  {research_tbl}
   <h2>D.J. Mercer Spotlight</h2>
   <p class="mut">The model above is one record. <a href="/football/mercer/">D.J. Mercer</a> keeps
   another: human-researched NFL and college picks, fingerprinted before kickoff and graded on

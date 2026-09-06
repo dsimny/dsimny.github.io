@@ -497,6 +497,13 @@
    "sha256": "084f373803f8662f44cfb6ce5f9c4ae67e9aea941d168600afa7eb9d73e07ca8",
    "sport": "ncaaf"
   },
+  "ncaaf|SMU Mustangs @ Florida State Seminoles|2026-09-07T23:30:00Z": {
+   "committed_utc": "2026-09-06T17:37:20Z",
+   "kickoff_utc": "2026-09-07T23:30:00Z",
+   "matchup": "SMU Mustangs @ Florida State Seminoles",
+   "sha256": "7a97dea3b6eef30acc90bb0ea2c5e117402e6f5ca37a5e49ab1ff67f35fc7bee",
+   "sport": "ncaaf"
+  },
   "ncaaf|Sacramento State Hornets @ Eastern Michigan Eagles|2026-08-29T22:30:00Z": {
    "committed_utc": "2026-08-29T18:21:19Z",
    "kickoff_utc": "2026-08-29T22:30:00Z",

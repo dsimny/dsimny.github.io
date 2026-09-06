@@ -122,6 +122,15 @@ card, or it is committed on materially staler information than the Sunday games
 on the same card. The decision is made before the card is written, never after
 Sunday's games have started.
 
+**DECIDED 2026-09-06: the Monday game is excluded from the inaugural card.**
+Denver at Kansas City is out of Week 1 for **operational timing only**. It is
+not a PASS, it carries no status of any kind, it is not fingerprinted, and
+nothing about it is a judgement on the matchup. A commissioning exclusion and a
+PASS are different things and must never be recorded as the same thing: a PASS
+says a play was considered and declined, an exclusion says the clock made the
+question unanswerable. Conflating them would put a handicapping opinion on the
+record that was never formed.
+
 ### The independent football case
 
 **A thesis must survive this question: "Would I still want this position if I had

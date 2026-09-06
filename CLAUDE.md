@@ -795,6 +795,54 @@ templates/commands have no product surface. When touching the engine, check
 changes against BOTH this playbook and the circuit-breaker section above; if
 they conflict, the tighter rule wins and the conflict gets flagged to Daniel.
 
+## D.J. Mercer Spotlight (added 2026-09-06)
+
+The editorial layer for football: human-researched NFL + NCAAF picks under the
+D.J. Mercer pen name, at `/football/mercer/`. Spec and operating manual:
+`docs/MERCER_SPOTLIGHT.md`. Code: `scripts/football/mercer.py` (check / commit /
+grade / render) and `selftest_mercer.py` (123 assertions, numbered to the
+requirement each one proves).
+
+- SEPARATE RECORD. `data/mercer/mercer_ledger.json` + `data/mercer/commitments.json`,
+  both append-only. mercer.py writes those two files and nothing else - the
+  self-test greps the source to prove it never touches football_ledger.json or
+  any MLB ledger. NFL and college are reported separately plus combined.
+- THE COMMIT GATE IS THE PRODUCT. `commit` REFUSES to fingerprint a pick whose
+  kickoff has passed, whose game will not resolve, or whose season type can
+  never be graded. That is also what makes a BACKFILLED record impossible, and
+  the refusal says so. The grader keeps a matching stamped-after-kickoff -> VOID
+  rule as defence in depth. There is no override flag on purpose.
+- GRADED IS FROZEN. A booked pick id is skipped, never recomputed. The week page
+  renders a graded pick's selection/price/stake FROM THE LEDGER, not the card,
+  and shows a red "edited after grading" block plus a red run when they diverge.
+- TAXONOMY: OFFICIAL / LEAN / PASS, in three separate lists AND validated by
+  status. Only OFFICIAL is graded. Leans and passes may carry no units.
+- `why` and `case_against` are REQUIRED on every official pick - "The Case
+  Against" is the section's identity, so a card missing it does not publish.
+- CONVICTION IS THREE WORDS (standard / strong / spotlight), never a number.
+  Retired fields (worries/watching/verdict/confidence) are refused by name.
+- LINE PROVENANCE: line, price and `book` are stored as fingerprinted and are
+  never replaced by a closing number. Grading reads them, never re-fetches.
+- **`mercer.slate_week` IS ET-ANCHORED AND market.slate_week IS NOT.** The
+  model's UTC anchor puts Monday Night Football in the NEXT week (Mon 20:15 ET
+  = Tue 00:15 UTC). Mercer converts to ET first so Thu-Mon stay together.
+  market.slate_week was deliberately NOT changed: football_ledger.json is keyed
+  by it and re-anchoring would re-split already-graded weeks.
+  **OPEN TODO for the model side, NOT this commit:** whether the model should
+  adopt the ET anchor too. It needs a migration decision for existing
+  slate_week keys, because re-anchoring re-labels weeks already graded and
+  fingerprinted - a record rewrite under House Rule 1, not a bug fix.
+  Written up with the measured comparison in docs/MERCER_SPOTLIGHT.md section 8.
+- Cards are hand-written JSON in `data/mercer/weeks/<slate_week>.json` (template
+  alongside). Weekly: `check` -> `commit` -> `render` -> push. The push is the
+  public timestamp. `football-grade.yml` grades + renders daily;
+  `football-capture.yml` re-renders hourly. Nothing posts to Discord yet.
+- Writes ONLY under `football/mercer/` - never the root index.html or feed.xml.
+- `page.py`'s hub lists only DATED dirs under football/; `football/mercer/`
+  lives there too and must never be treated as a slate week.
+- NOT built on purpose: Mercer+Model agreement (count it before ever calling it
+  stronger; never auto-boosts a stake), CLV on Mercer picks, Discord delivery.
+
 ## House rules (non-negotiable; they ARE the brand)
 
 1. Ledger is append-only: entries are never edited after grading; aggregates

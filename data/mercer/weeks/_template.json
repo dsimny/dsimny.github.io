@@ -1,0 +1,97 @@
+{
+  "_note": "TEMPLATE, ignored by mercer.py (its name is not a date). Copy to <slate_week>.json, where slate_week is the TUESDAY on or before the games, in Eastern time (e.g. 2026-09-08 covers NFL Week 1, Thu Sep 10 through Mon Sep 14). Delete this note in the copy. Field reference: docs/MERCER_SPOTLIGHT.md. Only entries in 'picks' are graded.",
+  "slate_week": "2026-09-08",
+  "title": "Week 1: the questions worth asking",
+  "intro": "Optional. One paragraph on how Mercer sees the week.",
+  "picks": [
+    {
+      "id": "2026-09-08-nfl-01",
+      "status": "OFFICIAL",
+      "sport": "nfl",
+      "away": "Baltimore Ravens",
+      "home": "Buffalo Bills",
+      "kickoff_utc": "2026-09-14T00:20:00Z",
+      "market": "spread",
+      "team": "Baltimore Ravens",
+      "line": 3,
+      "price": -110,
+      "book": "DraftKings",
+      "units": 1,
+      "conviction": "strong",
+      "mercer_number": "BAL +1.5",
+      "why": "REQUIRED. The affirmative case.",
+      "case_against": "REQUIRED. The strongest legitimate reason this could be wrong.",
+      "changes_my_mind": "Optional but expected: injury, line movement, weather, personnel."
+    },
+    {
+      "id": "2026-09-08-nfl-02",
+      "status": "OFFICIAL",
+      "sport": "nfl",
+      "away": "Baltimore Ravens",
+      "home": "Buffalo Bills",
+      "kickoff_utc": "2026-09-14T00:20:00Z",
+      "market": "total",
+      "side": "under",
+      "line": 44.5,
+      "price": -110,
+      "book": "FanDuel",
+      "units": 1,
+      "conviction": "standard",
+      "why": "...",
+      "case_against": "...",
+      "changes_my_mind": "..."
+    },
+    {
+      "id": "2026-09-08-ncaaf-01",
+      "status": "OFFICIAL",
+      "sport": "ncaaf",
+      "away": "Georgia Bulldogs",
+      "home": "Alabama Crimson Tide",
+      "kickoff_utc": "2026-09-12T23:30:00Z",
+      "espn_event_id": "optional: pin the exact game when `check` reports an ambiguity",
+      "market": "moneyline",
+      "team": "Alabama Crimson Tide",
+      "price": 120,
+      "units": 0.5,
+      "conviction": "spotlight",
+      "why": "...",
+      "case_against": "...",
+      "changes_my_mind": "..."
+    }
+  ],
+  "spotlight": [
+    {
+      "title": "Ravens at Bills: what the number is arguing about",
+      "matchup": "NFL \u00b7 Baltimore Ravens @ Buffalo Bills",
+      "sections": {
+        "The case for the play": "...",
+        "The case against it": "...",
+        "Numbers that matter": "...",
+        "Market movement": "...",
+        "What would make this wrong": "..."
+      }
+    }
+  ],
+  "leans": [
+    {
+      "status": "LEAN",
+      "sport": "nfl",
+      "away": "Atlanta Falcons",
+      "home": "Pittsburgh Steelers",
+      "kickoff_utc": "2026-09-13T17:00:00Z",
+      "lean": "Steelers -2.5",
+      "note": "Why it stopped short of an official pick. Never graded, carries no units."
+    }
+  ],
+  "passes": [
+    {
+      "status": "PASS",
+      "sport": "ncaaf",
+      "away": "East Carolina Pirates",
+      "home": "Alabama Crimson Tide",
+      "kickoff_utc": "2026-09-05T16:00:00Z",
+      "temptation": "Alabama -30",
+      "reason": "Why Mercer is staying away. Never graded."
+    }
+  ]
+}

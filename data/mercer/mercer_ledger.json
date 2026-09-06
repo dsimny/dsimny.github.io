@@ -1,0 +1,6 @@
+{
+ "_created_note": "Created deliberately and EMPTY on 2026-09-06 when the Mercer Spotlight was built - not as a side effect of a run. Under House Rule 1 the first entry is permanent, so the file exists before anything can append to it by accident. An empty entries list means no Mercer pick has settled yet.",
+ "_note": "D.J. Mercer Spotlight record, append-only (House Rule 1). Human-researched football picks under the Mercer byline. NEVER mixed with football_ledger.json (the model's record) or any MLB ledger. A VOID entry is a pick that could not be graded honestly \u2014 its void_reason says why, and it stays here in public. Leans and passes are never booked.",
+ "created_utc": "2026-09-06T13:28:08Z",
+ "entries": []
+}

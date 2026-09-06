@@ -80,6 +80,15 @@ jobs:
         if: ${{ !cancelled() }}
         run: python scripts/football/grade_football.py --sport nfl
 
+      # The D.J. Mercer Spotlight: human picks on their own append-only record.
+      # Reads the same two results stores refreshed above and never touches
+      # football_ledger.json. Exits non-zero ONLY for a pick edited after its
+      # fingerprint - after booking everything honest - so a tampered card
+      # reaches the alert instead of passing quietly.
+      - name: Grade the Mercer Spotlight
+        if: ${{ !cancelled() }}
+        run: python scripts/football/mercer.py grade
+
       # Reveal every week the ledger has now booked. Driven off the LEDGER
       # rather than off a date calculation: a week is revealed exactly when it
       # has actually been graded, which is the only definition that cannot
@@ -109,6 +118,12 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL }}
         run: python scripts/football/page.py --all
 
+      - name: Render the Mercer Spotlight
+        if: ${{ !cancelled() }}
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/mercer.py render
+
       - name: Commit
         if: ${{ !cancelled() }}
         run: |
@@ -124,6 +139,7 @@ jobs:
                   data/football/ncaaf_results.json \
                   data/football/nfl_results.json \
                   data/football/board_*.json \
+                  data/mercer/ \
                   football/ 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Football grade $(date -u +%F)"
           git push

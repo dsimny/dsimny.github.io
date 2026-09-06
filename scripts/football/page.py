@@ -53,6 +53,7 @@ import html
 import io
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -297,7 +298,11 @@ def render_hub():
 
     weeks = sorted({d for d in os.listdir(OUT)} if os.path.isdir(OUT) else [],
                    reverse=True)
-    weeks = [w for w in weeks if os.path.isdir(os.path.join(OUT, w))]
+    # Only dated directories are slate weeks. football/mercer/ lives under
+    # OUT too (the D.J. Mercer Spotlight, its own record) and must not be
+    # listed as a week - nice_date("mercer") would crash this render.
+    weeks = [w for w in weeks if os.path.isdir(os.path.join(OUT, w))
+             and re.match(r"^\d{4}-\d{2}-\d{2}$", w)]
     wl = "".join(f'<li><a href="/football/{w}/">Week of {nice_date(w)}</a></li>'
                  for w in weeks) or "<li>No weeks published yet.</li>"
 
@@ -327,6 +332,10 @@ def render_hub():
   what one unit would have returned, not money risked.</p>
   {table}
   {upgrade_block()}
+  <h2>D.J. Mercer Spotlight</h2>
+  <p class="mut">The model above is one record. <a href="/football/mercer/">D.J. Mercer</a> keeps
+  another: human-researched NFL and college picks, fingerprinted before kickoff and graded on
+  their own append-only ledger. The two never mix and neither borrows credibility from the other.</p>
   <h2>Weeks</h2>
   <ul class="plain">{wl}</ul>
   <p class="backline"><a href="/">Today's board</a> ·
@@ -362,6 +371,7 @@ def write(dirpath, inner, title, desc):
     <a href="/">Today's Board</a>
     <a href="/#ledger">The Ledger</a>
     <a href="/football/" class="here">Football</a>
+    <a href="/football/mercer/">D.J. Mercer</a>
     <a href="/blog/">Blog</a>
     <a href="/odds/">Odds</a>
   </nav>

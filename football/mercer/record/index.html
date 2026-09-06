@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Mercer Ledger — Open Ledger Sports</title>
+<meta name="description" content="Every D.J. Mercer football pick, graded in public. Wins, losses, pushes and voids, append-only.">
+<link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="shortcut icon" href="/favicon.ico">
+<style>
+  :root { color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --surface2:#222220;
+    --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --ring:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926; --good:#0ca30c; --crit:#d03b3b; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--page); color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.6; }
+  a { color:var(--s1); }
+  .wrap { max-width:780px; margin:0 auto; padding:0 20px; }
+  header.site { position:sticky; top:0; z-index:10; background:rgba(13,13,13,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--grid); }
+  .sitebar { display:flex; align-items:center; gap:14px; padding:12px 0; flex-wrap:wrap; }
+  .sitelogo { width:38px; height:38px; border-radius:50%; }
+  .markname { font-weight:800; letter-spacing:0.04em; font-size:0.98rem; }
+  .markname .open { color:var(--s1); }
+  .marksub { display:block; font-weight:500; font-size:0.6rem; letter-spacing:0.14em; color:var(--muted); text-transform:uppercase; }
+  .navlinks { margin-left:auto; display:flex; gap:14px; font-size:0.84rem; }
+  .navlinks a { color:var(--ink2); text-decoration:none; padding:6px 10px; border-radius:8px; }
+  .navlinks a:hover { background:var(--surface2); }
+  .navlinks a.here { background:var(--surface2); color:var(--ink); font-weight:650; }
+  article { padding:26px 0 30px; }
+  .kicker { display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--good); border:1px solid var(--ring); background:var(--surface); padding:5px 12px; border-radius:99px; margin-bottom:10px; }
+  .postdate { display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink2); margin-bottom:14px; }
+  h1 { font-size:1.55rem; line-height:1.2; letter-spacing:-0.01em; margin-bottom:14px; }
+  h2 { font-size:1.02rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted); margin:26px 0 10px; }
+  h3 { font-size:0.98rem; margin:20px 0 8px; }
+  p { color:var(--ink2); margin-bottom:12px; }
+  p strong, li strong { color:var(--ink); }
+  .lede { font-size:1.02rem; color:var(--ink2); }
+  .mut { font-size:0.82rem; color:var(--muted); }
+  ul { margin:0 0 12px 20px; color:var(--ink2); }
+  li { margin-bottom:7px; }
+  code { background:var(--surface2); border:1px solid var(--ring); border-radius:6px; padding:1px 6px; font-size:0.8em; }
+  .tablewrap { overflow-x:auto; margin-bottom:10px; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; background:var(--surface); border:1px solid var(--ring); border-radius:12px; overflow:hidden; }
+  th { text-align:left; font-size:0.64rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); padding:9px 10px; border-bottom:1px solid var(--grid); }
+  td { padding:8px 10px; border-bottom:1px solid var(--grid); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  td.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  td em { color:var(--muted); }
+  .backline { margin:20px 0; font-size:0.86rem; }
+  .idx { padding:26px 0 30px; }
+  .idxcard { display:block; background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:16px 18px; margin-bottom:12px; text-decoration:none; }
+  .idxcard:hover { border-color:var(--s1); }
+  .idxcard .d { font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+  .idxcard .t { display:block; color:var(--ink); font-weight:700; margin:4px 0 6px; font-size:1.02rem; }
+  .idxcard .z { display:block; color:var(--ink2); font-size:0.86rem; }
+  footer.legal { border-top:1px solid var(--grid); padding:22px 0 40px; margin-top:10px; }
+  footer.legal p { font-size:0.75rem; color:var(--muted); max-width:90ch; }
+
+  ul.plain { list-style:none; padding-left:0; }
+  ul.plain li { padding:3px 0; }
+
+  :root { --warn:#fab219; --serious:#ec835a; }
+  .subnav { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 20px; }
+  .subnav a { font-size:0.74rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink2); text-decoration:none; padding:6px 12px; border-radius:99px;
+    border:1px solid var(--ring); background:var(--surface); }
+  .subnav a:hover { border-color:var(--s1); color:var(--ink); }
+  .subnav a.here { color:var(--ink); border-color:var(--s1); }
+  .profile { display:flex; gap:16px; align-items:center; margin:8px 0 18px; }
+  .avatar { flex:none; width:64px; height:64px; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-weight:800; font-size:1.05rem; letter-spacing:0.04em; color:#0d0d0d;
+    background:linear-gradient(135deg,var(--s1),var(--s2)); }
+  .profile .who { font-weight:800; font-size:1.05rem; color:var(--ink); }
+  .profile .role { display:block; font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin:8px 0 18px; }
+  .tile { background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:14px 16px; }
+  .tile .tl { display:block; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted); }
+  .tile .tv { display:block; font-size:1.5rem; font-weight:750; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .tile .td { display:block; font-size:0.76rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .pick { background:var(--surface); border:1px solid var(--ring); border-radius:14px; padding:18px 18px 14px; margin-bottom:14px; }
+  .pick.graded-WIN { border-color:rgba(12,163,12,0.55); }
+  .pick.graded-LOSS { border-color:rgba(208,59,59,0.55); }
+  .pick.graded-VOID { border-style:dashed; }
+  .ph { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; flex-wrap:wrap; }
+  .pnum { font-size:0.68rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  .pmatch { display:block; color:var(--ink2); font-size:0.88rem; margin-top:2px; }
+  .sel { font-size:1.3rem; font-weight:800; color:var(--ink); margin:6px 0 2px; }
+  .sel small { font-size:0.85rem; font-weight:600; color:var(--ink2); }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-size:0.66rem; font-weight:700; letter-spacing:0.06em; padding:3px 9px; border-radius:99px;
+    background:var(--surface2); border:1px solid var(--ring); color:var(--ink2); }
+  .chip.play { color:var(--good); }
+  .chip.status-OFFICIAL { color:var(--good); border-color:rgba(12,163,12,0.45); }
+  .chip.status-LEAN { color:var(--warn); }
+  .chip.status-PASS { color:var(--muted); }
+  .conv { font-weight:700; }
+  .against { border-left:3px solid var(--serious); padding-left:12px; margin:10px 0 0; }
+  .altered { margin-top:10px; padding:10px 12px; border:1px solid var(--crit);
+    border-left:4px solid var(--crit); border-radius:8px; background:rgba(208,59,59,0.08);
+    font-size:0.8rem; color:var(--ink2); line-height:1.5; }
+  .rgline { margin:16px 0 6px; padding:10px 14px; border:1px solid var(--ring);
+    border-left:3px solid var(--warn); border-radius:10px; background:var(--surface);
+    font-size:0.8rem; color:var(--ink2); line-height:1.5; }
+  .chip.res-WIN { color:var(--good); } .chip.res-LOSS { color:var(--crit); }
+  .chip.res-PUSH { color:var(--ink2); } .chip.res-VOID { color:var(--warn); }
+  .prow { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px 12px;
+    margin:12px 0 4px; padding:10px 12px; background:var(--surface2); border-radius:10px; }
+  .plab { display:block; font-size:0.62rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted); }
+  .pval { font-size:0.9rem; font-weight:650; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .stars { color:var(--warn); letter-spacing:0.05em; }
+  .why { margin-top:12px; }
+  .why h4 { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:10px 0 4px; }
+  .why p { margin-bottom:6px; font-size:0.92rem; }
+  .fp { margin-top:10px; padding-top:10px; border-top:1px solid var(--grid); font-size:0.74rem; color:var(--muted); line-height:1.5; }
+  .fp code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:0.7rem; color:var(--s1); word-break:break-all; }
+  .fp .bad { color:var(--crit); font-weight:700; }
+  .fp .pending { color:var(--warn); font-weight:700; }
+  .spot { background:var(--surface); border:1px solid var(--ring); border-left:3px solid var(--s2); border-radius:12px; padding:16px 18px; margin-bottom:14px; }
+  .spot h3 { margin:0 0 6px; }
+  .spot h4 { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:12px 0 4px; }
+  .callout { background:var(--surface); border:1px solid var(--ring); border-left:3px solid var(--s1); border-radius:10px; padding:14px 16px; margin:16px 0; color:var(--ink2); font-size:0.9rem; }
+  .res-WIN { color:var(--good); } .res-LOSS { color:var(--crit); } .res-PUSH { color:var(--ink2); } .res-VOID { color:var(--warn); }
+  .quiet { color:var(--muted); font-size:0.8rem; }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap sitebar">
+  <img class="sitelogo" src="/assets/logo.jpg" width="440" height="440" alt="">
+  <div><span class="markname"><span class="open">OPEN LEDGER</span> SPORTS</span>
+    <small class="marksub">D.J. Mercer Spotlight · picks on the record, before kickoff</small></div>
+  <nav class="navlinks">
+    <a href="/">Today's Board</a>
+    <a href="/football/">Football</a>
+    <a href="/football/mercer/" class="here">D.J. Mercer</a>
+    <a href="/blog/">Blog</a>
+    <a href="/odds/">Odds</a>
+  </nav>
+</div></header>
+<div class="wrap">
+
+<div class="idx">
+  <span class="kicker">D.J. Mercer Spotlight · record</span>
+  <h1>The Mercer Ledger</h1>
+  <p class="lede">Every official selection. Every result. No deleted picks, no disappearing bad
+  weeks. <strong>No claim is made that these picks win</strong>; the table is the whole argument.</p>
+  <nav class="subnav"><a href="/football/mercer/">Spotlight</a><a href="/football/mercer/record/" class="here">The Mercer Ledger</a><a href="/football/mercer/about/">About D.J. Mercer</a><a href="/football/">Model football record</a></nav>
+  <p class="mut">This record was opened empty on <strong>Sunday, September 6, 2026</strong> and is waiting for its first committed pick. Nothing is backfilled, so it starts at zero rather than with a history nobody could check.</p>
+  <div class="tiles"><div class="tile"><span class="tl">NFL</span><span class="tv">0–0</span><span class="td">+0.00u · ROI —</span></div><div class="tile"><span class="tl">College Football</span><span class="tv">0–0</span><span class="td">+0.00u · ROI —</span></div><div class="tile"><span class="tl">Combined football</span><span class="tv">0–0</span><span class="td">+0.00u · ROI —</span></div></div>
+  <p class="mut"><strong>Nothing has been graded yet.</strong> This table is empty because no Mercer pick has settled, not because anything was removed. An empty record and a hidden one look identical, so we say which this is.</p>
+  <p class="rgline"><strong>21+.</strong> Open Ledger Sports is an analytics publication, not a sportsbook, and accepts no wagers. Nothing here is betting advice and no outcome is guaranteed. If you or someone you know has a gambling problem, call or text <strong>1-800-GAMBLER</strong>, or see the <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG's safer sports betting resources</a>.</p>
+  <p class="mut">Raw data: <a href="https://github.com/dsimny/dsimny.github.io/blob/main/data/mercer/mercer_ledger.json" rel="noopener">mercer_ledger.json</a>
+  · fingerprints: <a href="https://github.com/dsimny/dsimny.github.io/blob/main/data/mercer/commitments.json" rel="noopener">commitments.json</a>.</p>
+  
+<h2>How the record works</h2>
+<ul>
+  <li><strong>Fingerprinted before kickoff, or not at all.</strong> Each official pick is hashed
+  (SHA-256) and timestamped when it is filed, and that stamp is committed to a public repository.
+  The tool <em>refuses</em> to stamp a pick whose game has already started, so a late selection
+  never enters the record in the first place. The stamp is printed on every card.</li>
+  <li><strong>Nothing is backfilled.</strong> This record begins at the first publicly committed
+  pick. Older opinions cannot be added later, because every one of them would fail the test above.
+  A short honest record is the point; a long retrospective one would be worthless.</li>
+  <li><strong>Late is void.</strong> If a pick reaches grading with no stamp, or a stamp later than
+  its kickoff, it books as <span class="res-VOID">VOID</span> with the reason, and it stays on the
+  record where you can see it.</li>
+  <li><strong>Edited is refused.</strong> If a pick's text no longer matches its stamp, the grader
+  refuses to book it and says so on the page until it is restored.</li>
+  <li><strong>Graded is frozen.</strong> Once a pick is settled, its selection, line, price, stake
+  and result are never recomputed. Editing the card afterwards changes nothing in the ledger, and
+  the card says plainly that it was edited.</li>
+  <li><strong>The number is the number Mercer took.</strong> The line, the price and the book are
+  recorded as they were at the moment of the pick, and are never quietly replaced by a better
+  closing number.</li>
+  <li><strong>Only OFFICIAL picks count.</strong> Leans and passes are published as opinion, carry
+  no stake, and never touch the record.</li>
+  <li><strong>Separate records.</strong> NFL and college football are kept apart, with a combined
+  line, and none of it mixes with the site's model-driven football ledger.</li>
+  <li><strong>Pushes return the stake.</strong> ROI is profit divided by units risked on decided
+  picks (wins, losses and pushes); void picks are excluded from both.</li>
+  <li><strong>Conviction is three words, not a percentage.</strong> Standard, Strong or Spotlight.
+  Mercer has no calibrated model, so no number is invented to look like one.</li>
+</ul>
+<p class="mut">Not yet tracked: closing-line value on Mercer's picks, and whether Mercer and the
+model agreeing on a game means anything. Agreement will be counted before it is ever described as
+making a pick stronger. Both appear here when they are built, not before.</p>
+
+  <p class="backline"><a href="/football/mercer/">Spotlight</a> ·
+  <a href="/football/mercer/about/">About D.J. Mercer</a> ·
+  <a href="/football/">Model football record</a></p>
+</div>
+<footer class="legal"><p>Open Ledger Sports is an analytics publication, not a sportsbook. We accept no wagers. Nothing here is betting advice, and no outcome is guaranteed. 21+ only. If you or someone you know has a gambling problem, help is available: call or text 1-800-GAMBLER, or see the <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG's safer sports betting resources</a>.</p></footer>
+</div>
+</body>
+</html>

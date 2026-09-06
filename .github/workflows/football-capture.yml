@@ -204,6 +204,15 @@ jobs:
           WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
         run: python scripts/football/page.py --all
 
+      # The Mercer Spotlight re-renders here too, so a card pushed by hand
+      # during the week shows its fingerprint status and any final scores
+      # within the hour without waiting for the daily grade.
+      - name: Render the Mercer Spotlight
+        if: ${{ !cancelled() }}
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: python scripts/football/mercer.py render
+
       - name: Post the free play
         if: ${{ !cancelled() }}
         env:

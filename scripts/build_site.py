@@ -1032,6 +1032,7 @@ html = f'''<!DOCTYPE html>
     <button data-tab="method">Methodology</button>
     <button data-tab="rules">The Rules</button>
     <a href="football/">Football</a>
+    <a href="football/mercer/">D.J. Mercer</a>
     <a href="blog/">Blog</a>
     <a href="odds/">Odds</a>
   </nav>

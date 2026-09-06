@@ -1,0 +1,5 @@
+{
+ "_note": "Per-pick fingerprints for the D.J. Mercer Spotlight. Each entry is the SHA-256 of one pick's canonical JSON, stamped when `mercer.py commit` first saw it. Append-only: a pick is never re-stamped. The grader books a pick only if its EARLIEST stamp matches the pick as it stands now AND precedes kickoff; otherwise the entry is VOID (never stamped, or stamped late) or REFUSED (edited after stamping). The git history of this file is the public timestamp.",
+ "commitments": [],
+ "created_utc": "2026-09-06T13:28:08Z"
+}

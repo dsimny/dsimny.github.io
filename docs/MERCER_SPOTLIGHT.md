@@ -125,6 +125,82 @@ that is a finding about the ladder and it gets published like any other.
 A label that appears every week means nothing. Spotlight is expected to be rare,
 and its rarity is the only thing that makes it informative.
 
+## 2c. Mercer Research Filter v1.0 - FROZEN 2026-09-06
+
+Thresholds for triaging a slate into research tiers. **Frozen for the remainder
+of Week 1 and not to be recalibrated from this week's distribution again.**
+Re-deriving a cut from the same data it is applied to is how a filter becomes a
+description of one week rather than a rule.
+
+### WHAT THESE GRADES MEAN, AND WHAT THEY DO NOT
+
+**These grades measure whether a game is sufficiently researched to evaluate.
+They do not measure expected betting value, confidence, or probability of
+winning.**
+
+A game graded A on all three is a game where the evidence is good enough to form
+a view. It is not a game more likely to win, not a game more likely to be
+selected, and not a game with a better price. A grade is a statement about our
+information, not about the teams and not about the market's accuracy. Nothing in
+this filter may ever be cited as a reason a selection is strong.
+
+### The three grades
+
+**Data quality** - how settled the availability picture is.
+
+| grade | rule |
+|---|---|
+| A | 6 or fewer unresolved Questionable designations across both teams |
+| B | 7 to 10 |
+| C | 11 or more |
+
+Counted from the ESPN injury feed across both teams. A team the feed does not
+cover fails this outright: health is never inferred from silence.
+
+**Market stability** - how settled the number is.
+
+| grade | rule |
+|---|---|
+| A | spread dispersion <= 0.5 pts AND moneyline movement <= 2.0 probability points |
+| B | dispersion <= 1.5 pts AND movement <= 3.0 pp |
+| C | anything wider |
+
+Dispersion is the widest spread across books **on a single side of the line**.
+Measuring it over every quoted point mixes the favourite's -3.5 with the
+underdog's +3.5 and reports 7 points of disagreement on a unanimous market; that
+error was made and corrected on 2026-09-06. Movement is measured in implied
+probability points, never in raw American odds, which are discontinuous at
++/-100.
+
+**Research interest** - whether there is a question worth answering.
+
+| grade | rule |
+|---|---|
+| A | spread magnitude <= 3 AND (dispersion >= 1.0 pt OR movement >= 1.5 pp) |
+| B | spread <= 3, or dispersion >= 1.0 pt |
+| C | neither |
+
+### Tier gates
+
+Hard gates send a game to Tier C: kickoff outside the commissioning window,
+no spread quoted, fewer than 8 books (NFL) or 5 (college), spread magnitude
+above 10.5, or dispersion above 3.0 pts. Soft gates send it to Tier B: injury
+source missing for either team, no usable prior-season profile, no total
+quoted, or fewer than 5 injury entries on either side. Tier A is additionally
+capped as a research budget, not a threshold; games below the cap are recorded
+as ranked-out, not as deficient.
+
+### Provenance of the numbers
+
+The boundaries were set on 2026-09-06 against the Week 1 distribution, and the
+Questionable B/C boundary sits on a natural cluster break in that week's counts
+(5, 5, 7, 10, 10, 11, 11, 12, 13). That is honest for a first pass and is
+exactly why it is frozen now: a threshold re-cut every week against the week it
+judges is not a filter.
+
+Any change is a version bump with the reason recorded, following the precedent
+of House Rule 9 for the model's gates.
+
 ## 3. The record, and why it cannot be flattered
 
 ### Requirement 1 — ledger separation

@@ -39,8 +39,48 @@ instruction leads rather than sits in a FAQ.
 >
 > **What you receive**
 >
-> As a member, you'll get access to the plays that clear the Open Ledger process
-> but are held back from the public Free Pick.
+> Your membership is not just access to a handful of premium picks.
+>
+> During football season, members receive the full reasoned slate: every covered
+> game Open Ledger evaluates, with the market numbers, model context, analysis,
+> and written reasoning behind it.
+>
+> That means a typical football week can include dozens of evaluated games —
+> including games where the conclusion is PASS.
+>
+> From that complete slate, Open Ledger may designate a smaller number of
+> committed premium plays that meet the required standards for an official
+> position. Those plays become part of the permanent, gradeable record.
+>
+> The distinction matters:
+>
+> The slate is the analytical product. The committed plays are the
+> accountability mechanism.
+>
+> We do not manufacture official plays simply to create more action or make a
+> subscription appear busier. If nothing meets the standard, nothing gets
+> promoted into a play.
+>
+> **What we are — and are not — claiming**
+>
+> Open Ledger Sports does not claim that its football plays are proven to beat
+> the market.
+>
+> Our published research has not established that this market can currently be
+> out-forecast at the point when we are able to act, and we will not pretend
+> otherwise.
+>
+> That is why the product is built around transparency rather than promises:
+>
+> * See the games we evaluated.
+> * See the reasoning.
+> * See the numbers available when the decision was made.
+> * See what we passed on.
+> * See which positions were actually committed.
+> * Then see the results — including the losses.
+>
+> The methodology, research, limitations, and record remain public so you can
+> judge the process for yourself rather than relying on marketing claims.
 >
 > Open Ledger is built differently from a traditional picks service:
 >
@@ -62,6 +102,8 @@ instruction leads rather than sits in a FAQ.
 > After connecting, refresh Discord and look for the Members role and
 > #members-only channel.
 >
+> `SUPPORT CONTACT — SET BEFORE LAUNCH`
+>
 > Open Ledger Sports provides sports analytics and information only. It is not a
 > sportsbook and does not accept wagers. No outcome is guaranteed. 21+. If
 > gambling is causing problems for you or someone you know, call 1-800-GAMBLER.
@@ -81,8 +123,14 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 > After the connection is complete, the Members role should be added
 > automatically and #members-only will appear.
 >
-> Your membership gives you access to the member board during the sports and
-> markets Open Ledger is actively publishing.
+> Your membership gives you access to the full member slate during the sports
+> and markets Open Ledger is actively covering — including the games evaluated,
+> the reasoning behind them, PASS decisions, and any premium plays that qualify
+> for an official position.
+>
+> Open Ledger does not claim those plays are proven to beat the market. The
+> research, methodology, limitations, and results are published so you can
+> evaluate that claim for yourself.
 >
 > Remember what you are buying: the process and the record, not a promise of
 > winners.
@@ -91,7 +139,7 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 > stay. Passes stay passes.
 >
 > If you still cannot access the channel after connecting Discord, contact us
-> for help.
+> at `SUPPORT CONTACT — SET BEFORE LAUNCH`.
 >
 > 21+ • Analytics only • Not a sportsbook • No guarantees • 1-800-GAMBLER
 
@@ -150,36 +198,50 @@ brand cannot recover from.
 | The methodology, limitations and record remain public | `/football/`, the two published research results, and the NO MARKET list |
 | Legal footer, 21+, 1-800-GAMBLER | present in all three pieces (House Rule 5) |
 
-**TWO GAPS WORTH CLOSING BEFORE THE FIRST SUBSCRIBER, neither of which makes
-the copy false — both make it describe the WRONG PRODUCT or say less than the
-rules require.**
+**THREE GAPS WERE RAISED IN REVIEW AND ALL THREE ARE NOW CLOSED** (Daniel,
+2026-09-06). Recorded rather than quietly edited away, because the first one was
+a commercial error rather than a wording one and is worth not repeating.
 
-**1. It describes the MLB product, and undersells football.** "the plays that
-clear the Open Ledger process but are held back from the public Free Pick" is an
-accurate description of the MLB membership. It is not what a football member
-actually receives. `discord.py slate` sends `#members-only` **the entire reasoned
-slate — every covered game with its numbers and its write-up, ~57 in a college
-week — plus the one premium play.** The held play is the accountability
-mechanism; the slate is the product, and it is the whole reason the price is
-defensible (see `FOOTBALL_LAUNCH.md` §J). As written, the copy sells four picks
-a month.
+**1. It described the MLB product, and undersold football. FIXED.** The original
+"plays that clear the Open Ledger process but are held back from the public Free
+Pick" is accurate for baseball and wrong for football. `discord.py slate` sends
+`#members-only` **the entire reasoned slate — every covered game with its
+numbers and its write-up, dozens in a college week — plus the committed premium
+play.**
 
-**2. It does not carry football's no-expectation claim.** "the process and the
-record, not a promise of winners" is close and is not a violation. But
-`FOOTBALL_PIPELINE.md` §1 requires copy to say plainly that no expectation claim
-is made, and the site already does: *"We make no claim that these plays win. Two
-pre-registered studies, both published in full, found this market cannot be
-out-forecast at the moment we can act."* Member-facing copy saying less than the
-public page is the wrong way round — the person who has paid should be told at
-least as much as the person who has not.
+The replacement states the distinction directly: *the slate is the analytical
+product, the committed plays are the accountability mechanism.* That is the
+correct way round and it is what makes the price defensible. The old wording
+sold four picks a month, which is both inaccurate and the framing this brand
+loses on — against anyone willing to promise winners, honesty is a handicap;
+against research, it is the moat (`FOOTBALL_LAUNCH.md` §J).
 
-**Minor:** §2 ends "contact us for help" without saying how. Name the channel or
-the email, or it becomes a support ticket about how to file a support ticket.
+**2. It did not carry football's no-expectation claim. FIXED.** A dedicated
+"What we are — and are not — claiming" section now says the published research
+has not established that this market can be out-forecast at the point we can
+act. `FOOTBALL_PIPELINE.md` §1 requires that said plainly, and the public page
+already said it — member-facing copy saying LESS than the public page is the
+wrong way round. The paying reader is now told at least as much as the
+non-paying one.
+
+**3. "Contact us for help" named no route. FIXED with a MARKER, not an
+invention.** Both places now carry a literal `SUPPORT CONTACT — SET BEFORE
+LAUNCH` placeholder. Guessing an address or channel would have shipped a support
+promise pointing nowhere, which is worse than an obvious blank. Grep for that
+string before publishing either asset:
+
+    git grep "SUPPORT CONTACT — SET BEFORE LAUNCH"
+
+Decide which route is actually owned operationally — a dedicated Discord support
+channel, Whop's own support button, or an Open Ledger email — and replace both
+occurrences with the exact one.
 
 ## Still open
 
-**Refund and cancellation policy.** Nothing in this repo covers what happens
-when someone cancels mid-month or asks for their money back. Whop has defaults
+**Refund and cancellation policy — the next thing to write.** Nothing in this
+repo covers mid-cycle cancellation, refund requests, accidental renewals, or
+whether access continues through a period already paid for. Whop has defaults
 that may or may not be what is wanted. This is the remaining customer-facing
-rule most likely to create ambiguity once money changes hands, and a
-transparency brand handles its first refund request badly exactly once.
+rule most likely to create ambiguity once money changes hands, and it should be
+made as explicit as the betting methodology. A transparency brand handles its
+first refund request badly exactly once.

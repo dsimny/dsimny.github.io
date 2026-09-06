@@ -108,6 +108,41 @@ It may be reviewed after one complete cycle succeeds. Nothing in the code
 enforces it, and nothing should: `commit` is deliberately incremental so that
 mid-week additions work in normal weeks.
 
+**CONSEQUENCE FOR WEEK 1, MEASURED 2026-09-06.** One push before the earliest
+kickoff means the whole card is committed before **Sun 2026-09-13 1:00pm ET**.
+The Monday night game (Denver at Kansas City, Mon 8:15pm ET) has a T-24 capture
+window that does not open until **Sun 2:15pm ET** - after that deadline. So a
+Monday game cannot be committed on its own T-24 pricing under this rule; it
+would be committed roughly 25 hours before its freshest capture exists, and
+probably before its final injury designations.
+
+That is not an argument against the rule. It is the cost of the rule, and it has
+to be paid knowingly: either a Monday game is excluded from the commissioning
+card, or it is committed on materially staler information than the Sunday games
+on the same card. The decision is made before the card is written, never after
+Sunday's games have started.
+
+### The independent football case
+
+**A thesis must survive this question: "Would I still want this position if I had
+never seen the current betting line?"**
+
+The number matters enormously. That is not what this rule is about. It is about
+the order in which the reasoning happens. Seeing +8, or a total of 46, and then
+assembling a story that justifies it is the single easiest way to produce
+analysis that looks rigorous and is actually backwards. The football case has to
+exist on its own first. Only then is the market asked whether it offers a price
+worth taking.
+
+The practical test at writing time: strike every reference to the current number
+from the case-for and the case-against. If what remains is not a position, there
+was no thesis, only a reaction to a price.
+
+This is why the walk-away boundary is recorded separately from the thesis. The
+thesis says what is believed about the game; the boundary says at what number
+that belief stops being actionable. A thesis that cannot be stated without its
+price is not eligible.
+
 ### Conviction ladder
 
 | level | meaning |

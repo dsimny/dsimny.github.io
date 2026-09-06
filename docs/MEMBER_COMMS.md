@@ -6,9 +6,11 @@ the first subscriber arrives, or the season turns. Improvising customer-facing
 copy under time pressure is how a transparency brand ends up saying something it
 cannot support.
 
-Three assets, and the accuracy review that follows them. The copy below is
-Daniel's, reproduced verbatim; the review is separate on purpose so nobody has
-to guess which words were signed off.
+Four assets, and the accuracy review that follows them. Assets 1-3 are
+Daniel's copy, reproduced verbatim with his 2026-09-06 corrections applied;
+asset 4 is the checkout-facing summary of
+`docs/REFUND_CANCELLATION_POLICY.md`. The review is separate on purpose so
+nobody has to guess which words were signed off.
 
 Related: `PLAN-paid-tier.md` (the Whop setup and its gotchas),
 `docs/FOOTBALL_LAUNCH.md` §J (premium copy), `CLAUDE.md` House Rules 4, 5, 7, 8.
@@ -102,7 +104,7 @@ instruction leads rather than sits in a FAQ.
 > After connecting, refresh Discord and look for the Members role and
 > #members-only channel.
 >
-> `SUPPORT CONTACT — SET BEFORE LAUNCH`
+> Contact Open Ledger Sports through your Whop membership or order for billing, cancellation, refund, or access support.
 >
 > Open Ledger Sports provides sports analytics and information only. It is not a
 > sportsbook and does not accept wagers. No outcome is guaranteed. 21+. If
@@ -139,7 +141,7 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 > stay. Passes stay passes.
 >
 > If you still cannot access the channel after connecting Discord, contact us
-> at `SUPPORT CONTACT — SET BEFORE LAUNCH`.
+> through your Whop membership or order.
 >
 > 21+ • Analytics only • Not a sportsbook • No guarantees • 1-800-GAMBLER
 
@@ -178,6 +180,49 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 >
 > 21+ • Sports analytics only • Open Ledger Sports is not a sportsbook and does
 > not accept wagers • No outcome is guaranteed • 1-800-GAMBLER
+
+## 4. Refunds and cancellation — checkout-facing short version
+
+Shown at checkout and linked from the Whop product page. The full policy, with
+its reasoning and its operational rules, is `docs/REFUND_CANCELLATION_POLICY.md`
+— this is the summary, and if the two ever disagree the policy is what governs.
+
+> **Before you subscribe — how billing works**
+>
+> **$30 per month. No trial. Cancel any time.**
+>
+> **Cancelling.** Cancelling stops your next renewal. You keep member access
+> through the end of the period you have already paid for — cancelling does not
+> cut you off mid-month.
+>
+> **Refunds.** We do not refund part of a month you have already started.
+>
+> **We guarantee delivery, never results.** If an Open Ledger technical failure
+> stops you getting the member access you paid for, and we cannot fix it within
+> 24 hours of you contacting support, you get a full refund. If the product is
+> materially not delivered as described, the same applies.
+>
+> **We do not refund for losing plays or a disappointing record.** That is not
+> fine print — it is the same thing we say everywhere else, before you pay:
+> Open Ledger does not claim its football plays are proven to beat the market,
+> our published research has not established that they are, and the record is
+> public precisely so you can decide for yourself before subscribing.
+>
+> **Renewed by accident?** Contact us within 48 hours of the charge. If no new
+> member slate or premium content has been published since that renewal, we
+> refund it in full. One courtesy refund per customer per year.
+>
+> **Payment problems** — duplicate charges, payment errors, fraud, chargebacks —
+> are handled under Whop's payment terms and applicable law, which take
+> precedence over this policy where they apply.
+>
+> **Support.** Contact Open Ledger Sports through your Whop membership or order
+> for billing, cancellation, refund, or access questions.
+>
+> 21+ • Sports analytics only • Open Ledger Sports is not a sportsbook and does
+> not accept wagers • No outcome is guaranteed • 1-800-GAMBLER
+
+---
 
 ---
 
@@ -224,24 +269,24 @@ already said it — member-facing copy saying LESS than the public page is the
 wrong way round. The paying reader is now told at least as much as the
 non-paying one.
 
-**3. "Contact us for help" named no route. FIXED with a MARKER, not an
-invention.** Both places now carry a literal `SUPPORT CONTACT — SET BEFORE
-LAUNCH` placeholder. Guessing an address or channel would have shipped a support
-promise pointing nowhere, which is worse than an obvious blank. Grep for that
-string before publishing either asset:
+**3. "Contact us for help" named no route. RESOLVED 2026-09-06 — the route is
+Whop.** It was first left as a greppable `SUPPORT CONTACT — SET BEFORE LAUNCH`
+marker rather than a guessed address, because a support promise pointing nowhere
+is worse than an obvious blank. Daniel then chose the route and both occurrences
+now read: *contact Open Ledger Sports through your Whop membership or order.*
 
-    git grep "SUPPORT CONTACT — SET BEFORE LAUNCH"
-
-Decide which route is actually owned operationally — a dedicated Discord support
-channel, Whop's own support button, or an Open Ledger email — and replace both
-occurrences with the exact one.
+The reason is auditability, not convenience. Whop ties the thread to the actual
+customer and the actual purchase; a refund argument conducted across Discord DMs
+leaves no record either side can point at, which is an odd way to run a brand
+whose whole claim is that its records are checkable.
 
 ## Still open
 
-**Refund and cancellation policy — the next thing to write.** Nothing in this
-repo covers mid-cycle cancellation, refund requests, accidental renewals, or
-whether access continues through a period already paid for. Whop has defaults
-that may or may not be what is wanted. This is the remaining customer-facing
-rule most likely to create ambiguity once money changes hands, and it should be
-made as explicit as the betting methodology. A transparency brand handles its
-first refund request badly exactly once.
+**One Whop account setting, and it is a launch blocker.** Whop supports
+configurable automatic refunds. If a threshold is set high enough to cover the
+$30 membership, Whop could auto-approve a request this policy intends to review
+by hand — and asset 4's 48-hour rule turns on a fact (was a member slate
+delivered since that renewal?) that only a human checking
+`data/post_status.json` can establish. **Automatic refunds must be disabled for
+this product before checkout goes live.** It cannot be verified from the repo;
+see the launch checklist in `docs/REFUND_CANCELLATION_POLICY.md`.

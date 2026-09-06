@@ -239,7 +239,21 @@ jobs:
           # its reveal is the one thing that must never be committed, and in CI
           # crypto_box refuses to write one anyway. Grading stages it later,
           # after the reveal, which is when publishing it is the point.
-          git add data/football/board_*.enc                   data/football/commitments.json                   data/football/game_commitments.json                   data/post_status.json                   football/ 2>/dev/null || true
+          # ONE PATH PER `git add` - see the long note in football-grade.yml.
+          # A glob matching nothing makes git exit 128 and stage NOTHING,
+          # including the valid paths beside it, and `|| true` then hides it so
+          # the job goes green having committed nothing. That silently cost the
+          # grade job eleven days of work. This step had the same shape and was
+          # only ever saved by board_*.enc happening to match; before the first
+          # board existed it would have dropped the site and post_status writes
+          # too.
+          for p in data/football/board_*.enc \
+                   data/football/commitments.json \
+                   data/football/game_commitments.json \
+                   data/post_status.json \
+                   football/; do
+            git add "$p" 2>/dev/null || true
+          done
           git diff --cached --quiet || git commit -m "Football board $SLATE_WEEK"
           git push
 

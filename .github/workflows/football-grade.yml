@@ -134,13 +134,34 @@ jobs:
           # grading the plaintext board is exactly what we are publishing, so
           # anyone can hash it and check it against the fingerprint committed
           # before kickoff.
-          git add data/football/football_ledger.json \
-                  data/football/commitments.json \
-                  data/football/ncaaf_results.json \
-                  data/football/nfl_results.json \
-                  data/football/board_*.json \
-                  data/mercer/ \
-                  football/ 2>/dev/null || true
+          # ONE PATH PER `git add`, and this is not a style preference.
+          # `git add a b c_*.json` where the glob matches NOTHING is fatal: git
+          # exits 128 and stages NOTHING AT ALL, including the paths that were
+          # fine. With `2>/dev/null || true` swallowing that, the step passes,
+          # `git diff --cached --quiet` is true, and the job goes green having
+          # committed nothing.
+          #
+          # THIS ACTUALLY HAPPENED, for eleven consecutive days. Between
+          # 2026-08-27 and 2026-09-06 this job ran 11 times, succeeded every
+          # time, and committed NOTHING - because data/football/board_*.json
+          # matched no file while every board was still encrypted and
+          # unrevealed. So results were never refreshed, nothing ever graded,
+          # nothing was ever revealed, and two weeks of committed plays sat held
+          # after they had settled. House Rule 7 says that is fraud, and the
+          # cause was a shell idiom.
+          #
+          # Verified in a scratch repo: `git add real.txt also.txt board_*.json`
+          # -> exit 128, nothing staged; the same paths added one at a time ->
+          # both staged.
+          for p in data/football/football_ledger.json \
+                   data/football/commitments.json \
+                   data/football/ncaaf_results.json \
+                   data/football/nfl_results.json \
+                   data/football/board_*.json \
+                   data/mercer/ \
+                   football/; do
+            git add "$p" 2>/dev/null || true
+          done
           git diff --cached --quiet || git commit -m "Football grade $(date -u +%F)"
           git push
 

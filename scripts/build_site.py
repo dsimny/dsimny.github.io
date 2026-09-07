@@ -38,6 +38,17 @@ BOOK_TITLE = "Don't Trust the Screenshot"
 BOOK_AUTHOR = "D.J. Mercer"
 BOOK_PRICE = "$6.99 Kindle · $14.99 paperback"
 
+# Sponsor slot. Direct-sold, one sponsor at a time, labeled as paid — an
+# unmarked ad would undercut the thesis the same way an unmarked book plug
+# would. Set BOTH repo variables SPONSOR_NAME and SPONSOR_URL and the box
+# renders; leave either unset and the site renders without it, never with a
+# dead link — same graceful-skip pattern as the Whop button and the Discord
+# invite. SPONSOR_TAGLINE is the sponsor's one line of copy, optional. The
+# sponsor buys the box, never a word of the analysis, a pick, or a ledger row.
+SPONSOR_NAME = os.environ.get("SPONSOR_NAME", "").strip()
+SPONSOR_URL = os.environ.get("SPONSOR_URL", "").strip()
+SPONSOR_TAGLINE = os.environ.get("SPONSOR_TAGLINE", "").strip()
+
 # Email capture. Set to a beehiiv form id to turn the embed (and its attribution
 # script) back on; "" drops both. Dropped 2026-07-23: beehiiv's automated
 # daily send needs a Max/Enterprise tier the empty list doesn't justify yet.
@@ -571,6 +582,19 @@ book_block = f'''
       <a class="bookbtn" href="{BOOK_URL}" rel="noopener" target="_blank">Buy on Amazon →</a>
     </div>''' if BOOK_URL else ""
 
+# The sponsor box. Labeled before it is read ("Sponsor", top line), disclosed
+# after ("paid placement", bottom line) — the reader should never have to work
+# out that this is an ad. rel="sponsored" tells search engines the same thing
+# the label tells the reader.
+sponsor_block = f'''
+    <div class="sponsor">
+      <p class="sponsorlabel">Sponsor</p>
+      <p class="joinlead"><a href="{SPONSOR_URL}" rel="noopener sponsored" target="_blank">{SPONSOR_NAME} →</a></p>
+      {f'<p class="joinsub">{SPONSOR_TAGLINE}</p>' if SPONSOR_TAGLINE else ""}
+      <p class="sponsornote">Paid placement. Sponsors buy this box and nothing else — not a word of
+      the analysis, not a pick, not a line on the ledger.</p>
+    </div>''' if (SPONSOR_NAME and SPONSOR_URL) else ""
+
 def tease(b):
     # Matchup and risk tier only. Printing confidence, edge and unit size here
     # gave away most of a held play: on a two-team game, a stated confidence
@@ -639,6 +663,7 @@ if free is not None:
     {upgrade_block}
     {join_block}
     {email_block}
+    {sponsor_block}
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>
     <p class="sectsub" style="margin-top:14px;">Curious how the pick was made? <a href="#" data-goto="method">Read the methodology</a>. The whole tank is behind glass.</p>'''
 elif DP is not None and dp_row is not None:
@@ -666,6 +691,7 @@ elif DP is not None and dp_row is not None:
     {RG_BLOCK}
     {join_block}
     {email_block}
+    {sponsor_block}
     <div><button class="boardcta" data-goto="board">See the full board →</button></div>'''
 else:
     free_section = f'''
@@ -935,6 +961,10 @@ html = f'''<!DOCTYPE html>
      so it never competes with the blue Discord / green premium buttons. */
   .book {{ margin:18px 0 6px; padding:16px 18px; border:1px solid var(--ring); border-left:3px solid var(--s2); border-radius:14px; background:var(--surface); }}
   .bookbtn {{ display:inline-block; margin-top:12px; padding:10px 18px; border-radius:99px; background:var(--s2); color:#0d0d0d; font-weight:800; font-size:0.88rem; text-decoration:none; }}
+  .sponsor {{ margin:18px 0 6px; padding:16px 18px; border:1px dashed var(--grid); border-radius:14px; background:var(--surface); }}
+  .sponsor .joinlead a {{ color:var(--warn); text-decoration:none; }}
+  .sponsorlabel {{ font-size:0.7rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }}
+  .sponsornote {{ font-size:0.76rem; color:var(--muted); margin-top:8px; }}
   .lockednote {{ margin-top:10px; font-size:0.8rem; line-height:1.5; color:var(--ink2); border-top:1px solid var(--grid); padding-top:10px; }}
   .rgline {{ margin:14px 0 6px; padding:10px 14px; border:1px solid var(--ring); border-left:3px solid var(--warn); border-radius:10px; background:var(--surface); font-size:0.8rem; color:var(--ink2); line-height:1.5; }}
   /* Staleness banner (2026-08-17). Uses the existing critical colour, sits above

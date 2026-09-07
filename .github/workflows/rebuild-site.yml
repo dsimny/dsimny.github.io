@@ -28,6 +28,9 @@ jobs:
         env:
           DISCORD_INVITE_URL: ${{ vars.DISCORD_INVITE_URL }}
           WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
+          SPONSOR_NAME: ${{ vars.SPONSOR_NAME }}         # optional — sponsor box omitted when unset
+          SPONSOR_URL: ${{ vars.SPONSOR_URL }}
+          SPONSOR_TAGLINE: ${{ vars.SPONSOR_TAGLINE }}
           SITE_URL: ${{ vars.SITE_URL }}
         run: |
           LATEST=$(ls data/board_*.json data/board_*.enc 2>/dev/null \

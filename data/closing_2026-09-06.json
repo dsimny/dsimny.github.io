@@ -309,11 +309,11 @@
   "mins_to_first_pitch": 350
  },
  "823903": {
-  "away_ml": 169,
+  "away_ml": 168,
   "home_ml": -200,
-  "total": 8.0,
-  "over_price": -115,
-  "under_price": -105,
+  "total": 8.5,
+  "over_price": -103,
+  "under_price": -118,
   "away_name": "Washington Nationals",
   "home_name": "Los Angeles Dodgers",
   "utc": "2026-09-07T02:10:00Z",
@@ -333,9 +333,17 @@
     "over_price": -115,
     "under_price": -105,
     "captured_utc": "2026-09-06T22:30:22Z"
+   },
+   {
+    "away_ml": 168,
+    "home_ml": -200,
+    "total": 8.5,
+    "over_price": -103,
+    "under_price": -118,
+    "captured_utc": "2026-09-07T01:30:25Z"
    }
   ],
-  "captured_utc": "2026-09-06T22:30:22Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-07T01:30:25Z",
+  "mins_to_first_pitch": 40
  }
 }

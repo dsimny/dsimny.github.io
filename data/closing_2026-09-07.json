@@ -176,11 +176,11 @@
   "mins_to_first_pitch": 280
  },
  "823175": {
-  "away_ml": 110,
-  "home_ml": -129,
-  "total": 7.5,
-  "over_price": -115,
-  "under_price": -105,
+  "away_ml": -105,
+  "home_ml": -107,
+  "total": 8.0,
+  "over_price": -102,
+  "under_price": -118,
   "away_name": "St. Louis Cardinals",
   "home_name": "San Francisco Giants",
   "utc": "2026-09-08T00:10:00Z",
@@ -192,17 +192,25 @@
     "over_price": -115,
     "under_price": -105,
     "captured_utc": "2026-09-07T16:30:28Z"
+   },
+   {
+    "away_ml": -105,
+    "home_ml": -107,
+    "total": 8.0,
+    "over_price": -102,
+    "under_price": -118,
+    "captured_utc": "2026-09-07T22:30:27Z"
    }
   ],
-  "captured_utc": "2026-09-07T16:30:28Z",
-  "mins_to_first_pitch": 460
+  "captured_utc": "2026-09-07T22:30:27Z",
+  "mins_to_first_pitch": 100
  },
  "823902": {
-  "away_ml": 147,
-  "home_ml": -175,
+  "away_ml": 267,
+  "home_ml": -326,
   "total": 8.5,
-  "over_price": -105,
-  "under_price": -115,
+  "over_price": -111,
+  "under_price": -107,
   "away_name": "Cincinnati Reds",
   "home_name": "Los Angeles Dodgers",
   "utc": "2026-09-08T01:10:00Z",
@@ -214,17 +222,25 @@
     "over_price": -105,
     "under_price": -115,
     "captured_utc": "2026-09-07T16:30:28Z"
+   },
+   {
+    "away_ml": 267,
+    "home_ml": -326,
+    "total": 8.5,
+    "over_price": -111,
+    "under_price": -107,
+    "captured_utc": "2026-09-07T22:30:27Z"
    }
   ],
-  "captured_utc": "2026-09-07T16:30:28Z",
-  "mins_to_first_pitch": 520
+  "captured_utc": "2026-09-07T22:30:27Z",
+  "mins_to_first_pitch": 160
  },
  "824958": {
-  "away_ml": -200,
-  "home_ml": 170,
-  "total": 8.5,
-  "over_price": -102,
-  "under_price": -118,
+  "away_ml": -178,
+  "home_ml": 151,
+  "total": 9.5,
+  "over_price": -115,
+  "under_price": -103,
   "away_name": "Toronto Blue Jays",
   "home_name": "Athletics",
   "utc": "2026-09-08T02:05:00Z",
@@ -236,9 +252,17 @@
     "over_price": -102,
     "under_price": -118,
     "captured_utc": "2026-09-07T16:30:28Z"
+   },
+   {
+    "away_ml": -178,
+    "home_ml": 151,
+    "total": 9.5,
+    "over_price": -115,
+    "under_price": -103,
+    "captured_utc": "2026-09-07T22:30:27Z"
    }
   ],
-  "captured_utc": "2026-09-07T16:30:28Z",
-  "mins_to_first_pitch": 575
+  "captured_utc": "2026-09-07T22:30:27Z",
+  "mins_to_first_pitch": 215
  }
 }

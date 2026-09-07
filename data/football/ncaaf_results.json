@@ -138,20 +138,20 @@
    "away": "Louisville Cardinals",
    "away_abbr": "LOU",
    "away_key": "louisvillecardinals",
-   "away_score": null,
+   "away_score": 38,
    "espn_event_id": "401856661",
-   "final": false,
+   "final": true,
    "home": "Ole Miss Rebels",
    "home_abbr": "MISS",
    "home_key": "olemissrebels",
-   "home_score": null,
+   "home_score": 41,
    "kickoff_utc": "2026-09-06T23:30:00Z",
-   "margin": null,
+   "margin": 3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 79
   },
   "401856662": {
    "away": "UL Monroe Warhawks",
@@ -1791,39 +1791,39 @@
    "away": "Washington State Cougars",
    "away_abbr": "WSU",
    "away_key": "washingtonstatecougars",
-   "away_score": null,
+   "away_score": 10,
    "espn_event_id": "401858437",
-   "final": false,
+   "final": true,
    "home": "Washington Huskies",
    "home_abbr": "WASH",
    "home_key": "washingtonhuskies",
-   "home_score": null,
+   "home_score": 24,
    "kickoff_utc": "2026-09-06T20:00:00Z",
-   "margin": null,
+   "margin": 14,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 34
   },
   "401858438": {
    "away": "Wisconsin Badgers",
    "away_abbr": "WIS",
    "away_key": "wisconsinbadgers",
-   "away_score": null,
+   "away_score": 13,
    "espn_event_id": "401858438",
-   "final": false,
+   "final": true,
    "home": "Notre Dame Fighting Irish",
    "home_abbr": "ND",
    "home_key": "notredamefightingirish",
-   "home_score": null,
+   "home_score": 41,
    "kickoff_utc": "2026-09-06T23:30:00Z",
-   "margin": null,
+   "margin": 28,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 54
   },
   "401858439": {
    "away": "Howard Bison",
@@ -3517,5 +3517,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-09-06T18:00:09Z"
+ "updated_utc": "2026-09-07T16:15:30Z"
 }

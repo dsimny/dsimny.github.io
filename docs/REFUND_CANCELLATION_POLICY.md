@@ -15,7 +15,7 @@ Customer-facing short version: `docs/MEMBER_COMMS.md` §4. The two must say the
 same thing; if they ever diverge, THIS file is the policy and the short version
 is the summary that needs fixing.
 
-Product: **Open Ledger Sports Member, $30/month, no trial.**
+Product: **Open Ledger Sports Member, $49/month, no trial.**
 
 ---
 
@@ -145,7 +145,7 @@ deadline that cannot be recovered once it passes.
 **Status: UNVERIFIED — Daniel must confirm before checkout goes live.**
 
 Whop supports configurable automatic refunds. If an auto-refund threshold is set
-high enough to cover a $30 membership, Whop could approve automatically a
+high enough to cover a $49 membership, Whop could approve automatically a
 request this policy intends to evaluate by hand — and section 3's 48-hour rule
 depends on a fact (was a slate delivered since the renewal?) that only a human
 checking `post_status.json` can establish.

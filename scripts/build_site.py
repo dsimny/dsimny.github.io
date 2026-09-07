@@ -27,7 +27,7 @@ DISCORD_INVITE = os.environ.get("DISCORD_INVITE_URL", "").strip()
 # never advertises something that cannot be bought. Price lives here rather
 # than inline so it only has to change in one place.
 PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
-PREMIUM_PRICE = "$30/month"
+PREMIUM_PRICE = "$49/month"
 
 # The book. Unlike the CTAs above this is a fixed product page, not a per-deploy
 # secret, so the URL lives in the source. Set BOOK_AMAZON_URL to override it —

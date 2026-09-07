@@ -189,7 +189,7 @@ its reasoning and its operational rules, is `docs/REFUND_CANCELLATION_POLICY.md`
 
 > **Before you subscribe — how billing works**
 >
-> **$30 per month. No trial. Cancel any time.**
+> **$49 per month. No trial. Cancel any time.**
 >
 > **Cancelling.** Cancelling stops your next renewal. You keep member access
 > through the end of the period you have already paid for — cancelling does not
@@ -284,7 +284,7 @@ whose whole claim is that its records are checkable.
 
 **One Whop account setting, and it is a launch blocker.** Whop supports
 configurable automatic refunds. If a threshold is set high enough to cover the
-$30 membership, Whop could auto-approve a request this policy intends to review
+$49 membership, Whop could auto-approve a request this policy intends to review
 by hand — and asset 4's 48-hour rule turns on a fact (was a member slate
 delivered since that renewal?) that only a human checking
 `data/post_status.json` can establish. **Automatic refunds must be disabled for

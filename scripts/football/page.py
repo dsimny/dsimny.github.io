@@ -74,7 +74,7 @@ E = html.escape
 # build_site.py does it: the site never advertises something that cannot be
 # bought, and the switch is one repo variable rather than an edit.
 PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
-PREMIUM_PRICE = "$30/month"
+PREMIUM_PRICE = "$49/month"
 
 
 def upgrade_block(week=None):

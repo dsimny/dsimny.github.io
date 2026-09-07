@@ -48,9 +48,9 @@ Recorded here because the amount already finished is not obvious from `main`,
 where none of the football work is visible yet.
 
 **The commercial side is complete and end-to-end verified.**
-- Whop product "Open Ledger Sports Member", $30/month, no trial. Checkout link
-  is live and unlisted only because nothing points at it (URL in
-  `PLAN-paid-tier.md`).
+- Whop product "Open Ledger Sports Member", **$49/month from 2026-09-07** (was
+  $30, never charged to anyone). Checkout link is live and unlisted only because
+  nothing points at it (URL in `PLAN-paid-tier.md`).
 - Identity verified, bank account connected for payouts (2026-07-22).
 - Discord app connected: grants the Members role, removes it on cancel.
   "Assign this role after past due bill" left EMPTY on purpose.
@@ -91,7 +91,7 @@ product is sold as process and receipts. Nothing in this plan reopens it.
 | H | **Workflows DONE 2026-08-26** — `football-capture.yml` (capture + board, merged) and `football-grade.yml`, plus the home-page link | One external trigger hourly at :37; grade daily at 11:00Z. |
 | I | ~~Odds credits~~ **NOT A GAP** — paid tier live, 71,695 remaining | Section 6a. Recorded because the free-tier assumption shaped earlier decisions and should not be inherited. |
 | J | **Copy DONE 2026-08-26** — home-page premium block rewritten, football CTA added | Both sports described separately because they claim different things. Invisible until K. |
-| K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST. |
+| K | `WHOP_CHECKOUT_URL` unset | One repo variable. This is the go-live switch. Flip it LAST — and see the price-parity check below before you do. |
 
 ### B — the live board builder — BUILT 2026-08-26
 
@@ -329,7 +329,7 @@ is the asset that makes the paywall honest, and it costs about two weeks.
 | 2026-08-29 | NCAAF Week 1 | Capture deadline. Nothing publishes. |
 | 2026-09-08 | Daily Pick STAKING REVIEW | Separate strategy, separate decision. Football is 0u regardless and this review authorises nothing here. Do not move the date. |
 | 2026-09-10 | NFL opener | Allowlist deadline. First free football publication. |
-| ~2026-09-27 | MLB regular season ends | Decide what $30 buys in October, when football is the only live product. Not a credit event — see section 6a. |
+| ~2026-09-27 | MLB regular season ends | Decide what $49 buys in October, when football is the only live product. Not a credit event — see section 6a. |
 
 ## 5. State of the acquisition asset — flagged, not solved
 
@@ -380,7 +380,7 @@ its conclusion was stale, because the constraint moved and the doc did not.
 `data/odds_credits.json` is the evidence and it is in the repo in the clear —
 check it rather than the prose.
 
-**6b. What $30/month buys.** PARTLY DECIDED 2026-08-26.
+**6b. What $49/month buys.** PARTLY DECIDED 2026-08-26, repriced 2026-09-07.
 
 **Settled: ONE premium play a week, not one per sport.** NFL and NCAA FBS rank
 in a single pool (`FOOTBALL_PIPELINE.md` s.4 step 0, fp-v0.2). The measured
@@ -388,11 +388,22 @@ consequence is that the play is usually a COLLEGE game — college fields ~3x th
 games, rank 1 is a minimum rather than a median, and more draws produce a better
 tail. Copy must set that expectation before a member forms the wrong one.
 
-**Settled 2026-08-26: the price HOLDS AT $30/month.** Decided by Daniel with the
+**SUPERSEDED 2026-09-07: the price is $49/month.** Daniel's call. The
+reasoning below is kept because it is still the reasoning - what changed is
+the number, not the argument, and at $49 the argument matters MORE rather
+than less. A price rise makes "four picks a month" an even worse framing and
+the ~57-game reasoned slate an even more necessary one.
+
+Nobody was grandfathered because nobody has subscribed: `WHOP_CHECKOUT_URL`
+has never been set, so there is no existing member on the old price. That is
+a one-time freedom - the same change after launch would need a migration
+plan and a notice to members.
+
+**Superseded: settled 2026-08-26 as $30/month.** Decided by Daniel with the
 shape of the product on the table, not by default.
 
 The framing that has to go with it is not optional. One graded play a week is
-~4 a month; sold as a pick service that is indefensible at $30, and it should
+~4 a month; sold as a pick service that is indefensible at $49, and it should
 not be defended that way. The volume is in layer 2 — full reasoning on every
 covered game, ~57 a week measured on the 2026-08-25 board. **The product is a
 weekly research publication in which one play is graded in public for
@@ -603,7 +614,7 @@ the most damaging sentence that could appear on this site, because it would be
 contradicted by our own documents.
 
 **Football leads with the SLATE, never with the play.** One committed play a
-week is ~4 a month; sold as a pick service that is indefensible at $30 and
+week is ~4 a month; sold as a pick service that is indefensible at $49 and
 invites comparison with people willing to promise a win — a comparison this
 brand loses by design, having disarmed on claims. The reasoned slate is the
 product, and it is what members actually receive.
@@ -619,6 +630,34 @@ STILL A HUMAN TASK, not a code one: anyone who subscribes before late September
 buys a daily product and will start receiving a weekly one. With
 `WHOP_CHECKOUT_URL` unset the member count is likely zero, which makes telling
 them free now and awkward later.
+
+### K — before flipping the switch, check price parity
+
+**THE REPO CANNOT SEE THE WHOP PRICE, AND THAT IS THE FAILURE MODE.** The site
+now renders `$49/month` from `PREMIUM_PRICE` in `build_site.py` and `page.py`.
+Whop holds the real price, and nothing in this repository can read or verify it.
+
+So the site advertising one number while checkout charges another is a silent,
+entirely possible state — and on a brand built on "the numbers are checkable" it
+is close to the worst small error available.
+
+Before setting `WHOP_CHECKOUT_URL`:
+
+- [ ] **The Whop plan is actually priced $49/month.** Change it in Whop; the
+      repo edit does not.
+- [ ] **The checkout URL still resolves to that plan.** Repricing may mint a NEW
+      plan id. The link recorded in `PLAN-paid-tier.md`
+      (`plan_KIbsXvPUXlf3X`) was created for the $30 plan; if Whop issued a new
+      one, that recorded URL is stale and must be replaced in both the doc and
+      the repo variable.
+- [ ] **Open the checkout in a private window and read the price back.** The
+      only check that tests what a customer actually sees.
+
+NOBODY IS GRANDFATHERED, because nobody has subscribed — `WHOP_CHECKOUT_URL`
+has never been set, so no member exists on the old price. That is a one-time
+freedom worth naming: the same change after launch needs a migration decision
+and a notice to members, and the seasonal-transition note in
+`MEMBER_COMMS.md` §3 shows the shape that would take.
 
 ## 7. What this plan may NOT be used to justify
 

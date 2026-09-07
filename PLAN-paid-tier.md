@@ -79,7 +79,9 @@ premium picks really are exclusive rather than merely presented differently.
 
 ## Whop, as of 2026-07-22
 
-- Product "Open Ledger Sports Member", $30/month, NO trial. A three day trial
+- Product "Open Ledger Sports Member", $49/month, NO trial. REPRICED 2026-09-07
+  from $30; no member was grandfathered because none exists yet - the checkout
+  URL has never been live. A three day trial
   hands over three full days of a product whose whole value is daily, and the
   public ledger already serves as the free evidence.
 - Checkout link: https://whop.com/checkout/plan_KIbsXvPUXlf3X (live, public,
@@ -100,7 +102,7 @@ Gotchas learned doing it, worth telling every new member up front:
   Discord to Whop afterwards (whop.com -> their membership -> Connect Discord),
   or #ols-log shows "Discord ID: No Discord" and they only see #free-pick.
 - Use the "forever" promo codes, not the "100% off first payment" one. The
-  latter puts the member on a 30-day trial that renews to $30. One tester
+  latter puts the member on a 30-day trial that renews at full price. One tester
   landed on it; fixed by extending the trial, but the forever codes avoid it.
 - A stray premium post reached the public #general once during webhook
   testing. Not from the pipeline (board always posts to #members-only, proven

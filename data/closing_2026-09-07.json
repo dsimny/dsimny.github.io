@@ -236,11 +236,11 @@
   "mins_to_first_pitch": 160
  },
  "824958": {
-  "away_ml": -178,
+  "away_ml": -180,
   "home_ml": 151,
   "total": 9.5,
-  "over_price": -115,
-  "under_price": -103,
+  "over_price": -119,
+  "under_price": 100,
   "away_name": "Toronto Blue Jays",
   "home_name": "Athletics",
   "utc": "2026-09-08T02:05:00Z",
@@ -260,9 +260,17 @@
     "over_price": -115,
     "under_price": -103,
     "captured_utc": "2026-09-07T22:30:27Z"
+   },
+   {
+    "away_ml": -180,
+    "home_ml": 151,
+    "total": 9.5,
+    "over_price": -119,
+    "under_price": 100,
+    "captured_utc": "2026-09-08T01:30:21Z"
    }
   ],
-  "captured_utc": "2026-09-07T22:30:27Z",
-  "mins_to_first_pitch": 215
+  "captured_utc": "2026-09-08T01:30:21Z",
+  "mins_to_first_pitch": 35
  }
 }

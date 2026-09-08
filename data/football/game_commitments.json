@@ -713,6 +713,20 @@
    "matchup": "Wyoming Cowboys @ Colorado State Rams",
    "sha256": "d0f82e21aab9278b86b59f6b3ed41a26afb483e6a2e5fc57a072cdc3ed114e29",
    "sport": "ncaaf"
+  },
+  "nfl|NE @ SEA|2026-09-10T00:15:00Z": {
+   "committed_utc": "2026-09-08T18:32:08Z",
+   "kickoff_utc": "2026-09-10T00:15:00Z",
+   "matchup": "NE @ SEA",
+   "sha256": "dd190841dd2ba478baa13de75b1ef09508285ce1cf3987153ed1c6b64626a661",
+   "sport": "nfl"
+  },
+  "nfl|NE @ SEA|2026-09-10T00:20:00Z": {
+   "committed_utc": "2026-09-08T18:32:08Z",
+   "kickoff_utc": "2026-09-10T00:20:00Z",
+   "matchup": "NE @ SEA",
+   "sha256": "cb9a82d9a497db6d8343404922354b7e25f13b1f1192137b999c45fd40b854d0",
+   "sport": "nfl"
   }
  }
 }

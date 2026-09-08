@@ -1259,20 +1259,20 @@
    "away": "SMU Mustangs",
    "away_abbr": "SMU",
    "away_key": "smumustangs",
-   "away_score": null,
+   "away_score": 27,
    "espn_event_id": "401858212",
-   "final": false,
+   "final": true,
    "home": "Florida State Seminoles",
    "home_abbr": "FSU",
    "home_key": "floridastateseminoles",
-   "home_score": null,
+   "home_score": 24,
    "kickoff_utc": "2026-09-07T23:30:00Z",
-   "margin": null,
+   "margin": -3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 51
   },
   "401858213": {
    "away": "Florida A&M Rattlers",
@@ -3517,5 +3517,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-09-07T16:15:30Z"
+ "updated_utc": "2026-09-08T14:51:34Z"
 }

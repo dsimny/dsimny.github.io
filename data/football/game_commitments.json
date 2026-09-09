@@ -727,6 +727,13 @@
    "matchup": "NE @ SEA",
    "sha256": "cb9a82d9a497db6d8343404922354b7e25f13b1f1192137b999c45fd40b854d0",
    "sport": "nfl"
+  },
+  "nfl|SF @ LA|2026-09-11T00:35:00Z": {
+   "committed_utc": "2026-09-09T18:37:27Z",
+   "kickoff_utc": "2026-09-11T00:35:00Z",
+   "matchup": "SF @ LA",
+   "sha256": "c5cedd4733116380df430ab980f7174337cca9160301ef25d78ce557ffc49be0",
+   "sport": "nfl"
   }
  }
 }

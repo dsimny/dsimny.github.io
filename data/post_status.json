@@ -215,22 +215,6 @@
   },
   {
    "date": "2026-09-08",
-   "mode": "fb_free",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-09T07:47:28Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "fb_slate",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-09T07:47:28Z"
-  },
-  {
-   "date": "2026-09-08",
    "mode": "recap",
    "result": "nothing_to_post",
    "http_status": null,
@@ -253,6 +237,22 @@
    "http_status": null,
    "detail": "missing FB_PAGE_ACCESS_TOKEN",
    "at_utc": "2026-09-09T08:10:23Z"
+  },
+  {
+   "date": "2026-09-08",
+   "mode": "fb_free",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-09T08:37:20Z"
+  },
+  {
+   "date": "2026-09-08",
+   "mode": "fb_slate",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-09T08:37:20Z"
   }
  ]
 }

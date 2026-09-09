@@ -1,0 +1,68 @@
+name: Social self-tests
+# The offline guard for scripts/post_social.py — the Qualified / Daily Pick
+# recap fallback and the public copy it publishes. Runs scripts/selftest_social.py,
+# which asserts the things that are expensive to get wrong on a public feed:
+# the two ledgers never mix, the Daily Pick disclosure keeps all four of its
+# facts, an allocated pick is never described as paper-only or as a placed
+# wager, every X post stays inside 280 characters, and the legal / 21+ /
+# 1-800-GAMBLER language survives every trim.
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. The suite never imports requests,
+# never references a poster or an endpoint, and writes only inside a
+# TemporaryDirectory; its Qualified regression check reads a committed fixture
+# rather than git history, so it works in the shallow clone actions/checkout
+# produces by default. That is why this job runs with `contents: read` and
+# declares no `env:` secrets at all — there is nothing here for a malicious
+# pull request to exfiltrate.
+#
+# PATH FILTERS ARE LOAD-BEARING. main receives ~55 automated commits a day from
+# the hourly football capture and the daily board/grade runs, every one of them
+# touching data/ and generated pages and none of them touching this code. An
+# unfiltered workflow would burn a run an hour to re-prove an untouched suite.
+# The filter below fires only on the sources the suite actually covers.
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/post_social.py"
+      - "scripts/selftest_social.py"
+      - "scripts/fixtures/**"
+      - "requirements.txt"
+      - ".github/workflows/social-selftest.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/post_social.py"
+      - "scripts/selftest_social.py"
+      - "scripts/fixtures/**"
+      - "requirements.txt"
+      - ".github/workflows/social-selftest.yml"
+
+# Read-only. This job validates; it never commits, never pushes, and never
+# posts. Unlike the pipeline workflows it does not need `contents: write`.
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    # The suite is pure CPU and finishes in seconds; ten minutes is generous
+    # headroom for the pip install, and it caps a hung run rather than letting
+    # it sit on a runner.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Offline social self-tests
+        # PYTHONIOENCODING is not cosmetic: the posts carry ✅/❌/⚪/🎯/📊 and the
+        # · separator, and the suite prints them. Set it explicitly so the run
+        # never depends on the runner's default stdout encoding.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/selftest_social.py

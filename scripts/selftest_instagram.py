@@ -28,6 +28,7 @@ silently swallow half a disclosure.
 """
 import ast
 import hashlib
+import inspect
 import json
 import os
 import sys
@@ -613,9 +614,22 @@ def main():
 
     check("13e.1", "book attribution survives when it fits",
           "BetMGM" in blob(rr.render_card(*install(tmp, FX["daily_win_staked"]))[1]))
-    check("13e.2", "reservation uses advance width, not ink width",
-          rr.advance("+0.29u", rr.font(rr.MIN_BODY_PX, bold=True))
-          >= rr.text_width("+0.29u", rr.font(rr.MIN_BODY_PX, bold=True)))
+    # ASSERT THE CODE, NOT THE FONT. This check first read
+    #     advance("+0.29u") >= text_width("+0.29u")
+    # which passed on Windows (both exactly 120) and FAILED on the Ubuntu
+    # runner, where the rasteriser reports an ink box marginally wider than the
+    # advance. Ink width and advance width are independent metrics — neither
+    # bounds the other in general — so that was never a property worth
+    # asserting, and it made a green suite depend on which machine ran it.
+    #
+    # The regression actually worth preventing is someone "simplifying" the
+    # reservation back to ink width, so assert that directly against the source
+    # of the function that does the reserving. The geometric outcome is already
+    # proven by the bounding-box checks in 13c, which run on real metrics
+    # wherever they execute.
+    _rows_src = inspect.getsource(rr._entry_rows)
+    check("13e.2", "the unit-figure reservation is computed from advance width",
+          "advance(amount" in _rows_src and "text_width(amount" not in _rows_src)
     check("13e.3", "a zero-width allowance yields an ellipsis, never a crash",
           rr.fit("Some very long pick name", rr.font(32), 0) == ("…", True))
 

@@ -1,0 +1,113 @@
+{
+ "824872": {
+  "away_ml": 115,
+  "home_ml": -147,
+  "total": 7.5,
+  "over_price": -102,
+  "under_price": -127,
+  "note": "first capture was after first pitch \u2014 weak close",
+  "away_name": "Tampa Bay Rays",
+  "home_name": "Atlanta Braves",
+  "utc": "2026-09-10T16:15:00Z",
+  "history": [
+   {
+    "away_ml": 115,
+    "home_ml": -147,
+    "total": 7.5,
+    "over_price": -102,
+    "under_price": -127,
+    "captured_utc": "2026-09-10T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-09-10T16:30:24Z",
+  "mins_to_first_pitch": -15
+ },
+ "823413": {
+  "away_ml": 156,
+  "home_ml": -187,
+  "total": 8.5,
+  "over_price": -114,
+  "under_price": -107,
+  "away_name": "Houston Astros",
+  "home_name": "Philadelphia Phillies",
+  "utc": "2026-09-10T17:05:00Z",
+  "history": [
+   {
+    "away_ml": 156,
+    "home_ml": -187,
+    "total": 8.5,
+    "over_price": -114,
+    "under_price": -107,
+    "captured_utc": "2026-09-10T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-09-10T16:30:24Z",
+  "mins_to_first_pitch": 35
+ },
+ "823088": {
+  "away_ml": 108,
+  "home_ml": -126,
+  "total": 6.5,
+  "over_price": -112,
+  "under_price": -108,
+  "away_name": "Texas Rangers",
+  "home_name": "Seattle Mariners",
+  "utc": "2026-09-10T20:10:00Z",
+  "history": [
+   {
+    "away_ml": 108,
+    "home_ml": -126,
+    "total": 6.5,
+    "over_price": -112,
+    "under_price": -108,
+    "captured_utc": "2026-09-10T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-09-10T16:30:24Z",
+  "mins_to_first_pitch": 220
+ },
+ "823499": {
+  "away_ml": 240,
+  "home_ml": -300,
+  "total": 8.5,
+  "over_price": -107,
+  "under_price": -113,
+  "away_name": "Colorado Rockies",
+  "home_name": "New York Yankees",
+  "utc": "2026-09-10T23:05:00Z",
+  "history": [
+   {
+    "away_ml": 240,
+    "home_ml": -300,
+    "total": 8.5,
+    "over_price": -107,
+    "under_price": -113,
+    "captured_utc": "2026-09-10T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-09-10T16:30:24Z",
+  "mins_to_first_pitch": 395
+ },
+ "824550": {
+  "away_ml": -108,
+  "home_ml": -110,
+  "total": 7.5,
+  "over_price": -120,
+  "under_price": 100,
+  "away_name": "Pittsburgh Pirates",
+  "home_name": "Chicago White Sox",
+  "utc": "2026-09-10T23:40:00Z",
+  "history": [
+   {
+    "away_ml": -108,
+    "home_ml": -110,
+    "total": 7.5,
+    "over_price": -120,
+    "under_price": 100,
+    "captured_utc": "2026-09-10T16:30:24Z"
+   }
+  ],
+  "captured_utc": "2026-09-10T16:30:24Z",
+  "mins_to_first_pitch": 430
+ }
+}

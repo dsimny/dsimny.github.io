@@ -350,9 +350,9 @@
  "823900": {
   "away_ml": 234,
   "home_ml": -285,
-  "total": 8.5,
-  "over_price": -107,
-  "under_price": -112,
+  "total": 8.0,
+  "over_price": -110,
+  "under_price": -110,
   "away_name": "Cincinnati Reds",
   "home_name": "Los Angeles Dodgers",
   "utc": "2026-09-10T02:10:00Z",
@@ -372,9 +372,17 @@
     "over_price": -107,
     "under_price": -112,
     "captured_utc": "2026-09-09T22:30:24Z"
+   },
+   {
+    "away_ml": 234,
+    "home_ml": -285,
+    "total": 8.0,
+    "over_price": -110,
+    "under_price": -110,
+    "captured_utc": "2026-09-10T01:30:21Z"
    }
   ],
-  "captured_utc": "2026-09-09T22:30:24Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-10T01:30:21Z",
+  "mins_to_first_pitch": 40
  }
 }

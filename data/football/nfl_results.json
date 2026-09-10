@@ -5,20 +5,20 @@
    "away": "NE",
    "away_abbr": "NE",
    "away_name": "New England Patriots",
-   "away_score": null,
+   "away_score": 10,
    "espn_event_id": "401872656",
-   "final": false,
+   "final": true,
    "home": "SEA",
    "home_abbr": "SEA",
    "home_name": "Seattle Seahawks",
-   "home_score": null,
+   "home_score": 13,
    "kickoff_utc": "2026-09-10T00:20:00Z",
-   "margin": null,
+   "margin": 3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 23
   },
   "401872657": {
    "away": "SF",
@@ -1218,5 +1218,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-09-09T14:59:39Z"
+ "updated_utc": "2026-09-10T14:45:53Z"
 }

@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-09-05",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-09-06T08:10:19Z"
-  },
-  {
-   "date": "2026-09-05",
-   "mode": "x",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-06T08:10:19Z"
-  },
-  {
-   "date": "2026-09-05",
-   "mode": "facebook",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-06T08:10:19Z"
-  },
-  {
    "date": "2026-09-06",
    "mode": "pick",
    "result": "posted",
@@ -255,6 +230,31 @@
    "http_status": null,
    "detail": "",
    "at_utc": "2026-09-10T07:47:26Z"
+  },
+  {
+   "date": "2026-09-09",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-10T08:10:23Z"
+  },
+  {
+   "date": "2026-09-09",
+   "mode": "x",
+   "result": "failed",
+   "http_status": 402,
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "at_utc": "2026-09-10T08:10:23Z"
+  },
+  {
+   "date": "2026-09-09",
+   "mode": "facebook",
+   "result": "no_config",
+   "http_status": null,
+   "detail": "missing FB_PAGE_ACCESS_TOKEN",
+   "at_utc": "2026-09-10T08:10:23Z"
   }
  ]
 }

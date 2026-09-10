@@ -1,0 +1,299 @@
+{
+ "_comment": [
+  "Frozen ledger states for scripts/selftest_instagram.py and for the human-review",
+  "previews. FROZEN ON PURPOSE: a card quotes running aggregates, so testing against",
+  "the live ledgers would break the first time any pick grades — a false alarm, not a",
+  "regression. Same reasoning as qualified_social_golden.json.",
+  "",
+  "Shapes mirror production exactly (verified against scripts/selftest_social.py's",
+  "QUAL/DAILY and against grade.py): the Qualified ledger carries pnl / units /",
+  "units_net / roi_pct; the Daily ledger carries pnl_paper / pnl_staked /",
+  "units_staked / paper_basis and paper_units_net / paper_roi_pct, and has NO pnl,",
+  "units, units_net or roi_pct at all. On a VOID, grade.py only assigns final_score",
+  "in the non-void branch, so the key is ABSENT rather than null — mirrored here.",
+  "",
+  "Every 'daily_*' scenario ships an EMPTY qualified ledger, because select_recap()",
+  "prefers Qualified whenever it has a settled entry for the date; an empty one is",
+  "what forces the Daily Pick path."
+ ],
+ "scenarios": {
+  "qualified_win": {
+   "date": "2026-05-01",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-01", "gamePk": 1, "game": "Boston Red Sox @ New York Yankees",
+      "pick": "Boston Red Sox ML (-134)", "units": 1.0, "confidence": "2u",
+      "final_score": "4-2", "result": "WIN", "pnl": 0.75}
+    ],
+    "aggregates": {"record": "12-9", "wins": 12, "losses": 9, "voids": 1,
+                   "units_net": 2.41, "units_risked": 24.5, "roi_pct": 9.84}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "qualified_loss": {
+   "date": "2026-05-02",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-02", "gamePk": 2, "game": "Chicago Cubs @ St. Louis Cardinals",
+      "pick": "Chicago Cubs ML (-120)", "units": 1.0, "confidence": "2u",
+      "final_score": "1-6", "result": "LOSS", "pnl": -1.0}
+    ],
+    "aggregates": {"record": "12-10", "wins": 12, "losses": 10, "voids": 1,
+                   "units_net": 1.41, "units_risked": 25.5, "roi_pct": 5.53}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "qualified_void": {
+   "date": "2026-05-03",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-03", "gamePk": 3, "game": "Seattle Mariners @ Houston Astros",
+      "pick": "Seattle Mariners ML (+105)", "units": 1.0, "confidence": "2u",
+      "result": "VOID", "pnl": 0.0}
+    ],
+    "aggregates": {"record": "12-10", "wins": 12, "losses": 10, "voids": 2,
+                   "units_net": 1.41, "units_risked": 25.5, "roi_pct": 5.53}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "qualified_long_slate": {
+   "date": "2026-05-04",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-04", "gamePk": 41, "game": "A @ B", "pick": "Atlanta Braves ML (-118)",
+      "units": 1.0, "confidence": "2u", "final_score": "5-4", "result": "WIN", "pnl": 0.85},
+     {"date": "2026-05-04", "gamePk": 42, "game": "C @ D", "pick": "Los Angeles Dodgers ML (-155)",
+      "units": 1.0, "confidence": "2u", "final_score": "7-1", "result": "WIN", "pnl": 0.65},
+     {"date": "2026-05-04", "gamePk": 43, "game": "E @ F", "pick": "Tampa Bay Rays ML (+112)",
+      "units": 1.0, "confidence": "1u", "final_score": "2-3", "result": "LOSS", "pnl": -1.0},
+     {"date": "2026-05-04", "gamePk": 44, "game": "G @ H", "pick": "San Diego Padres ML (-107)",
+      "units": 1.0, "confidence": "1u", "final_score": "6-5", "result": "WIN", "pnl": 0.93},
+     {"date": "2026-05-04", "gamePk": 45, "game": "I @ J", "pick": "Milwaukee Brewers ML (-125)",
+      "units": 1.0, "confidence": "2u", "final_score": "0-4", "result": "LOSS", "pnl": -1.0},
+     {"date": "2026-05-04", "gamePk": 46, "game": "K @ L", "pick": "Cleveland Guardians ML (+120)",
+      "units": 1.0, "confidence": "1u", "final_score": "8-2", "result": "WIN", "pnl": 1.2},
+     {"date": "2026-05-04", "gamePk": 47, "game": "M @ N", "pick": "Philadelphia Phillies ML (-140)",
+      "units": 1.0, "confidence": "2u", "final_score": "3-2", "result": "WIN", "pnl": 0.71},
+     {"date": "2026-05-04", "gamePk": 48, "game": "O @ P", "pick": "Toronto Blue Jays ML (+101)",
+      "units": 1.0, "confidence": "1u", "final_score": "1-9", "result": "LOSS", "pnl": -1.0}
+    ],
+    "aggregates": {"record": "17-13", "wins": 17, "losses": 13, "voids": 2,
+                   "units_net": 2.75, "units_risked": 33.5, "roi_pct": 8.21}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "qualified_long_pick_name": {
+   "date": "2026-05-05",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-05", "gamePk": 51, "game": "Q @ R",
+      "pick": "Arizona Diamondbacks Team Total Over 4.5 Runs (-118, alternate line)",
+      "units": 1.0, "confidence": "2u", "final_score": "6-3", "result": "WIN", "pnl": 0.85}
+    ],
+    "aggregates": {"record": "18-13", "wins": 18, "losses": 13, "voids": 2,
+                   "units_net": 3.6, "units_risked": 34.5, "roi_pct": 10.43}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "daily_win_zero": {
+   "date": "2026-06-01",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-01", "gamePk": 11, "game": "Atlanta Braves @ Miami Marlins",
+      "pick": "Atlanta Braves ML (+100, Caesars)", "market": "moneyline", "price": 100,
+      "book": "Caesars", "units_staked": 0.0, "paper_basis": 0.25, "strategy": "daily",
+      "final_score": "5-4", "result": "WIN", "pnl_paper": 0.25, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "16-10", "wins": 16, "losses": 10, "voids": 0,
+                   "paper_units_net": 1.382, "paper_roi_pct": 21.26,
+                   "staked_units_net": 0.0, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_loss_zero": {
+   "date": "2026-06-02",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-02", "gamePk": 12, "game": "Seattle Mariners @ Texas Rangers",
+      "pick": "Seattle Mariners ML (-110, FanDuel)", "market": "moneyline", "price": -110,
+      "book": "FanDuel", "units_staked": 0.0, "paper_basis": 0.25, "strategy": "daily",
+      "final_score": "2-7", "result": "LOSS", "pnl_paper": -0.25, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "16-11", "wins": 16, "losses": 11, "voids": 0,
+                   "paper_units_net": 1.132, "paper_roi_pct": 16.77,
+                   "staked_units_net": 0.0, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_void_zero": {
+   "date": "2026-06-03",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-03", "gamePk": 13, "game": "New York Mets @ Washington Nationals",
+      "pick": "New York Mets ML (-105, DraftKings)", "market": "moneyline", "price": -105,
+      "book": "DraftKings", "units_staked": 0.0, "paper_basis": 0.25, "strategy": "daily",
+      "result": "VOID", "pnl_paper": 0.0, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "16-11", "wins": 16, "losses": 11, "voids": 1,
+                   "paper_units_net": 1.132, "paper_roi_pct": 16.77,
+                   "staked_units_net": 0.0, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_win_staked": {
+   "date": "2026-06-04",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-04", "gamePk": 14, "game": "Texas Rangers @ Los Angeles Angels",
+      "pick": "Texas Rangers ML (+115, BetMGM)", "market": "moneyline", "price": 115,
+      "book": "BetMGM", "units_staked": 0.25, "paper_basis": 0.25, "strategy": "daily",
+      "final_score": "8-3", "result": "WIN", "pnl_paper": 0.29, "pnl_staked": 0.29}
+    ],
+    "aggregates": {"record": "17-11", "wins": 17, "losses": 11, "voids": 1,
+                   "paper_units_net": 1.422, "paper_roi_pct": 20.31,
+                   "staked_units_net": 0.29, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_loss_staked": {
+   "date": "2026-06-05",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-05", "gamePk": 15, "game": "Detroit Tigers @ Minnesota Twins",
+      "pick": "Detroit Tigers ML (-102, Caesars)", "market": "moneyline", "price": -102,
+      "book": "Caesars", "units_staked": 0.25, "paper_basis": 0.25, "strategy": "daily",
+      "final_score": "1-5", "result": "LOSS", "pnl_paper": -0.25, "pnl_staked": -0.25}
+    ],
+    "aggregates": {"record": "17-12", "wins": 17, "losses": 12, "voids": 1,
+                   "paper_units_net": 1.172, "paper_roi_pct": 16.28,
+                   "staked_units_net": 0.04, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_void_staked": {
+   "date": "2026-06-06",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-06", "gamePk": 16, "game": "Colorado Rockies @ San Francisco Giants",
+      "pick": "Colorado Rockies ML (+130, DraftKings)", "market": "moneyline", "price": 130,
+      "book": "DraftKings", "units_staked": 0.25, "paper_basis": 0.25, "strategy": "daily",
+      "result": "VOID", "pnl_paper": 0.0, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "17-12", "wins": 17, "losses": 12, "voids": 2,
+                   "paper_units_net": 1.172, "paper_roi_pct": 16.28,
+                   "staked_units_net": 0.04, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_staked_long_pick": {
+   "_why": "The row that visual review flagged, lengthened past the point where it fits. Proves the pick ellipsizes and the +0.29u result stays whole and unobscured.",
+   "date": "2026-06-07",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-07", "gamePk": 17, "game": "Texas Rangers @ Los Angeles Angels",
+      "pick": "Texas Rangers First 5 Innings ML (+115, BetMGM Sportsbook alternate line)",
+      "market": "moneyline", "price": 115, "book": "BetMGM Sportsbook",
+      "units_staked": 0.25, "paper_basis": 0.25, "strategy": "daily",
+      "final_score": "8-3", "result": "WIN", "pnl_paper": 0.29, "pnl_staked": 0.29}
+    ],
+    "aggregates": {"record": "18-12", "wins": 18, "losses": 12, "voids": 2,
+                   "paper_units_net": 1.462, "paper_roi_pct": 19.49,
+                   "staked_units_net": 0.33, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_zero_long_pick": {
+   "_why": "Same stress on the zero-allocation branch, whose amount reads '-0.25u paper' upstream but '-0.25u' on the card.",
+   "date": "2026-06-08",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-06-08", "gamePk": 18, "game": "Seattle Mariners @ Texas Rangers",
+      "pick": "Seattle Mariners Team Total Under 3.5 Runs (-110, FanDuel Sportsbook alternate)",
+      "market": "team_total", "price": -110, "book": "FanDuel Sportsbook",
+      "units_staked": 0.0, "paper_basis": 0.25, "strategy": "daily",
+      "final_score": "2-7", "result": "LOSS", "pnl_paper": -0.25, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "18-13", "wins": 18, "losses": 13, "voids": 2,
+                   "paper_units_net": 1.212, "paper_roi_pct": 15.64,
+                   "staked_units_net": 0.33, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "qualified_long_pick_wide_amount": {
+   "_why": "Longest pick AND the widest unit figure the card can produce (-10.00u, a five-glyph signed figure). This is the worst case for the reservation: if the gutter is ever computed from ink width instead of advance, this row is the one that collides.",
+   "date": "2026-05-06",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-06", "gamePk": 61, "game": "U @ V",
+      "pick": "Arizona Diamondbacks Team Total Over 4.5 Runs (-118, DraftKings alternate line)",
+      "units": 10.0, "confidence": "2u", "final_score": "2-9", "result": "LOSS",
+      "pnl": -10.0}
+    ],
+    "aggregates": {"record": "18-14", "wins": 18, "losses": 14, "voids": 2,
+                   "units_net": -6.4, "units_risked": 44.5, "roi_pct": -14.38}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "both_ledgers_same_date": {
+   "_why": "Proves priority: Qualified wins the date and the Daily entry must not appear.",
+   "date": "2026-05-01",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-01", "gamePk": 1, "game": "Boston Red Sox @ New York Yankees",
+      "pick": "Boston Red Sox ML (-134)", "units": 1.0, "confidence": "2u",
+      "final_score": "4-2", "result": "WIN", "pnl": 0.75}
+    ],
+    "aggregates": {"record": "12-9", "wins": 12, "losses": 9, "voids": 1,
+                   "units_net": 2.41, "units_risked": 24.5, "roi_pct": 9.84}
+   },
+   "daily": {
+    "entries": [
+     {"date": "2026-05-01", "gamePk": 91, "game": "Kansas City Royals @ Chicago White Sox",
+      "pick": "Kansas City Royals ML (+108, BetMGM)", "market": "moneyline", "price": 108,
+      "book": "BetMGM", "units_staked": 0.0, "paper_basis": 0.25, "strategy": "daily",
+      "final_score": "9-2", "result": "WIN", "pnl_paper": 0.27, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "16-10", "wins": 16, "losses": 10, "voids": 0,
+                   "paper_units_net": 1.382, "paper_roi_pct": 21.26,
+                   "staked_units_net": 0.0, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "unsettled_only": {
+   "_why": "An entry in any non-settled state must never render or caption.",
+   "date": "2026-07-01",
+   "qualified": {
+    "entries": [
+     {"date": "2026-07-01", "gamePk": 71, "game": "S @ T", "pick": "Held Pick ML (-110)",
+      "units": 1.0, "confidence": "2u", "result": "PENDING", "pnl": 0.0}
+    ],
+    "aggregates": {"record": "12-9", "wins": 12, "losses": 9, "voids": 1,
+                   "units_net": 2.41, "units_risked": 24.5, "roi_pct": 9.84}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  }
+ }
+}

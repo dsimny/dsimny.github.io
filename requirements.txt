@@ -9,3 +9,16 @@ cryptography>=42.0
 # OAuth 1.0a signing for posting the daily record to X (scripts/post_social.py).
 # Only imported on the live X post; dry-run and no-config paths don't need it.
 requests-oauthlib>=1.3
+# Renders the Instagram recap card (scripts/render_recap_image.py).
+#
+# PINNED EXACTLY, unlike everything above, and that is deliberate. The card is
+# required to be byte-identical for a given ledger state, and an image encoder is
+# precisely the kind of dependency whose output shifts between releases — a
+# changed default, a new libjpeg, a tweak to the rasteriser. A floor like
+# ">=12.0" would let CI silently render a different file from Daniel's machine
+# and break the determinism check in scripts/selftest_instagram.py with no code
+# change to blame. Bump this deliberately, then re-run that suite.
+#
+# Pillow 12.3.0 ships no font of its own, which is why the renderer loads a
+# vendored face from assets/fonts/ by path. See assets/fonts/README.md.
+Pillow==12.3.0

@@ -1,0 +1,87 @@
+name: Instagram self-tests
+# The offline guard for the Instagram recap card and caption (Phase 1). Runs
+# scripts/selftest_instagram.py, which asserts the things that are expensive to
+# get wrong on a public feed: the Qualified and Daily Pick ledgers never mix and
+# exactly one running record appears per card, an allocated pick is never
+# described as paper-only or as a placed wager, the card is exactly 1080x1350
+# sRGB JPEG under Meta's 8MB ceiling, the same ledger state renders a
+# BYTE-IDENTICAL file, no result is carried by an emoji glyph, and the legal /
+# 21+ / 1-800-GAMBLER language survives on every branch.
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. Phase 1 contains no transport at all:
+# there is no container creation, no media_publish, no token and no status file
+# anywhere in these scripts. The suite proves that structurally rather than by
+# assertion — it parses both modules' ASTs and fails if either imports a network
+# library, reads an environment variable, names a Meta endpoint, or references a
+# board or .enc path. That is why this job runs with `contents: read` and
+# declares no `env:` secrets: there is nothing here for a malicious pull request
+# to exfiltrate.
+#
+# PATH FILTERS ARE LOAD-BEARING, exactly as in social-selftest.yml. main receives
+# ~55 automated commits a day from the hourly football capture and the daily
+# board/grade runs, none of them touching this code. An unfiltered workflow would
+# burn a run an hour re-proving an untouched suite. The filter below fires only
+# on the sources this suite actually covers — including the vendored font and its
+# licence, because swapping a face changes every card and the suite pins their
+# checksums.
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/render_recap_image.py"
+      - "scripts/post_instagram.py"
+      - "scripts/selftest_instagram.py"
+      - "scripts/fixtures/instagram_cards.json"
+      - "scripts/post_social.py"
+      - "assets/fonts/**"
+      - "requirements.txt"
+      - ".github/workflows/instagram-selftest.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/render_recap_image.py"
+      - "scripts/post_instagram.py"
+      - "scripts/selftest_instagram.py"
+      - "scripts/fixtures/instagram_cards.json"
+      - "scripts/post_social.py"
+      - "assets/fonts/**"
+      - "requirements.txt"
+      - ".github/workflows/instagram-selftest.yml"
+
+# Read-only. This job validates; it never commits, never pushes, never renders
+# into the repository and never posts. Unlike the pipeline workflows it does not
+# need `contents: write`.
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    # The suite renders a handful of 1080x1350 cards and finishes in seconds; ten
+    # minutes is generous headroom for the pip install and caps a hung run.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Offline Instagram self-tests
+        # PYTHONIOENCODING is not cosmetic: the cards and captions carry · and —
+        # and the suite prints them. Set it explicitly so the run never depends
+        # on the runner's default stdout encoding.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/selftest_instagram.py
+      - name: Confirm the social suite is unaffected
+        # render_recap_image.py and post_instagram.py IMPORT post_social.py and
+        # reuse its disclosure constants. Phase 1 changed nothing in that file,
+        # and this step is what keeps it that way: if a future Instagram change
+        # edits shared copy, the 206 checks guarding the Facebook and X posts
+        # fail here rather than on a live feed.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/selftest_social.py

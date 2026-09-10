@@ -98,6 +98,13 @@
    "sha256": "4d5706b73245a53461c516e7f36c2120a8e7e37363445232b69c03eb3ab32d4a",
    "sport": "ncaaf"
   },
+  "ncaaf|Cal Poly Mustangs @ San Jose State Spartans|2026-09-12T00:00:00Z": {
+   "committed_utc": "2026-09-10T18:19:30Z",
+   "kickoff_utc": "2026-09-12T00:00:00Z",
+   "matchup": "Cal Poly Mustangs @ San Jose State Spartans",
+   "sha256": "6e687fdef6b2219ef68556069ab17b25e45f056be212fc621feb76d06dfe8f34",
+   "sport": "ncaaf"
+  },
   "ncaaf|Central Michigan Chippewas @ New Mexico Lobos|2026-09-06T02:00:00Z": {
    "committed_utc": "2026-09-04T20:37:22Z",
    "kickoff_utc": "2026-09-06T02:00:00Z",
@@ -390,6 +397,13 @@
    "sha256": "30bbaf73c0ed2bc45fb48a69aaf807ac238fce7dd49e1738de94eb8bf0213b48",
    "sport": "ncaaf"
   },
+  "ncaaf|Missouri Tigers @ Kansas Jayhawks|2026-09-12T00:00:00Z": {
+   "committed_utc": "2026-09-10T18:19:30Z",
+   "kickoff_utc": "2026-09-12T00:00:00Z",
+   "matchup": "Missouri Tigers @ Kansas Jayhawks",
+   "sha256": "90c56bee0b7889de31f25f1ac765e79df9b27f4f7a3fdca70ace55cddaec4563",
+   "sport": "ncaaf"
+  },
   "ncaaf|Murray State Racers @ Middle Tennessee Blue Raiders|2026-09-05T23:00:00Z": {
    "committed_utc": "2026-09-04T17:37:31Z",
    "kickoff_utc": "2026-09-05T23:00:00Z",
@@ -500,6 +514,9 @@
   "ncaaf|Richmond Spiders @ NC State Wolfpack|2026-09-11T23:00:00Z": {
    "committed_utc": "2026-09-10T17:37:25Z",
    "kickoff_utc": "2026-09-11T23:00:00Z",
+   "later_disagreements": [
+    "4e73456b27afe0358932f431ea41a09cf134ae48883bf2ba5387232b763f76be"
+   ],
    "matchup": "Richmond Spiders @ NC State Wolfpack",
    "sha256": "13595e60ad9ba13df3b1208b4d93400730323f12963e0eb605ab3e1803437af0",
    "sport": "ncaaf"
@@ -507,6 +524,9 @@
   "ncaaf|Rutgers Scarlet Knights @ Boston College Eagles|2026-09-11T23:30:00Z": {
    "committed_utc": "2026-09-10T17:37:25Z",
    "kickoff_utc": "2026-09-11T23:30:00Z",
+   "later_disagreements": [
+    "8a4ea15c2e3d150252f68d406a1d47dd643f3fc45e0ac4968962ce014d7f4bcd"
+   ],
    "matchup": "Rutgers Scarlet Knights @ Boston College Eagles",
    "sha256": "1193abb224af852df5b04397e21dd7d3bbfe79c94ec525b1b21bd1f69891edd7",
    "sport": "ncaaf"

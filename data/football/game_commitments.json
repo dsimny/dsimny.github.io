@@ -497,6 +497,20 @@
    "sha256": "084f373803f8662f44cfb6ce5f9c4ae67e9aea941d168600afa7eb9d73e07ca8",
    "sport": "ncaaf"
   },
+  "ncaaf|Richmond Spiders @ NC State Wolfpack|2026-09-11T23:00:00Z": {
+   "committed_utc": "2026-09-10T17:37:25Z",
+   "kickoff_utc": "2026-09-11T23:00:00Z",
+   "matchup": "Richmond Spiders @ NC State Wolfpack",
+   "sha256": "13595e60ad9ba13df3b1208b4d93400730323f12963e0eb605ab3e1803437af0",
+   "sport": "ncaaf"
+  },
+  "ncaaf|Rutgers Scarlet Knights @ Boston College Eagles|2026-09-11T23:30:00Z": {
+   "committed_utc": "2026-09-10T17:37:25Z",
+   "kickoff_utc": "2026-09-11T23:30:00Z",
+   "matchup": "Rutgers Scarlet Knights @ Boston College Eagles",
+   "sha256": "1193abb224af852df5b04397e21dd7d3bbfe79c94ec525b1b21bd1f69891edd7",
+   "sport": "ncaaf"
+  },
   "ncaaf|SMU Mustangs @ Florida State Seminoles|2026-09-07T23:30:00Z": {
    "committed_utc": "2026-09-06T17:37:20Z",
    "kickoff_utc": "2026-09-07T23:30:00Z",

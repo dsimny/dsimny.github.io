@@ -61,7 +61,7 @@ FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 
 # Total checks this file is expected to run. Bump it DELIBERATELY when adding or
 # removing a check; unexplained drift means a check stopped executing.
-EXPECTED_CHECKS = 622
+EXPECTED_CHECKS = 714
 
 # Checksums of the vendored font files, as recorded in assets/fonts/README.md.
 # A swapped or corrupted face changes every card, so it fails the suite here
@@ -1232,6 +1232,139 @@ def main():
           "media_publish" not in sync_src)
     check("17.8c", "sync_status reads the feed and nothing else",
           "recent_media" in sync_src)
+
+    # ------------------------------- 19. matchup context on the score line --
+    #
+    # grade.py writes final_score as `away-home` (grade.py:255). On the live
+    # 2026-09-09 card that made a correctly graded WIN read as a loss:
+    #   "Kansas City Royals ML (+108, Caesars)" / "Final 2-5"
+    # Kansas City is HOME in `AZ @ KC` and scored 5, but the card showed a team
+    # name beside "2-5" with no way to tell which number was theirs. Printing the
+    # ledger's own `game` string restores the ordering context.
+    #
+    # Nothing here reorders, recomputes or relabels the score.
+    print("\n19. Matchup context — an away-home score can't read as contradictory")
+
+    def entry_of(scen):
+        kind, r = install(tmp, FX[scen])
+        return kind, r, r["entries"][0]
+
+    # ---- 19.1 the live shape: picked team is HOME, score is away-home ----
+    kind, r, e = entry_of("daily_home_pick_win")
+    _, calls = rr.render_card(kind, r)
+    sl = [c for c in calls if c.get("role") == "score"]
+    check("19.1a", "the score line names the matchup then the score",
+          sl and sl[0]["logical"] == "AZ @ KC · Final 2-5")
+    check("19.1b", "the ledger's game string is used verbatim",
+          e["game"] in sl[0]["logical"])
+    check("19.1c", "final_score is unchanged and unreversed",
+          "Final 2-5" in sl[0]["logical"] and "5-2" not in sl[0]["logical"])
+    check("19.1d", "the pick still renders on its own line",
+          any(c.get("role") == "pick" and c["logical"] == e["pick"] for c in calls))
+    cap = pi.build_caption(FX["daily_home_pick_win"]["date"])
+    check("19.1e", "the caption carries the same matchup + score segment",
+          "AZ @ KC · Final 2-5" in cap)
+    check("19.1f", "caption entry reads pick — matchup · score",
+          "Kansas City Royals ML (+108, Caesars) — AZ @ KC · Final 2-5" in cap)
+
+    # ---- 19.2 mirror image: picked team is AWAY ----
+    kind, r, e = entry_of("daily_away_pick_win")
+    _, calls = rr.render_card(kind, r)
+    sl = [c for c in calls if c.get("role") == "score"]
+    check("19.2a", "away-pick matchup renders verbatim",
+          sl[0]["logical"] == "KC @ AZ · Final 5-2")
+    check("19.2b", "the score is not flipped to flatter the pick",
+          "Final 5-2" in sl[0]["logical"])
+    check("19.2c", "caption matches", "KC @ AZ · Final 5-2" in
+          pi.build_caption(FX["daily_away_pick_win"]["date"]))
+
+    # ---- 19.3 losses and voids ----
+    for scen, want in [("qualified_loss", "Chicago Cubs @ St. Louis Cardinals · Final 1-6"),
+                       ("daily_loss_zero", "Seattle Mariners @ Texas Rangers · Final 2-7")]:
+        kind, r, e = entry_of(scen)
+        _, calls = rr.render_card(kind, r)
+        sl = [c for c in calls if c.get("role") == "score"]
+        check(f"19.3.{scen}", f"{scen}: loss carries the matchup", sl[0]["logical"] == want)
+        check(f"19.3.{scen}.c", f"{scen}: caption agrees",
+              want in pi.build_caption(FX[scen]["date"]))
+
+    for scen in ["qualified_void", "daily_void_zero", "daily_void_staked"]:
+        kind, r, e = entry_of(scen)
+        _, calls = rr.render_card(kind, r)
+        sl = [c for c in calls if c.get("role") == "score"]
+        check(f"19.4.{scen}", f"{scen}: a void says 'void', never a made-up score",
+              sl[0]["logical"].endswith("· Final void"))
+        check(f"19.4.{scen}.g", f"{scen}: the matchup is still shown on a void",
+              sl[0]["logical"].startswith(e["game"]))
+        check(f"19.4.{scen}.n", f"{scen}: no digits invented for the score",
+              "Final void" in pi.build_caption(FX[scen]["date"]))
+
+    # ---- 19.5 missing / blank game field falls back cleanly ----
+    kind, r, e = entry_of("qualified_no_game_field")
+    _, calls = rr.render_card(kind, r)
+    sl = [c for c in calls if c.get("role") == "score"]
+    check("19.5a", "a missing game field falls back to the bare form",
+          sl[0]["logical"] == "Final 6-3")
+    check("19.5b", "no orphan separator is emitted",
+          not sl[0]["logical"].startswith("·") and " ·  " not in sl[0]["logical"])
+    check("19.5c", "caption falls back the same way",
+          "— Final 6-3 (" in pi.build_caption(FX["qualified_no_game_field"]["date"]))
+
+    kind, r, e = entry_of("qualified_blank_game_field")
+    _, calls = rr.render_card(kind, r)
+    sl = [c for c in calls if c.get("role") == "score"]
+    check("19.5d", "a whitespace-only game field is treated as missing",
+          sl[0]["logical"] == "Final void")
+
+    # ---- 19.6 long matchup: no clipping, no overlap ----
+    kind, r, e = entry_of("qualified_long_matchup")
+    _, calls = rr.render_card(kind, r)
+    sl = [c for c in calls if c.get("role") == "score"][0]
+    pk = [c for c in calls if c.get("role") == "pick"][0]
+    am = [c for c in calls if c.get("role") == "amount"][0]
+    check("19.6a", "the long score line stays inside the right margin",
+          sl["bbox"][2] <= rr.W - rr.MARGIN)
+    check("19.6b", "the long score line stays inside the left margin",
+          sl["bbox"][0] >= rr.MARGIN)
+    check("19.6c", "the long pick still clears the unit figure",
+          pk["bbox"][2] < am["bbox"][0])
+    check("19.6d", "the score line never overlaps the unit figure vertically",
+          sl["bbox"][1] > am["bbox"][3])
+    check("19.6e", "the full matchup is recorded even when drawn truncated",
+          sl["logical"].startswith(e["game"]))
+    check("19.6f", "truncation, if any, ends in a single ellipsis",
+          (not sl["truncated"]) or sl["fragments"][0].endswith("…"))
+
+    # ---- 19.7 card and caption use ONE matchup string ----
+    # The helper is duplicated in the two modules (post_social.py is frozen and
+    # is the only natural shared home). This is the guard against drift.
+    matrix = [
+        {"game": "AZ @ KC", "final_score": "2-5"},
+        {"game": "KC @ AZ", "final_score": "5-2"},
+        {"game": "AAA @ BBB"},
+        {"game": "", "final_score": "1-0"},
+        {"game": "   ", "final_score": "1-0"},
+        {"final_score": "9-9"},
+        {},
+        {"game": "A @ B", "final_score": None},
+        {"game": "Very Long Team Name @ Another Very Long Team Name",
+         "final_score": "12-11"},
+    ]
+    mismatch = [m for m in matrix if rr.score_line(m) != pi.score_line(m)]
+    check("19.7", "renderer and caption score_line() agree byte-for-byte",
+          not mismatch)
+    check("19.7b", "both produce the documented shape",
+          rr.score_line({"game": "AZ @ KC", "final_score": "2-5"}) == "AZ @ KC · Final 2-5")
+    check("19.7c", "both fall back identically with no game",
+          rr.score_line({"final_score": "2-5"}) == "Final 2-5"
+          and pi.score_line({"final_score": "2-5"}) == "Final 2-5")
+
+    # ---- 19.8 Facebook copy is untouched ----
+    install(tmp, FX["daily_home_pick_win"])
+    fb = ps.build_fb_text(FX["daily_home_pick_win"]["date"])
+    check("19.8a", "the Facebook post does NOT carry the new matchup segment",
+          "AZ @ KC · Final" not in fb)
+    check("19.8b", "post_social still renders its own score form", "2-5" in fb)
 
     # ------------------------ 18. --strict: the production exit-code table --
     #

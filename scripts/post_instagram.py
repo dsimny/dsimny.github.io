@@ -164,16 +164,38 @@ def parse_ref(ref):
 
 
 # --------------------------------------------------------------- caption --
+def score_line(e):
+    """`AZ @ KC · Final 2-5` — the matchup, then the score, both verbatim.
+
+    grade.py writes final_score as `away-home` (grade.py:255), so a correctly
+    graded WIN on a HOME pick reads as a loss when the score stands alone:
+    "Kansas City Royals ML … Final 2-5" looks like Kansas City scored 2. They
+    scored 5 — the ledger's `game` is `AZ @ KC`, so Kansas City is the home side
+    and the second number is theirs. The matchup restores the only context that
+    makes the ordering readable.
+
+    NOTHING IS REINTERPRETED: the score is not reordered, recomputed or
+    relabelled, and `game` is the ledger's own string. An entry with no usable
+    `game` falls back to the bare form rather than inventing a matchup, and a
+    void stays `void` rather than a fabricated score.
+
+    Duplicated from render_recap_image.score_line on purpose — see the long note
+    there. Check 19.7 asserts the two agree byte-for-byte.
+    """
+    score = e.get("final_score") or "void"
+    game = (e.get("game") or "").strip()
+    return f"{game} · Final {score}" if game else f"Final {score}"
+
+
 def _entry_line(e, amount):
-    """`WIN · Boston Red Sox ML (-134) — Final 4-2 (+0.75u)`
+    """`WIN · Boston Red Sox ML (-134) — AAA @ BBB · Final 4-2 (+0.75u)`
 
     Book names inside `pick` are kept verbatim: the price source is a fact about
     the graded entry and stating it is the point of an auditable ledger. Text
     attribution only — no bookmaker mark, logo or link anywhere.
     """
     word = RESULT_WORD.get(e.get("result", ""), "—")
-    score = e.get("final_score") or "void"
-    return f"{word} · {e.get('pick', '')} — Final {score} ({amount})"
+    return f"{word} · {e.get('pick', '')} — {score_line(e)} ({amount})"
 
 
 def _rows(entries, amount_fn, cap):

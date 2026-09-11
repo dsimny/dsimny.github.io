@@ -130,6 +130,36 @@ LEDGER_LABEL_DAILY_STAKED = "DAILY PICK LEDGER — RECORDED ALLOCATION"
 
 RESULT_WORD = {"WIN": "WIN", "LOSS": "LOSS", "VOID": "VOID"}
 
+
+def score_line(e):
+    """`AZ @ KC · Final 2-5` — the matchup, then the score, both verbatim.
+
+    WHY THE MATCHUP IS HERE. grade.py writes final_score as `away-home`
+    (grade.py:255), so a correctly graded WIN on a HOME pick reads as a loss
+    when the score stands alone: "Kansas City Royals ML … Final 2-5" looks like
+    Kansas City scored 2. They scored 5 — the ledger's `game` is `AZ @ KC`, so
+    Kansas City is the home side and the second number is theirs. Printing the
+    matchup restores the only context that makes the ordering readable.
+
+    NOTHING IS REINTERPRETED. The score is not reordered, recomputed or
+    relabelled, and the matchup is the ledger's own `game` string verbatim —
+    this module still reports what grade.py recorded and nothing else. An entry
+    with no usable `game` falls back to the previous bare form rather than
+    inventing a matchup, and a void still renders as `void` rather than a
+    fabricated score.
+
+    DUPLICATED, DELIBERATELY, in post_instagram.py. The natural shared home is
+    post_social.py, which both modules already import — but the Facebook copy is
+    frozen and out of scope here. Rather than have the renderer import the
+    publishing module (which would drag PIL into a caption-only path) the four
+    lines are repeated, and selftest_instagram.py check 19.7 asserts the two
+    implementations agree byte-for-byte across a matrix of entries, so they
+    cannot drift apart unnoticed.
+    """
+    score = e.get("final_score") or "void"
+    game = (e.get("game") or "").strip()
+    return f"{game} · Final {score}" if game else f"Final {score}"
+
 # ------------------------------------------------------------------- fonts --
 FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 FONT_REGULAR = os.path.join(FONT_DIR, "DejaVuSans.ttf")
@@ -405,8 +435,10 @@ def _entry_rows(c, entries, amount_fn, cap):
                 f"row collision: pick ends at x={pick_box[2]} but the unit "
                 f"figure starts at x={amount_box[0]} ({pick!r} vs {amount!r})")
 
-        score = e.get("final_score") or "void"
-        c.text((px, y + 44), f"Final {score}", font(26), MUTED, role="score")
+        sf = font(26)
+        line, strunc = fit(score_line(e), sf, W - MARGIN - px)
+        c.text((px, y + 44), line, sf, MUTED, logical=score_line(e),
+               truncated=strunc, role="score")
 
     y_end = ROWS_Y0 + len(shown) * ROW_H
     if len(entries) > len(shown):

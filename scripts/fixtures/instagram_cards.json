@@ -256,6 +256,91 @@
    "daily": {"entries": [], "aggregates": null}
   },
 
+  "daily_home_pick_win": {
+   "_why": "THE LIVE 2026-09-09 SHAPE. grade.py writes final_score away-home, so a HOME pick that won reads as a loss without the matchup: 'Kansas City Royals ML ... Final 2-5'. KC is home in 'AZ @ KC' and scored 5. Verbatim copy of the production entry.",
+   "date": "2026-09-09",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-09-09", "gamePk": 824064, "game": "AZ @ KC",
+      "pick": "Kansas City Royals ML (+108, Caesars)", "market": "moneyline",
+      "price": 108, "book": "Caesars", "units_staked": 0.0, "paper_basis": 0.25,
+      "strategy": "daily", "final_score": "2-5", "result": "WIN",
+      "pnl_paper": 0.27, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "17-11", "wins": 17, "losses": 11, "voids": 0,
+                   "paper_units_net": 1.402, "paper_roi_pct": 20.03,
+                   "staked_units_net": 0.0, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "daily_away_pick_win": {
+   "_why": "The mirror image: the picked team is AWAY, so the FIRST number is theirs. Same code path, opposite reading — proves nothing is being reordered to suit the pick.",
+   "date": "2026-09-10",
+   "qualified": {"entries": [], "aggregates": null},
+   "daily": {
+    "entries": [
+     {"date": "2026-09-10", "gamePk": 824065, "game": "KC @ AZ",
+      "pick": "Kansas City Royals ML (-104, FanDuel)", "market": "moneyline",
+      "price": -104, "book": "FanDuel", "units_staked": 0.0, "paper_basis": 0.25,
+      "strategy": "daily", "final_score": "5-2", "result": "WIN",
+      "pnl_paper": 0.24, "pnl_staked": 0.0}
+    ],
+    "aggregates": {"record": "18-11", "wins": 18, "losses": 11, "voids": 0,
+                   "paper_units_net": 1.642, "paper_roi_pct": 22.65,
+                   "staked_units_net": 0.0, "opened": "2026-08-09",
+                   "note": "Daily Pick strategy (v0.15)."}
+   }
+  },
+
+  "qualified_no_game_field": {
+   "_why": "An entry with NO game key must fall back to the bare 'Final x-y' rather than emitting a stray separator or inventing a matchup.",
+   "date": "2026-05-07",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-07", "gamePk": 71,
+      "pick": "Minnesota Twins ML (-115)", "units": 1.0, "confidence": "2u",
+      "final_score": "6-3", "result": "WIN", "pnl": 0.87}
+    ],
+    "aggregates": {"record": "19-14", "wins": 19, "losses": 14, "voids": 2,
+                   "units_net": -5.53, "units_risked": 45.5, "roi_pct": -12.15}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "qualified_blank_game_field": {
+   "_why": "A present-but-empty game string is the same case as a missing one.",
+   "date": "2026-05-08",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-08", "gamePk": 72, "game": "   ",
+      "pick": "Baltimore Orioles ML (+102)", "units": 1.0, "confidence": "1u",
+      "result": "VOID", "pnl": 0.0}
+    ],
+    "aggregates": {"record": "19-14", "wins": 19, "losses": 14, "voids": 3,
+                   "units_net": -5.53, "units_risked": 45.5, "roi_pct": -12.15}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
+  "qualified_long_matchup": {
+   "_why": "Longest realistic matchup AND pick together — the score line must not clip or cross the right margin, and the pick row must still clear the unit figure.",
+   "date": "2026-05-09",
+   "qualified": {
+    "entries": [
+     {"date": "2026-05-09", "gamePk": 73,
+      "game": "Arizona Diamondbacks @ Kansas City Royals (doubleheader game 2)",
+      "pick": "Arizona Diamondbacks Team Total Over 4.5 Runs (-118, DraftKings alternate line)",
+      "units": 1.0, "confidence": "2u", "final_score": "11-10", "result": "WIN",
+      "pnl": 0.85}
+    ],
+    "aggregates": {"record": "20-14", "wins": 20, "losses": 14, "voids": 3,
+                   "units_net": -4.68, "units_risked": 46.5, "roi_pct": -10.06}
+   },
+   "daily": {"entries": [], "aggregates": null}
+  },
+
   "both_ledgers_same_date": {
    "_why": "Proves priority: Qualified wins the date and the Daily entry must not appear.",
    "date": "2026-05-01",

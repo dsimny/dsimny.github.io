@@ -22,3 +22,14 @@ requests-oauthlib>=1.3
 # Pillow 12.3.0 ships no font of its own, which is why the renderer loads a
 # vendored face from assets/fonts/ by path. See assets/fonts/README.md.
 Pillow==12.3.0
+# Parses .github/workflows/grade-ledger.yml in scripts/selftest_instagram.py's
+# group 20 — the offline contract checks on the production Instagram wiring (job
+# split, shared grading date, pushed-SHA handoff, --strict, alert branches).
+#
+# DECLARED HERE RATHER THAN INSTALLED AD HOC IN THE SELF-TEST WORKFLOW, because
+# the whole point of those checks is that they run everywhere the suite runs. It
+# was briefly absent and CI failed with ModuleNotFoundError while the suite
+# passed locally — exactly the local/CI divergence the pinned-dependency
+# convention above exists to prevent. The suite must never skip a check because
+# a parser is missing; a missing parser is a failure.
+PyYAML>=6.0

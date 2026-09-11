@@ -216,22 +216,6 @@
    "at_utc": "2026-09-10T15:10:27Z"
   },
   {
-   "date": "2026-09-08",
-   "mode": "fb_free",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-11T07:47:28Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "fb_slate",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-11T07:47:29Z"
-  },
-  {
    "date": "2026-09-10",
    "mode": "recap",
    "result": "nothing_to_post",
@@ -255,6 +239,22 @@
    "http_status": 403,
    "detail": "{\"error\":{\"message\":\"(#200) If posting to a group, requires app being installed in the group, and \\\\\\n          either publish_to_groups permission with user token, or both pages_read_engagement \\\\\\n ",
    "at_utc": "2026-09-11T08:10:21Z"
+  },
+  {
+   "date": "2026-09-08",
+   "mode": "fb_free",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-11T08:37:23Z"
+  },
+  {
+   "date": "2026-09-08",
+   "mode": "fb_slate",
+   "result": "no_board",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-11T08:37:24Z"
   }
  ]
 }

@@ -924,7 +924,7 @@
    "home_abbr": "BAY",
    "home_key": "baylorbears",
    "home_score": null,
-   "kickoff_utc": "2026-09-13T00:00:00Z",
+   "kickoff_utc": "2026-09-13T00:08:00Z",
    "margin": null,
    "season_slug": "regular-season",
    "season_type": 2,
@@ -1278,20 +1278,20 @@
    "away": "Florida A&M Rattlers",
    "away_abbr": "FAMU",
    "away_key": "floridaamrattlers",
-   "away_score": null,
+   "away_score": 7,
    "espn_event_id": "401858213",
-   "final": false,
+   "final": true,
    "home": "Miami Hurricanes",
    "home_abbr": "MIA",
    "home_key": "miamihurricanes",
-   "home_score": null,
+   "home_score": 77,
    "kickoff_utc": "2026-09-11T00:00:00Z",
-   "margin": null,
+   "margin": 70,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 84
   },
   "401858214": {
    "away": "Rutgers Scarlet Knights",
@@ -3280,7 +3280,7 @@
    "home_abbr": "LIB",
    "home_key": "libertyflames",
    "home_score": null,
-   "kickoff_utc": "2026-09-12T22:00:00Z",
+   "kickoff_utc": "2026-09-12T16:00:00Z",
    "margin": null,
    "season_slug": "regular-season",
    "season_type": 2,
@@ -3517,5 +3517,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-09-09T14:59:38Z"
+ "updated_utc": "2026-09-11T14:49:24Z"
 }

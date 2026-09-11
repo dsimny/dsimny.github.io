@@ -24,20 +24,20 @@
    "away": "SF",
    "away_abbr": "SF",
    "away_name": "San Francisco 49ers",
-   "away_score": null,
+   "away_score": 27,
    "espn_event_id": "401872657",
-   "final": false,
+   "final": true,
    "home": "LA",
    "home_abbr": "LAR",
    "home_name": "Los Angeles Rams",
-   "home_score": null,
+   "home_score": 7,
    "kickoff_utc": "2026-09-11T00:35:00Z",
-   "margin": null,
+   "margin": -20,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 34
   },
   "401872658": {
    "away": "ATL",
@@ -1218,5 +1218,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-09-10T14:45:53Z"
+ "updated_utc": "2026-09-11T14:49:25Z"
 }

@@ -111,6 +111,21 @@ concurrency:
 jobs:
   capture:
     runs-on: ubuntu-latest
+    # THE ALERT JOB BELOW MUST NOT FIRE FOR A DATA-INTEGRITY FAILURE.
+    #
+    # It keys on `needs.capture.result != 'success'`, so without this output a
+    # failing integrity step would Discord-alert — with a 20-line log tail —
+    # on every capture run. During a persistent fault that is 26 alerts a day, which is how
+    # an ops channel gets muted. The daily monitor is the human notification
+    # layer; these steps only turn the run red.
+    #
+    # The integrity step carries no `if:`, so it runs only when every step before
+    # it succeeded (default `success()`), unlike the `!cancelled()` steps above
+    # it. That is what makes this output safe to suppress on: `failed=true` can
+    # ONLY mean the integrity check was the sole failure. A genuine pipeline
+    # failure skips the step, leaves the output empty, and still alerts.
+    outputs:
+      integrity_failed: ${{ steps.integrity.outputs.failed }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -257,13 +272,59 @@ jobs:
           git diff --cached --quiet || git commit -m "Football board $SLATE_WEEK"
           git push
 
+      - name: Capture data integrity
+        id: integrity
+        # RUNS AFTER BOTH PUSHES, in the same workspace, so it sees exactly the
+        # files this run generated — no second checkout, no head_sha, no
+        # staleness window. That is why this lives here rather than in a
+        # workflow_run job: workflow_run hands you the commit that TRIGGERED the
+        # upstream run, not the one it produced, so it would inspect the state
+        # from before these captures existed.
+        #
+        # ONLY capture_isolation runs here. It reads data/football/odds/, which
+        # this workflow just wrote — a real causal fit. selftest_team_join reads
+        # games.csv and team_game_efficiency.csv (static since 2026-08-20) plus
+        # nfl_results.json (written by football-grade.yml), none of which this
+        # run touches; running it here would re-check three-week-old data 26
+        # times a day and blame a capture for something it did not cause. It
+        # lives in football-grade.yml instead.
+        #
+        # A failure here NEVER undoes the push, rewrites data, auto-corrects, or
+        # posts to Discord. The commit already landed and stands. This only turns
+        # the run red so the fault is visible and attributable.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          set +e
+          python scripts/football/selftest_capture_isolation.py
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo "::error title=selftest_capture_isolation.py::live football capture data violated an invariant (exit $rc); pushed data remains committed"
+            {
+              echo "## Capture data integrity"
+              echo ""
+              echo "❌ \`selftest_capture_isolation.py\` failed (exit $rc)."
+              echo ""
+              echo "Live football capture data violated an invariant."
+              echo "**Pushed data remains committed** — nothing was reverted,"
+              echo "rewritten or auto-corrected, and no Discord alert was sent"
+              echo "from here. The daily monitor is the notification layer."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            exit $rc
+          fi
+          echo "## Capture data integrity" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ \`selftest_capture_isolation.py\` passed." >> "$GITHUB_STEP_SUMMARY"
+
   # Loud failure, same rule as the board, grading and closing runs. The impact
   # line is written to be TRUE rather than reassuring: this is the one job whose
   # failure destroys something, so it must not read like the closing-capture
   # alert, which is genuinely low-stakes.
   alert:
     needs: capture
-    if: ${{ always() && needs.capture.result != 'success' }}
+    if: ${{ always() && needs.capture.result != 'success'
+          && needs.capture.outputs.integrity_failed != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

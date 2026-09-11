@@ -63,7 +63,7 @@ FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 
 # Total checks this file is expected to run. Bump it DELIBERATELY when adding or
 # removing a check; unexplained drift means a check stopped executing.
-EXPECTED_CHECKS = 872
+EXPECTED_CHECKS = 873
 
 # Checksums of the vendored font files, as recorded in assets/fonts/README.md.
 # A swapped or corrupted face changes every card, so it fails the suite here
@@ -1403,20 +1403,46 @@ def main():
           "MEMBERS_WEBHOOK = os.environ.get" in pd_src)
 
     # ---- 22.5 no workflow feeds the removed fallbacks to an alert step ----
+    #
+    # COMMENTS ARE NOT CODE. This scan read the raw file, so an alert step whose
+    # comment said "DISCORD_WEBHOOK_URL and DISCORD_WEBHOOK_URL_MEMBERS are
+    # deliberately NOT passed" was reported as passing them — the clearer the
+    # workflow documented the policy, the more likely it was to fail the test
+    # enforcing it. football-data-daily.yml tripped exactly that on its first
+    # run. Whole-line comments are dropped before the scan; `env:` bindings,
+    # which is what actually feeds a webhook to the step, are never comments.
+    def alert_code(txt):
+        return "\n".join(l for l in txt.splitlines()
+                         if not l.lstrip().startswith("#"))
+
+    def alert_offenders(txt):
+        bad = []
+        for block in alert_code(txt).split("- name:"):
+            if "post_discord.py alert" not in block:
+                continue
+            if ("DISCORD_WEBHOOK_URL_MEMBERS" in block
+                    or re.search(r"DISCORD_WEBHOOK_URL: \$\{\{", block)):
+                bad.append(block)
+        return bad
+
     wfdir = os.path.join(ROOT, ".github", "workflows")
     offenders = []
     for fn in sorted(os.listdir(wfdir)):
         if not fn.endswith(".yml"):
             continue
         txt = open(os.path.join(wfdir, fn), encoding="utf-8").read()
-        for block in txt.split("- name:"):
-            if "post_discord.py alert" not in block:
-                continue
-            if ("DISCORD_WEBHOOK_URL_MEMBERS" in block
-                    or re.search(r"DISCORD_WEBHOOK_URL: \$\{\{", block)):
-                offenders.append(fn)
+        if alert_offenders(txt):
+            offenders.append(fn)
     check("22.5", "no alert step still passes the members/free webhooks",
           not offenders)
+    # Narrowing a scan is only safe if it still catches what it exists to catch.
+    check("22.5b", "and a real members-webhook binding on an alert step is "
+                   "still caught",
+          len(alert_offenders(
+              "      - name: Alert\n"
+              "        env:\n"
+              "          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.X }}\n"
+              "        run: python scripts/post_discord.py alert \"boom\"\n")) == 1)
 
     # ---- 22.6 the policy is written down where a human will read it ----
     check("22.6a", "post_discord.py documents the no-fallback policy",

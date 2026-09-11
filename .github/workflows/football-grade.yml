@@ -41,6 +41,21 @@ concurrency:
 jobs:
   grade:
     runs-on: ubuntu-latest
+    # THE ALERT JOB BELOW MUST NOT FIRE FOR A DATA-INTEGRITY FAILURE.
+    #
+    # It keys on `needs.grade.result != 'success'`, so without this output a
+    # failing integrity step would Discord-alert — with a 20-line log tail —
+    # on every grade run. During a persistent fault that is one a day forever, which is how
+    # an ops channel gets muted. The daily monitor is the human notification
+    # layer; these steps only turn the run red.
+    #
+    # The integrity step carries no `if:`, so it runs only when every step before
+    # it succeeded (default `success()`), unlike the `!cancelled()` steps above
+    # it. That is what makes this output safe to suppress on: `failed=true` can
+    # ONLY mean the integrity check was the sole failure. A genuine pipeline
+    # failure skips the step, leaves the output empty, and still alerts.
+    outputs:
+      integrity_failed: ${{ steps.integrity.outputs.failed }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -165,9 +180,50 @@ jobs:
           git diff --cached --quiet || git commit -m "Football grade $(date -u +%F)"
           git push
 
+      - name: Football join integrity
+        id: integrity
+        # AFTER THE PUSH, DELIBERATELY — not before it.
+        #
+        # The tempting ordering is "check, then commit only if clean". It was
+        # rejected: House Rule 7 says a graded play is published in full after
+        # grading, win or lose, and gating the push would withhold graded results
+        # and the week's reveal because a REFERENCE table disagreed. team_join
+        # compares nfl_results.json (which this run regenerates, step "Refresh
+        # NFL results") against games.csv and team_game_efficiency.csv, both
+        # static since 2026-08-20 and untouched here. A franchise mismatch in
+        # those does not mean the grades are wrong, and it must not delay
+        # publishing them.
+        #
+        # So the record publishes and the run goes red. A failure NEVER reverts
+        # the push, repairs data, weakens an assertion, or posts to Discord.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          set +e
+          python scripts/football/selftest_team_join.py
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo "::error title=selftest_team_join.py::football reference datasets disagree (exit $rc); graded results remain committed and published"
+            {
+              echo "## Football join integrity"
+              echo ""
+              echo "❌ \`selftest_team_join.py\` failed (exit $rc)."
+              echo ""
+              echo "The football reference datasets disagree. **Graded results"
+              echo "remain committed and published** — House Rule 7 — and nothing"
+              echo "was reverted or repaired. No Discord alert was sent from here."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            exit $rc
+          fi
+          echo "## Football join integrity" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ \`selftest_team_join.py\` passed." >> "$GITHUB_STEP_SUMMARY"
+
   alert:
     needs: grade
-    if: ${{ always() && needs.grade.result != 'success' }}
+    if: ${{ always() && needs.grade.result != 'success'
+          && needs.grade.outputs.integrity_failed != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

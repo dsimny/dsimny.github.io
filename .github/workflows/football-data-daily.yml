@@ -1,0 +1,140 @@
+name: Football data integrity (daily)
+# THE DATA-DRIFT MONITOR. Its opposite number is football-selftest.yml, the CODE
+# regression gate.
+#
+# That split is the whole design. Six of the eight football suites are hermetic —
+# poison their inputs and the result does not move — so a red X there means
+# somebody broke the code. The two here read live pipeline output on purpose:
+#
+#   selftest_capture_isolation.py  reads data/football/odds/
+#   selftest_team_join.py          reads nfl_results.json, games.csv,
+#                                  team_game_efficiency.csv
+#
+# Either can go red because a capture or a franchise table changed, with no code
+# involved. Mixed into the code gate they would make a red X ambiguous, and an
+# ambiguous red X gets ignored.
+#
+# READ-ONLY, START TO FINISH. This workflow regenerates nothing, repairs nothing,
+# commits nothing and pushes nothing. `contents: read` is enforcement, not
+# decoration. A monitor that fixes what it finds destroys the evidence of what
+# went wrong, and an auto-correcting pipeline over an append-only ledger is how a
+# silent rewrite happens.
+#
+# BOTH SUITES ALSO RUN INSIDE THE PIPELINE ITSELF — capture_isolation at the end
+# of football-capture.yml, team_join at the end of football-grade.yml — where
+# each sees the exact bytes its own run produced. This job is the second net: it
+# catches drift on a day when neither pipeline ran at all (no slate, a skipped
+# window, a workflow that never fired), which is precisely when nothing else
+# would look.
+on:
+  workflow_dispatch: {}
+  # NO `schedule:` BLOCK, DELIBERATELY. GitHub's cron is best-effort and this
+  # repository has measured it running hours late — 10:18, 14:23 and 17:40 ET
+  # against a `7 * * * *` entry. The pipeline is driven by cron-job.org for that
+  # reason, and this monitor follows the same pattern: an external entry fires
+  # workflow_dispatch at 02:30 America/New_York, after the night's grade run and
+  # before the morning captures.
+  #
+  # Adding a `schedule:` here later would not be a harmless belt-and-braces: it
+  # would double-fire the monitor and, on a bad day, double-alert.
+
+# READ-ONLY. No write scope exists for this job to misuse.
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    name: Football data integrity
+    runs-on: ubuntu-latest
+    # Both suites are pure CPU over committed CSV/JSON and finish in seconds.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Run both data-integrity monitors
+        # BOTH RUN EVEN IF THE FIRST FAILS. `set +e` and a per-suite exit code,
+        # not `&&`. If the odds captures and the franchise tables both drifted,
+        # one alert naming both is worth far more than an alert naming whichever
+        # happened to be checked first — and "fix, re-dispatch, discover the
+        # second one" is a slow way to learn that.
+        id: monitors
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          set +e
+          FAILED=""
+          for s in capture_isolation team_join; do
+            echo "::group::selftest_$s.py"
+            python "scripts/football/selftest_$s.py"
+            rc=$?
+            echo "::endgroup::"
+            if [ $rc -ne 0 ]; then
+              FAILED="$FAILED selftest_$s.py"
+              echo "::error title=selftest_$s.py::exited $rc — live football data drifted; NO data was modified"
+            fi
+            printf '%s|%s\n' "$s" "$rc" >> /tmp/monitor_results
+          done
+          FAILED="${FAILED# }"
+          echo "failed=$FAILED" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Football data integrity"
+            echo ""
+            echo "| monitor | exit |"
+            echo "|---|---|"
+            while IFS='|' read -r name rc; do
+              if [ "$rc" = "0" ]; then icon="✅"; else icon="❌"; fi
+              echo "| \`selftest_$name.py\` | $icon $rc |"
+            done < /tmp/monitor_results
+            echo ""
+            if [ -n "$FAILED" ]; then
+              echo "**Failed:** $FAILED"
+              echo ""
+              echo "Live football data drifted. **No data was modified by this run**"
+              echo "— this workflow holds \`contents: read\` and regenerates,"
+              echo "repairs, commits and pushes nothing."
+            else
+              echo "Both data-integrity monitors passed."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Alert on drift
+        # ONE ALERT, NOT ONE PER SUITE. Two notifications for one morning's
+        # breakage is how an alert channel gets muted.
+        #
+        # SILENT ON SUCCESS. Nothing is posted when both monitors pass. A daily
+        # "all good" message trains everyone to skim past the channel, which is
+        # the one thing an alert channel must not become.
+        # NOT `failure()`. The monitors step runs under `set +e` and exits 0
+        # even when a suite fails — that is what lets both suites run — so
+        # `failure()` would be false and this step would never fire. The
+        # aggregated output is the authority on whether anything drifted.
+        # Left as a plain condition (implicitly `success() &&`) so a broken
+        # checkout or pip install, which sets no output, does not alert.
+        if: ${{ steps.monitors.outputs.failed != '' }}
+        env:
+          # ONLY the private ops webhook is in scope. DISCORD_WEBHOOK_URL and
+          # DISCORD_WEBHOOK_URL_MEMBERS are deliberately NOT passed: post_alert()
+          # has no fallback, and an env this job never sets cannot become one by
+          # accident. An internal data-integrity failure must never surface in a
+          # customer channel.
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # NO --detail-file, DELIBERATELY. A raw log tail in a Discord message
+          # is unreadable, can carry whatever a suite happened to print, and the
+          # run URL already leads to the full log for anyone who needs it.
+          python scripts/post_discord.py alert \
+            "Football data integrity FAILED: ${{ steps.monitors.outputs.failed }}. No data was modified — this monitor is read-only. Run: $RUN_URL"
+          # post_alert() NEVER exits non-zero — an optional alert destination must
+          # not be able to mask or change a result. So the failure is asserted
+          # here, unconditionally. This also covers the unset-secret case: the
+          # script logs that the alert was not sent and deliberately not routed
+          # anywhere else, and the run still goes red.
+          echo "Data-integrity failure stands regardless of whether the alert was deliverable."
+          exit 1

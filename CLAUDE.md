@@ -130,9 +130,13 @@ LOUD FAILURE. Three layers, because they catch different things:
 - `post_discord.py alert "<msg>" [--detail-file f]` — swallows every exception
   and always exits 0 (an alerting path that can break a run is worse than none),
   and validates the webhook host against discord.com before sending, so a
-  swapped env var can't POST a CI log somewhere else. Webhook order:
-  DISCORD_WEBHOOK_URL_ALERTS → _MEMBERS → the free channel. A visible failure is
-  on-brand; do not soften or suppress these.
+  swapped env var can't POST a CI log somewhere else. It sends to
+  DISCORD_WEBHOOK_URL_ALERTS and NOWHERE ELSE — the old
+  ALERTS → _MEMBERS → free-channel chain was removed on 2026-09-11 after it
+  broadcast a stack trace into #members-only. See "Ops alerts go to a
+  PRIVATE channel only" below. A visible failure is on-brand; do not soften
+  or suppress these — but the audience for a build failure is ops, not
+  subscribers.
 
 NOT DONE, deliberately: a missed day stays missed. No board is ever backfilled
 for a day the pipeline skipped — the banner IS how a missed day is communicated.
@@ -924,6 +928,61 @@ grade-ledger, heartbeat, morning-board, capture-closing, football-*.
 Normal routing is unchanged: free pick → `DISCORD_WEBHOOK_URL`, members board →
 `DISCORD_WEBHOOK_URL_MEMBERS`, results recap → `DISCORD_WEBHOOK_URL_LEDGER`
 falling back to the free channel. Enforced by `selftest_instagram.py` group 22.
+
+## Football CI: code gate vs data monitor (2026-09-11)
+
+Eight football self-test suites, split by WHAT A RED X MEANS. That split is the
+whole architecture, and it exists because an ambiguous red X gets ignored.
+
+**Code gate** — `.github/workflows/football-selftest.yml`, on push/PR to the
+football paths. Seven hermetic suites: allowlist, board, discord, mercer, page,
+workflows, writeup. Each was proven hermetic by poisoning its inputs and
+confirming the result did not move. A red run here means A CODE REGRESSION,
+never live-data drift.
+
+**Data monitors** — the two suites that read live pipeline output on purpose:
+
+| suite | reads | runs in |
+|---|---|---|
+| `selftest_capture_isolation.py` | `data/football/odds/` | football-capture.yml, last step |
+| `selftest_team_join.py` | `nfl_results.json`, `games.csv`, `team_game_efficiency.csv` | football-grade.yml, last step |
+
+Each runs in the workflow that WRITES what it checks, as the final step, AFTER
+that workflow's pushes. Do not move either into the code gate, and do not run
+team_join in capture: a capture writes none of its three inputs, so a failure
+there would blame the wrong run, 26 times a day.
+
+**Both monitors run AFTER the push, deliberately.** The tempting ordering is
+"check, then commit only if clean". It is wrong here. House rule 7 publishes a
+graded play in full after grading, win or lose; gating the push on team_join
+would withhold graded results and the week's reveal because a REFERENCE table
+disagreed. A monitor failure NEVER undoes a push, rewrites data, auto-corrects,
+or posts to Discord. The record publishes; the run goes red.
+
+**Human notification** — `.github/workflows/football-data-daily.yml`. Read-only
+(`contents: read`), `workflow_dispatch` only, runs BOTH monitors, silent when
+both pass, and on failure sends exactly ONE alert via `post_discord.py alert`
+naming which monitor failed plus the run URL, then exits 1. No GitHub `schedule:`
+— cron-job.org dispatches it at 02:30 America/New_York, same reason as the rest
+of the pipeline. It is the second net: it catches drift on a day when neither
+pipeline ran at all, which is exactly when nothing else would look.
+
+Do NOT add per-capture Discord alerts and do not invent dedup state. A persistent
+fault turning many capture runs red is acceptable — each red run truthfully says
+the data that run generated violated the invariant.
+
+Both pipelines already end in an `alert` job keyed on
+`needs.<job>.result != 'success'`, which would have Discord-alerted (with a
+20-line log tail) on every one of those red runs. So the integrity step exports
+`integrity_failed` and the alert job stands down on it. That suppression is sound
+ONLY because the integrity step carries no `if:` — every other step in those jobs
+runs on `!cancelled()`, this one on the default `success()`, so `failed=true` can
+only mean the integrity check was the sole failure. **Never give the integrity
+step an `if:`**; it would let the output go true alongside a real pipeline failure
+and silence a genuine alert.
+
+Every placement above is asserted by `scripts/football/selftest_workflows.py`,
+which runs inside the code gate and has a negative control for each rule.
 
 ## House rules (non-negotiable; they ARE the brand)
 

@@ -12,7 +12,13 @@ name: Football code self-tests
 # confirming the result did not move (2026-09-11 audit):
 #   allowlist, board, discord, mercer, page, writeup
 #
-# NEEDS NO SECRETS AND TOUCHES NO NETWORK. None of the six imports a network
+# selftest_workflows joined them afterwards. It reads .github/workflows/*.yml
+# — repository source, not pipeline output — so it is hermetic by the same
+# standard: no capture, grade or franchise table can move it. It asserts WHERE
+# each data monitor is wired, which is a code-level contract and belongs in the
+# code gate even though the thing it protects is data integrity.
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. None of the seven imports a network
 # library; none writes outside a temp directory; none reads an environment
 # variable that CI must supply (selftest_mercer reads MERCER_KEEP, a documented
 # local debug flag that only controls temp-dir cleanup). That is why this job
@@ -26,8 +32,15 @@ on:
       - "scripts/football/**"
       - "requirements.txt"
       - ".github/workflows/football-selftest.yml"
+      # THE WORKFLOWS THE CONTRACT SUITE READS. selftest_workflows.py
+      # asserts WHERE each data monitor is wired, so editing any of these
+      # three can break this gate without touching a line of Python. Without
+      # them, moving a monitor to the wrong workflow would sail through CI.
+      - ".github/workflows/football-capture.yml"
+      - ".github/workflows/football-grade.yml"
+      - ".github/workflows/football-data-daily.yml"
       # SHARED MODULES THE SUITES ACTUALLY IMPORT. `scripts/football/**` is not
-      # enough: the import graph of the six reaches these six files outside it,
+      # enough: the import graph of the suites reaches these six files outside it,
       # so a change to any of them can break this gate without touching
       # scripts/football/ at all. Derived by walking the AST import graph, not
       # guessed — re-derive it if the suites grow new imports.
@@ -44,8 +57,15 @@ on:
       - "scripts/football/**"
       - "requirements.txt"
       - ".github/workflows/football-selftest.yml"
+      # THE WORKFLOWS THE CONTRACT SUITE READS. selftest_workflows.py
+      # asserts WHERE each data monitor is wired, so editing any of these
+      # three can break this gate without touching a line of Python. Without
+      # them, moving a monitor to the wrong workflow would sail through CI.
+      - ".github/workflows/football-capture.yml"
+      - ".github/workflows/football-grade.yml"
+      - ".github/workflows/football-data-daily.yml"
       # SHARED MODULES THE SUITES ACTUALLY IMPORT. `scripts/football/**` is not
-      # enough: the import graph of the six reaches these six files outside it,
+      # enough: the import graph of the suites reaches these six files outside it,
       # so a change to any of them can break this gate without touching
       # scripts/football/ at all. Derived by walking the AST import graph, not
       # guessed — re-derive it if the suites grow new imports.
@@ -75,7 +95,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Run the six hermetic football suites
+      - name: Run the seven hermetic football suites
         # EVERY SUITE RUNS EVEN AFTER ONE FAILS. Stopping at the first failure
         # would hide the rest, and "fix, push, wait, discover the next one" is a
         # slow way to learn what a change actually broke. The loop records each
@@ -89,7 +109,7 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           set +e
-          SUITES="allowlist board discord mercer page writeup"
+          SUITES="allowlist board discord mercer page workflows writeup"
           FAILED=""
           for s in $SUITES; do
             echo "::group::selftest_$s.py"
@@ -116,11 +136,11 @@ jobs:
             if [ -n "$FAILED" ]; then
               echo "**Failed:**$FAILED"
               echo ""
-              echo "A red run here means a **code regression**. These six suites are"
+              echo "A red run here means a **code regression**. These seven suites are"
               echo "hermetic — they do not read mutable production data, so live-data"
               echo "drift cannot cause this."
             else
-              echo "All six hermetic suites passed."
+              echo "All seven hermetic suites passed."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -128,4 +148,4 @@ jobs:
             echo "FAILED:$FAILED"
             exit 1
           fi
-          echo "All six hermetic football suites passed."
+          echo "All seven hermetic football suites passed."

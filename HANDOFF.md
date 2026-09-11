@@ -25,7 +25,7 @@ MLB picks site with a Monte Carlo engine and an **append-only public ledger** �
 | **Email** (Resend) | 🟡 Code live, not sending | Set repo **variable** `RESEND_SEGMENT_ID` to the real all-subscribers segment id, add a contact, trigger Morning board, confirm inbox |
 | **X / Twitter** | 🟡 Auth works, blocked on billing | Fund X API credits (see Parked, below) |
 | **Facebook** | 🟢 **Configured — awaiting first natural production post** | Credentials are set and the code is live on main. Nothing to do: the next grading run with a settled entry publishes on its own. Verification is that post, not a manual trigger |
-| **Instagram** | 🔵 **IN PROGRESS — Phase 1** | Account created (@openledgersports, Professional/Business) and connected to the Facebook Page. Renderer + caption under development; **no live Meta call exists yet**. See the Instagram section below |
+| **Instagram** | 🟢 **LIVE — nightly recap card** | Activated 2026-09-11. Publishes one 1080x1350 card per graded night via the `instagram` job in `grade-ledger.yml`. See the Instagram section below |
 
 Live status is machine-readable in **`data/post_status.json`** (per-channel `posted` / `failed` / `no_config` with HTTP codes). Latest: `facebook nothing_to_post` (credentials present; the Qualified ledger has simply been quiet), `x failed 402`, email not configured.
 
@@ -81,7 +81,7 @@ If it 403s: confirm the account is the Page admin and `pages_manage_posts` was g
 
 ---
 
-## ▶ Instagram — Phase 1 built, Phase 2 not started
+## Instagram — LIVE (activated 2026-09-11)
 
 **Account state:** **@openledgersports** exists, is a **Professional (Business)** account, and is **connected to the Open Ledger Sports Facebook Page** (`1263139090223888`). Nothing else about Instagram is configured — there is **no Instagram secret, no variable, and no live API call anywhere in the repository.**
 
@@ -94,14 +94,29 @@ If it 403s: confirm the account is the Page admin and `pages_manage_posts` was g
 
 **Why the card draws its result marks instead of using ✅/❌:** in the vendored font U+2705 and U+274C both render as the *same* `.notdef` tofu box while U+26AA renders a real glyph — a win and a loss would look identical and a void would look fine. The marks are drawn primitives with the literal word beside them.
 
-**Phase 2 (NOT started — do not begin without reading the durability design):**
-1. Regenerate the Page token with Instagram scopes: `instagram_basic`, `instagram_content_publish`, `pages_read_engagement`, `pages_show_list` (add `ads_management` + `ads_read` only if the Page role comes via Business Manager). Same exchange as the Facebook section above.
-2. Resolve the IG account id once: `GET /v26.0/{page-id}?fields=instagram_business_account`.
-3. Set placeholders **secret `IG_ACCESS_TOKEN`** and **variable `IG_USER_ID`**. Prefer a separate secret over widening `FB_PAGE_ACCESS_TOKEN`, so an Instagram rotation cannot break Facebook.
-4. Set the **Instagram bio link** to `https://openledgersports.com`. This is a hard prerequisite, not a nicety: Instagram renders caption URLs as inert text, so the caption deliberately carries no URL and points at the bio instead.
-5. **App Review is not required** — Standard Access covers publishing to an account Daniel holds an app role on. Advanced Access is only for publishing on behalf of other businesses.
+**Phase 2 — ✅ DONE, live 2026-09-11.** `grade-ledger.yml` now has three jobs: **grade** (grades, renders the card, syncs Instagram status, commits and pushes) → **instagram** (checks out the exact pushed SHA, publishes with `--strict`) → **alert** (one message, chosen by job result).
 
-**The Phase 2 hazard, in one line:** publishing happens *after* the commit step, so a naive design records "posted" in a file that never reaches the repository — and a runner death between `media_publish` and the commit would republish the same card. Duplicate prevention must therefore be anchored in something Meta itself can be asked about, not solely in an unpushed local file.
+**Verified permissions on the Page token** (confirmed against the live account, 2026-09-11):
+
+| Permission | Why |
+|---|---|
+| `instagram_basic` | Read the IG professional account and its recent media |
+| `instagram_content_publish` | Create and publish feed posts |
+| `pages_read_engagement` | Required by the Instagram-API-with-Facebook-Login path |
+| `pages_show_list` | Dependency of `instagram_content_publish` |
+| **`business_management`** | **Meta required it for THIS configuration.** The published Facebook-Login docs list only the four above, but the account is administered through Business Manager, and the token could not resolve `instagram_business_account` on the Page without it. Do not prune it as "not in the docs" — it is not optional here. |
+
+**App Review is not required** — Standard Access covers publishing to an account Daniel holds an app role on. Advanced Access is only for publishing on behalf of other businesses.
+
+**Credentials (names only — never record a token value):**
+- **Variable `IG_USER_ID` = `17841412346017029`.** Not secret: it is the public Instagram professional-account id, recorded here in full so the wiring can be checked without a console round-trip.
+- **Secret `IG_ACCESS_TOKEN`** — a Page token carrying the five permissions above. **Name only. Never paste the value into this file, a commit, an issue or a chat.** If it leaks, rotate it in the Meta console and update the GitHub secret; nothing in the repo needs changing.
+
+**The Instagram bio link must point at `https://openledgersports.com`.** This is a hard requirement, not a nicety: Instagram renders caption URLs as inert text, so captions deliberately carry **no URL** and end with "at the link in our bio". Without the bio link the caption points at nothing.
+
+**How the durability hazard was solved.** Publishing happens *after* the commit, in a job that commits nothing and is destroyed with its runner — so a "posted" row written there never reaches the repository. It cannot ride along with the next run; nothing carries it. Duplicate prevention is therefore anchored in **Meta's own feed**: every caption carries `OLS-QUAL-<date>` / `OLS-DAILY-<date>`, and every run reads recent media for that reference before creating anything. The local status file is advisory, made durable by `sync-status` running in the grade job *before* the commit. An orphan container (created, never published) is abandoned and expires after 24h rather than being resumed from unreliable local state.
+
+**⚠️ NEVER re-run the whole Grade ledger workflow after a post-push Instagram failure.** The ledger and site are already live and correct. `post_discord.py` is intentionally not idempotent, so a re-run reposts a duplicate Discord recap. Tomorrow's run reconciles Instagram on its own; to fix sooner, run `scripts/post_instagram.py publish` by hand.
 
 ---
 
@@ -114,7 +129,7 @@ If it 403s: confirm the account is the Page admin and `pages_manage_posts` was g
 ## Config reference (names only — never commit values)
 - **Secrets:** `BOARD_ENCRYPTION_KEY` (required, unrecoverable if lost), `ODDS_API_KEY`, `DISCORD_WEBHOOK_URL` / `_MEMBERS` / `_LEDGER`, `RESEND_API_KEY`, `X_API_KEY` / `X_API_SECRET` / `X_ACCESS_TOKEN` / `X_ACCESS_SECRET`, `FB_PAGE_ACCESS_TOKEN`.
 - **Variables:** `SITE_URL`, `DISCORD_INVITE_URL`, `WHOP_CHECKOUT_URL`, `RESEND_SEGMENT_ID`, `EMAIL_FROM`, `FB_PAGE_ID`.
-- **Planned for Instagram Phase 2 (NOT set, and nothing reads them yet):** secret `IG_ACCESS_TOKEN`, variable `IG_USER_ID`. Listed here as names only so the eventual wiring has one place to check.
+- **Instagram (LIVE):** secret `IG_ACCESS_TOKEN` (name only — never record the value), variable `IG_USER_ID` = `17841412346017029` (not secret).
 
 ## Hard rules a new assistant MUST respect (from CLAUDE.md)
 - **NEVER commit a locally built `index.html` / `feed.xml`.** CI rebuilds them from the day's (encrypted) board; committing a stale local build reverts the live free pick. Before committing, `git checkout -- index.html feed.xml`, then `git add` only the specific source files (not `-A`).

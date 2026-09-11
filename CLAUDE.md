@@ -843,6 +843,59 @@ requirement each one proves).
 - NOT built on purpose: Mercer+Model agreement (count it before ever calling it
   stronger; never auto-boosts a stake), CLV on Mercer picks, Discord delivery.
 
+## Instagram recap cards (live 2026-09-11)
+
+Nightly, after grading commits and pushes, `grade-ledger.yml`'s **instagram** job
+publishes one 1080x1350 card of yesterday's graded result to @openledgersports.
+
+**Two ledgers, never mixed — same rule as everywhere else.** The card and caption
+are built from `post_social.select_recap()`, so they cannot disagree with the
+site or the Facebook post about which strategy a night belongs to. Qualified and
+Daily Pick have separate draw paths and disjoint unit keys; **exactly one running
+ledger appears on a card**, labelled with the ledger it came from. A Daily Pick
+card carries its disclosure verbatim from `post_social.py` — never a paraphrase.
+
+**Every caption carries a deterministic reference:** `OLS-QUAL-<date>` or
+`OLS-DAILY-<date>`, derived only from the settled recap's date and strategy, and
+appended *outside* the caption trim ladder so no rung can drop it.
+
+**Meta's published feed is the durable duplicate-prevention authority.** Every
+run reads recent Instagram media for that reference *before* creating anything;
+if it is already live, the media id is recovered and nothing is published. This
+matters because the instagram job commits nothing and is destroyed with its
+runner — anything it writes locally is gone. A fresh runner with no state at all
+behaves identically. **`data/instagram_status.json` is advisory telemetry only**;
+it is made durable by `post_instagram.py sync-status`, which runs in the grade
+job *before* the commit and folds yesterday's confirmed publications into that
+day's normal `git add data/`. The history lands a day in arrears, which is fine
+because nothing depends on it.
+
+**The image is a SHA-pinned public URL** —
+`raw.githubusercontent.com/<repo>/<pushed SHA>/data/social/ig_<date>.jpg`. Pinned
+to the commit the grade job actually pushed, so bot commits landing on main
+cannot invalidate it, and no Pages build has to finish first. A container is
+**never** created against an unreachable image; reachability is retried a bounded
+number of times first.
+
+**Strict production exits.** `publish --strict` means `posted` and
+`nothing_to_post` exit 0 (a quiet night is not a failure) while `no_config`,
+`pending_media` and `failed` exit 1. A run that published nothing is a channel
+going quietly dark, not a success.
+
+**NEVER re-run the whole Grade ledger workflow after a post-push Instagram
+failure.** Grading, the reveal and the site push have already completed; the
+public record is correct and live. `post_discord.py` is intentionally NOT
+idempotent, so a re-run reposts a duplicate Discord recap. Instagram duplicate
+prevention is remote, so tomorrow's run reconciles on its own — or run
+`scripts/post_instagram.py publish` by hand. The alert job says exactly this,
+and distinguishes a grading failure from an Instagram failure by job result.
+
+**Config (names only — never values):** secret `IG_ACCESS_TOKEN`, variable
+`IG_USER_ID`. The Instagram **bio link** must point at the site: captions
+deliberately carry no URL, because Instagram renders caption links as inert text.
+
+Offline guard: `scripts/selftest_instagram.py` (no network, no credentials).
+
 ## House rules (non-negotiable; they ARE the brand)
 
 1. Ledger is append-only: entries are never edited after grading; aggregates

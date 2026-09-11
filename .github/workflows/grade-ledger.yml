@@ -2,6 +2,13 @@ name: Grade ledger
 # Runs daily at 08:10 UTC (4:10 AM ET) — after the last West Coast game ends.
 # Grades yesterday's published picks against final scores and updates the
 # append-only ledger, then rebuilds the site so the record is live by morning.
+#
+# THREE JOBS, DELIBERATELY SEPARATE (Instagram wiring, 2026-09-11):
+#   grade      graded, committed and pushed the public record.
+#   instagram  the recap card reached Instagram.
+#   alert      one message, chosen from JOB RESULTS rather than a step name.
+# Keeping them apart means an Instagram failure cannot cast doubt on a grading
+# run that already succeeded, and the alert can say which of the two happened.
 on:
   # Triggered by cron-job.org via the workflow_dispatch API, daily at 4:10 AM ET.
   # GitHub cron removed 2026-07-23 (see morning-board.yml: late + duplicate posts).
@@ -13,6 +20,12 @@ permissions:
 jobs:
   grade:
     runs-on: ubuntu-latest
+    # Consumed by the instagram job. The date is resolved ONCE, here, and passed
+    # downstream — never recomputed in a second job, where a run spanning
+    # midnight ET would silently produce a different "yesterday".
+    outputs:
+      sha:  ${{ steps.push.outputs.sha }}
+      date: ${{ steps.gdate.outputs.date }}
     # Needed to decrypt yesterday's board for grading, and to reveal it after.
     env:
       BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
@@ -22,6 +35,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
+      - name: Resolve the grading date
+        id: gdate
+        # ONE definition of "yesterday" for everything downstream, including the
+        # separate instagram job.
+        run: echo "date=$(TZ=America/New_York date -d yesterday +%F)" >> "$GITHUB_OUTPUT"
       - name: Grade yesterday's picks
         run: python scripts/grade.py
       - name: Rebuild site with updated ledger
@@ -47,12 +65,12 @@ jobs:
         # Regenerates the same URLs with the revealed picks, closing lines,
         # ledger results, and postgame notes. Yesterday in ET, not UTC — the
         # run happens at 4:10 AM ET.
-        run: python scripts/game_pages.py "$(TZ=America/New_York date -d yesterday +%F)"
+        run: python scripts/game_pages.py "${{ steps.gdate.outputs.date }}"
       - name: Export training rows
         # Point-in-time feature rows from the just-revealed board + finals,
         # for the future challenger/calibration model. First run backfills
         # every revealed board; nightly runs append yesterday.
-        run: python scripts/export_training_rows.py "$(TZ=America/New_York date -d yesterday +%F)"
+        run: python scripts/export_training_rows.py "${{ steps.gdate.outputs.date }}"
       - name: Grade pick'em and post the leaderboard
         # Pulls entries from the Worker, grades against the revealed board +
         # final score, pushes per-user results back (names stay in the Worker),
@@ -87,21 +105,136 @@ jobs:
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           SITE_URL: ${{ vars.SITE_URL }}                              # optional
         run: python scripts/post_social.py facebook
+      - name: Render the Instagram recap card
+        # Deterministic 1080x1350 JPEG from the settled ledger, written under
+        # data/ so the existing `git add data/` below already commits it.
+        #
+        # MUST NOT BLOCK THE LEDGER PUSH. A missing card costs an Instagram post;
+        # a failed grading run costs the public record. If this fails, the
+        # instagram job finds no image, exhausts its bounded reachability
+        # retries, reports pending_media and goes red there — where it belongs,
+        # without ever having endangered the commit.
+        run: |
+          D="${{ steps.gdate.outputs.date }}"
+          python scripts/render_recap_image.py "$D" "data/social/ig_$D.jpg" \
+            || echo "::warning::recap card render failed; Instagram will report pending_media"
+      - name: Sync Instagram status from the live feed
+        # BEFORE THE COMMIT, deliberately. Yesterday's publish ran in a job that
+        # committed nothing and was then destroyed with its runner, so the only
+        # way that history reaches the repository is to re-derive it from Meta
+        # here and let the commit below carry it. The advisory history therefore
+        # lands one day in arrears, which is fine because nothing depends on it.
+        #
+        # Read-only against Meta: creates no container, publishes nothing
+        # (selftest checks 17.8a-c assert that against the function's source). A
+        # failed read leaves the existing file untouched and never blocks.
+        env:
+          IG_USER_ID: ${{ vars.IG_USER_ID }}                # optional — skipped when unset
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}   # optional
+        run: |
+          python scripts/post_instagram.py sync-status \
+            || echo "::warning::Instagram status sync failed; advisory history is one day stale"
       - name: Commit ledger and site
+        id: push
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
           git add data/ index.html feed.xml blog/ picks/
-          git diff --cached --quiet || git commit -m "Grade $(date -u -d yesterday +%F)"
-          git push
+          git diff --cached --quiet || git commit -m "Grade ${{ steps.gdate.outputs.date }}"
+          # PUSH RETRY. main receives ~2 bot commits an hour, so a bare push can
+          # lose a race and strand the run. Commit first (the tree is clean by
+          # this point), then rebase — never --autostash, which would silently
+          # pick up unrelated working-tree state. STOP ON CONFLICT: the ledger is
+          # append-only, so a conflict means something is genuinely wrong and
+          # must reach a human rather than be auto-resolved.
+          for i in 1 2 3; do
+            git push && break
+            git fetch origin main || exit 1
+            if ! git rebase origin/main; then
+              git rebase --abort
+              echo "::error::rebase conflict during grade push — stopping, not auto-resolving"
+              exit 1
+            fi
+          done
+          # Read AFTER the push succeeded: this is the commit that actually
+          # contains the card, and it is immutable regardless of what lands on
+          # main afterwards.
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-  # Same loud-failure rule as the morning board (added 2026-08-17). A grading
-  # run that dies leaves yesterday's picks ungraded and unrevealed — House Rule 7
-  # territory — so it must reach a human the same day, not whenever someone
-  # happens to open the Actions tab.
-  alert:
+  instagram:
+    # `needs: grade` alone already means "only if grade succeeded" — there is no
+    # always()/if here on purpose, so a failed grade SKIPS this job rather than
+    # running it against a push that never happened.
     needs: grade
-    if: ${{ always() && needs.grade.result != 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Read-only: this job publishes to Instagram, never to the repository. There
+    # is no second commit anywhere in it.
+    permissions:
+      contents: read
+    outputs:
+      reason: ${{ steps.ig.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # THE EXACT PUSHED COMMIT, not main. Bot commits land on main twice an
+          # hour; checking out a moving ref would risk running a different
+          # revision of the code than the one that produced the card.
+          ref: ${{ needs.grade.outputs.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Publish the recap card to Instagram
+        id: ig
+        # NO `|| true`, NO continue-on-error. --strict turns "published nothing"
+        # into a red job:
+        #     posted | nothing_to_post            -> exit 0
+        #     no_config | pending_media | failed  -> exit 1
+        # A quiet night with no settled entries is still green.
+        #
+        # Duplicate prevention is REMOTE: post_instagram.py reads the live feed
+        # for this date's OLS-<KIND>-<DATE> reference before creating anything,
+        # so a runner that dies after media_publish cannot double-post.
+        env:
+          IG_USER_ID: ${{ vars.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          set +e
+          D="${{ needs.grade.outputs.date }}"
+          SHA="${{ needs.grade.outputs.sha }}"
+          URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SHA}/data/social/ig_${D}.jpg"
+          OUT=$(python scripts/post_instagram.py publish "$D" --image-url="$URL" --strict 2>&1)
+          RC=$?
+          echo "$OUT"
+          # The alert reason is lifted from the CLI's OWN final line, which is
+          # always "[state] detail (calls=N)" and has already been through
+          # sanitize()/_scrub(). Anything not matching that shape — an unexpected
+          # traceback, a pip error — is replaced with a generic pointer, so raw
+          # exception text can never reach Discord.
+          REASON=$(echo "$OUT" | tail -n 1)
+          case "$REASON" in
+            "["*"]"*) : ;;
+            *) REASON="unexpected error - see the run log" ;;
+          esac
+          echo "reason=$(echo "$REASON" | cut -c1-200)" >> "$GITHUB_OUTPUT"
+          exit $RC
+
+  alert:
+    # Same loud-failure rule as the morning board (added 2026-08-17). A grading
+    # run that dies leaves yesterday's picks ungraded and unrevealed — House Rule
+    # 7 territory — so it must reach a human the same day, not whenever someone
+    # happens to open the Actions tab.
+    #
+    # Fires for EITHER failure and picks its message from JOB RESULTS rather than
+    # by string-matching a step name (which a rename would silently break).
+    #
+    # 'cancelled' alerts too: a cancellation can land at any point, including
+    # after media_publish returned but before anything was reported, so silence
+    # there would be the wrong default. 'skipped' does NOT alert — when grade
+    # fails, instagram is skipped and only the grade message is sent.
+    needs: [grade, instagram]
+    if: ${{ always() && (needs.grade.result != 'success' || needs.instagram.result == 'failure' || needs.instagram.result == 'cancelled') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -121,21 +254,42 @@ jobs:
         run: |
           set +e
           RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          # gh's built-in --jq, not the standalone jq binary: one less thing that
-          # can be missing on a runner and silently blank out the alert.
-          Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
-          Q_JOB='[.jobs[] | select(.name != "alert") | select(.conclusion != "success") | .id][0] // empty'
-          RUN_JOBS="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
-          STEP=$(gh api "$RUN_JOBS" --jq "$Q_STEP" 2>/dev/null)
-          JOB_ID=$(gh api "$RUN_JOBS" --jq "$Q_JOB" 2>/dev/null)
-          [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
-          : > tail.txt
-          if [ -n "$JOB_ID" ]; then
-            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$JOB_ID/logs" > joblog.txt 2>/dev/null \
-              && tail -n 20 joblog.txt > tail.txt
-          fi
-          python scripts/post_discord.py alert \
-            "**Grading run did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
+          if [ "${{ needs.grade.result }}" != "success" ]; then
+            # GRADING ITSELF FAILED. Nothing was pushed, so a re-run is genuinely
+            # safe and the log tail is worth attaching.
+            #
+            # gh's built-in --jq, not the standalone jq binary: one less thing
+            # that can be missing on a runner and silently blank out the alert.
+            Q_STEP='[.jobs[] | select(.name != "alert") | .steps[]? | select(.conclusion == "failure") | .name][0] // "unknown (no failing step reported)"'
+            Q_JOB='[.jobs[] | select(.name != "alert") | select(.conclusion != "success") | .id][0] // empty'
+            RUN_JOBS="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs"
+            STEP=$(gh api "$RUN_JOBS" --jq "$Q_STEP" 2>/dev/null)
+            JOB_ID=$(gh api "$RUN_JOBS" --jq "$Q_JOB" 2>/dev/null)
+            [ -n "$STEP" ] || STEP="unknown (could not read the run's jobs)"
+            : > tail.txt
+            if [ -n "$JOB_ID" ]; then
+              gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$JOB_ID/logs" > joblog.txt 2>/dev/null \
+                && tail -n 20 joblog.txt > tail.txt
+            fi
+            python scripts/post_discord.py alert \
+              "**Grading run did not complete.** Failing step: \`$STEP\`. Run: $RUN_URL
           Yesterday's board may still be unrevealed and its picks ungraded. Nothing has been written to the ledger — grade.py writes nothing when it aborts — so a re-run is safe." \
-            --detail-file tail.txt
+              --detail-file tail.txt
+          elif [ "${{ needs.instagram.result }}" = "cancelled" ]; then
+            # GRADING SUCCEEDED; INSTAGRAM WAS CANCELLED. The outcome is genuinely
+            # UNKNOWN. No reason string and NO LOG TAIL are forwarded: on a
+            # cancellation the step output is likely unset or half-written, and an
+            # unsanitized fragment is exactly what must not reach Discord.
+            python scripts/post_discord.py alert \
+              "**Instagram job was cancelled — the ledger is fine.** Run: $RUN_URL
+          Grading, the reveal and the site push all COMPLETED and are live. Instagram publication MAY BE INCOMPLETE: a cancellation can happen at any point, so the card may have gone out, may have been left as an unpublished container, or may never have been attempted. Do NOT re-run the Grade ledger workflow — post_discord.py is intentionally not idempotent and would repost a duplicate recap. Duplicate prevention is remote, so tomorrow's run reconciles against the live feed and will not double-post either way."
+          else
+            # GRADING SUCCEEDED; ONLY INSTAGRAM FAILED. NO LOG TAIL is attached: a
+            # raw tail can carry text that never passed through the sanitizer, and
+            # the GET calls carry the token as a query parameter. The reason below
+            # is the CLI's own sanitized summary line.
+            python scripts/post_discord.py alert \
+              "**Instagram post failed — the ledger is fine.** Reason: \`${{ needs.instagram.outputs.reason }}\`. Run: $RUN_URL
+          Grading, the reveal and the site push all COMPLETED; the public record is correct and live. Do NOT re-run the Grade ledger workflow — post_discord.py is intentionally not idempotent and it would repost a duplicate recap. Instagram duplicate prevention is remote, so tomorrow's run reconciles on its own; to fix it sooner, run scripts/post_instagram.py publish by hand."
+          fi
           exit 0

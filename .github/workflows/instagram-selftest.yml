@@ -38,6 +38,11 @@ on:
       - "assets/fonts/**"
       - "requirements.txt"
       - ".github/workflows/instagram-selftest.yml"
+      # The production wiring itself. Group 20 asserts the job split, the
+      # shared grading date, the pushed-SHA handoff, --strict, the pinned
+      # image URL and the alert branches against this file, so a change to
+      # it must re-run these checks.
+      - ".github/workflows/grade-ledger.yml"
   pull_request:
     branches:
       - main
@@ -50,6 +55,11 @@ on:
       - "assets/fonts/**"
       - "requirements.txt"
       - ".github/workflows/instagram-selftest.yml"
+      # The production wiring itself. Group 20 asserts the job split, the
+      # shared grading date, the pushed-SHA handoff, --strict, the pinned
+      # image URL and the alert branches against this file, so a change to
+      # it must re-run these checks.
+      - ".github/workflows/grade-ledger.yml"
 
 # Read-only. This job validates; it never commits, never pushes, never renders
 # into the repository and never posts. Unlike the pipeline workflows it does not

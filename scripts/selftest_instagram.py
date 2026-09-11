@@ -38,6 +38,7 @@ silently swallow half a disclosure.
 """
 import ast
 import hashlib
+import re
 import inspect
 import json
 import os
@@ -61,7 +62,7 @@ FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 
 # Total checks this file is expected to run. Bump it DELIBERATELY when adding or
 # removing a check; unexplained drift means a check stopped executing.
-EXPECTED_CHECKS = 714
+EXPECTED_CHECKS = 767
 
 # Checksums of the vendored font files, as recorded in assets/fonts/README.md.
 # A swapped or corrupted face changes every card, so it fails the suite here
@@ -1232,6 +1233,166 @@ def main():
           "media_publish" not in sync_src)
     check("17.8c", "sync_status reads the feed and nothing else",
           "recent_media" in sync_src)
+
+    # --------------------------- 20. the production wiring contract (offline) --
+    #
+    # grade-ledger.yml is what actually publishes. Everything above proves the
+    # CODE is correct; these checks prove the WIRING around it still is — the job
+    # split, the single grading date, the pushed-SHA handoff, strict mode, the
+    # pinned image URL, sync-before-commit, and the alert branches.
+    #
+    # Parsed as YAML from disk. No network, no Actions API, no dispatch: this is
+    # a static read of a file in the working tree.
+    print("\n20. Production wiring contract — grade-ledger.yml")
+
+    import yaml  # noqa: E402  (pulled in by requirements.txt; offline)
+    WF = os.path.join(ROOT, ".github", "workflows", "grade-ledger.yml")
+    check("20.0", "grade-ledger.yml exists", os.path.exists(WF))
+    wf = yaml.safe_load(open(WF, encoding="utf-8"))
+    # GitHub's `on:` is parsed by YAML 1.1 as the boolean True.
+    on = wf["on"] if "on" in wf else wf[True]
+    jobs = wf["jobs"]
+
+    check("20.1a", "three jobs: grade, instagram, alert",
+          set(jobs) == {"grade", "instagram", "alert"})
+    check("20.1b", "instagram depends on grade", jobs["instagram"].get("needs") == "grade")
+    check("20.1c", "instagram has no always()/if — a failed grade SKIPS it",
+          "if" not in jobs["instagram"])
+    check("20.1d", "alert depends on both jobs",
+          sorted(jobs["alert"].get("needs") or []) == ["grade", "instagram"])
+    check("20.1e", "the workflow is still dispatch-triggered only",
+          set(on) == {"workflow_dispatch"})
+
+    g, ig, al = jobs["grade"], jobs["instagram"], jobs["alert"]
+    gsteps = g["steps"]
+    names = [s.get("name", "") for s in gsteps]
+    runs = {s.get("name", ""): (s.get("run") or "") for s in gsteps}
+
+    # ---- one grading date, resolved once and handed downstream ----
+    check("20.2a", "grade exposes a date output",
+          g.get("outputs", {}).get("date") == "${{ steps.gdate.outputs.date }}")
+    check("20.2b", "the date is produced by a step with id 'gdate'",
+          any(s.get("id") == "gdate" for s in gsteps))
+    check("20.2c", "only ONE step computes 'yesterday' anywhere in the file",
+          open(WF, encoding="utf-8").read().count("date -d yesterday") == 1)
+    check("20.2d", "the instagram job consumes the shared date, never its own",
+          "needs.grade.outputs.date" in (ig["steps"][-1].get("run") or "")
+          and "date -d yesterday" not in (ig["steps"][-1].get("run") or ""))
+
+    # ---- the pushed SHA ----
+    check("20.3a", "grade exposes a sha output",
+          g.get("outputs", {}).get("sha") == "${{ steps.push.outputs.sha }}")
+    commit_step = [s for s in gsteps if s.get("id") == "push"]
+    check("20.3b", "the commit step carries id 'push'", len(commit_step) == 1)
+    cs = commit_step[0]["run"]
+    check("20.3c", "the sha is read AFTER the push loop, not before",
+          cs.index("git push") < cs.index("rev-parse HEAD"))
+    check("20.3d", "the push retries rather than failing on the first race",
+          "for i in 1 2 3" in cs and "git fetch origin main" in cs)
+    check("20.3e", "a rebase conflict ABORTS and stops — never auto-resolved",
+          "git rebase --abort" in cs and "exit 1" in cs)
+    # Comment lines are stripped first: the step's own comment explains WHY
+    # --autostash is refused, and a naive substring search would read that
+    # explanation as evidence of the thing it forbids.
+    cs_cmds = "\n".join(l for l in cs.split("\n") if not l.strip().startswith("#"))
+    check("20.3f", "no --autostash in any executed command",
+          "--autostash" not in cs_cmds)
+    check("20.3g", "instagram checks out the exact pushed SHA",
+          ig["steps"][0].get("with", {}).get("ref") == "${{ needs.grade.outputs.sha }}")
+
+    # ---- render + sync happen before the ONE data commit ----
+    check("20.4a", "the render step exists",
+          "Render the Instagram recap card" in names)
+    check("20.4b", "the sync-status step exists",
+          "Sync Instagram status from the live feed" in names)
+    i_render = names.index("Render the Instagram recap card")
+    i_sync = names.index("Sync Instagram status from the live feed")
+    i_commit = names.index("Commit ledger and site")
+    check("20.4c", "render runs BEFORE the commit", i_render < i_commit)
+    check("20.4d", "sync-status runs BEFORE the commit", i_sync < i_commit)
+    check("20.4e", "sync-status is the sync-status subcommand, not publish",
+          "sync-status" in runs["Sync Instagram status from the live feed"]
+          and "publish" not in runs["Sync Instagram status from the live feed"])
+    check("20.4f", "render failure cannot block the ledger push",
+          "||" in runs["Render the Instagram recap card"])
+    check("20.4g", "exactly one git commit in the whole workflow",
+          open(WF, encoding="utf-8").read().count("git commit") == 1)
+    check("20.4h", "the instagram job commits nothing — no second status commit",
+          not any("git commit" in (s.get("run") or "") or "git push" in (s.get("run") or "")
+                  for s in ig["steps"]))
+    check("20.4i", "the instagram job is read-only on the repository",
+          ig.get("permissions") == {"contents": "read"})
+
+    # ---- publishing is strict and unsuppressed ----
+    pub = [s for s in ig["steps"] if s.get("id") == "ig"]
+    check("20.5a", "the publish step carries id 'ig'", len(pub) == 1)
+    pr = pub[0]["run"]
+    check("20.5b", "publish runs with --strict", "--strict" in pr)
+    check("20.5c", "no '|| true' suppressing the publish", "|| true" not in pr)
+    check("20.5d", "no continue-on-error on the step or the job",
+          not pub[0].get("continue-on-error") and not ig.get("continue-on-error"))
+    check("20.5e", "the publish exit code is propagated", "exit $RC" in pr)
+    check("20.5f", "the image URL is pinned to the pushed SHA",
+          "raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SHA}" in pr)
+    check("20.5g", "the URL points at the rendered card path",
+          "data/social/ig_${D}.jpg" in pr)
+    check("20.5h", "the alert reason is shape-checked before being exported",
+          'REASON="unexpected error' in pr)
+
+    # ---- credentials by NAME only ----
+    env_pub = pub[0].get("env", {})
+    check("20.6a", "publish reads IG_USER_ID from a repo VARIABLE",
+          env_pub.get("IG_USER_ID") == "${{ vars.IG_USER_ID }}")
+    check("20.6b", "publish reads IG_ACCESS_TOKEN from a repo SECRET",
+          env_pub.get("IG_ACCESS_TOKEN") == "${{ secrets.IG_ACCESS_TOKEN }}")
+    env_sync = [s for s in gsteps
+                if s.get("name") == "Sync Instagram status from the live feed"][0].get("env", {})
+    check("20.6c", "sync-status uses the same two names",
+          env_sync.get("IG_USER_ID") == "${{ vars.IG_USER_ID }}"
+          and env_sync.get("IG_ACCESS_TOKEN") == "${{ secrets.IG_ACCESS_TOKEN }}")
+    check("20.6d", "the env names match the module's constants",
+          set(env_pub) == {pi.ENV_IG_USER, pi.ENV_IG_TOKEN})
+    raw = open(WF, encoding="utf-8").read()
+    check("20.6e", "no credential VALUE is embedded in the workflow",
+          not re.search(r"(EAA[A-Za-z0-9]{20,}|IGQ[A-Za-z0-9_-]{20,})", raw))
+
+    # ---- alert branches on job RESULTS ----
+    ar = "\n".join(s.get("run") or "" for s in al["steps"])
+    cond = al.get("if", "")
+    check("20.7a", "alert fires when grade fails",
+          "needs.grade.result != 'success'" in cond)
+    check("20.7b", "alert fires when instagram FAILS",
+          "needs.instagram.result == 'failure'" in cond)
+    check("20.7c", "alert fires when instagram is CANCELLED",
+          "needs.instagram.result == 'cancelled'" in cond)
+    check("20.7d", "alert does NOT fire merely because instagram was skipped",
+          "'skipped'" not in cond)
+    check("20.7e", "the message is selected from job results, not a step name",
+          '"${{ needs.grade.result }}" != "success"' in ar
+          and '"${{ needs.instagram.result }}" = "cancelled"' in ar)
+    check("20.7f", "the grade branch keeps the ledger-not-written wording",
+          "Nothing has been written to the ledger" in ar)
+    check("20.7g", "the cancellation branch says publication may be incomplete",
+          "MAY BE INCOMPLETE" in ar)
+    check("20.7h", "both Instagram branches say the ledger is fine",
+          ar.count("the ledger is fine") == 2)
+    check("20.7i", "both Instagram branches warn against re-running the workflow",
+          ar.count("Do NOT re-run the Grade ledger workflow") == 2)
+    check("20.7j", "only the grade branch attaches a log tail",
+          ar.count("--detail-file") == 1)
+    check("20.7k", "the log tail is attached in the grade branch only",
+          ar.index("--detail-file") < ar.index("MAY BE INCOMPLETE"))
+
+    # ---- this suite re-runs when the wiring changes ----
+    SELF = os.path.join(ROOT, ".github", "workflows", "instagram-selftest.yml")
+    sw = yaml.safe_load(open(SELF, encoding="utf-8"))
+    son = sw["on"] if "on" in sw else sw[True]
+    check("20.8a", "grade-ledger.yml is in the push path filter",
+          ".github/workflows/grade-ledger.yml" in son["push"]["paths"])
+    check("20.8b", "grade-ledger.yml is in the pull_request path filter",
+          ".github/workflows/grade-ledger.yml" in son["pull_request"]["paths"])
+    check("20.8c", "the self-test workflow still declares no secrets",
+          "secrets." not in open(SELF, encoding="utf-8").read())
 
     # ------------------------------- 19. matchup context on the score line --
     #

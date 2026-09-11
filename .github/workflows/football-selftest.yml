@@ -1,0 +1,131 @@
+name: Football code self-tests
+# The hermetic regression gate for the football code.
+#
+# A RED RUN HERE MEANS A CODE REGRESSION, NEVER LIVE-DATA DRIFT. That line is
+# the whole design. Two of the eight football suites — selftest_capture_isolation
+# and selftest_team_join — read live pipeline output on purpose and can go red
+# because a capture or a franchise table changed, with no code involved. Mixing
+# those in here would make a red X ambiguous, and an ambiguous red X gets
+# ignored. They belong to a separate data-integrity workflow.
+#
+# The six below were each proven hermetic by poisoning their inputs and
+# confirming the result did not move (2026-09-11 audit):
+#   allowlist, board, discord, mercer, page, writeup
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. None of the six imports a network
+# library; none writes outside a temp directory; none reads an environment
+# variable that CI must supply (selftest_mercer reads MERCER_KEEP, a documented
+# local debug flag that only controls temp-dir cleanup). That is why this job
+# runs with `contents: read` and declares no `env:` secrets at all.
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/football/**"
+      - "requirements.txt"
+      - ".github/workflows/football-selftest.yml"
+      # SHARED MODULES THE SUITES ACTUALLY IMPORT. `scripts/football/**` is not
+      # enough: the import graph of the six reaches these six files outside it,
+      # so a change to any of them can break this gate without touching
+      # scripts/football/ at all. Derived by walking the AST import graph, not
+      # guessed — re-derive it if the suites grow new imports.
+      - "scripts/crypto_box.py"
+      - "scripts/post_discord.py"
+      - "scripts/blog.py"
+      - "scripts/blog_evergreen.py"
+      - "scripts/feed.py"
+      - "scripts/game_pages.py"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/football/**"
+      - "requirements.txt"
+      - ".github/workflows/football-selftest.yml"
+      # SHARED MODULES THE SUITES ACTUALLY IMPORT. `scripts/football/**` is not
+      # enough: the import graph of the six reaches these six files outside it,
+      # so a change to any of them can break this gate without touching
+      # scripts/football/ at all. Derived by walking the AST import graph, not
+      # guessed — re-derive it if the suites grow new imports.
+      - "scripts/crypto_box.py"
+      - "scripts/post_discord.py"
+      - "scripts/blog.py"
+      - "scripts/blog_evergreen.py"
+      - "scripts/feed.py"
+      - "scripts/game_pages.py"
+
+# Read-only. This job validates; it never commits, never pushes, never writes
+# into the repository, and never posts anywhere.
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    name: Football code self-tests
+    runs-on: ubuntu-latest
+    # The suites are pure CPU and finish in seconds; fifteen minutes is generous
+    # headroom for the pip install and caps a hung run rather than letting it
+    # sit on a runner.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run the six hermetic football suites
+        # EVERY SUITE RUNS EVEN AFTER ONE FAILS. Stopping at the first failure
+        # would hide the rest, and "fix, push, wait, discover the next one" is a
+        # slow way to learn what a change actually broke. The loop records each
+        # exit code, prints a summary table, and fails the job at the end if any
+        # suite exited nonzero.
+        #
+        # PYTHONIOENCODING is not cosmetic: the suites print ✅/❌/· and box
+        # characters. Set it explicitly so the run never depends on the runner's
+        # default stdout encoding.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          set +e
+          SUITES="allowlist board discord mercer page writeup"
+          FAILED=""
+          for s in $SUITES; do
+            echo "::group::selftest_$s.py"
+            python "scripts/football/selftest_$s.py"
+            rc=$?
+            echo "::endgroup::"
+            if [ $rc -ne 0 ]; then
+              FAILED="$FAILED $s"
+              echo "::error title=selftest_$s.py::exited $rc — this is a CODE regression, not data drift"
+            fi
+            printf '%s|%s\n' "$s" "$rc" >> /tmp/results
+          done
+
+          {
+            echo "## Football code self-tests"
+            echo ""
+            echo "| suite | exit |"
+            echo "|---|---|"
+            while IFS='|' read -r name rc; do
+              if [ "$rc" = "0" ]; then icon="✅"; else icon="❌"; fi
+              echo "| \`selftest_$name.py\` | $icon $rc |"
+            done < /tmp/results
+            echo ""
+            if [ -n "$FAILED" ]; then
+              echo "**Failed:**$FAILED"
+              echo ""
+              echo "A red run here means a **code regression**. These six suites are"
+              echo "hermetic — they do not read mutable production data, so live-data"
+              echo "drift cannot cause this."
+            else
+              echo "All six hermetic suites passed."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -n "$FAILED" ]; then
+            echo "FAILED:$FAILED"
+            exit 1
+          fi
+          echo "All six hermetic football suites passed."

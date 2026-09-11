@@ -27,6 +27,74 @@ SRC = {"nfl": "nfl_20260825T030847Z.json", "ncaaf": "ncaaf_20260825T030833Z.json
 ODDS = os.path.join(ROOT, "data", "football", "odds")
 
 
+def scan_body(html):
+    """The HTML with presentation stripped, ready for the leak scan.
+
+    STYLING IS NOT CONTENT, and mixing the two produced a false alarm that stood
+    for days. The scan looks for the premium play's numbers loose in the page; a
+    CSS length is a number too. `page.py` renders the site logo with
+    `style="width:300px;max-width:100%;height:auto;..."`, and with a premium
+    price of +100 the scan matched `100` inside `max-width:100%` and reported
+    `REDACTED page leaks premium numbers: ['best_price=100']`. There was no leak
+    — no live or committed football page has ever contained `best_price`.
+
+    A test that cries wolf gets loosened exactly like a validator that does, so
+    the fix narrows the haystack rather than the assertion. `<style>` blocks were
+    already removed; inline `style="..."` attributes were not, and that is where
+    the collision lived.
+    """
+    out = re.sub(r"<style>.*?</style>", "", html, flags=re.S)
+    out = re.sub(r'\sstyle="[^"]*"', "", out)
+    out = re.sub(r"\sstyle='[^']*'", "", out)
+    return out
+
+
+# How production actually renders each premium field, so the scan looks for what
+# a real leak would look like rather than for a bare integer. Only best_price
+# goes through page.money() (`+100`); the rest are emitted as plain str(v).
+# Keeping these in step with page.py's `rows` is the point — if that rendering
+# changes, this is the place to follow it.
+PREMIUM_FIELDS = ("best_price", "eff_overround_pts", "raw_overround_pts",
+                  "books_at_best", "n_books")
+
+
+def rendered_forms(field, v):
+    """Every string shape `v` could legitimately take in the published page."""
+    if field == "best_price":
+        # page.py:163 -> money(v). Both the formatted form and the bare digits
+        # are checked: the formatted one is what a real leak looks like, and the
+        # bare one is now safe to check because scan_body() removed the CSS that
+        # used to collide with it.
+        return {page.money(v), str(v)}
+    return {str(v)}
+
+
+def premium_leaks(prem, body):
+    """Premium numbers found loose in a REDACTED page. Empty list is the pass."""
+    leaks = []
+    for field in PREMIUM_FIELDS:
+        v = prem.get(field)
+        if v is None:
+            continue
+        for form in rendered_forms(field, v):
+            # Single characters are skipped: a lone digit collides with
+            # everything and proves nothing.
+            if len(form) > 1 and re.search(
+                    rf"(?<![\d.]){re.escape(form)}(?![\d.])", body):
+                leaks.append(f"{field}={form}")
+    # The emptiness guard is not cosmetic: `"" in body` is always True, so a
+    # play with no best_book would have been reported as leaking one.
+    book = str(prem.get("best_book", "")).strip()
+    if book and book in body:
+        leaks.append(f"best_book={book}")
+    # The side is the thing that must never appear pre-kickoff.
+    side = str(prem.get("side", ""))
+    home, away = str(prem.get("home", "")), str(prem.get("away", ""))
+    if side and side != home and side != away and side in body:
+        leaks.append("side")
+    return leaks
+
+
 def shift(snap, when):
     s = copy.deepcopy(snap)
     old = datetime.fromisoformat(s["captured_utc"].replace("Z", "+00:00"))
@@ -79,7 +147,7 @@ try:
         # (max-width:100%, rgba(0,0,0,.5)) and matching them produced a false
         # "premium price leaked" on the first run - a test that cries wolf gets
         # loosened exactly like a validator that does.
-        body = re.sub(r"<style>.*?</style>", "", h, flags=re.S)
+        body = scan_body(h)
         label = "REVEALED" if reveal else "REDACTED"
         print(f"--- {label}: {len(h)} bytes ---")
 
@@ -97,22 +165,7 @@ try:
 
         if not reveal:
             # THE REDACTION TEST. None of the premium play's numbers may appear.
-            leaks = []
-            for field in ("best_price", "eff_overround_pts", "raw_overround_pts",
-                          "books_at_best", "n_books"):
-                v = prem.get(field)
-                if v is None:
-                    continue
-                for form in {str(v), f"{v:+d}" if isinstance(v, int) else str(v)}:
-                    if len(form) > 1 and re.search(rf"(?<![\d.]){re.escape(form)}(?![\d.])", body):
-                        leaks.append(f"{field}={form}")
-            if str(prem.get("best_book", "")) in body:
-                leaks.append(f"best_book={prem['best_book']}")
-            # The side is the thing that must never appear pre-kickoff.
-            side = str(prem.get("side", ""))
-            home, away = str(prem.get("home", "")), str(prem.get("away", ""))
-            if side and side != home and side != away and side in body:
-                leaks.append("side")
+            leaks = premium_leaks(prem, body)
             if leaks:
                 fails.append(f"REDACTED page leaks premium numbers: {leaks}")
             else:
@@ -129,6 +182,51 @@ try:
             else:
                 print("    premium published in full after grading")
 
+    # ---- NEGATIVE CONTROL ----------------------------------------------
+    # Narrowing the scan is only safe if it still catches the thing it exists
+    # to catch. A guard loosened to stop a false alarm, and never re-proven, is
+    # how a boundary quietly stops being enforced. So: inject each premium
+    # number into a page body the way production would actually render it, and
+    # require the scan to find it.
+    # Multi-digit values throughout, deliberately. A single digit cannot be
+    # distinguished from page noise — `len(form) > 1` skips it — so a leaked
+    # one-digit n_books would NOT be caught. That is a real, accepted limit of
+    # this scan, not something the control should paper over by pretending
+    # otherwise. The fields that actually reconstruct the play (price, book,
+    # side) are never single-digit.
+    control = {"best_price": -135, "best_book": "pinnacle", "side": "Some Side FC",
+               "home": "Home FC", "away": "Away FC", "n_books": 12,
+               "books_at_best": 11, "eff_overround_pts": 1.22,
+               "raw_overround_pts": 2.41}
+    clean_page = ('<html><head><style>.x{max-width:100%}</style></head><body>'
+                  '<img style="width:300px;max-width:100%;height:auto">'
+                  '<p>Held until this week is graded. 0 units.</p></body></html>')
+    if premium_leaks(control, scan_body(clean_page)):
+        fails.append("CONTROL: a clean page was reported as leaking")
+
+    injections = {
+        "price as rendered": f'<tr><td>Best takeable price</td><td>{page.money(control["best_price"])} at x</td></tr>',
+        "price as bare digits": "<p>the number is -135 flat</p>",
+        "book": f'<td>{control["best_book"]}</td>',
+        "side": f'<td>{control["side"]}</td>',
+        "eff overround": f'<strong>{control["eff_overround_pts"]}</strong> pts',
+        "raw overround": f'<td>{control["raw_overround_pts"]} -> x</td>',
+        "eligible books": f'<td>Eligible books</td><td>{control["n_books"]}</td>',
+    }
+    for what, html in injections.items():
+        leaked = premium_leaks(control, scan_body(clean_page.replace(
+            "</body>", html + "</body>")))
+        if not leaked:
+            fails.append(f"CONTROL: an injected premium {what} was NOT caught")
+    # And the specific collision that caused the false alarm must stay quiet:
+    # a CSS length equal to the price is styling, not a leak.
+    css_only = ('<html><body><img style="width:300px;max-width:100%">'
+                '<div style="width:135px"></div></body></html>')
+    if premium_leaks({"best_price": 100}, scan_body(css_only)):
+        fails.append("CONTROL: a CSS length was reported as a leaked price")
+    print(f"    negative control: {len(injections)} injected leaks all caught, "
+          f"CSS lengths ignored")
+
     print()
     if fails:
         print(f"FAILED ({len(fails)}):")
@@ -136,6 +234,7 @@ try:
             print("  -", f)
         sys.exit(1)
     print("PASS - redacted page cannot reconstruct the play; revealed page")
-    print("publishes it in full; legal and no-claim copy present in both.")
+    print("publishes it in full; legal and no-claim copy present in both;")
+    print("and the leak scan still catches every injected premium number.")
 finally:
     shutil.rmtree(tmp, ignore_errors=True)

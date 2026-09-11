@@ -73,9 +73,28 @@ def make(tmp):
 
 
 tmp = tempfile.mkdtemp(prefix="olsboard")
+REAL_GAME_COMMITMENTS = board.GAME_COMMITMENTS
 try:
     odds, n_caps = make(tmp)
     board.ODDS_DIR = odds
+
+    # HERMETIC COMMITMENT STORE.
+    #
+    # `commit=False` only stops board.commit_games() from WRITING; it always
+    # READS the store to compare fingerprints. So this test was reading the live
+    # append-only data/football/game_commitments.json, comparing production's
+    # frozen SHAs against its own synthetic fixture, and reporting the inevitable
+    # mismatch as "a frozen evaluation was restated".
+    #
+    # That made the suite's result a function of production data rather than of
+    # the code under test. It was green at creation (2026-08-26) and went red on
+    # its own when SF @ LA was committed on 2026-09-09 — no code changed in
+    # between. A test that flips with live data teaches people to ignore it.
+    #
+    # Pointing the store at the temp directory makes the run deterministic. The
+    # `restated` assertion below is UNCHANGED and still at full strength: it just
+    # now measures this fixture instead of whatever production happens to hold.
+    board.GAME_COMMITMENTS = os.path.join(tmp, "game_commitments.json")
     print(f"fixture: {n_caps} captures (one per distinct kickoff, each at that game's T-24)\n")
 
     D = board.decision_moment(WEEK)
@@ -220,6 +239,39 @@ try:
     if extra:
         fails.append(f"board game carries unexpected fields: {sorted(extra)}")
 
+    # ---- HERMETICITY CONTROL --------------------------------------------
+    # Prove the isolation actually holds, rather than assuming it. Write a
+    # commitment store that deliberately OVERLAPS this fixture's matchups with
+    # different fingerprints — exactly the shape of the production data that
+    # was breaking this suite — and require the board to be unchanged.
+    poisoned = os.path.join(tmp, "poisoned_commitments.json")
+    overlap = {g["matchup"] for g in b["games"]}
+    io.open(poisoned, "w", encoding="utf-8").write(json.dumps({
+        "games": {
+            f"{g['sport']}|{g['matchup']}|{g['kickoff_utc']}": {
+                "sha256": "0" * 64,          # deliberately wrong fingerprint
+                "committed_utc": "2026-01-01T00:00:00Z",
+                "kickoff_utc": g["kickoff_utc"],
+                "sport": g["sport"], "matchup": g["matchup"],
+            } for g in b["games"]
+        }
+    }, indent=1))
+    board.GAME_COMMITMENTS = poisoned
+    poisoned_board = board.build(["nfl", "ncaaf"], WEEK,
+                                 D + timedelta(hours=6), commit=False)
+    board.GAME_COMMITMENTS = os.path.join(tmp, "game_commitments.json")
+    restated_now = [g["matchup"] for g in poisoned_board["games"] if g.get("restated")]
+    if not restated_now:
+        fails.append("hermeticity control: a poisoned store did NOT mark anything "
+                     "restated, so the restated check proves nothing")
+    clean_board = board.build(["nfl", "ncaaf"], WEEK,
+                              D + timedelta(hours=6), commit=False)
+    if [g["matchup"] for g in clean_board["games"] if g.get("restated")]:
+        fails.append("hermeticity control: the isolated store still reports "
+                     "restated games — isolation is not holding")
+    print(f"    hermeticity: {len(overlap)} overlapping matchups in a poisoned "
+          f"store flag {len(restated_now)} restated; the isolated store flags 0")
+
     print("=" * 62)
     if fails:
         print(f"FAILED ({len(fails)}):")
@@ -230,4 +282,8 @@ try:
     print("tightest market, guards enforced, and the grader's own evaluate()")
     print("reproduces the premium play exactly.")
 finally:
+    # Restore the module-level path even if an assertion above bailed out, so a
+    # failing run can never leave a redirected store behind for anything else
+    # importing board in the same process.
+    board.GAME_COMMITMENTS = REAL_GAME_COMMITMENTS
     shutil.rmtree(tmp, ignore_errors=True)

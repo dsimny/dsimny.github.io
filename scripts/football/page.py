@@ -444,8 +444,8 @@ def write(dirpath, inner, title, desc):
 </head>
 <body>
 <header class="site"><div class="wrap sitebar">
-  <img class="sitelogo" src="/assets/logo.jpg" width="440" height="440" alt="">
-  <div><span class="markname"><span class="open">OPEN LEDGER</span> SPORTS</span>
+  <img class="sitelogo" src="/assets/branding/ols-horizontal-on-dark-transparent.svg" width="1200" height="200" style="width:300px;max-width:100%;height:auto;border-radius:0" alt="Open Ledger Sports">
+  <div>
     <small class="marksub">Football · process and receipts, not predictions</small></div>
   <nav class="navlinks">
     <a href="/">Today's Board</a>

@@ -870,9 +870,8 @@ html = f'''<!DOCTYPE html>
   .wrap {{ max-width:1060px; margin:0 auto; padding:0 20px; }}
   header.site {{ position:sticky; top:0; z-index:10; background:rgba(13,13,13,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--grid); }}
   .sitebar {{ display:flex; align-items:center; gap:24px; padding:14px 0 4px; flex-wrap:wrap; }}
-  /* The logo carries the name now, so it sits beside the tagline rather than
-     above it. Circular crop matches the mark's gold ring. */
-  .wordmark {{ display:flex; align-items:center; gap:12px; }}
+  /* Outlined horizontal brand asset; tagline wraps on narrow screens. */
+  .wordmark {{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; }}
   .sitelogo {{ width:46px; height:46px; flex:none; border-radius:50%; }}
   .markname {{ font-weight:800; letter-spacing:0.04em; font-size:1.05rem; }}
   .markname .open {{ color:var(--s1); }}
@@ -1022,8 +1021,8 @@ html = f'''<!DOCTYPE html>
 </head>
 <body class="{'stale' if STALE else ''}" data-board-date="{DATE}" data-generated-utc="{GENERATED_UTC}" data-board-due-et="{BOARD_DUE_ET_MIN}" data-offseason="{'1' if OFFSEASON else ''}">
 <header class="site"><div class="wrap sitebar">
-  <div class="wordmark"><img class="sitelogo" src="assets/logo.jpg" width="440" height="440" alt="">
-    <div class="marktext"><span class="markname"><span class="open">OPEN LEDGER</span> SPORTS</span>
+  <div class="wordmark"><img class="sitelogo" src="/assets/branding/ols-horizontal-on-dark-transparent.svg" width="1200" height="200" style="width:300px;max-width:100%;height:auto;border-radius:0" alt="Open Ledger Sports">
+    <div class="marktext">
       <small>Every pick on the record. Every rule in public.</small></div></div>
   <nav class="tabs" role="tablist">
     <button class="active" data-tab="free">Free Pick</button>

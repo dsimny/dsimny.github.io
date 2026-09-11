@@ -46,10 +46,14 @@ jobs:
           if [ -n "$LATEST" ]; then python scripts/game_pages.py "$LATEST"; fi
       - name: Rebuild the odds-movement page
         run: python scripts/odds_page.py
+      - name: Re-render football and Mercer branding
+        run: |
+          python scripts/football/page.py --all
+          python scripts/football/mercer.py render
       - name: Commit site
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add index.html feed.xml data/ blog/ picks/ odds/
+          git add index.html feed.xml data/ blog/ picks/ odds/ football/
           git diff --cached --quiet || git commit -m "Rebuild site $(date -u +%F)"
           git push

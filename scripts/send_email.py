@@ -122,7 +122,7 @@ def build_payload(item):
         "from": EMAIL_FROM,
         "subject": item["title"],
         "name": item["title"],           # broadcast name in the Resend dashboard
-        "html": item["html"],
+        "html": '<p><img src="https://openledgersports.com/assets/branding/email-header.png" width="300" height="50" alt="Open Ledger Sports" style="max-width:100%;height:auto"></p>' + item["html"],
         "text": html_to_text(item["html"]),
         "send": True,                    # create + send in one call (Resend supports this)
     }

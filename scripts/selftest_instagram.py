@@ -63,7 +63,7 @@ FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 
 # Total checks this file is expected to run. Bump it DELIBERATELY when adding or
 # removing a check; unexplained drift means a check stopped executing.
-EXPECTED_CHECKS = 871
+EXPECTED_CHECKS = 872
 
 # Checksums of the vendored font files, as recorded in assets/fonts/README.md.
 # A swapped or corrupted face changes every card, so it fails the suite here
@@ -1450,6 +1450,16 @@ def main():
 
     D = os.path.join(ROOT, "data")
 
+    def social_listing():
+        p = os.path.join(D, "social")
+        return sorted(os.listdir(p)) if os.path.isdir(p) else []
+
+    # Snapshot BEFORE the group runs, so 21.9 can prove it wrote nothing rather
+    # than asserting the absence of a specific filename. Production does write
+    # real cards here (the Instagram recovery run committed one), and a test
+    # that denies a real production artefact exists is simply wrong.
+    social_before = social_listing()
+
     # ---- 21.1 the exact production path is ACCEPTED ----
     check("21.1a", "the production card path is accepted",
           accepts(os.path.join(D, "social", "ig_2026-09-10.jpg")))
@@ -1543,8 +1553,16 @@ def main():
     check("21.8h", "the renderer accepts the recovery workflow's target",
           accepts(os.path.join(ROOT, "data", "social", "ig_2026-09-10.jpg")))
 
-    check("21.9", "no card was actually written to data/ by this group",
-          not os.path.exists(os.path.join(D, "social", "ig_2026-09-10.jpg")))
+    # This used to assert that data/social/ig_2026-09-10.jpg did not exist — a
+    # hardcoded date that production then legitimately produced, via the
+    # Instagram recovery run. Asserting the absence of a real production
+    # artefact is just wrong. What this group actually promises is that it
+    # WRITES NOTHING, so compare the directory before and after instead.
+    check("21.9", "this group wrote nothing into data/social/",
+          social_listing() == social_before)
+    check("21.10", "the guard is case-sensitive regardless of what is on disk",
+          not accepts(os.path.join(D, "social", "IG_2026-09-10.jpg"))
+          and not accepts(os.path.join(D, "social", "ig_2026-09-10.JPG")))
 
     # --------------------------- 20. the production wiring contract (offline) --
     #

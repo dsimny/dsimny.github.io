@@ -609,7 +609,15 @@ def _assert_safe_out(path):
         return
 
     card_dir = os.path.realpath(os.path.join(ROOT, CARD_DIR))
-    name = os.path.basename(full)
+    # The DIRECTORY is checked with realpath, which is what defeats traversal
+    # and symlinks. The FILENAME is taken from the caller's own path instead,
+    # because realpath resolves case against the filesystem: on Windows, once
+    # data/social/ig_2026-09-10.jpg exists on disk, realpath rewrites a request
+    # for IG_2026-09-10.jpg to the on-disk casing and the pattern then matches.
+    # That made the rule case-insensitive on Windows and case-sensitive on
+    # Linux, and only after a real card had landed. abspath still normalises
+    # separators and `..`, so traversal is unaffected.
+    name = os.path.basename(os.path.abspath(path))
     m = CARD_NAME_RE.match(name)
     if os.path.dirname(full) == card_dir and m:
         try:

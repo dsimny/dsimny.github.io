@@ -77,15 +77,86 @@ and members-channel access, when the record justifies charging.
 Phase 1 shipped later the same day, so from the 2026-07-23 board onward the
 premium picks really are exclusive rather than merely presented differently.
 
-## Whop, as of 2026-07-22
+## Whop, as of 2026-07-22 (pricing section corrected 2026-09-11)
 
-- Product "Open Ledger Sports Member", $49/month, NO trial. REPRICED 2026-09-07
-  from $30; no member was grandfathered because none exists yet - the checkout
-  URL has never been live. A three day trial
-  hands over three full days of a product whose whole value is daily, and the
-  public ledger already serves as the free evidence.
-- Checkout link: https://whop.com/checkout/plan_KIbsXvPUXlf3X (live, public,
-  unlisted only because nothing points at it).
+### CORRECTION, 2026-09-11 — what this file used to say was wrong
+
+This section previously read: *"$49/month, NO trial. REPRICED 2026-09-07 from
+$30; no member was grandfathered because none exists yet - the checkout URL has
+never been live."*
+
+**All three of those claims were false**, and they were caught only because an
+affiliate link a friend shared rendered a $30 checkout. What was actually true
+on 2026-09-11 before any fix:
+
+- The repricing to $49 **had never been applied in Whop**. The product had
+  exactly ONE pricing option and it was $30/month. The $49 existed only in this
+  file, in `build_site.py`'s `PREMIUM_PRICE`, and in `docs/`.
+- **Five members were already subscribed at $30/month.** The Whop store page
+  read "6 joined" with named accounts, and the product listed 5 against that
+  plan. The checkout URL had evidently been live and used.
+- `plan_KIbsXvPUXlf3X` — recorded here as the checkout link — was the $30 plan.
+
+The lesson worth keeping: a price written in a plan document is not a price. It
+had drifted for four days with the real product one click away from selling at
+the old rate.
+
+### CONFIRMED — directly observed 2026-09-11
+
+- **$49/month is the price for NEW members.** Verified on the public store page,
+  the product page, and the product URL while signed out.
+- **Canonical checkout / affiliate destination is the PRODUCT URL:**
+  `https://whop.com/open-ledger-sports/open-ledger-sports-premium/`
+  Use this, not a `plan_...` URL. A plan-pinned link is frozen to one pricing
+  option forever, which is exactly how the old $30 link kept selling after the
+  price was supposed to have changed. A product URL follows the current default
+  plan, so the next repricing does not strand every shared copy of the link.
+  Whop's affiliate parameter works on product URLs.
+- **Five existing members are on the $30 plan.** They were NOT migrated and the
+  plan was NOT deleted. Grandfathering them at the price they bought at is the
+  deliberate choice; moving them silently is the thing not to do.
+- **The old $30 plan is OUT OF STOCK, not deleted.** Retired by setting its
+  pricing-option **stock to 0** (Whop has no "archive" for pricing options).
+  `plan_KIbsXvPUXlf3X` now renders "Out of stock — The seller may restock it."
+  with **no payment form at all** — no card fields, no submit. Verified by
+  loading the URL signed out, before and after.
+- **Setting stock to 0 exhausted the plan immediately** rather than permitting
+  zero *further* sales on top of the five already made — i.e. in this one
+  observed test, stock counted total uses, not remaining. That is what the
+  before/after page load showed and nothing more; it has not been verified
+  against Whop's documentation or a second case, so do not generalise it.
+- **"Hidden" is not "closed".** Un-ticking *Show on store page* removes the
+  option from the picker and the store listing but, by design, leaves the direct
+  link fully purchasable — Whop documents this as the mechanism for private
+  offers. Hiding the $30 option did not stop it selling; only stock 0 did.
+- **All five $30 memberships remained ACTIVE after the stock change.** Confirmed
+  by Daniel in Whop -> Customers on 2026-09-11, after stock was set to 0. This
+  is his check, not one this repo can make — recorded here because it is the
+  item with live money attached (~$150/month) and it is now closed. Taken
+  together with the point above: in this one case, exhausting a plan's stock
+  blocked new checkouts without disturbing existing subscriptions. One case,
+  not a documented guarantee — re-check if the method is ever reused.
+
+### PENDING — not verified, do not treat as done
+
+- **The fake anchor price.** Both the product page and checkout display
+  `$61.25` struck through beside `$49` with a "Save 20%" badge. No such discount
+  exists: Whop appears to synthesise the anchor as price / 0.8 (the $30 plan
+  showed `$37.5` the same way, and 37.50 x 0.8 = 30.00; 61.25 x 0.8 = 49.00).
+  Unresolved — the toggle, if there is one, has not been found. This matters
+  more here than for a typical seller: a struck-through price nobody was ever
+  charged is a manufactured claim, on a brand whose entire pitch is publishing
+  the real record including the losses. Decide deliberately rather than leave it.
+- **`WHOP_CHECKOUT_URL` is still UNSET, pending Daniel's decision.** That
+  variable is the only reason the site is not already advertising the paid tier.
+  Setting it makes the upgrade button appear on the next build. Do not set it
+  while the anchor-price question is open, and set it to the PRODUCT URL above.
+
+### The rest of the Whop setup (unchanged, from 2026-07-22)
+
+- Product "Open Ledger Sports Member", NO trial. A three day trial hands over
+  three full days of a product whose whole value is daily, and the public ledger
+  already serves as the free evidence.
 - Discord app connected: grants the "Members" role, removes it on cancel.
 - "Assign this role after past due bill" left EMPTY on purpose. It was briefly
   set to "Members", which would have granted premium access to people whose
@@ -109,7 +180,10 @@ Gotchas learned doing it, worth telling every new member up front:
   by channel_id). Deleted. Keep #general locked or gone.
 
 To go live on the site, set the repo variable WHOP_CHECKOUT_URL to the
-checkout link. The upgrade button appears on the next build, and not before.
+**product URL** above — not a `plan_...` link. The upgrade button appears on the
+next build, and not before. See PENDING: this is still Daniel's call, and
+`build_site.py` already advertises $49, so the site and Whop only agree once
+both the variable is set and the price in Whop stays $49.
 
 ## Phase 3 — site changes
 

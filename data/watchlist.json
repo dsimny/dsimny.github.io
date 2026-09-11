@@ -4207,21 +4207,101 @@
    "actual_total": 14,
    "result": "WIN",
    "pnl": 0.943
+  },
+  {
+   "date": "2026-09-10",
+   "gamePk": 823413,
+   "game": "HOU @ PHI",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8.5 (-105, Bovada)",
+   "price": -105,
+   "book": "Bovada",
+   "model_p": 0.5545,
+   "edge": 0.0423,
+   "divergence": 0.0545,
+   "actual_total": 3,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-09-10",
+   "gamePk": 823088,
+   "game": "TEX @ SEA",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 6.5 (-105, Bovada)",
+   "price": -105,
+   "book": "Bovada",
+   "model_p": 0.5672,
+   "edge": 0.055,
+   "divergence": 0.065,
+   "actual_total": 7,
+   "result": "WIN",
+   "pnl": 0.952
+  },
+  {
+   "date": "2026-09-10",
+   "gamePk": 823499,
+   "game": "COL @ NYY",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8.5 (+100, Caesars)",
+   "price": 100,
+   "book": "Caesars",
+   "model_p": 0.544,
+   "edge": 0.044,
+   "divergence": 0.0506,
+   "actual_total": 13,
+   "result": "WIN",
+   "pnl": 1.0
+  },
+  {
+   "date": "2026-09-10",
+   "gamePk": 823499,
+   "game": "COL @ NYY",
+   "market": "moneyline",
+   "tag": "R8-hold",
+   "pick": "New York Yankees ML (-280, LowVig.ag)",
+   "price": -280,
+   "book": "LowVig.ag",
+   "model_p": 0.4591,
+   "edge": -0.0825,
+   "divergence": -0.128,
+   "final_score": "3-10",
+   "result": "WIN",
+   "pnl": 0.357
+  },
+  {
+   "date": "2026-09-10",
+   "gamePk": 824550,
+   "game": "PIT @ CWS",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (-115, Bovada)",
+   "price": -115,
+   "book": "Bovada",
+   "model_p": 0.5803,
+   "edge": 0.0454,
+   "divergence": 0.0595,
+   "actual_total": 2,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "145-110-8p",
-  "n_graded": 263,
+  "record": "148-112-8p",
+  "n_graded": 268,
   "win_pct": 56.9,
-  "paper_units_net": 17.366,
-  "paper_roi_pct": 6.81,
+  "paper_units_net": 17.675,
+  "paper_roi_pct": 6.8,
   "by_tag": {
    "R8-hold": {
-    "record": "26-4",
-    "n_graded": 30,
-    "win_pct": 86.7,
-    "paper_units_net": 8.199,
-    "paper_roi_pct": 27.33
+    "record": "27-4",
+    "n_graded": 31,
+    "win_pct": 87.1,
+    "paper_units_net": 8.556,
+    "paper_roi_pct": 27.6
    },
    "edge-band": {
     "record": "13-9",
@@ -4231,30 +4311,30 @@
     "paper_roi_pct": 18.4
    },
    "market-proving": {
-    "record": "106-97-8p",
-    "n_graded": 211,
+    "record": "108-99-8p",
+    "n_graded": 215,
     "win_pct": 52.2,
-    "paper_units_net": 5.118,
-    "paper_roi_pct": 2.52
+    "paper_units_net": 5.07,
+    "paper_roi_pct": 2.45
    }
   },
   "by_market": {
    "moneyline": {
-    "record": "39-13",
-    "n_graded": 52,
-    "win_pct": 75.0,
-    "paper_units_net": 12.248,
-    "paper_roi_pct": 23.55
+    "record": "40-13",
+    "n_graded": 53,
+    "win_pct": 75.5,
+    "paper_units_net": 12.605,
+    "paper_roi_pct": 23.78
    },
    "total": {
-    "record": "106-97-8p",
-    "n_graded": 211,
+    "record": "108-99-8p",
+    "n_graded": 215,
     "win_pct": 52.2,
-    "paper_units_net": 5.118,
-    "paper_roi_pct": 2.52
+    "paper_units_net": 5.07,
+    "paper_roi_pct": 2.45
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-09-09"
+  "last_graded": "2026-09-10"
  }
 }

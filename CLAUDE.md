@@ -896,6 +896,35 @@ deliberately carry no URL, because Instagram renders caption links as inert text
 
 Offline guard: `scripts/selftest_instagram.py` (no network, no credentials).
 
+## Ops alerts go to a PRIVATE channel only (2026-09-11)
+
+`post_discord.py alert` is the internal operations channel. It sends **only** to
+`DISCORD_WEBHOOK_URL_ALERTS`. It must **never** fall back to
+`DISCORD_WEBHOOK_URL_MEMBERS`, `DISCORD_WEBHOOK_URL` or
+`DISCORD_WEBHOOK_URL_LEDGER`.
+
+It used to chain `ALERT or MEMBERS or WEBHOOK`, on the reasoning that a visible
+failure is on-brand and an alert should always land somewhere. That was wrong
+about the audience. On 2026-09-11 a stack trace about an Instagram image path —
+internal infrastructure, meaningless to a subscriber — was broadcast into
+#members-only because the ops secret was unset (run 34577853134). Paying members
+were shown a pipeline defect they could not act on, in the channel they pay for
+picks in.
+
+**"Publish your losses" is about RESULTS.** It has never meant publishing build
+failures to customers. House rule 1 governs the ledger; it says nothing about
+CI. Different audiences, different channels.
+
+If `DISCORD_WEBHOOK_URL_ALERTS` is unset, the alert is **not sent anywhere**. It
+is printed in the Actions log, which is the durable record either way, and the
+run's red X is the signal. A missing optional alert destination must never turn
+a good ledger run into a failure. Applies to every caller of `alert` mode —
+grade-ledger, heartbeat, morning-board, capture-closing, football-*.
+
+Normal routing is unchanged: free pick → `DISCORD_WEBHOOK_URL`, members board →
+`DISCORD_WEBHOOK_URL_MEMBERS`, results recap → `DISCORD_WEBHOOK_URL_LEDGER`
+falling back to the free channel. Enforced by `selftest_instagram.py` group 22.
+
 ## House rules (non-negotiable; they ARE the brand)
 
 1. Ledger is append-only: entries are never edited after grading; aggregates

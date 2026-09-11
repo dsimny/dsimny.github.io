@@ -1,0 +1,133 @@
+name: Instagram recovery
+# Publishes ONE missed Instagram recap card for ONE past date, and nothing else.
+#
+# WHY THIS EXISTS. When an Instagram post is missed, the obvious move is to
+# re-run "Grade ledger" — and that is the wrong move. That workflow calls
+# post_discord.py recap, which is intentionally NOT idempotent, so a re-run
+# posts a duplicate results recap to a public Discord channel. It also re-runs
+# grading, the reveal and the site build against an already-settled date. The
+# ledger is append-only; a social-media gap is never a reason to touch it.
+#
+# So this workflow does the Instagram half alone: render the card, commit just
+# that one JPEG, and publish from the immutable SHA-pinned URL.
+#
+# WHAT IT MUST NEVER DO, and does not:
+#   grade.py, build_site.py, post_discord.py, post_social.py, grade_pickem.py
+#   any write to data/ledger.json, a settled board, commitments, index.html or
+#   feed.xml. The only path it commits is data/social/ig_<date>.jpg, which is
+#   also the only path scripts/render_recap_image.py is allowed to create inside
+#   data/ (_assert_safe_out). selftest_instagram.py group 23 asserts all of this
+#   against this file's own text.
+#
+# DUPLICATE PREVENTION IS REMOTE AND UNCHANGED. post_instagram.py reads the live
+# Meta feed for this date's OLS-<KIND>-<DATE> reference before creating
+# anything. So re-running this workflow is safe even if a previous attempt
+# published successfully and then lost its local state: the second run finds the
+# reference already live, records `posted`, and publishes nothing. Do NOT add a
+# local-only idempotency check here.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Grading date to recover, YYYY-MM-DD (US Eastern), e.g. 2026-09-10"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Validate the date
+        id: d
+        # A REAL CALENDAR DATE, not merely a YYYY-MM-DD-shaped string: strptime
+        # rejects 2026-13-45 and 2026-02-30, which a regex would wave through.
+        # Also refuses a future date — there is nothing settled to recover.
+        run: |
+          D="${{ inputs.date }}"
+          python - "$D" <<'PY'
+          import sys
+          from datetime import datetime, timedelta
+          from zoneinfo import ZoneInfo
+          raw = sys.argv[1].strip()
+          try:
+              d = datetime.strptime(raw, "%Y-%m-%d").date()
+          except ValueError:
+              sys.exit(f"::error::{raw!r} is not a real calendar date (YYYY-MM-DD)")
+          today = datetime.now(ZoneInfo("America/New_York")).date()
+          if d > today - timedelta(days=1):
+              sys.exit(f"::error::{raw} is not a past grading date (today ET is {today})")
+          print(f"validated {raw}")
+          PY
+          echo "date=$D" >> "$GITHUB_OUTPUT"
+
+      - name: Render the recap card
+        id: render
+        # render_recap_image.py exits 0 and writes NOTHING when select_recap()
+        # returns nothing for the date. That is the "no settled entry" case, and
+        # it must end the run cleanly rather than commit an empty file or call
+        # Meta. The file check below is what distinguishes the two outcomes.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          D="${{ steps.d.outputs.date }}"
+          OUT="data/social/ig_$D.jpg"
+          python scripts/render_recap_image.py "$D" "$OUT"
+          if [ ! -s "$OUT" ]; then
+            echo "::notice::No settled recap for $D — nothing rendered, nothing committed, Instagram not called."
+            echo "rendered=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "rendered=true" >> "$GITHUB_OUTPUT"
+            ls -l "$OUT"
+          fi
+
+      - name: Commit and push the card
+        id: push
+        if: steps.render.outputs.rendered == 'true'
+        # ONLY the one JPEG is staged. Never `git add -A`, never `git add data/`
+        # — this workflow has no business touching the ledger, and a locally
+        # built index.html or feed.xml must never be committed (see CLAUDE.md).
+        run: |
+          D="${{ steps.d.outputs.date }}"
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "data/social/ig_$D.jpg"
+          git diff --cached --quiet || git commit -m "Instagram recovery card $D"
+          # Same push philosophy as grade-ledger.yml: commit first so the tree is
+          # clean, then rebase — never --autostash. STOP ON CONFLICT rather than
+          # auto-resolving anything ledger-adjacent.
+          for i in 1 2 3; do
+            git push && break
+            git fetch origin main || exit 1
+            if ! git rebase origin/main; then
+              git rebase --abort
+              echo "::error::rebase conflict during recovery push — stopping, not auto-resolving"
+              exit 1
+            fi
+          done
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Instagram
+        if: steps.render.outputs.rendered == 'true'
+        # --strict, and no `|| true`: if this cannot publish, the run goes red.
+        # The image URL is pinned to the commit just pushed, so a bot commit
+        # landing on main cannot invalidate it and no Pages build has to finish.
+        env:
+          IG_USER_ID: ${{ vars.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          D="${{ steps.d.outputs.date }}"
+          SHA="${{ steps.push.outputs.sha }}"
+          URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SHA}/data/social/ig_${D}.jpg"
+          python scripts/post_instagram.py publish "$D" --image-url="$URL" --strict

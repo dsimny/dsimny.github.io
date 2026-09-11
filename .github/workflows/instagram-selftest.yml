@@ -35,6 +35,7 @@ on:
       - "scripts/selftest_instagram.py"
       - "scripts/fixtures/instagram_cards.json"
       - "scripts/post_social.py"
+      - "scripts/post_discord.py"
       - "assets/fonts/**"
       - "requirements.txt"
       - ".github/workflows/instagram-selftest.yml"
@@ -43,6 +44,7 @@ on:
       # image URL and the alert branches against this file, so a change to
       # it must re-run these checks.
       - ".github/workflows/grade-ledger.yml"
+      - ".github/workflows/instagram-recovery.yml"
   pull_request:
     branches:
       - main
@@ -52,6 +54,7 @@ on:
       - "scripts/selftest_instagram.py"
       - "scripts/fixtures/instagram_cards.json"
       - "scripts/post_social.py"
+      - "scripts/post_discord.py"
       - "assets/fonts/**"
       - "requirements.txt"
       - ".github/workflows/instagram-selftest.yml"
@@ -60,6 +63,7 @@ on:
       # image URL and the alert branches against this file, so a change to
       # it must re-run these checks.
       - ".github/workflows/grade-ledger.yml"
+      - ".github/workflows/instagram-recovery.yml"
 
 # Read-only. This job validates; it never commits, never pushes, never renders
 # into the repository and never posts. Unlike the pipeline workflows it does not

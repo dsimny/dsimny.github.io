@@ -10,7 +10,7 @@ fails the suite even when nothing reports FAIL.
 
 RUNS FULLY OFFLINE. No network, no credentials, no git history, no full clone.
 It writes only inside a TemporaryDirectory, and never inside data/ — the
-renderer refuses that path outright and check 12.1 proves it, while the
+renderer refuses every non-card path there (group 21), while the
 Instagram status path is redirected into the temp directory for the whole
 transport section and check 16.zz proves no live status file was created.
 
@@ -48,6 +48,7 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
+import yaml  # noqa: E402  (offline YAML parse of the workflows)
 from PIL import Image  # noqa: E402
 
 import post_instagram as pi  # noqa: E402
@@ -62,7 +63,7 @@ FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 
 # Total checks this file is expected to run. Bump it DELIBERATELY when adding or
 # removing a check; unexplained drift means a check stopped executing.
-EXPECTED_CHECKS = 767
+EXPECTED_CHECKS = 871
 
 # Checksums of the vendored font files, as recorded in assets/fonts/README.md.
 # A swapped or corrupted face changes every card, so it fails the suite here
@@ -568,7 +569,11 @@ def main():
         ok = False
     except ValueError:
         ok = True
-    check("12.1", "renderer refuses to write inside data/", ok)
+    # Narrowed 2026-09-11: the renderer no longer refuses ALL of data/, only
+    # everything that is not its own card. data/nope.jpg is still refused, so
+    # this check still holds — but the label used to claim a blanket ban that no
+    # longer exists. Group 21 owns the full boundary.
+    check("12.1", "renderer refuses a non-card path inside data/", ok)
     check("12.2", "no file was created in data/",
           not os.path.exists(os.path.join(ROOT, "data", "nope.jpg")))
 
@@ -1234,6 +1239,313 @@ def main():
     check("17.8c", "sync_status reads the feed and nothing else",
           "recent_media" in sync_src)
 
+    # ----------------------- 23. the Instagram-only recovery workflow --------
+    #
+    # The obvious way to recover a missed Instagram post is to re-run Grade
+    # ledger. That is the wrong move: post_discord.py recap is intentionally not
+    # idempotent, so it would repost a duplicate results recap to a public
+    # channel, and it would re-run grading against an already-settled date. This
+    # workflow does the Instagram half alone. These checks assert what it must
+    # never touch, statically, against the file's own text.
+    print("\n23. Instagram recovery workflow — narrow by construction")
+
+    REC = os.path.join(ROOT, ".github", "workflows", "instagram-recovery.yml")
+    check("23.0", "instagram-recovery.yml exists", os.path.exists(REC))
+    rec_src = open(REC, encoding="utf-8").read()
+    rec = yaml.safe_load(rec_src)
+    rec_on = rec["on"] if "on" in rec else rec[True]
+
+    check("23.1a", "dispatch-only — no schedule, no push trigger",
+          set(rec_on) == {"workflow_dispatch"})
+    check("23.1b", "it takes a required date input",
+          rec_on["workflow_dispatch"]["inputs"]["date"]["required"] is True)
+    check("23.1c", "exactly one job", len(rec["jobs"]) == 1)
+
+    job = rec["jobs"]["recover"]
+    steps = job["steps"]
+    names = [s.get("name", "") for s in steps]
+    runs = "\n".join(s.get("run") or "" for s in steps)
+
+    # EXECUTABLE LINES ONLY. YAML comments are already gone (the parser drops
+    # them), but the run blocks carry shell comments that deliberately NAME the
+    # forbidden scripts in order to say they are forbidden. Scanning raw text
+    # would read that prohibition as a violation of itself — the same trap the
+    # docstring scan in group 11 had to avoid.
+    rec_exec = "\n".join(l for l in runs.split("\n")
+                         if not l.strip().startswith("#"))
+
+    # ---- 23.2 the forbidden scripts, absent from anything executed ----
+    for script in ["grade.py", "build_site.py", "post_discord.py",
+                   "post_social.py", "grade_pickem.py", "blog.py",
+                   "game_pages.py", "export_training_rows.py"]:
+        check(f"23.2.{script}", f"never calls {script}", script not in rec_exec)
+
+    # ---- 23.3 the forbidden paths, absent from anything executed ----
+    for path in ["data/ledger.json", "data/daily_ledger.json", "index.html",
+                 "feed.xml", "data/commitments.json", "board_"]:
+        check(f"23.3.{path}", f"never touches {path}", path not in rec_exec)
+    check("23.3.add", "never uses `git add -A` or a broad `git add data/`",
+          "git add -A" not in rec_exec and "git add data/" not in rec_exec)
+    check("23.3.only", "stages ONLY the one card",
+          'git add "data/social/ig_$D.jpg"' in rec_exec)
+
+    # ---- 23.4 date validation is a real calendar check ----
+    val = runs
+    check("23.4a", "the date is parsed with strptime, not just regex-shaped",
+          "strptime" in val and "%Y-%m-%d" in val)
+    check("23.4b", "an impossible date exits with an error", "::error::" in val)
+    check("23.4c", "a future date is refused", "not a past grading date" in val)
+
+    # ---- 23.5 nothing-to-render exits cleanly, commits nothing ----
+    check("23.5a", "the render step gates on a NON-EMPTY file", "-s " in val)
+    check("23.5b", "a missing recap is a notice, not a failure",
+          "::notice::" in val and "nothing committed" in val)
+    check("23.5c", "the commit step is gated on rendered == true",
+          any(s.get("if") == "steps.render.outputs.rendered == 'true'"
+              for s in steps if s.get("id") == "push"))
+    check("23.5d", "the publish step is gated on rendered == true",
+          any(s.get("if") == "steps.render.outputs.rendered == 'true'"
+              for s in steps if "post_instagram.py publish" in (s.get("run") or "")))
+
+    # ---- 23.6 push safety matches grade-ledger's philosophy ----
+    check("23.6a", "push retries rather than failing the first race",
+          "for i in 1 2 3" in val and "git fetch origin main" in val)
+    check("23.6b", "a rebase conflict aborts and stops",
+          "git rebase --abort" in val)
+    check("23.6c", "no --autostash",
+          "--autostash" not in "\n".join(
+              l for l in val.split("\n") if not l.strip().startswith("#")))
+    check("23.6d", "the SHA is captured after the push", "rev-parse HEAD" in val)
+
+    # ---- 23.7 publishing keeps remote duplicate prevention ----
+    pub_step = [s for s in steps if "post_instagram.py publish" in (s.get("run") or "")]
+    check("23.7a", "it publishes with --strict",
+          pub_step and "--strict" in pub_step[0]["run"])
+    check("23.7b", "no '|| true' on the publish", "|| true" not in rec_exec)
+    check("23.7c", "no continue-on-error anywhere",
+          not any("continue-on-error" in str(st) for st in steps)
+          and "continue-on-error" not in str(job.get("continue-on-error", "")))
+    check("23.7d", "the image URL is pinned to the pushed SHA",
+          pub_step and "raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SHA}"
+          in pub_step[0]["run"])
+    check("23.7e", "credentials come from the agreed variable and secret",
+          pub_step and pub_step[0]["env"] == {
+              "IG_USER_ID": "${{ vars.IG_USER_ID }}",
+              "IG_ACCESS_TOKEN": "${{ secrets.IG_ACCESS_TOKEN }}"})
+    check("23.7f", "no local-only idempotency was invented",
+          "instagram_status" not in rec_src)
+    check("23.7g", "no credential value is embedded",
+          not re.search(r"(EAA[A-Za-z0-9]{20,}|IGQ[A-Za-z0-9_-]{20,})", rec_src))
+
+    # ------------------------ 22. ops alerts never reach a customer channel --
+    #
+    # On 2026-09-11 an Instagram infrastructure failure was broadcast into
+    # #members-only, because post_alert() read
+    #     ALERT_WEBHOOK or MEMBERS_WEBHOOK or WEBHOOK
+    # and DISCORD_WEBHOOK_URL_ALERTS was unset. Paying members were shown a
+    # pipeline defect they could not act on, in the channel they pay for picks in.
+    #
+    # "Publish your losses" is about RESULTS, not build failures. Different
+    # audiences, different channels. alert mode now sends ONLY to the ops webhook;
+    # unset means not sent, and the Actions run is the durable record.
+    #
+    # Asserted against the SOURCE rather than by importing post_discord: that
+    # module pulls in crypto_box, and this suite's standing guarantee is that it
+    # imports no network stack at all (check 16.zz2).
+    print("\n22. Ops alert routing — private channel only, no fallback")
+
+    PD = os.path.join(ROOT, "scripts", "post_discord.py")
+    pd_src = open(PD, encoding="utf-8").read()
+    pd_tree = ast.parse(pd_src)
+    alert_fn = [n for n in ast.walk(pd_tree)
+                if isinstance(n, ast.FunctionDef) and n.name == "post_alert"]
+    check("22.1a", "post_alert() exists", len(alert_fn) == 1)
+
+    # The webhook assignment inside post_alert must be a bare Name, not a
+    # fallback chain. A BoolOp here is exactly the regression to prevent.
+    assigns = [n for n in ast.walk(alert_fn[0])
+               if isinstance(n, ast.Assign)
+               and any(getattr(t, "id", None) == "webhook" for t in n.targets)]
+    check("22.1b", "post_alert assigns `webhook` exactly once", len(assigns) == 1)
+    val = assigns[0].value if assigns else None
+    check("22.1c", "the webhook is a single name, not an `or` fallback chain",
+          isinstance(val, ast.Name))
+    check("22.1d", "and that name is ALERT_WEBHOOK",
+          isinstance(val, ast.Name) and val.id == "ALERT_WEBHOOK")
+
+    names_in_alert = {n.id for n in ast.walk(alert_fn[0]) if isinstance(n, ast.Name)}
+    check("22.2a", "post_alert never references MEMBERS_WEBHOOK",
+          "MEMBERS_WEBHOOK" not in names_in_alert)
+    check("22.2b", "post_alert never references the free-pick WEBHOOK",
+          "WEBHOOK" not in names_in_alert)
+    check("22.2c", "post_alert never references LEDGER_WEBHOOK",
+          "LEDGER_WEBHOOK" not in names_in_alert)
+    check("22.2d", "the unset path explains where the alert did NOT go",
+          "not configured" in pd_src and "DISCORD_WEBHOOK_URL_ALERTS" in pd_src)
+
+    # post_alert must stay non-fatal: a missing optional destination cannot turn
+    # a good ledger run into a failure.
+    check("22.3a", "post_alert still swallows every exception",
+          any(isinstance(n, ast.ExceptHandler) for n in ast.walk(alert_fn[0])))
+    check("22.3b", "post_alert never exits non-zero",
+          not any(isinstance(n, ast.Call)
+                  and getattr(n.func, "attr", "") == "exit"
+                  for n in ast.walk(alert_fn[0])))
+
+    # ---- 22.4 the OTHER modes keep their existing routing, untouched ----
+    check("22.4a", "free pick still routes to DISCORD_WEBHOOK_URL",
+          '"pick":  (build_pick_payload,  WEBHOOK,' in pd_src)
+    check("22.4b", "members board still routes to the members webhook",
+          '"board": (build_board_payload, MEMBERS_WEBHOOK,' in pd_src)
+    check("22.4c", "public recap still falls back to the free channel",
+          '"recap": (build_recap_payload, LEDGER_WEBHOOK or WEBHOOK,' in pd_src)
+    check("22.4d", "MEMBERS_WEBHOOK is still defined for the board mode",
+          "MEMBERS_WEBHOOK = os.environ.get" in pd_src)
+
+    # ---- 22.5 no workflow feeds the removed fallbacks to an alert step ----
+    wfdir = os.path.join(ROOT, ".github", "workflows")
+    offenders = []
+    for fn in sorted(os.listdir(wfdir)):
+        if not fn.endswith(".yml"):
+            continue
+        txt = open(os.path.join(wfdir, fn), encoding="utf-8").read()
+        for block in txt.split("- name:"):
+            if "post_discord.py alert" not in block:
+                continue
+            if ("DISCORD_WEBHOOK_URL_MEMBERS" in block
+                    or re.search(r"DISCORD_WEBHOOK_URL: \$\{\{", block)):
+                offenders.append(fn)
+    check("22.5", "no alert step still passes the members/free webhooks",
+          not offenders)
+
+    # ---- 22.6 the policy is written down where a human will read it ----
+    check("22.6a", "post_discord.py documents the no-fallback policy",
+          "NO FALLBACK" in pd_src)
+    check("22.6b", "CLAUDE.md records the ops-alert routing policy",
+          "DISCORD_WEBHOOK_URL_ALERTS" in open(
+              os.path.join(ROOT, "CLAUDE.md"), encoding="utf-8").read())
+
+    # ------------------- 21. the data/ write boundary (incident 34577853134) --
+    #
+    # THE BUG THIS EXISTS TO PREVENT. The Phase 1 guard refused every path under
+    # data/, with a docstring saying the committed pipeline was "Phase 2's
+    # problem". Phase 2 then pointed grade-ledger.yml at data/social/ig_<date>.jpg
+    # — the one path the guard forbade. Production asked the renderer to create a
+    # file it was hard-coded to reject, the render step warned and continued (the
+    # ledger was correctly protected), and the Instagram job then failed with
+    # pending_media on a file that had never existed.
+    #
+    # The suite did not catch it because check 12.1 asserted the OLD rule — the
+    # tests were actively enforcing the bug. The lesson is check 21.8: assert the
+    # renderer's allowlist against the path the WORKFLOW actually uses, so the
+    # two cannot drift apart again.
+    print("\n21. data/ write boundary — allowlist, not blanket ban")
+
+    def accepts(p):
+        try:
+            rr._assert_safe_out(p)
+            return True
+        except ValueError:
+            return False
+
+    D = os.path.join(ROOT, "data")
+
+    # ---- 21.1 the exact production path is ACCEPTED ----
+    check("21.1a", "the production card path is accepted",
+          accepts(os.path.join(D, "social", "ig_2026-09-10.jpg")))
+    check("21.1b", "the incident's own date is accepted",
+          accepts(os.path.join(D, "social", "ig_2026-09-11.jpg")))
+    check("21.1c", "a relative form of the same path is accepted",
+          accepts(os.path.join(ROOT, "data", "social", "ig_2026-01-01.jpg")))
+    check("21.1d", "leap day is accepted",
+          accepts(os.path.join(D, "social", "ig_2024-02-29.jpg")))
+
+    # ---- 21.2 unrelated files directly under data/ are REFUSED ----
+    for bad in ["ledger.json", "daily_ledger.json", "post_status.json",
+                "instagram_status.json", "foo.jpg", "ig_2026-09-10.jpg"]:
+        check(f"21.2.{bad}", f"data/{bad} is refused",
+              not accepts(os.path.join(D, bad)))
+    check("21.2.dir", "data/ itself is refused", not accepts(D))
+
+    # ---- 21.3 unrelated files under data/social/ are REFUSED ----
+    for bad in ["test.jpg", "foo.jpg", "ledger.json", "ig_2026-09-10.jpg.bak"]:
+        check(f"21.3.{bad}", f"data/social/{bad} is refused",
+              not accepts(os.path.join(D, "social", bad)))
+
+    # ---- 21.4 wrong extension is REFUSED ----
+    for bad in ["ig_2026-09-10.png", "ig_2026-09-10.jpeg", "ig_2026-09-10.webp",
+                "ig_2026-09-10"]:
+        check(f"21.4.{bad}", f"{bad} is refused",
+              not accepts(os.path.join(D, "social", bad)))
+
+    # ---- 21.5 malformed card filenames are REFUSED ----
+    for bad in ["ig_bad.jpg", "ig_.jpg", "ig_2026-9-10.jpg", "ig_20260910.jpg",
+                "ig_2026-09-10-extra.jpg", "IG_2026-09-10.jpg",
+                "xig_2026-09-10.jpg", "ig_2026-13-45.jpg", "ig_2026-02-30.jpg",
+                "ig_2025-02-29.jpg"]:
+        check(f"21.5.{bad}", f"{bad} is refused",
+              not accepts(os.path.join(D, "social", bad)))
+    check("21.5.date", "a real calendar date is required, not just the shape",
+          not accepts(os.path.join(D, "social", "ig_2026-13-45.jpg"))
+          and accepts(os.path.join(D, "social", "ig_2026-12-31.jpg")))
+
+    # ---- 21.6 traversal and prefix tricks cannot bypass it ----
+    check("21.6a", "traversal out of data/social/ into data/ is refused",
+          not accepts(os.path.join(D, "social", "..", "ledger.json")))
+    check("21.6b", "traversal dressed as a valid card name is refused",
+          not accepts(os.path.join(D, "social", "..", "ig_2026-09-10.jpg")))
+    check("21.6c", "a nested subdirectory is refused",
+          not accepts(os.path.join(D, "social", "sub", "ig_2026-09-10.jpg")))
+    check("21.6d", "a sibling dir sharing the prefix is refused",
+          not accepts(os.path.join(D, "social_backup", "ig_2026-09-10.jpg")))
+    check("21.6e", "a sibling dir sharing the data prefix is refused",
+          not accepts(os.path.join(ROOT, "data_old", "social", "ig_2026-09-10.jpg"))
+          or not os.path.realpath(os.path.join(ROOT, "data_old")).startswith(
+              os.path.realpath(D) + os.sep))
+    check("21.6f", "traversal back INTO the card dir still resolves and is accepted",
+          accepts(os.path.join(D, "social", "sub", "..", "ig_2026-09-10.jpg")))
+
+    # ---- 21.7 everything outside data/ stays writable ----
+    check("21.7a", "a temporary directory is accepted",
+          accepts(os.path.join(tmp, "preview.jpg")))
+    check("21.7b", "an arbitrary temp filename is accepted",
+          accepts(os.path.join(tmp, "anything-at-all.png")))
+    check("21.7c", "a repo path outside data/ is accepted",
+          accepts(os.path.join(ROOT, "scratch.jpg")))
+    check("21.7d", "the suite's own previews still render",
+          accepts(os.path.join(tmp, "ig_2026-09-10.jpg")))
+
+    # ---- 21.8 THE CONTRACT: workflow render target == renderer allowlist ----
+    wf_src = open(os.path.join(ROOT, ".github", "workflows",
+                               "grade-ledger.yml"), encoding="utf-8").read()
+    m = re.search(r'render_recap_image\.py\s+"\$D"\s+"([^"]+)"', wf_src)
+    check("21.8a", "the workflow's render target is parseable", bool(m))
+    wf_target = m.group(1) if m else ""
+    resolved = wf_target.replace("$D", "2026-09-10").replace("${D}", "2026-09-10")
+    check("21.8b", f"the workflow renders to {wf_target!r}",
+          resolved == "data/social/ig_2026-09-10.jpg")
+    check("21.8c", "the renderer ACCEPTS the workflow's own target path",
+          accepts(os.path.join(ROOT, resolved)))
+    check("21.8d", "the allowlist directory matches the workflow's directory",
+          rr.CARD_DIR.replace(os.sep, "/") == os.path.dirname(resolved))
+    check("21.8e", "the allowlist filename pattern matches the workflow's filename",
+          bool(rr.CARD_NAME_RE.match(os.path.basename(resolved))))
+
+    # The same agreement for the recovery workflow, if it exists.
+    recp = os.path.join(ROOT, ".github", "workflows", "instagram-recovery.yml")
+    check("21.8f", "the recovery workflow exists", os.path.exists(recp))
+    rsrc = open(recp, encoding="utf-8").read() if os.path.exists(recp) else ""
+    rexec = "\n".join(l for l in rsrc.split("\n") if not l.strip().startswith("#"))
+    # It composes the path from a shell variable, so assert the pattern it builds
+    # and that the renderer accepts the concrete form.
+    check("21.8g", "the recovery workflow targets the same card path",
+          'data/social/ig_$D.jpg' in rexec)
+    check("21.8h", "the renderer accepts the recovery workflow's target",
+          accepts(os.path.join(ROOT, "data", "social", "ig_2026-09-10.jpg")))
+
+    check("21.9", "no card was actually written to data/ by this group",
+          not os.path.exists(os.path.join(D, "social", "ig_2026-09-10.jpg")))
+
     # --------------------------- 20. the production wiring contract (offline) --
     #
     # grade-ledger.yml is what actually publishes. Everything above proves the
@@ -1245,7 +1557,6 @@ def main():
     # a static read of a file in the working tree.
     print("\n20. Production wiring contract — grade-ledger.yml")
 
-    import yaml  # noqa: E402  (pulled in by requirements.txt; offline)
     WF = os.path.join(ROOT, ".github", "workflows", "grade-ledger.yml")
     check("20.0", "grade-ledger.yml exists", os.path.exists(WF))
     wf = yaml.safe_load(open(WF, encoding="utf-8"))

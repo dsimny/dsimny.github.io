@@ -54,10 +54,24 @@ MEMBERS_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_MEMBERS", "")
 # Falls back to the free-pick webhook if unset, so nothing breaks before the
 # channel exists.
 LEDGER_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_LEDGER", "")
-# Ops alerts. An admin channel is the right home, but the members channel is a
-# perfectly good fallback: a visible failure is on-brand for this site, not
-# something to hide. Falls back again to the free channel so an alert always
-# has somewhere to land.
+# Ops alerts. PRIVATE CHANNEL ONLY — this one NEVER falls back.
+#
+# It used to read `ALERT_WEBHOOK or MEMBERS_WEBHOOK or WEBHOOK`, on the reasoning
+# that a visible failure is on-brand and an alert should always land somewhere.
+# That was wrong about WHO the audience is. On 2026-09-11 a stack trace about an
+# Instagram image path — internal infrastructure, meaningless to a subscriber —
+# was broadcast into #members-only because this secret was unset (run
+# 34577853134). Paying members were shown a pipeline defect they could not act
+# on, in the channel they pay for picks in.
+#
+# "Publish your losses" is about RESULTS. It has never meant publishing build
+# failures to customers. Those are different audiences and different channels.
+#
+# So: alert mode sends ONLY to DISCORD_WEBHOOK_URL_ALERTS. If that is unset the
+# alert is not sent anywhere — it is logged in the Actions run, which is the
+# durable record either way, and the run's own red X is the signal. A missing
+# optional alert destination must never turn a good ledger run into a failure.
+# Enforced by selftest_instagram.py group 22.
 ALERT_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_ALERTS", "")
 SITE = os.environ.get("SITE_URL", "").rstrip("/")
 
@@ -431,10 +445,17 @@ def post_alert(args, dry=False):
         if dry:
             print(json.dumps(payload, indent=2))
             return
-        webhook = ALERT_WEBHOOK or MEMBERS_WEBHOOK or WEBHOOK
+        # NO FALLBACK, deliberately. See the ALERT_WEBHOOK comment above: ops
+        # alerts are internal and must never reach a customer channel. Do not
+        # reintroduce `or MEMBERS_WEBHOOK or WEBHOOK` here.
+        webhook = ALERT_WEBHOOK
         if not webhook:
-            print("NOTE: no DISCORD_WEBHOOK_URL_ALERTS / _MEMBERS / _URL set — "
-                  "alert not sent. The failure is still in the Actions log.")
+            print("NOTE: DISCORD_WEBHOOK_URL_ALERTS is not configured — ops "
+                  "alert NOT sent, and deliberately not routed to any other "
+                  "channel. The failure is recorded in the Actions run, which "
+                  "is the durable record. To receive these, create a private "
+                  "ops channel, add a webhook, and save it as the repo secret "
+                  "DISCORD_WEBHOOK_URL_ALERTS.")
             return
         if not webhook_host_ok(webhook):
             print("WARNING: alert webhook is not a discord.com URL — refusing to send.")

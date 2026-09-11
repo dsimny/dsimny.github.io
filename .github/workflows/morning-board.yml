@@ -166,9 +166,7 @@ jobs:
       - name: Post the failure to Discord
         env:
           GH_TOKEN: ${{ github.token }}
-          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}     # optional — ops channel
-          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}   # fallback
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}                   # last-resort fallback
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}   # ops channel; unset = alert not sent, never rerouted
         run: |
           # Every lookup below is best-effort: an alert that says less is fine,
           # an alert that fails to send is not. Hence set +e and the || true.

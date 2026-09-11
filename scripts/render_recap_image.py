@@ -46,7 +46,9 @@ against the source text, not just by convention.
 Run:  python scripts/render_recap_image.py <YYYY-MM-DD> <out.jpg>
 """
 import os
+import re
 import sys
+from datetime import datetime
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -566,15 +568,61 @@ def render_card(kind, r):
     return img, c.calls
 
 
+# The ONE file this module is allowed to create inside data/. Must agree with
+# the render target in .github/workflows/grade-ledger.yml; selftest_instagram.py
+# check 21.8 parses that workflow and asserts the two have not drifted apart.
+CARD_DIR = os.path.join("data", "social")
+CARD_NAME_RE = re.compile(r"^ig_(\d{4}-\d{2}-\d{2})\.jpg$")
+
+
 def _assert_safe_out(path):
-    """Never write into data/. Previews and tests write to a temp dir; the
-    committed pipeline is Phase 2's problem, not this module's."""
-    full = os.path.abspath(path)
-    data_dir = os.path.abspath(os.path.join(ROOT, "data"))
-    if full == data_dir or full.startswith(data_dir + os.sep):
-        raise ValueError(
-            f"refusing to write inside data/: {full}. Phase 1 renders to a "
-            f"temporary directory only.")
+    """Refuse to write anywhere inside data/ except this module's own card.
+
+    WHY THIS IS AN ALLOWLIST AND NOT A BLANKET BAN. The Phase 1 version of this
+    guard rejected everything under data/, with a docstring saying the committed
+    pipeline was "Phase 2's problem". Phase 2 then wired grade-ledger.yml to
+    render to data/social/ig_<date>.jpg — the exact path the guard forbade — and
+    production asked the renderer to create a file it was hard-coded to refuse.
+    The render step's `|| ::warning::` correctly kept the ledger safe, so grading
+    pushed cleanly and only Instagram failed, with `pending_media` on a file that
+    had never been written. Run 34577853134, 2026-09-11.
+
+    The original protection is still worth having: this module must never be
+    able to clobber a ledger, a board, a commitment file or a status file. So
+    the rule is narrowed rather than dropped —
+
+        outside data/            -> always allowed (temp dirs, previews, tests)
+        data/social/ig_<date>.jpg -> allowed, the production card
+        anything else under data/ -> refused
+
+    Paths are normalised BEFORE the decision, so `data/social/../ledger.json`
+    resolves to data/ledger.json and is refused, and a sibling directory that
+    merely shares a prefix (data/social_backup/) does not pass as data/social/.
+    The date is parsed as a real calendar date, so ig_2026-13-45.jpg is refused.
+    """
+    full = os.path.realpath(os.path.abspath(path))
+    data_dir = os.path.realpath(os.path.join(ROOT, "data"))
+
+    # Outside data/ entirely: not our business. Previews and the whole test
+    # suite live here.
+    if full != data_dir and not full.startswith(data_dir + os.sep):
+        return
+
+    card_dir = os.path.realpath(os.path.join(ROOT, CARD_DIR))
+    name = os.path.basename(full)
+    m = CARD_NAME_RE.match(name)
+    if os.path.dirname(full) == card_dir and m:
+        try:
+            datetime.strptime(m.group(1), "%Y-%m-%d")
+        except ValueError:
+            m = None
+        if m:
+            return
+
+    raise ValueError(
+        f"refusing to write {full}: the only file this renderer may create "
+        f"inside data/ is {CARD_DIR}/ig_<YYYY-MM-DD>.jpg. Everything else "
+        f"under data/ is ledger, board, commitment or status data.")
 
 
 def save_jpeg(img, path):

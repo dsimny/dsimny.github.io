@@ -121,7 +121,7 @@ def build_payload(item):
         "segment_id": SEGMENT_ID,
         "from": EMAIL_FROM,
         "subject": item["title"],
-        "name": item["title"],           # broadcast name in the Resend dashboard
+        "name": item["title"][:70],     # Resend dashboard name is limited to 70 characters
         "html": item["html"],
         "text": html_to_text(item["html"]),
         "send": True,                    # create + send in one call (Resend supports this)

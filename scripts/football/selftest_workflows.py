@@ -155,8 +155,11 @@ check("selftest_team_join" not in cap,
 # AFTER THE FINAL PUSH. Placement is the whole point; merely being present is
 # not the contract. The monitor must see the bytes this run pushed.
 cap_doc = parsed(CAPTURE)
-cap_bodies = [s.get("run", "") or "" for s in steps(cap_doc, "capture")]
-pushes = [i for i, b in enumerate(cap_bodies) if re.search(r"^\s*git push\b", b, re.M)]
+cap_bodies = [shell(s.get("run")) for s in steps(cap_doc, "capture")]
+# `git push` is no longer at the start of a line - it lives inside
+# `if git push; then ...` in the retry loop - so this matches it anywhere in the
+# comment-stripped body rather than anchoring to the margin.
+pushes = [i for i, b in enumerate(cap_bodies) if re.search(r"\bgit push\b", b)]
 mon = [i for i, b in enumerate(cap_bodies) if "selftest_capture_isolation.py" in b]
 check(len(mon) == 1, f"exactly one integrity step in capture ({len(mon)})")
 check(bool(pushes) and bool(mon) and mon[0] > max(pushes),
@@ -182,8 +185,8 @@ print("\n[3] football-grade.yml runs team_join, after the push")
 gr = code_lines(GRADE)
 check("scripts/football/selftest_team_join.py" in gr, "grade runs selftest_team_join.py")
 gr_doc = parsed(GRADE)
-gr_bodies = [s.get("run", "") or "" for s in steps(gr_doc, "grade")]
-gr_push = [i for i, b in enumerate(gr_bodies) if re.search(r"^\s*git push\b", b, re.M)]
+gr_bodies = [shell(s.get("run")) for s in steps(gr_doc, "grade")]
+gr_push = [i for i, b in enumerate(gr_bodies) if re.search(r"\bgit push\b", b)]
 gr_mon = [i for i, b in enumerate(gr_bodies) if "selftest_team_join.py" in b]
 check(len(gr_mon) == 1, f"exactly one team_join step in grade ({len(gr_mon)})")
 check(bool(gr_push) and bool(gr_mon) and gr_mon[0] > max(gr_push),
@@ -265,6 +268,123 @@ suites = re.search(r'SUITES="([^"]+)"', st)
 check(bool(suites) and "workflows" in suites.group(1).split(),
       f"this contract suite itself runs in the hermetic gate "
       f"({suites.group(1) if suites else 'no SUITES list found'})")
+check(bool(suites) and "push_pattern" in suites.group(1).split(),
+      "and so does the real-git push-pattern harness, which proves what text "
+      "inspection cannot")
+
+# --------------------------------------------------------------------------
+print("\n[9] the football capture pushes cannot corrupt main")
+#
+# WHAT THIS REPLACED. Both steps used to run, BEFORE staging:
+#     git pull --rebase --autostash || true
+# The tree was dirty by construction at that point, so --autostash was the only
+# way the pull could move at all. It hid a failure mode nobody had considered:
+# when the rebase succeeds but the STASH POP conflicts, `git pull` exits 0,
+# leaving UU markers in the working tree and the stash undropped. `|| true` was
+# never the thing swallowing it. The step then staged, committed and pushed raw
+# conflict markers to main.
+#
+# These assertions pin the SHAPE. selftest_push_pattern.py pins the BEHAVIOUR by
+# running this exact shell against real git, including a negative control that
+# replays the old pattern and requires it to publish markers. Neither suite is
+# sufficient alone: text cannot see git's exit codes, and behaviour tests cannot
+# see a second push site someone adds later without the epilogue.
+CAP_PUSH_STEPS = {"Commit captures", "Commit the board and pages"}
+STAGED = {
+    # EXACT, not "contains". Broadening a staged set is how index.html, a
+    # plaintext board, or someone else's generated file ends up in a football
+    # commit. push 2's list is the one-path-per-`git add` loop.
+    "Commit captures": ["data/football/odds/", "data/odds_credits.json"],
+    "Commit the board and pages": ["data/football/board_*.enc",
+                                   "data/football/commitments.json",
+                                   "data/football/game_commitments.json",
+                                   "data/post_status.json",
+                                   "football/"],
+}
+
+cap_steps = {s.get("name"): shell(s.get("run")) for s in steps(cap_doc, "capture")}
+check(CAP_PUSH_STEPS <= set(cap_steps),
+      f"both push steps are still named as expected ({sorted(CAP_PUSH_STEPS)})")
+
+epilogues = {}
+for name in sorted(CAP_PUSH_STEPS & set(cap_steps)):
+    body = cap_steps[name]
+
+    # -- the removed hazards --
+    check("--autostash" not in body, f"{name}: no --autostash")
+    check("git pull" not in body, f"{name}: no `git pull` at all - sync happens "
+                                  f"after the commit, not before the staging")
+    # `git add "$p" 2>/dev/null || true` is the DELIBERATE one-path-per-add
+    # pattern and must survive; only a SYNC command may not be swallowed.
+    # `git rebase --abort 2>/dev/null || true` is EXEMPT and must stay. It is
+    # cleanup on a path that exits 1 two lines later, and it has to tolerate
+    # "no rebase in progress" - which is exactly what git says when the rebase
+    # refused to START (an unstaged tracked file, say). Swallowing the CLEANUP
+    # hides nothing; swallowing the SYNC is what published conflict markers.
+    swallowed = [l.strip() for l in body.splitlines()
+                 if re.search(r"git (pull|fetch|rebase|push)\b", l)
+                 and re.search(r"\|\|\s*true", l)
+                 and "rebase --abort" not in l]
+    check(not swallowed, f"{name}: no `|| true` on a git sync command ({swallowed})")
+    check("--force" not in body and not re.search(r"git push\s+-f\b", body),
+          f"{name}: never force-pushes")
+    check("--force-with-lease" not in body, f"{name}: no --force-with-lease either")
+    for auto in ("--theirs", "--ours", "-X ours", "-X theirs", "-Xours", "-Xtheirs",
+                 "rerere"):
+        check(auto not in body, f"{name}: no automatic conflict resolution ({auto})")
+
+    # -- explicit staging, unchanged --
+    check("git add -A" not in body and not re.search(r"git add\s+\.\s*$", body, re.M),
+          f"{name}: no `git add -A` and no `git add .`")
+    added = re.findall(r"^\s*git add\s+(.+?)(?:\s+2>/dev/null)?(?:\s*\|\|.*)?$",
+                       body, re.M)
+    paths = []
+    for a in added:
+        paths.extend(p for p in a.split() if p != '"$p"')
+    loop = re.search(r"for p in (.+?); do", body, re.S)
+    if loop:
+        paths = [p for p in loop.group(1).replace("\\", " ").split() if p]
+    check(paths == STAGED[name],
+          f"{name}: stages EXACTLY {STAGED[name]} (found {paths})")
+    for never in ("index.html", "feed.xml", "blog/", "picks/",
+                  "data/football/board_*.json"):
+        check(never not in body,
+              f"{name}: never stages {never} - this workflow does not own it")
+
+    # -- ordering: stage, commit, then sync --
+    i_add = body.index("git add")
+    i_commit = body.index("git commit")
+    i_push = body.index("git push")
+    check(i_add < i_commit < i_push,
+          f"{name}: order is add -> commit -> push ({i_add} < {i_commit} < {i_push})")
+
+    # -- the retry contract --
+    check('pushed=""' in body, f"{name}: uses the `pushed` success flag")
+    check("for i in 1 2 3; do" in body, f"{name}: retries up to 3 times")
+    check("git fetch origin main || exit 1" in body,
+          f"{name}: a failed fetch stops the step rather than being ignored")
+    check("git rebase origin/main" in body, f"{name}: rebases onto the fetched main")
+    check("git rebase --abort" in body, f"{name}: aborts a conflicted rebase")
+    check("auto-resolving" in body and "::error::" in body,
+          f"{name}: announces the conflict as an ::error and says it is not "
+          f"auto-resolving")
+    guard = re.search(r'if \[ -z "\$pushed" \]; then\n(.+?)\n\s*fi', body, re.S)
+    check(bool(guard) and "exit 1" in guard.group(1),
+          f"{name}: THE EXHAUSTION GUARD - three rejected pushes exit 1. Without "
+          f"it the loop's last command is a successful rebase, so the step "
+          f"reports success having pushed nothing (grade-ledger's live bug)")
+    check(body.count("git push") == 1,
+          f"{name}: exactly one `git push`, inside the retry ({body.count('git push')})")
+
+    m = re.search(r'^PUSH_WHAT=.*$', body, re.M)
+    check(bool(m), f"{name}: names itself in PUSH_WHAT for the error messages")
+    if m:
+        epilogues[name] = re.sub(r'^PUSH_WHAT=.*$', '', body[m.start():], flags=re.M)
+
+check(len(set(epilogues.values())) == 1,
+      f"both epilogues are BYTE-IDENTICAL once PUSH_WHAT is removed - the safest "
+      f"version cannot drift into being the second-safest at one of them "
+      f"({len(set(epilogues.values()))} distinct)")
 
 print(f"\nworkflow-contract selftest: "
       f"{'ALL PASSED' if not fails else str(len(fails)) + ' FAILED'}")

@@ -929,6 +929,63 @@ Normal routing is unchanged: free pick → `DISCORD_WEBHOOK_URL`, members board 
 `DISCORD_WEBHOOK_URL_MEMBERS`, results recap → `DISCORD_WEBHOOK_URL_LEDGER`
 falling back to the free channel. Enforced by `selftest_instagram.py` group 22.
 
+## CI pushes: commit first, rebase only on rejection (2026-09-12)
+
+**`git pull --rebase --autostash` is banned in every CI push step.** Not because
+`|| true` hides a failed rebase - because there is usually nothing to hide:
+
+> When the rebase succeeds but the AUTOSTASH POP conflicts, `git pull` **exits
+> 0**, leaving `UU` conflict markers in the working tree and the stash undropped.
+
+The football capture steps ran that line BEFORE staging, so the tree was dirty by
+construction and `--autostash` was the only way the pull could move at all. The
+step then staged, committed and pushed the markers to `main`. Proven against real
+git, and the negative control in `selftest_push_pattern.py` still reproduces it.
+
+The shape every retrying push step uses:
+
+```
+<stage an explicit, named path set>
+git diff --cached --quiet || git commit -m "..."
+PUSH_WHAT="<site>"
+pushed=""
+for i in 1 2 3; do
+  if git push; then pushed=yes; break; fi
+  git fetch origin main || exit 1
+  if ! git rebase origin/main; then
+    git rebase --abort 2>/dev/null || true
+    echo "::error::rebase conflict during the $PUSH_WHAT push - stopping, not auto-resolving"
+    exit 1
+  fi
+done
+if [ -z "$pushed" ]; then
+  echo "::error::$PUSH_WHAT push still rejected after 3 rebase attempts - nothing was pushed"
+  exit 1
+fi
+```
+
+Everything after `PUSH_WHAT` is **byte-identical at every push point**, asserted by
+`selftest_workflows.py`, so the safest version cannot drift into being the
+second-safest somewhere.
+
+**The `pushed` guard is not optional.** A `for ... done` whose last command is a
+successful rebase exits 0, so three rejected pushes report SUCCESS having pushed
+nothing. Proven: exit 0, three rejections, `HEAD != origin/main`.
+
+**Stop loudly; never auto-resolve.** No `--force`, no `--force-with-lease`, no
+`-X ours/theirs`, no `rerere`. A conflict on a football commit means something is
+genuinely wrong and must reach a human. Losing one odds window is a visible,
+recoverable incident; merge markers in the credit ledger or a frozen commitment
+store are not - that is the trade, made deliberately.
+
+`git rebase --abort 2>/dev/null || true` is the one exempt `|| true`: it is
+cleanup on a path that exits 1 two lines later, and it must tolerate "no rebase in
+progress" for the case where the rebase refused to start.
+
+Staging stays explicit and per-site. Never `git add -A`, never `git add .`, and
+the capture workflow never stages `index.html` or `feed.xml` - it does not own
+them. Both suites assert the exact staged sets.
+
 ## Football CI: code gate vs data monitor (2026-09-11)
 
 Eight football self-test suites, split by WHAT A RED X MEANS. That split is the

@@ -106,6 +106,36 @@ check(not bad, f"all 32 canonical keys are stable under canonical() ({bad or 'no
 print("\n[4] coverage - what each table actually contains, so an empty join is legible")
 epa_seasons = sorted({r["season"] for r in epa_rows})
 gm_seasons = sorted({r["season"] for r in gm_rows})
+
+# A TRUNCATED OR MALFORMED TABLE IS A DATA-INTEGRITY FAILURE, NOT A CRASH.
+#
+# This used to be `epa_seasons[-1], gm_seasons[-1]`, which raises IndexError the
+# moment either table has no usable season rows. That is the wrong shape of
+# failure for this suite: it reads live pipeline output, so an empty or
+# malformed table is a plausible production state that a reader needs to
+# diagnose — and a bare traceback names neither the table nor the reason. The
+# suite is a data monitor; its failures have to be legible as data problems.
+missing_seasons = [name for name, seasons, path in
+                   (("team_game_efficiency.csv", epa_seasons, EPA),
+                    ("games.csv", gm_seasons, GAMES))
+                   if not seasons]
+if missing_seasons:
+    for name, seasons, path, rows in (
+            ("team_game_efficiency.csv", epa_seasons, EPA, epa_rows),
+            ("games.csv", gm_seasons, GAMES, gm_rows)):
+        if seasons:
+            continue
+        check(False, f"{name}: no usable season rows - the table has "
+                     f"{len(rows)} data row(s) and yields 0 distinct seasons, "
+                     f"so the coverage comparison cannot run. Expected a "
+                     f"populated 'season' column in {os.path.relpath(path, ROOT)}. "
+                     f"Likely an empty, truncated or malformed regeneration.")
+    print("\n" + "=" * 62)
+    print(f"FAILED ({len(fails)}):")
+    for f in fails:
+        print("  - " + f)
+    sys.exit(1)
+
 epa_latest, gm_latest = epa_seasons[-1], gm_seasons[-1]
 print(f"       EPA table newest season   : {epa_latest}")
 print(f"       games.csv newest season   : {gm_latest}")

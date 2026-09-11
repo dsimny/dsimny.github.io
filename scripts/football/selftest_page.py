@@ -109,6 +109,7 @@ def shift(snap, when):
 
 
 tmp = tempfile.mkdtemp(prefix="olspage")
+REAL_GAME_COMMITMENTS = boardmod.GAME_COMMITMENTS
 try:
     odds = os.path.join(tmp, "odds"); os.makedirs(odds)
     for sport, f in SRC.items():
@@ -122,6 +123,21 @@ try:
                     "w", encoding="utf-8").write(json.dumps(shift(src, when), indent=1))
 
     boardmod.ODDS_DIR = odds
+
+    # HERMETIC COMMITMENT STORE, same pattern as selftest_board.py.
+    #
+    # boardmod.build(commit=False) only suppresses WRITING; the per-game
+    # commitment store is always READ. This suite was therefore reading the live
+    # append-only data/football/game_commitments.json and comparing production's
+    # frozen fingerprints against its own fixture.
+    #
+    # Poisoning that store today changes nothing here — no assertion below
+    # depends on `restated` — but "harmless right now" is not the same as
+    # "correct". It makes the suite's inputs implicit, couples a premium-boundary
+    # test to a file that grows on every football run, and is one new assertion
+    # away from mattering. selftest_board.py was green for two weeks under
+    # exactly this coupling before production data flipped it red.
+    boardmod.GAME_COMMITMENTS = os.path.join(tmp, "game_commitments.json")
     D = boardmod.decision_moment(WEEK)
     b = boardmod.build(["nfl", "ncaaf"], WEEK, D + timedelta(hours=6), commit=False)
     # Fake prose so the card path is exercised without an API key.
@@ -237,4 +253,7 @@ try:
     print("publishes it in full; legal and no-claim copy present in both;")
     print("and the leak scan still catches every injected premium number.")
 finally:
+    # Restore even if an assertion bailed out, so a failing run cannot leave a
+    # redirected store behind for anything else importing board in-process.
+    boardmod.GAME_COMMITMENTS = REAL_GAME_COMMITMENTS
     shutil.rmtree(tmp, ignore_errors=True)

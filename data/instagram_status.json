@@ -1,0 +1,16 @@
+{
+ "version": 1,
+ "posts": [
+  {
+   "date": "2026-09-10",
+   "kind": "daily",
+   "ref": "OLS-DAILY-2026-09-10",
+   "result": "posted",
+   "creation_id": null,
+   "media_id": "18108743585156827",
+   "http_status": 200,
+   "detail": "confirmed live by sync-status",
+   "at_utc": "2026-09-12T08:10:23Z"
+  }
+ ]
+}

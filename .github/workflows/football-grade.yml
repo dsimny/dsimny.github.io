@@ -110,6 +110,13 @@ jobs:
       # reaches the alert instead of passing quietly.
       - name: Grade the Mercer Spotlight
         if: ${{ !cancelled() }}
+        env:
+          # REQUIRED NOW THAT THE CARD IS SEALED. Grading has to decrypt the
+          # card to re-hash it against the public commitment; without the key
+          # it cannot verify, so it must not book. The render steps deliberately
+          # do NOT get the key - a locked public card is built from
+          # commitments.json alone, so a public build never needs to decrypt.
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
         run: python scripts/football/mercer.py grade
 
       # grade_committed reveals only after both selected positions have settled.
@@ -126,6 +133,7 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           SITE_URL: ${{ vars.SITE_URL }}
+          WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
         run: python scripts/football/mercer.py render
 
       - name: Commit

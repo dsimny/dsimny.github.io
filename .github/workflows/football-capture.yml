@@ -274,10 +274,22 @@ jobs:
       # The Mercer Spotlight re-renders here too, so a card pushed by hand
       # during the week shows its fingerprint status and any final scores
       # within the hour without waiting for the daily grade.
+      # PREMIUM DELIVERY. The public site is static and cannot authenticate
+      # anyone, so the actionable card goes to the Discord members channel,
+      # whose role Whop grants and revokes on the subscription. Idempotent per
+      # week via data/post_status.json, so the hourly cadence cannot double-post.
+      - name: Deliver the Mercer card to members
+        if: ${{ !cancelled() }}
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}
+        run: python scripts/football/mercer.py deliver
+
       - name: Render the Mercer Spotlight
         if: ${{ !cancelled() }}
         env:
           SITE_URL: ${{ vars.SITE_URL }}
+          WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
         run: python scripts/football/mercer.py render
 
       - name: Post the free play

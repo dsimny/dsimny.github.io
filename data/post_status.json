@@ -242,18 +242,18 @@
   {
    "date": "2026-09-08",
    "mode": "fb_free",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-12T17:47:32Z"
+   "result": "posted",
+   "http_status": 204,
+   "detail": "2 messages",
+   "at_utc": "2026-09-12T18:37:45Z"
   },
   {
    "date": "2026-09-08",
    "mode": "fb_slate",
-   "result": "no_board",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-12T17:47:32Z"
+   "result": "posted",
+   "http_status": 204,
+   "detail": "11 messages",
+   "at_utc": "2026-09-12T18:38:02Z"
   }
  ]
 }

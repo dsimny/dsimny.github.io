@@ -58,7 +58,33 @@ jobs:
           # and only morning-board's 2 were reaching the repo, so the committed
           # log recorded the account balance without ever showing which caller
           # was spending it. Counters and timestamps only — no key material.
-          git add data/closing_*.json data/odds_credits.json odds/
+          #
+          # ONE PATH PER `git add`, and this is not a style preference.
+          # `git add a b c_*.json` where the glob matches NOTHING is fatal: git
+          # exits 128 and stages NOTHING AT ALL, including the paths that were
+          # fine.
+          #
+          # THIS EXACT SHAPE ALREADY COST ELEVEN DAYS in football-grade.yml.
+          # Between 2026-08-27 and 2026-09-06 that job ran 11 times, succeeded
+          # every time, and committed nothing, because data/football/board_*.json
+          # matched no file while every board was still encrypted. Nothing was
+          # graded or revealed, and two weeks of settled plays sat held - which
+          # House Rule 7 calls fraud - all from a shell idiom.
+          #
+          # This step had the same shape and was only ever saved by
+          # data/closing_*.json happening to match. It does not always: the very
+          # first run against a fresh clone, or any run where fetch_closing.py
+          # captured nothing, leaves the glob empty - and with it
+          # data/odds_credits.json and odds/ would BOTH have failed to stage, so
+          # the credit reading would die with the runner. That is the same defect
+          # that hid this job's spending until 2026-08-20.
+          #
+          # One at a time, each tolerating its own miss. Pinned by
+          # scripts/football/selftest_staging.py, which proves against real git
+          # that an unmatched glob no longer takes its siblings down with it.
+          for p in data/closing_*.json                    data/odds_credits.json                    odds/; do
+            git add "$p" 2>/dev/null || true
+          done
           git diff --cached --quiet || git commit -m "Closing lines $(date -u +%FT%TZ)"
           PUSH_WHAT="closing lines"
           # ---- PUSH EPILOGUE ----------------------------------------

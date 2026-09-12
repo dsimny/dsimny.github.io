@@ -2,7 +2,7 @@ name: Football code self-tests
 # The hermetic regression gate for the football code.
 #
 # A RED RUN HERE MEANS A CODE REGRESSION, NEVER LIVE-DATA DRIFT. That line is
-# the whole design. Two of the ten football suites — selftest_capture_isolation
+# the whole design. Two of the eleven football suites — selftest_capture_isolation
 # and selftest_team_join — read live pipeline output on purpose and can go red
 # because a capture or a franchise table changed, with no code involved. Mixing
 # those in here would make a red X ambiguous, and an ambiguous red X gets
@@ -27,7 +27,12 @@ name: Football code self-tests
 # it found: `git pull --rebase --autostash` EXITS 0 when its stash pop
 # conflicts, and the old capture steps then pushed the markers to main.
 #
-# NEEDS NO SECRETS AND TOUCHES NO NETWORK. None of the eight imports a network
+# selftest_staging is the same idea one block earlier, and hermetic the same
+# way: it runs each workflow's `git add` preamble against throwaway repos and
+# proves an unmatched glob cannot take its siblings down with it. Its negative
+# control reproduces the eleven-day football-grade outage on demand.
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. None of the nine imports a network
 # library; none writes outside a temp directory; none reads an environment
 # variable that CI must supply (selftest_mercer reads MERCER_KEEP, a documented
 # local debug flag that only controls temp-dir cleanup). That is why this job
@@ -124,7 +129,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Run the eight hermetic football suites
+      - name: Run the nine hermetic football suites
         # EVERY SUITE RUNS EVEN AFTER ONE FAILS. Stopping at the first failure
         # would hide the rest, and "fix, push, wait, discover the next one" is a
         # slow way to learn what a change actually broke. The loop records each
@@ -138,7 +143,7 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           set +e
-          SUITES="allowlist board discord mercer page push_pattern workflows writeup"
+          SUITES="allowlist board discord mercer page push_pattern staging workflows writeup"
           FAILED=""
           for s in $SUITES; do
             echo "::group::selftest_$s.py"
@@ -165,11 +170,11 @@ jobs:
             if [ -n "$FAILED" ]; then
               echo "**Failed:**$FAILED"
               echo ""
-              echo "A red run here means a **code regression**. These eight suites are"
+              echo "A red run here means a **code regression**. These nine suites are"
               echo "hermetic — they do not read mutable production data, so live-data"
               echo "drift cannot cause this."
             else
-              echo "All eight hermetic suites passed."
+              echo "All nine hermetic suites passed."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -177,4 +182,4 @@ jobs:
             echo "FAILED:$FAILED"
             exit 1
           fi
-          echo "All eight hermetic football suites passed."
+          echo "All nine hermetic football suites passed."

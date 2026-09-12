@@ -929,6 +929,65 @@ Normal routing is unchanged: free pick → `DISCORD_WEBHOOK_URL`, members board 
 `DISCORD_WEBHOOK_URL_MEMBERS`, results recap → `DISCORD_WEBHOOK_URL_LEDGER`
 falling back to the free channel. Enforced by `selftest_instagram.py` group 22.
 
+## ONE PATH PER `git add` (2026-09-12)
+
+    git add a b c_*.json
+
+where the glob matches **nothing** is not a partial success. git exits 128 and
+stages **nothing at all**, including `a` and `b`. Paired with
+`2>/dev/null || true` the step passes, `git diff --cached --quiet` is true, and
+the job goes green having committed nothing.
+
+**This cost eleven days.** Between 2026-08-27 and 2026-09-06 `football-grade.yml`
+ran eleven times, succeeded every time, and committed nothing, because
+`data/football/board_*.json` matched no file while every board was still
+encrypted. Nothing was graded or revealed, and two weeks of settled plays sat
+held - which house rule 7 calls fraud. The cause was a shell idiom.
+
+Every staging block that names a glob uses the loop form:
+
+```
+for p in data/closing_*.json          data/odds_credits.json          odds/; do
+  git add "$p" 2>/dev/null || true
+done
+```
+
+Each path tolerates its own miss and cannot take its siblings down with it.
+Blocks with no glob may stay inline: a literal path that vanishes exits 128 and
+turns the run RED, which is loud and therefore fine. The unacceptable outcome is
+the third one - green, empty, and silent.
+
+`scripts/football/selftest_staging.py` runs every workflow's `git add` preamble
+against throwaway repos and proves it, per site: everything present stages
+everything; an unmatched glob still stages its siblings; the declared set is
+never exceeded. Its negative control reproduces the football-grade outage on
+demand, so the assertion cannot quietly stop meaning anything.
+
+## Contract tests scope to the block they protect (2026-09-12)
+
+> **Scope a contract test to the exact execution block it protects, unless the
+> invariant is intentionally repository-wide.**
+
+Three guards in this repository fired on correct code because they scanned a
+whole file instead of the thing they were about:
+
+| guard | scanned | tripped on |
+|---|---|---|
+| football page leak scan | the whole HTML | `max-width:100%` when the premium price was `+100` |
+| `selftest_instagram` 22.5 | the whole workflow | a comment saying `DISCORD_WEBHOOK_URL_MEMBERS` is deliberately NOT passed |
+| `selftest_instagram` 23.7b | the whole workflow | `git rebase --abort 2>/dev/null \|\| true` in a different step |
+
+Each was a false alarm on a workflow or page that was correct, and the clearer
+the code documented its own policy, the likelier it was to fail the test
+enforcing that policy. **A guard that cries wolf gets loosened exactly like a
+validator that does** - so the fix is always to narrow the haystack, never the
+assertion, and to add a control proving the narrowed scan still catches a real
+one. Comments are not code: strip comment-only lines before any scan, at file
+level and inside `run:` bodies.
+
+Repository-wide scans are still right when the invariant is repository-wide -
+"no workflow anywhere may use `--autostash`" is one, and belongs on every file.
+
 ## CI pushes: commit first, rebase only on rejection (2026-09-12)
 
 **`git pull --rebase --autostash` is banned in every CI push step.** Not because

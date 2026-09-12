@@ -1,0 +1,80 @@
+name: Mercer Live code self-tests
+# The hermetic regression gate for scripts/mercer_live/ (Mercer Live ML-1, the
+# live observation boundary). Same design as football-selftest.yml and for the
+# same reason: a red run here means a CODE REGRESSION, never live-data drift.
+# The suite reads no capture, no ledger and no network; every payload is a
+# fixture and every write lands in a temp directory it deletes.
+#
+# DELIBERATELY SEPARATE from football-selftest.yml. That gate's trigger set is
+# scripts/football/**, and its nine suites protect the pregame product. Mercer
+# Live lives beside that product, not inside it, and a shadow-research package
+# must not be able to turn the production football gate red - or green.
+#
+# NOTHING HERE CAPTURES ANYTHING. ML-1's capture loop does not run on GitHub
+# Actions at all: per-minute sampling on a scheduler this repository has
+# measured firing hours late is not sampling. See
+# docs/MERCER_LIVE_ML1_ARCHITECTURE.md section 7.
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK, so it runs with contents: read and
+# declares no env.
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/mercer_live/**"
+      - "docs/MERCER_LIVE_V0.1_PREREGISTRATION.md"
+      - "docs/MERCER_LIVE_ML1_ARCHITECTURE.md"
+      - "data/mercer_live/manifest.json"
+      - ".gitignore"
+      - "requirements.txt"
+      - ".github/workflows/mercer-live-selftest.yml"
+      # Modules the suite imports from the football package for identity and
+      # tiers. A change there can break this gate without touching mercer_live/.
+      - "scripts/football/teams.py"
+      - "scripts/football/espn_ncaaf.py"
+      - "scripts/football/price_test.py"
+      - "scripts/football/market.py"
+      - "scripts/football/fetch_odds.py"
+      - "scripts/football/localenv.py"
+      - "data/football/team_names.json"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/mercer_live/**"
+      - "docs/MERCER_LIVE_V0.1_PREREGISTRATION.md"
+      - "docs/MERCER_LIVE_ML1_ARCHITECTURE.md"
+      - "data/mercer_live/manifest.json"
+      - ".gitignore"
+      - "requirements.txt"
+      - ".github/workflows/mercer-live-selftest.yml"
+      - "scripts/football/teams.py"
+      - "scripts/football/espn_ncaaf.py"
+      - "scripts/football/price_test.py"
+      - "scripts/football/market.py"
+      - "scripts/football/fetch_odds.py"
+      - "scripts/football/localenv.py"
+      - "data/football/team_names.json"
+
+# Read-only. This job validates; it never commits, pushes, writes into the
+# repository, or posts anywhere.
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    name: Mercer Live code self-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run the Mercer Live self-test
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/mercer_live/selftest_mercer_live.py

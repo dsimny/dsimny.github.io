@@ -34,3 +34,11 @@ data/backtest/
 #                is the failure that would actually matter, stays detectable.
 data/football/odds/hist/
 data/football/raw/pbp/
+
+# Mercer Live ML-1 raw live observations (scripts/mercer_live/). One NFL Sunday
+# at one-minute cadence is hundreds of thousands of rows; a public Pages repo
+# that seven workflows race to push to is not where that belongs. Same pattern
+# as data/football/raw/pbp/ and odds/hist/: the bytes stay off-repo and the
+# committed data/mercer_live/manifest.json carries their sha256 + row counts,
+# append-only, so the raw evidence is tamper-evident wherever it is kept.
+data/mercer_live/raw/

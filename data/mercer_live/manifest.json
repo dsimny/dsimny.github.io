@@ -1,0 +1,6 @@
+{
+ "_note": "Mercer Live ML-1 raw observation manifest. The raw files under data/mercer_live/raw/ are GITIGNORED (too large for a Pages repo) and this records their sha256, size and row count once a partition is sealed. APPEND-ONLY: an entry is never rewritten. If a sealed file's hash later disagrees, the disagreement is appended under `discrepancies` and the original entry stands. Nothing here is a pick, a price or a model output.",
+ "discrepancies": [],
+ "files": {},
+ "schema_version": "ml1-1.0"
+}

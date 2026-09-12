@@ -847,6 +847,81 @@ requirement each one proves).
 - NOT built on purpose: Mercer+Model agreement (count it before ever calling it
   stronger; never auto-boosts a stake), CLV on Mercer picks, Discord delivery.
 
+## Mercer Live (ML-1, built 2026-09-12 — shadow mode, captures only)
+
+The future live-football decision system (NFL + NCAAF live moneyline, spread,
+total) under the D.J. Mercer name. Pre-registration:
+`docs/MERCER_LIVE_V0.1_PREREGISTRATION.md` (reads `frozen: NOT YET`; must be
+frozen before package ML-5 emits a shadow position — `mlcommon.prereg_frozen()`
+is the hook). Architecture, audit, cost and roadmap:
+`docs/MERCER_LIVE_ML1_ARCHITECTURE.md`. Code: `scripts/mercer_live/` (six
+modules). Self-test: `selftest_mercer_live.py`, hermetic, gated by
+`.github/workflows/mercer-live-selftest.yml` (contents: read, no secrets).
+
+THE PIPELINE SHAPE IS FIXED: DATA → MODEL → CIRCUIT BREAKERS → DECISION →
+LEDGER → D.J. MERCER PRESENTATION. Never LLM → opinion → wager. Mercer is a
+presentation layer; every actionable recommendation originates in deterministic
+code. Nothing in ML-1 publishes anything: no picks, no units, no Discord (Mode 1
+— Shadow — is the only mode any code may run in), no site page.
+
+WHAT ML-1 IS: one job — capture and preserve time-stamped live game state
+(ESPN scoreboard, free) and live market quotes (The Odds API, `h2h,spreads,totals`
+× `us` = 3 credits per call, only while a game is in progress). It is a
+CALLABLE PROCESS (`capture.py once` / `loop`), NOT a workflow: per-minute
+sampling on GitHub's scheduler is not sampling, and per-minute commits would
+race the seven workflows that already push to main. Recommended scheduler:
+Daniel's machine or a small always-on host running `loop` during game windows
+(architecture doc section 10). No workflow invokes it; the self-test asserts
+that.
+
+WHERE IT WRITES, AND ONLY THERE: `data/mercer_live/raw/` (GITIGNORED —
+gzip-appended NDJSON per league per UTC date: `game_observations`,
+`market_observations`, `market_coverage`, `ticks`, raw payload archives) and
+`data/mercer_live/manifest.json` (COMMITTED, append-only sha256 + row counts
+per sealed file, written by `capture.py seal`; a later hash disagreement is
+appended as a discrepancy, never overwritten). The store REFUSES to open under
+`data/football/`, `data/mercer/`, `football/` or the site directories.
+
+SEMANTICS THAT MUST NOT DRIFT:
+- `observed_at` is the moment OPEN LEDGER received the response, from our UTC
+  clock, ms precision. Provider stamps (`book_last_update`, HTTP `Date`) are
+  kept beside it, never substituted; `quote_age_s` is derived from both.
+- Append-only: 100 samples of one game are 100 rows. No "latest" overwrite.
+- Idempotency: the observation identity is "we looked during run R", not "X had
+  value V". A re-execution inside the same interval slot is refused before any
+  append; the next slot is a new observation even when nothing changed. A tick
+  that wrote NO observation does not consume its slot.
+- Identity is BORROWED from the pregame system: NFL through `teams.py`
+  franchise keys, NCAAF through `espn_ncaaf.norm`/`ALIASES`; `event_id` is
+  `<league>:<espn_event_id>`. A market row joins a game only on an exact
+  (away_key, home_key) match to exactly one game observed THIS TICK within 12 h
+  of its commence time; `ambiguous`, `home_away_conflict`, `identity_error` and
+  `unjoined` are recorded, never joined, never dropped. An unresolvable name
+  does NOT abort the tick (unlike `fetch_odds.py`): a minute does not come back.
+- PHASE COMES FROM OBSERVED GAME STATE. `live` requires the joined game's
+  state `in`. No game state → `pregame` only while commence_time is in the
+  future, else `unknown` — never `live`. The pregame loader
+  (`market.load_snapshots`) globs `data/football/odds/<sport>_*.json` and can
+  never see a live quote (self-test group 5).
+- Fail closed: a source that fails writes nothing for that source; the failure
+  is in the tick record; the other source is kept; nothing is fabricated or
+  corrected — impossible clocks are recorded as received and named in
+  `anomalies`. "0 is not a score": pregame score is null.
+- Credits: a local DAILY CAP (default 2,000) and a RESERVE floor (default 5,000
+  remaining, so the MLB board and football captures are never starved) are
+  checked BEFORE every call; every call and refusal is in the tick record and
+  each reading is appended to `data/odds_credits.json` as `mercer_live:<league>`.
+  Burn at 60 s, three markets, both leagues: ~22,700/month.
+
+NOT VERIFIED IN-SESSION (egress blocked): ESPN's in-play `situation` block and
+the Odds API's in-play payload were built from documentation and the existing
+modules, not from a payload fetched that day. `capture.py probe --out-dir X`
+saves both raw payloads so the first live session verifies them by eye.
+
+Pre-existing, noted, NOT fixed here: `docs/FOOTBALL_PREREG_V03.md` is a draft
+with no `frozen:` line and is not in `asof.SPECS`, contrary to the rule in the
+fb-v0.2 section above. Outside this package.
+
 ## Instagram recap cards (live 2026-09-11)
 
 Nightly, after grading commits and pushes, `grade-ledger.yml`'s **instagram** job

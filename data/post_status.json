@@ -1,41 +1,6 @@
 {
  "posts": [
   {
-   "at_utc": "2026-09-08T15:10:27Z",
-   "channel_id": "1529354298436354048",
-   "date": "2026-09-08",
-   "detail": "",
-   "http_status": 200,
-   "mode": "board",
-   "result": "posted"
-  },
-  {
-   "at_utc": "2026-09-08T15:10:27Z",
-   "date": "2026-09-08",
-   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
-   "http_status": 422,
-   "mode": "email",
-   "result": "failed"
-  },
-  {
-   "at_utc": "2026-09-08T15:10:28Z",
-   "channel_id": "1529354000020013116",
-   "date": "2026-09-08",
-   "detail": "",
-   "http_status": 200,
-   "mode": "blog",
-   "result": "posted"
-  },
-  {
-   "at_utc": "2026-09-09T08:10:22Z",
-   "channel_id": "",
-   "date": "2026-09-08",
-   "detail": "",
-   "http_status": null,
-   "mode": "recap",
-   "result": "nothing_to_post"
-  },
-  {
    "at_utc": "2026-09-09T08:10:23Z",
    "date": "2026-09-08",
    "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
@@ -254,6 +219,41 @@
    "http_status": null,
    "detail": "",
    "at_utc": "2026-09-12T14:47:24Z"
+  },
+  {
+   "date": "2026-09-12",
+   "mode": "pick",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-12T15:10:41Z"
+  },
+  {
+   "date": "2026-09-12",
+   "mode": "board",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354298436354048",
+   "detail": "",
+   "at_utc": "2026-09-12T15:10:42Z"
+  },
+  {
+   "date": "2026-09-12",
+   "mode": "email",
+   "result": "failed",
+   "http_status": 422,
+   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
+   "at_utc": "2026-09-12T15:10:42Z"
+  },
+  {
+   "date": "2026-09-12",
+   "mode": "blog",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-12T15:10:43Z"
   }
  ]
 }

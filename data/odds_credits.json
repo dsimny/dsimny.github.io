@@ -1,26 +1,6 @@
 {
  "readings": [
   {
-   "remaining": 99932,
-   "used": 68,
-   "last_call_cost": 2,
-   "markets": "h2h,totals",
-   "regions": "us",
-   "http_status": 200,
-   "source": "fetch_closing",
-   "read_utc": "2026-09-05T16:30:22Z"
-  },
-  {
-   "remaining": 99931,
-   "used": 69,
-   "last_call_cost": 1,
-   "markets": "h2h",
-   "regions": "us",
-   "http_status": 200,
-   "source": "football_fetch_odds:ncaaf",
-   "read_utc": "2026-09-05T16:37:25Z"
-  },
-  {
    "remaining": 99930,
    "used": 70,
    "last_call_cost": 1,
@@ -599,6 +579,26 @@
    "http_status": 200,
    "source": "football_fetch_odds:ncaaf",
    "read_utc": "2026-09-11T22:37:20Z"
+  },
+  {
+   "remaining": 99841,
+   "used": 159,
+   "last_call_cost": 3,
+   "markets": "h2h,spreads,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_fetch_odds:nfl",
+   "read_utc": "2026-09-12T00:38:09Z"
+  },
+  {
+   "remaining": 99838,
+   "used": 162,
+   "last_call_cost": 3,
+   "markets": "h2h,spreads,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_fetch_odds:nfl",
+   "read_utc": "2026-09-12T00:45:36Z"
   }
  ],
  "note": "The Odds API bills one credit per market per region per call. Free tier: 500/month. See CLAUDE.md for the budget and the decision rule for upgrading."

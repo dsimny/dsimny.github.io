@@ -1,0 +1,47 @@
+{
+ "slate_week": "2026-09-08",
+ "title": "Week 1: one play, two passes, and a college slate we were not ready for",
+ "intro": "Football is back, and so is one of the easiest times of the year to convince yourself you know more than you actually do. New quarterbacks, new coordinators, small samples, big expectations. So the Mercer Ledger opens the way it intends to run all season: selectively. Four games reached deep research this week. Three of them fell away, two after the news moved against the reasoning rather than the price. What is below is one play, the strongest argument against it, and the number at which it stops being worth taking. Wins stay on the record. So do losses.",
+ "picks": [
+  {
+   "id": "2026-09-08-nfl-01",
+   "sport": "nfl",
+   "status": "OFFICIAL",
+   "away": "Green Bay Packers",
+   "home": "Minnesota Vikings",
+   "kickoff_utc": "2026-09-13T20:25:00Z",
+   "market": "total",
+   "side": "under",
+   "line": 46.5,
+   "price": -110,
+   "units": 0.25,
+   "book": "Fanatics",
+   "conviction": "standard",
+   "mercer_number": "no independent number is claimed; this is a judgement about personnel and defensive quality, not a projection",
+   "why": "Green Bay travels to Minneapolis without a meaningful share of its offensive personnel. Josh Jacobs, the lead back, is ruled out for a personal matter rather than an injury. Luke Musgrave is out at tight end and Savion Williams is on injured reserve. Minnesota is without its starting centre, Michael Jurgens, and starts Kyler Murray behind an interior line already reshuffled. Both defences graded inside the top four by per-play efficiency in 2024, which is two-season-old context rather than proof of present strength, and neither team has played a 2026 snap. Strip the posted number away entirely and the football argument still stands on its own: two defences with real recent pedigree, two offences each missing pieces they planned around, and no current-season evidence pointing the other way. That is a case for a lower-scoring game than a total near forty-seven implies.",
+   "case_against": "Micah Parsons is out for Green Bay, and that cuts directly against this position rather than supporting it. A missing primary pass rusher weakens the Green Bay defence and plausibly raises what Minnesota can score, so the absences in this game genuinely do not all point the same way. Anyone framing this as a tidy injury story is wrong. Beyond that, the entire scoring baseline rests on 2025 results across rosters that have since turned over, including a quarterback change in Minnesota, so it is weak evidence in either direction. Tucker Kraft returning to full practice restores a receiving option that was in doubt. And the market moved the total up half a point between our two captures, which is the opposite direction to this reasoning, from a market holding information we do not have.",
+   "changes_my_mind": "Walk-away boundary, recorded before this number was checked: playable only at 46.5 or higher at -110 or better, and dead below 46. If the total falls to 46 or lower this position is gone rather than cheaper. Also disqualifying: Jacobs or Parsons being upgraded before kickoff, a depth-chart change at either quarterback, or confirmation of conditions favouring a faster game, for which no forecast source is wired up."
+  }
+ ],
+ "leans": [],
+ "passes": [
+  {
+   "sport": "nfl",
+   "status": "PASS",
+   "away": "Atlanta Falcons",
+   "home": "Pittsburgh Steelers",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "temptation": "Atlanta +6, three points better than the +3 this game was first researched at",
+   "reason": "The football case deteriorated at the same time the number improved, and the number improved because of it. Tua Tagovailoa is out with an oblique and Michael Penix Jr. is out with a knee, so Cooper Rush starts. Meanwhile every Pittsburgh player this game was flagged on five days ago came back active: DK Metcalf, Michael Pittman Jr., Jalen Ramsey and Jaquan Brisker. The original reasoning was that Pittsburgh carried the heavier unresolved personnel load. The opposite turned out to be true. Three extra points are not value here, they are the market repricing a third-string quarterback, and taking them would mean building a case backwards from a bigger number. Passing."
+  },
+  {
+   "sport": "nfl",
+   "status": "PASS",
+   "away": "Cleveland Browns",
+   "home": "Jacksonville Jaguars",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "temptation": "Cleveland +9.5, a point and a half more than when this game entered research",
+   "reason": "The independent football case did not survive once the betting number was removed. Jacksonville is genuinely without its centre and a starting guard, both on injured reserve, and that is a real thing to notice. But strip the price out and what remains is an argument that a team which won five games last season, with the least efficient offence in the league by 2024 per-play numbers, deserves backing against a thirteen-win opponent. Nobody would want that side without seeing the number first. The backfield questions that made this interesting also resolved in Jacksonville's favour, with Jakobi Meyers and Bhayshul Tuten both active. A large number is not a reason. Passing."
+  }
+ ]
+}

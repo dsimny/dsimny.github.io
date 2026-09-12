@@ -245,6 +245,72 @@ judges is not a filter.
 Any change is a version bump with the reason recorded, following the precedent
 of House Rule 9 for the model's gates.
 
+## 2d. Premium withholding — added 2026-09-12
+
+**Before kickoff, the public record contains cryptographic proof that the
+selection existed, but the actionable selection remains withheld for Premium
+members. After grading, the exact committed selection and full analysis are
+permanently revealed, win or lose.**
+
+### What is public before kickoff
+
+The matchup, the kickoff time, the conviction label, the commit timestamp, the
+SHA-256 fingerprint, a Premium CTA and the legal footer. Nothing from which the
+wager can be reconstructed: no side, line, price, book, stake, walk-away number
+or reasoning.
+
+### How it is enforced
+
+Not by hiding. There is no CSS, no blur, no `display:none`, no collapsed markup,
+no data attribute and no client-side gate anywhere in this design. **The locked
+card is built from `commitments.json` alone and never reads the pick**, so the
+withheld fields are not in scope when the HTML is written. Absent from the page
+means absent from the source.
+
+| | pregame | after grading |
+|---|---|---|
+| card on disk | `weeks/<week>.enc`, encrypted | `weeks/<week>.json`, plaintext |
+| commitment log | proof only: hash, timestamps, matchup, conviction | same, plus `revealed` |
+| public page | locked card | full card, reasoning and result |
+| members | full actionable card via Discord | (already had it) |
+
+`crypto_box.refuse_plaintext_in_ci` means a CI run with no key fails rather than
+writing a readable card. Locally a missing key still writes plaintext, which
+keeps development workable and never reaches CI.
+
+### Where Premium members actually receive the pick
+
+**The Discord members channel**, whose role Whop grants and revokes with the
+subscription. Not the website. GitHub Pages is static: there is no server, no
+session and no authentication, so the site cannot decide who may read a page. A
+"members area" built on it would be decoration over content anyone can download,
+which is precisely the defect this section exists to close. A JavaScript gate
+would be worse than the original leak because it would look solved.
+
+### Reveal is driven by grading, not by a person
+
+Grading decrypts the card, re-hashes it, and compares against the public
+commitment. A mismatch refuses the pick and books nothing. Only after the entry
+is written does the commitment flip to `revealed` and the plaintext publish. The
+verification therefore precedes every ledger mutation, and no card is ever
+disclosed without having been booked.
+
+### Week 1 was not premium-exclusive, and the record says so
+
+The inaugural card (`2026-09-08`, Packers at Vikings) was committed in plaintext
+to this public repository on 2026-09-11, before this control existed. Its
+selection, price, book and stake were publicly readable before kickoff, from the
+rendered page and from the raw file GitHub Pages serves.
+
+The commitment itself is unaffected: the fingerprint and timestamp are the
+originals, and the pick was genuinely committed 43.6 hours before kickoff. What
+failed was premium exclusivity, not commitment integrity.
+
+Its commitment entry carries `pregame_public: true` so the renderer keeps
+publishing it in full rather than pretending it was ever withheld. **History was
+not rewritten and the pick was not deleted.** The flag is set only on a card that
+was actually public; it is never applied to one that was withheld.
+
 ## 3. The record, and why it cannot be flattered
 
 ### Requirement 1 — ledger separation

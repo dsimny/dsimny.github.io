@@ -187,6 +187,33 @@ def load_ledger():
         "entries": []})
 
 
+# Fields a public commitment entry may carry. THE WHITELIST IS THE CONTROL:
+# anything not named here never reaches the public commitment log, so a future
+# field cannot leak a pick by being added to the pick schema and forgotten here.
+#
+# Why matchup / espn_event_id / conviction are present even though they are not
+# a fingerprint: the LOCKED public card has to be renderable from this file
+# ALONE, with no decryption key, because no CI render step has one. They are
+# non-actionable by inspection - knowing a play exists on a named game, and how
+# confident the analyst is, does not tell you the side, the number or the price.
+PUBLIC_COMMIT_FIELDS = (
+    "pick_id", "slate_week", "sport", "sha256", "committed_utc", "kickoff_utc",
+    "matchup", "espn_event_id", "conviction", "revealed", "revealed_utc",
+    "pregame_public",
+)
+# Never allowed in the public commitment log, at any point before reveal.
+ACTIONABLE_FIELDS = (
+    "selection", "market", "side", "team", "line", "price", "units", "book",
+    "why", "case_against", "changes_my_mind", "quantitative_case", "walk_away",
+    "mercer_number",
+)
+
+
+def public_commit_entry(d):
+    """Strip a commitment down to the publishable whitelist."""
+    return {k: d[k] for k in PUBLIC_COMMIT_FIELDS if k in d}
+
+
 def load_commitments():
     return load_json(COMMITMENTS, {
         "_note": ("Per-pick fingerprints for the D.J. Mercer Spotlight. Each "
@@ -196,26 +223,107 @@ def load_commitments():
                   "matches the pick as it stands now AND precedes kickoff; "
                   "otherwise the entry is VOID (never stamped, or stamped late) "
                   "or REFUSED (edited after stamping). The git history of this "
-                  "file is the public timestamp."),
+                  "file is the public timestamp. "
+                  "PROOF ONLY: this file is public and deliberately carries NO "
+                  "actionable pick detail before reveal - no side, line, price, "
+                  "book, stake or reasoning. The sha256 proves what was committed "
+                  "without disclosing it; the card itself is encrypted until the "
+                  "play is graded."),
         "commitments": []})
 
 
+def week_paths(week):
+    """(plaintext, encrypted) paths for a slate week.
+
+    PLAINTEXT IS THE REVEALED STATE, NOT THE WORKING STATE. Before a pick is
+    graded its card lives only in the .enc file; the .json appears when the
+    reveal happens and is what makes the record publicly checkable afterwards.
+    """
+    return (os.path.join(WEEKS, f"{week}.json"),
+            os.path.join(WEEKS, f"{week}.enc"))
+
+
 def list_weeks():
-    out = []
-    for p in sorted(glob.glob(os.path.join(WEEKS, "*.json"))):
-        w = os.path.basename(p)[:-5]
+    out = set()
+    for p in glob.glob(os.path.join(WEEKS, "*.json")) + glob.glob(os.path.join(WEEKS, "*.enc")):
+        w = os.path.splitext(os.path.basename(p))[0]
         if WEEK_RE.match(w):
-            out.append(w)
-    return out
+            out.add(w)
+    return sorted(out)
 
 
 def load_week(week):
-    return load_json(os.path.join(WEEKS, f"{week}.json"), None)
+    """The card, from plaintext if revealed, else by decrypting.
+
+    Returns None when the card is encrypted and no key is available. That is a
+    NORMAL state for a public render, not an error: the locked card is built
+    from commitments.json, which needs no key.
+    """
+    plain, enc = week_paths(week)
+    if os.path.exists(plain):
+        return load_json(plain, None)
+    if os.path.exists(enc) and crypto_box.have_key():
+        return crypto_box.decrypt_from(enc)
+    return None
+
+
+def save_week(week, doc, revealed):
+    """Write the card: plaintext once revealed, encrypted while it is not.
+
+    The CI guard is the load-bearing part. Locally a missing key just means
+    plaintext, which keeps development workable. In Actions a missing key means
+    the secret vanished, and writing the card in the clear would publish every
+    unrevealed selection to a public repository.
+    """
+    plain, enc = week_paths(week)
+    if revealed:
+        save_json(plain, doc)
+        if os.path.exists(enc):
+            os.remove(enc)
+        return "plaintext (revealed)"
+    crypto_box.refuse_plaintext_in_ci(f"the Mercer card for {week}")
+    if crypto_box.have_key():
+        os.makedirs(WEEKS, exist_ok=True)
+        crypto_box.encrypt_to(enc, doc)
+        if os.path.exists(plain):
+            os.remove(plain)
+        return "encrypted"
+    save_json(plain, doc)
+    return "plaintext (no key; local only)"
 
 
 def fingerprint(pick):
     """SHA-256 of the pick's canonical JSON, same canon as the model's board."""
     return crypto_box.sha256_of(pick)
+
+
+def commit_for(pick_id, commits):
+    """The single commitment entry for a pick id, or None."""
+    return next((c for c in commits if c.get("pick_id") == pick_id), None)
+
+
+def is_revealed(c):
+    """One reveal rule, used by every renderer and by the grader.
+
+    `pregame_public` is the Week 1 escape hatch and nothing else: that card was
+    published in plaintext before this control existed, and pretending otherwise
+    would be a lie the git history contradicts. It is set once, by hand, with a
+    reason, and it is never set on a card that was actually withheld.
+    """
+    if not c:
+        return False
+    return bool(c.get("revealed")) or bool(c.get("pregame_public"))
+
+
+def week_is_revealed(week, commits):
+    """A week is revealed only when EVERY committed pick in it is.
+
+    Deliberately all-or-nothing for the surrounding prose. Title, intro, leans
+    and passes are written as one piece and can allude to the play; releasing
+    them while any pick in the week is still live would leak by implication.
+    """
+    ws = [c for c in commits if c.get("slate_week") == week]
+    return bool(ws) and all(is_revealed(c) for c in ws)
 
 
 # ------------------------------------------------------------- validation --
@@ -500,12 +608,17 @@ def cmd_commit(week, now=None, write=True, stores=None, dry_run=False):
             if gate:
                 refused.append(f"{p['id']}: NOT fingerprinted - {gate}")
                 continue
-            entry = {
+            a, h = ev_names(p["sport"], ev)
+            # PROOF ONLY. The sha256 commits the pick; nothing here discloses it.
+            # public_commit_entry() enforces the whitelist so a field added to the
+            # pick schema later cannot leak by being copied in here by habit.
+            entry = public_commit_entry({
                 "pick_id": p["id"], "slate_week": w, "sport": p["sport"],
-                "selection": selection_text(p), "price": p["price"],
-                "units": float(p.get("units", 1)), "book": p.get("book"),
-                "espn_event_id": ev["espn_event_id"], "kickoff_utc": ev["kickoff_utc"],
-                "sha256": fingerprint(p), "committed_utc": market.iso(now)}
+                "sha256": fingerprint(p), "committed_utc": market.iso(now),
+                "kickoff_utc": ev["kickoff_utc"], "matchup": f"{a} @ {h}",
+                "espn_event_id": ev["espn_event_id"],
+                "conviction": str(p.get("conviction") or "").lower() or None,
+                "revealed": False, "revealed_utc": None})
             com["commitments"].append(entry)
             by_id[p["id"]] = entry
             added += 1
@@ -517,8 +630,20 @@ def cmd_commit(week, now=None, write=True, stores=None, dry_run=False):
         print("  REFUSED " + m)
     if added and write:
         save_json(COMMITMENTS, com)
+        # SEAL THE CARD. Stamping without encrypting would leave the actionable
+        # selection readable in a public repo, which is the defect this exists
+        # to close. Weeks with nothing yet revealed are sealed; a week already
+        # revealed stays plaintext.
+        for w in weeks:
+            doc = load_week(w)
+            if doc is None:
+                continue
+            if week_is_revealed(w, com["commitments"]):
+                continue
+            how = save_week(w, doc, revealed=False)
+            print(f"  sealed {w}: {how}")
     elif added and dry_run:
-        print("  --dry-run: commitments.json untouched")
+        print("  --dry-run: commitments.json untouched, card not sealed")
     print(f"commit: {added} new fingerprint(s), {len(refused)} refused"
           + ("" if added or refused else " - every pick on disk is already stamped"))
     return 1 if refused else 0
@@ -649,11 +774,168 @@ def cmd_grade(dry_run=False, stores=None, now=None):
         ledger["entries"].extend(new)
         save_json(LEDGER, ledger)
         print(f"wrote {os.path.relpath(LEDGER, ROOT)}")
+        # REVEAL, AND ONLY NOW. Ordering matters and is not arbitrary: the
+        # fingerprint was verified inside grade_pick before any of these entries
+        # existed, so nothing reaches the ledger on an unverified card, and
+        # nothing is disclosed until it has been booked. House Rule 7 - held
+        # before, published in full after, win or lose.
+        com = load_commitments()
+        booked = {e["pick_id"] for e in new}
+        touched = set()
+        for c in com["commitments"]:
+            if c["pick_id"] in booked and not c.get("revealed"):
+                c["revealed"] = True
+                c["revealed_utc"] = market.iso(now)
+                touched.add(c["slate_week"])
+        if touched:
+            save_json(COMMITMENTS, com)
+            for w in sorted(touched):
+                if not week_is_revealed(w, com["commitments"]):
+                    print(f"  {w}: partly graded; card stays sealed until every "
+                          f"pick in it is booked")
+                    continue
+                doc = load_week(w)
+                if doc is None:
+                    print(f"  {w}: REVEALED in the log, but the card could not be "
+                          f"read to publish (no key?). Plaintext not written.")
+                    continue
+                print(f"  {w}: revealed -> {save_week(w, doc, revealed=True)}")
     elif dry_run:
-        print("--dry-run: ledger untouched")
+        print("--dry-run: ledger untouched, nothing revealed")
     # Refusals go red AFTER everything gradeable was booked: a tampered pick
     # must not hold the honest ones hostage, but it must not pass quietly.
     return 1 if (refused or altered) else 0
+
+
+# -------------------------------------------------------------- delivery --
+#
+# WHERE PREMIUM MEMBERS ACTUALLY GET THE PICK, and why it is not the website.
+#
+# GitHub Pages is static. There is no server, no session and no authentication,
+# so the site CANNOT decide who may read a page. Any "members only" area built
+# on it would be decoration over content that is already downloadable, which is
+# exactly the failure this whole change exists to fix. Shipping a JavaScript
+# gate would be worse than the original defect, because it would look solved.
+#
+# So the public site stays locked for everyone and the actionable card is
+# delivered through the channel that already has real access control: the
+# Discord members channel, whose role is granted and revoked by Whop on the
+# subscription. That gate is not ours to fake - it is enforced by Discord.
+#
+# Idempotent per (week, mode) through data/post_status.json, the same file and
+# schema post_discord.py and discord.py already use, so a re-run cannot
+# double-post to members.
+
+MEMBERS_WEBHOOK_ENV = "DISCORD_WEBHOOK_URL_MEMBERS"
+STATUS_PATH = os.path.join(ROOT, "data", "post_status.json")
+STATUS_KEEP = 200
+
+
+def _status_load():
+    return load_json(STATUS_PATH, {"posts": []})
+
+
+def already_delivered(week):
+    for p in _status_load().get("posts", []):
+        if (p.get("date") == week and p.get("mode") == "mercer_members"
+                and p.get("result") == "posted"):
+            return True
+    return False
+
+
+def _status_record(week, result, status=None, detail=""):
+    log = _status_load()
+    log["posts"] = [p for p in log.get("posts", [])
+                    if not (p.get("date") == week and p.get("mode") == "mercer_members")]
+    log["posts"].append({"date": week, "mode": "mercer_members", "result": result,
+                         "http_status": status, "detail": str(detail)[:200],
+                         "at_utc": market.iso(market.now_utc())})
+    log["posts"] = sorted(log["posts"], key=lambda p: p["at_utc"])[-STATUS_KEEP:]
+    save_json(STATUS_PATH, log)
+
+
+def member_messages(week, doc, commits):
+    """The full actionable card, for the members channel only."""
+    picks = doc.get("picks", [])
+    head = (f"**D.J. MERCER — week of {nice_date(week)}**\n"
+            f"{len(picks)} official selection{'s' if len(picks) != 1 else ''}. "
+            f"Committed and fingerprinted before kickoff; this is the full card, "
+            f"including the case against.")
+    embeds = []
+    for i, p in enumerate(picks, 1):
+        c = commit_for(p["id"], commits) or {}
+        units = float(p.get("units", 1))
+        lines = [
+            f"**{selection_text(p)}  {p['price']:+d}**",
+            f"Taken at **{p.get('book') or 'unspecified'}**  ·  stake **{units:g}u**"
+            + (f"  ·  **{conviction_label(p)}**" if conviction_label(p) else ""),
+            "",
+            f"__Why Mercer likes it__\n{p.get('why', '')}",
+            "",
+            f"__The case against__\n{p.get('case_against', '')}",
+        ]
+        if p.get("changes_my_mind"):
+            lines += ["", f"__What would change my mind__\n{p['changes_my_mind']}"]
+        if c.get("sha256"):
+            lines += ["", f"Commitment `{c['sha256'][:24]}…` at {c.get('committed_utc','')}"]
+        body = "\n".join(lines)
+        embeds.append({"title": f"Pick #{i} — {p.get('away','')} @ {p.get('home','')}",
+                       "description": body[:4000], "color": 0x3987E5})
+    msgs = [{"content": head, "embeds": embeds[:10]}]
+    for extra in range(10, len(embeds), 10):
+        msgs.append({"embeds": embeds[extra:extra + 10]})
+    return msgs
+
+
+def cmd_deliver(week=None, dry_run=False, now=None):
+    """Post the full card to the premium members channel."""
+    now = now or market.now_utc()
+    week = week or current_week(now)
+    hook = os.environ.get(MEMBERS_WEBHOOK_ENV, "").strip()
+    doc = load_week(week)
+    if doc is None:
+        print(f"{week}: card unreadable here (sealed and no key). Nothing delivered.")
+        return 1
+    if not doc.get("picks"):
+        print(f"{week}: no official picks; nothing to deliver.")
+        return 0
+    if already_delivered(week) and not dry_run:
+        print(f"{week}: already delivered to members; refusing to double-post.")
+        return 0
+    commits = load_commitments()["commitments"]
+    unstamped = [p["id"] for p in doc["picks"] if not commit_for(p["id"], commits)]
+    if unstamped:
+        # Delivering before the public commitment exists would hand members a
+        # pick with no public proof behind it - the wrong order.
+        print(f"{week}: REFUSING to deliver - not fingerprinted yet: {unstamped}")
+        return 1
+    msgs = member_messages(week, doc, commits)
+    if dry_run or not hook:
+        if not hook:
+            print(f"  {MEMBERS_WEBHOOK_ENV} is not set - printing instead of posting.")
+        for i, m in enumerate(msgs, 1):
+            print(f"--- members message {i}/{len(msgs)} ---")
+            if m.get("content"):
+                print(m["content"])
+            for e in m.get("embeds", []):
+                print(f"  [embed] {e['title']}")
+                print("    " + e["description"].replace("\n", "\n    "))
+        return 0
+    import requests
+    for i, m in enumerate(msgs, 1):
+        try:
+            r = requests.post(hook, json=m, timeout=20)
+        except Exception as exc:
+            _status_record(week, "failed", None, str(exc))
+            print(f"  delivery FAILED on message {i}: {exc}")
+            return 1
+        if r.status_code >= 300:
+            _status_record(week, "failed", r.status_code, r.text[:160])
+            print(f"  delivery FAILED on message {i}: HTTP {r.status_code}")
+            return 1
+    _status_record(week, "posted", 200, f"{len(msgs)} message(s)")
+    print(f"{week}: delivered the full card to members ({len(msgs)} message(s))")
+    return 0
 
 
 # ------------------------------------------------------------------ record --
@@ -706,6 +988,9 @@ EXTRA_CSS = """
   .tile .tv { display:block; font-size:1.5rem; font-weight:750; margin-top:2px; font-variant-numeric:tabular-nums; }
   .tile .td { display:block; font-size:0.76rem; color:var(--muted); font-variant-numeric:tabular-nums; }
   .pick { background:var(--surface); border:1px solid var(--ring); border-radius:14px; padding:18px 18px 14px; margin-bottom:14px; }
+  .pick.locked { border-style:dashed; border-color:rgba(57,135,229,0.45); }
+  .lockedsel { color:var(--s1); letter-spacing:0.02em; }
+  .chip.lockchip { color:var(--s1); }
   .pick.graded-WIN { border-color:rgba(12,163,12,0.55); }
   .pick.graded-LOSS { border-color:rgba(208,59,59,0.55); }
   .pick.graded-VOID { border-style:dashed; }
@@ -884,6 +1169,73 @@ def pick_card(i, p, entry, commits, ev):
             f'<div class="fp">{commit_status(p, commits, ev)}</div></article>')
 
 
+PREMIUM_URL = os.environ.get("WHOP_CHECKOUT_URL", "").strip()
+
+
+def premium_cta():
+    """The upgrade block. Omitted entirely when no checkout URL is configured.
+
+    Mirrors page.py: the site never advertises something that cannot be bought,
+    and the switch is one repository variable rather than an edit.
+    """
+    if not PREMIUM_URL:
+        return ('<p class="mut">Premium membership is not open for signups right now. '
+                'The selection publishes here in full once the game is graded.</p>')
+    return (f'<a class="joinbtn" href="{E(PREMIUM_URL)}" rel="noopener">'
+            f'Join Premium</a>')
+
+
+def locked_card(i, c):
+    """The PUBLIC pregame card, built from the commitment log ALONE.
+
+    It takes the commitment entry, never the pick, and that is the whole point.
+    The actionable fields are not omitted from a template that has them in
+    scope - they are never in scope. There is no branch of this function that
+    could print a side, a number or a price, so no future edit can leak one by
+    forgetting a condition.
+
+    No CSS hiding, no blur, no display:none, no collapsed markup, no data
+    attributes, no inline JSON. What is absent from the page is absent from the
+    source, because it was never read.
+    """
+    sport = SPORTS.get(c.get("sport"), {}).get("label", "")
+    kick = c.get("kickoff_utc") or ""
+    try:
+        kick_txt = f'{nice_date(kick[:10])}, {et_time(kick)}'
+    except Exception:
+        kick_txt = E(str(kick))
+    sha = str(c.get("sha256") or "")
+    conv = CONVICTION_LABEL.get(str(c.get("conviction") or "").lower())
+    rows = [("Committed", E(str(c.get("committed_utc") or "unknown")))]
+    if conv:
+        rows.append(("Conviction", f'<span class="conv">{conv}</span>'))
+    prow = "".join(f'<div><span class="plab">{k}</span><span class="pval">{v}</span></div>'
+                   for k, v in rows)
+    return (f'<article class="pick locked" id="{E(str(c.get("pick_id","")))}">'
+            f'<div class="ph"><div>'
+            f'<span class="pnum">Mercer\'s pick #{i} · {E(sport)}</span>'
+            f'<span class="pmatch">{E(str(c.get("matchup","")))} · {kick_txt}</span></div>'
+            f'<div class="chips"><span class="chip lockchip">Premium · locked</span></div>'
+            f'</div>'
+            f'<div class="sel lockedsel">Premium pick locked</div>'
+            f'<div class="prow">{prow}</div>'
+            f'<div class="why"><p>This selection was committed before kickoff and '
+            f'fingerprinted to the Open Ledger record. The exact wager, the price, the '
+            f'book, the stake and the full reasoning are available to Premium members '
+            f'now, and publish here for everyone once the game is graded — win or '
+            f'lose.</p>'
+            f'<p class="mut">Nothing on this page before kickoff can tell you what the '
+            f'selection is. That is deliberate: the proof below is what makes the record '
+            f'checkable, not the pick.</p>'
+            f'{premium_cta()}</div>'
+            f'<div class="fp">Commitment fingerprint '
+            f'<code>sha256 {E(sha)}</code> — recorded '
+            f'{E(str(c.get("committed_utc") or ""))}, before the '
+            f'{kick_txt} kickoff. '
+            f'<a href="{REPO_BLOB}data/mercer/commitments.json" rel="noopener">verify</a>'
+            f'</div></article>')
+
+
 def spotlight_block(s):
     body = ""
     for head, text in (s.get("sections") or {}).items():
@@ -916,29 +1268,71 @@ def _opinion_table(items, stores, col3, col4, key3, key4, status):
 
 
 def week_body(week, doc, entries, commits, stores, show_title=False):
-    picks = doc.get("picks", [])
+    """One week's public body, locked or revealed PER PICK.
+
+    THE DOC MAY BE None AND THAT IS NORMAL. A public render has no decryption
+    key, so the card is unreadable and every pick renders from the commitment
+    log. When the doc IS readable - locally, or after reveal - an unrevealed
+    pick STILL renders locked. That asymmetry is the control: having the
+    plaintext in memory must never be sufficient to publish it, or a developer
+    running `render` on their own machine would silently commit the leak.
+    """
+    doc = doc or {}
     by_id = {e["pick_id"]: e for e in entries}
+    wk_commits = [c for c in commits if c.get("slate_week") == week]
+    picks = doc.get("picks", [])
+    # Commitments are the spine, not the card: they exist for every stamped pick
+    # whether or not the card can be read here.
+    order = [c for c in wk_commits] or []
+    by_pid = {p.get("id"): p for p in picks}
+    fully = week_is_revealed(week, commits)
+
     parts = []
     wr = record(entries, week=week)
     line = (f'This week: <strong>{rec_line(wr)}</strong>, {rec_units(wr)}'
             if wr["n"] else "This week: nothing graded yet")
-    n = len(picks)
+    n = len(order) or len(picks)
     parts.append(f'<h2 id="card">Mercer\'s card · week of {nice_date(week)}</h2>'
                  f'<p class="mut">{line}. {n} official pick{"s" if n != 1 else ""}. '
                  f'Every one is fingerprinted before kickoff and graded here, win or lose.</p>')
-    if show_title and doc.get("title"):
+    # Title, intro, leans and passes are written as one piece and can allude to
+    # the play, so they wait until the whole week is out.
+    if fully and show_title and doc.get("title"):
         parts.append(f'<h3>{E(str(doc["title"]))}</h3>')
-    if doc.get("intro"):
+    if fully and doc.get("intro"):
         parts.append(f'<p class="lede">{E(str(doc["intro"]))}</p>')
-    if not picks:
+    if not order and not picks:
         parts.append('<p class="callout"><strong>No official pick this week.</strong> Nothing met '
                      'the standard for a play. Passing is a position too, and it is recorded as one '
                      'here rather than papered over with a manufactured pick.</p>')
-    for i, p in enumerate(picks, 1):
-        ev, _ = resolve_event(p, stores.get(p["sport"], {}))
-        parts.append(pick_card(i, p, by_id.get(p["id"]), commits, ev))
-    if picks:
+
+    if order:
+        for i, c in enumerate(order, 1):
+            p = by_pid.get(c.get("pick_id"))
+            if is_revealed(c) and p is not None:
+                ev, _ = resolve_event(p, stores.get(p["sport"], {}))
+                parts.append(pick_card(i, p, by_id.get(p["id"]), commits, ev))
+            else:
+                parts.append(locked_card(i, c))
+    else:
+        # No commitments yet: an unstamped draft. Never render its contents.
+        for i, p in enumerate(picks, 1):
+            parts.append(
+                f'<article class="pick locked"><div class="ph"><div>'
+                f'<span class="pnum">Mercer\'s pick #{i}</span>'
+                f'<span class="pmatch">{E(str(p.get("away","")))} @ '
+                f'{E(str(p.get("home","")))}</span></div></div>'
+                f'<div class="sel lockedsel">Not yet committed</div>'
+                f'<div class="why"><p class="mut">This pick has not been '
+                f'fingerprinted yet, so it is not on the record and nothing about '
+                f'it is published.</p></div></article>')
+    if order or picks:
         parts.append(RG_LINE)
+    if not fully:
+        parts.append('<p class="mut">Leans, the pass list and the week\'s written '
+                     'introduction publish with the picks once every selection in this '
+                     'week has been graded.</p>')
+        return "".join(parts)
 
     if doc.get("spotlight"):
         parts.append('<h2 id="spotlight">Game spotlight</h2>')
@@ -1074,8 +1468,14 @@ def render_hub(entries, commits, stores, weeks=None, now=None):
 
 
 def render_week(week, entries, commits, stores):
-    doc = load_week(week)
-    title = doc.get("title") or f"Mercer's card, week of {nice_date(week)}"
+    doc = load_week(week)          # None when sealed and no key: expected
+    # THE WEEK TITLE IS PART OF THE CARD. Mercer's own titles summarise the
+    # week ("one play, two passes...") and can hint at the selection, so the
+    # public heading stays generic until the week is fully revealed.
+    if week_is_revealed(week, commits) and (doc or {}).get("title"):
+        title = doc["title"]
+    else:
+        title = f"Mercer's card, week of {nice_date(week)}"
     inner = f'''
 <div class="idx">
   <span class="kicker">D.J. Mercer Spotlight · week</span>
@@ -1090,8 +1490,8 @@ def render_week(week, entries, commits, stores):
 </div>'''
     write(os.path.join(OUT, week), inner,
           f"D.J. Mercer, week of {nice_date(week)} — Open Ledger Sports",
-          "D.J. Mercer's official football picks for the week, with the case for, the case "
-          "against, and the fingerprint that proves when they were filed.")
+          "D.J. Mercer's official football selections for the week, committed and "
+          "fingerprinted before kickoff and revealed in full after grading.")
     print(f"wrote football/mercer/{week}/index.html ({len(doc.get('picks', []))} picks)")
 
 
@@ -1323,6 +1723,13 @@ def cmd_render(stores=None, now=None):
     bad, good = 0, []
     for w in list_weeks():
         doc = load_week(w)
+        if doc is None:
+            # Sealed and unreadable here. Correct for a public build: the locked
+            # card comes from commitments.json, which needs no key.
+            print(f"{w}: sealed (no key) - rendering locked cards from commitments")
+            render_week(w, entries, commits, stores)
+            good.append(w)
+            continue
         errs = validate_week(w, doc)
         if errs:
             for e in errs:
@@ -1351,6 +1758,9 @@ def main():
                    help="show what would be stamped and refused; write nothing")
     c = sub.add_parser("grade", help="book finished picks into the Mercer ledger")
     c.add_argument("--dry-run", action="store_true")
+    c = sub.add_parser("deliver", help="post the full card to the premium members channel")
+    c.add_argument("--week")
+    c.add_argument("--dry-run", action="store_true")
     sub.add_parser("render", help="write football/mercer/")
     args = ap.parse_args()
     if args.cmd == "check":
@@ -1359,6 +1769,8 @@ def main():
         return cmd_commit(args.week, dry_run=args.dry_run)
     if args.cmd == "grade":
         return cmd_grade(args.dry_run)
+    if args.cmd == "deliver":
+        return cmd_deliver(args.week, args.dry_run)
     if args.cmd == "render":
         return cmd_render()
     return 2

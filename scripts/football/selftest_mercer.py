@@ -365,8 +365,12 @@ def main():
         for forbidden in ("football_ledger", "daily_ledger", "totals_ledger", "watchlist"):
             check(not re.search(r"save_json\([^)]*" + forbidden, src),
                   f"[1] mercer.py never writes {forbidden}.json")
-        check(src.count("save_json(LEDGER") == 1 and src.count("save_json(COMMITMENTS") == 1,
-              "[1] exactly one writer each for the ledger and the commitments")
+        # The commitment log gained a SECOND legitimate writer when premium
+        # withholding landed: cmd_commit stamps, cmd_grade flips `revealed`.
+        # Both are controlled; a THIRD would still fail this.
+        check(src.count("save_json(LEDGER") == 1, "[1] exactly one writer for the ledger")
+        check(src.count("save_json(COMMITMENTS") == 2,
+              "[1] exactly two controlled writers for the commitments (stamp, reveal)")
 
         # ---- rendering ------------------------------------------------------
         print("\n[9][10][11][12] rendering")
@@ -392,9 +396,16 @@ def main():
               "[4] every card carries both halves of the argument")
         check("What would change my mind" in body, "[4] 'What would change my mind' renders")
         check("OFFICIAL PICK" in body.upper(), "[4] the OFFICIAL status is printed on cards")
-        check(">LEAN<" in body and ">PASS<" in body, "[4] LEAN and PASS are labelled in their tables")
-        check("Only OFFICIAL picks touch the record" in body,
-              "[4] the page says which entries count")
+        # PREMIUM WITHHOLDING (2026-09-12): leans, the pass list and the week's
+        # written prose publish only once EVERY pick in the week is revealed,
+        # because they are written as one piece and can allude to a live play.
+        # This fixture week never fully reveals (P5's game does not finish), so
+        # the correct assertion is that they are ABSENT. selftest_mercer_premium
+        # covers the revealed case, where they must all appear.
+        check(">LEAN<" not in body and ">PASS<" not in body,
+              "[4] leans and passes are withheld while a pick in the week is live")
+        check("publish with the picks once every selection" in body,
+              "[4] the page explains why they are withheld")
         check("★" not in body, "[4b] no star ratings survive")
         check("Conviction" in body and "Strong" in body, "[4b] conviction renders as a word")
 
@@ -455,7 +466,9 @@ def main():
                          {"slate_week": "2026-09-29", "picks": [{"id": "broken"}]})
         rc = mercer.cmd_render(stores=STORES, now=T_VIEW)
         hub3 = io.open(os.path.join(mercer.OUT, "index.html"), encoding="utf-8").read()
-        check(rc == 1 and "Fixture week" in hub3,
+        # "Fixture week" is the card TITLE, which is now withheld until the week
+        # fully reveals. Assert instead on content the hub shows either way.
+        check(rc == 1 and "Mercer's card" in hub3,
               "a malformed card is skipped and the hub keeps rendering")
         check(not os.path.exists(os.path.join(mercer.OUT, "2026-09-29")),
               "the malformed week gets no page")

@@ -23,6 +23,8 @@ requirement it proves:
  11  legal language           21+, 1-800-GAMBLER, not-a-sportsbook, no guarantee
  12  generated-file safety    writes only under football/mercer/
 """
+import base64
+import hashlib
 import io
 import json
 import os
@@ -39,6 +41,59 @@ sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import mercer   # noqa: E402
 import market   # noqa: E402
 import settle   # noqa: E402
+import crypto_box   # noqa: E402
+
+# ---- HERMETIC TEST KEY ---------------------------------------------------
+#
+# WHY THIS EXISTS. Sealing the Mercer card (14f128e) routed save_week() through
+# crypto_box.refuse_plaintext_in_ci(), which - correctly - aborts when
+# GITHUB_ACTIONS=true and no key is set. This suite writes a card, so it began
+# failing the hermetic gate the moment that landed, and the gate has been red
+# since 2026-09-12 03:16.
+#
+# The gate must stay secret-free: "a red run here means a code regression" is
+# only true while nothing in it depends on repository configuration. So the suite
+# supplies its OWN key rather than the workflow supplying the real one.
+#
+# DETERMINISTIC, derived from a literal string, so a failure reproduces exactly
+# and a reviewer can see at a glance that it is not a production key. It is never
+# printed, never written outside the temp directory, and never committed - the
+# only artifacts it encrypts live under tempfile.mkdtemp() and are deleted in
+# finally. crypto_box is NOT modified: the production guard still refuses a
+# plaintext CI write without a key, and section [13] proves it still does.
+TEST_KEY = base64.urlsafe_b64encode(
+    hashlib.sha256(b"ols-selftest-mercer-fixture-key").digest()).decode()
+
+# None means "was unset", which must be restored as UNSET rather than as "".
+_REAL_KEY = os.environ.get(crypto_box.ENV_KEY)
+
+
+def _restore_key():
+    """Put the environment back exactly as it was found."""
+    if _REAL_KEY is None:
+        os.environ.pop(crypto_box.ENV_KEY, None)
+    else:
+        os.environ[crypto_box.ENV_KEY] = _REAL_KEY
+
+
+def _prod_digest():
+    """Fingerprint of the REAL data/mercer tree, to prove the suite never touches it.
+
+    The suite redirects mercer.DATA into a temp directory, so this should be
+    identical before and after. Handing the suite an encryption key is exactly
+    the kind of change that could turn "writes nothing" into "writes something
+    encrypted somewhere", so it is measured rather than assumed.
+    """
+    real = os.path.join(ROOT, "data", "mercer")
+    out = {}
+    for base, dirs, files in os.walk(real):
+        for f in sorted(files):
+            p = os.path.join(base, f)
+            with open(p, "rb") as fh:
+                out[os.path.relpath(p, ROOT).replace("\\", "/")] = \
+                    hashlib.sha256(fh.read()).hexdigest()
+    return out
+
 
 WEEK = "2026-09-08"
 
@@ -167,7 +222,11 @@ def main():
         if not cond:
             fails.append(msg)
 
+    # Snapshot the real Mercer data directory so [13] can prove the suite
+    # left production untouched, key or no key.
+    prod_before = _prod_digest()
     try:
+        os.environ[crypto_box.ENV_KEY] = TEST_KEY
         mercer.DATA = os.path.join(tmp, "data")
         mercer.WEEKS = os.path.join(mercer.DATA, "weeks")
         mercer.LEDGER = os.path.join(mercer.DATA, "mercer_ledger.json")
@@ -472,7 +531,77 @@ def main():
               "a malformed card is skipped and the hub keeps rendering")
         check(not os.path.exists(os.path.join(mercer.OUT, "2026-09-29")),
               "the malformed week gets no page")
+
+        # ---- 13. the suite is hermetic AND still exercises the sealed path --
+        #
+        # Supplying a key could "fix" the gate two wrong ways: by never reaching
+        # the encryption branch at all, or by leaving a readable card behind. So
+        # assert the branch was taken, the bytes are real ciphertext, and the
+        # guard still bites when the key is removed.
+        print("\n[13] sealed-card path, exercised rather than bypassed")
+        sealed_week = "2026-10-06"
+        doc = {"slate_week": sealed_week, "picks": [dict(P1, id="seal-01")],
+               "leans": [], "passes": [], "spotlight": []}
+        how = mercer.save_week(sealed_week, doc, revealed=False)
+        plain, enc = mercer.week_paths(sealed_week)
+        check(how == "encrypted",
+              f"save_week took the ENCRYPTED branch, not the local plaintext "
+              f"fallback (returned {how!r})")
+        check(os.path.exists(enc), "the .enc card exists")
+        check(not os.path.exists(plain),
+              "and NO plaintext card was left beside it")
+        raw = open(enc, "rb").read()
+        check(raw.startswith(b"gAAAAA"),
+              "the card is real Fernet ciphertext, not JSON in an .enc name")
+        check(b"seal-01" not in raw and b"Baltimore" not in raw,
+              "the selection is not readable in the sealed bytes")
+        check(mercer.load_week(sealed_week)["picks"][0]["id"] == "seal-01",
+              "and it decrypts back to exactly what went in")
+        # WITHOUT the key the same call returns None rather than the card - the
+        # property every public CI render depends on.
+        os.environ.pop(crypto_box.ENV_KEY, None)
+        try:
+            check(mercer.load_week(sealed_week) is None,
+                  "with no key the sealed card reads back as None, which is what "
+                  "a keyless public render sees")
+        finally:
+            os.environ[crypto_box.ENV_KEY] = TEST_KEY
+
+        # THE GUARD STILL HAS TEETH. Remove the key, claim to be CI, and the
+        # production refusal must fire - this is the check that would have caught
+        # the outage, and it must keep working after the suite starts supplying
+        # a key of its own.
+        _ga = os.environ.get("GITHUB_ACTIONS")
+        os.environ.pop(crypto_box.ENV_KEY, None)
+        os.environ["GITHUB_ACTIONS"] = "true"
+        try:
+            refused = False
+            try:
+                mercer.save_week("2026-10-13", doc, revealed=False)
+            except SystemExit as exc:
+                refused = "REFUSING" in str(exc) and crypto_box.ENV_KEY in str(exc)
+            check(refused,
+                  "with the key removed under CI, save_week REFUSES rather than "
+                  "writing the card in the clear")
+            p2, e2 = mercer.week_paths("2026-10-13")
+            check(not os.path.exists(p2) and not os.path.exists(e2),
+                  "and it wrote nothing at all when it refused")
+        finally:
+            os.environ[crypto_box.ENV_KEY] = TEST_KEY
+            if _ga is None:
+                os.environ.pop("GITHUB_ACTIONS", None)
+            else:
+                os.environ["GITHUB_ACTIONS"] = _ga
+        check(crypto_box.have_key(), "the test key is restored for the rest of the run")
+
+        # The key never escapes the process or the temp tree.
+        check(_REAL_KEY != TEST_KEY, "the test key is not the production key")
+        leaked = [p for p in (plain, enc) if not p.startswith(tmp)]
+        check(not leaked, f"every sealed artifact lives under the temp dir ({leaked})")
+        check(_prod_digest() == prod_before,
+              "the real data/mercer tree is byte-identical to before the run")
     finally:
+        _restore_key()
         if os.environ.get("MERCER_KEEP"):
             print(f"\nMERCER_KEEP set: fixture pages left in {tmp}")
         else:

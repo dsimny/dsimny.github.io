@@ -141,21 +141,45 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add data/ index.html feed.xml blog/ picks/
           git diff --cached --quiet || git commit -m "Grade ${{ steps.gdate.outputs.date }}"
-          # PUSH RETRY. main receives ~2 bot commits an hour, so a bare push can
-          # lose a race and strand the run. Commit first (the tree is clean by
-          # this point), then rebase — never --autostash, which would silently
-          # pick up unrelated working-tree state. STOP ON CONFLICT: the ledger is
-          # append-only, so a conflict means something is genuinely wrong and
-          # must reach a human rather than be auto-resolved.
+          PUSH_WHAT="grade ledger"
+          # ---- PUSH EPILOGUE ----------------------------------------
+          # Byte-identical at every retrying push point in the repository.
+          # PUSH_WHAT is the only thing that varies; selftest_workflows.py
+          # asserts the rest matches exactly, so the safest version cannot
+          # drift into being the second-safest somewhere.
+          #
+          # main takes ~2 bot commits an hour and seven workflows push to it,
+          # so a bare push can lose a race and strand the run. Commit FIRST
+          # (done above, so the tree is clean), then rebase only when a push
+          # actually loses. NEVER --autostash: it hides working-tree state, and
+          # when its stash pop conflicts it exits 0 with UU markers in the tree,
+          # which the old pre-staging `git pull` then staged, committed and
+          # pushed to main.
+          #
+          # STOP ON CONFLICT. The ledger is append-only and football commitments
+          # are frozen once recorded, so a conflict means something is genuinely
+          # wrong and must reach a human rather than be auto-resolved. Losing one
+          # run's output is a visible, recoverable incident; merge markers in the
+          # ledger, the credit log or a commitment store are not.
+          pushed=""
           for i in 1 2 3; do
-            git push && break
+            if git push; then pushed=yes; break; fi
             git fetch origin main || exit 1
             if ! git rebase origin/main; then
-              git rebase --abort
-              echo "::error::rebase conflict during grade push — stopping, not auto-resolving"
+              git rebase --abort 2>/dev/null || true
+              echo "::error::rebase conflict during the $PUSH_WHAT push - stopping, not auto-resolving"
               exit 1
             fi
           done
+          # THE EXHAUSTION GUARD. Without it, `for ... done` whose last command
+          # is a successful rebase exits 0, so three lost races report SUCCESS
+          # having pushed nothing. That was live in grade-ledger.yml and
+          # instagram-recovery.yml until 2026-09-12. Proven in a scratch repo:
+          # exit 0, three rejections, HEAD != origin/main.
+          if [ -z "$pushed" ]; then
+            echo "::error::$PUSH_WHAT push still rejected after 3 rebase attempts - nothing was pushed"
+            exit 1
+          fi
           # Read AFTER the push succeeded: this is the commit that actually
           # contains the card, and it is immutable regardless of what lands on
           # main afterwards.

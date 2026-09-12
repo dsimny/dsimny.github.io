@@ -48,6 +48,16 @@ on:
       - ".github/workflows/football-capture.yml"
       - ".github/workflows/football-grade.yml"
       - ".github/workflows/football-data-daily.yml"
+      # AND EVERY WORKFLOW THAT PUSHES. selftest_workflows.py and
+      # selftest_push_pattern.py assert the push epilogue is byte-identical
+      # at all six retrying sites and that no workflow anywhere reintroduces
+      # `git pull --rebase --autostash`. Editing any of these can break this
+      # gate without touching a line of Python.
+      - ".github/workflows/capture-closing.yml"
+      - ".github/workflows/grade-ledger.yml"
+      - ".github/workflows/instagram-recovery.yml"
+      - ".github/workflows/morning-board.yml"
+      - ".github/workflows/rebuild-site.yml"
       # SHARED MODULES THE SUITES ACTUALLY IMPORT. `scripts/football/**` is not
       # enough: the import graph of the suites reaches these six files outside it,
       # so a change to any of them can break this gate without touching
@@ -73,6 +83,16 @@ on:
       - ".github/workflows/football-capture.yml"
       - ".github/workflows/football-grade.yml"
       - ".github/workflows/football-data-daily.yml"
+      # AND EVERY WORKFLOW THAT PUSHES. selftest_workflows.py and
+      # selftest_push_pattern.py assert the push epilogue is byte-identical
+      # at all six retrying sites and that no workflow anywhere reintroduces
+      # `git pull --rebase --autostash`. Editing any of these can break this
+      # gate without touching a line of Python.
+      - ".github/workflows/capture-closing.yml"
+      - ".github/workflows/grade-ledger.yml"
+      - ".github/workflows/instagram-recovery.yml"
+      - ".github/workflows/morning-board.yml"
+      - ".github/workflows/rebuild-site.yml"
       # SHARED MODULES THE SUITES ACTUALLY IMPORT. `scripts/football/**` is not
       # enough: the import graph of the suites reaches these six files outside it,
       # so a change to any of them can break this gate without touching

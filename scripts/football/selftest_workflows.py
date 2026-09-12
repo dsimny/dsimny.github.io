@@ -273,118 +273,197 @@ check(bool(suites) and "push_pattern" in suites.group(1).split(),
       "inspection cannot")
 
 # --------------------------------------------------------------------------
-print("\n[9] the football capture pushes cannot corrupt main")
+print("\n[9] no push in this repository can corrupt main")
 #
-# WHAT THIS REPLACED. Both steps used to run, BEFORE staging:
+# WHAT THIS REPLACED, at five sites across four workflows. Each ran, BEFORE
+# staging:
 #     git pull --rebase --autostash || true
 # The tree was dirty by construction at that point, so --autostash was the only
 # way the pull could move at all. It hid a failure mode nobody had considered:
-# when the rebase succeeds but the STASH POP conflicts, `git pull` exits 0,
+# when the rebase succeeds but the AUTOSTASH POP conflicts, `git pull` exits 0,
 # leaving UU markers in the working tree and the stash undropped. `|| true` was
 # never the thing swallowing it. The step then staged, committed and pushed raw
 # conflict markers to main.
 #
-# These assertions pin the SHAPE. selftest_push_pattern.py pins the BEHAVIOUR by
-# running this exact shell against real git, including a negative control that
-# replays the old pattern and requires it to publish markers. Neither suite is
-# sufficient alone: text cannot see git's exit codes, and behaviour tests cannot
-# see a second push site someone adds later without the epilogue.
-CAP_PUSH_STEPS = {"Commit captures", "Commit the board and pages"}
-STAGED = {
-    # EXACT, not "contains". Broadening a staged set is how index.html, a
-    # plaintext board, or someone else's generated file ends up in a football
-    # commit. push 2's list is the one-path-per-`git add` loop.
-    "Commit captures": ["data/football/odds/", "data/odds_credits.json"],
-    "Commit the board and pages": ["data/football/board_*.enc",
-                                   "data/football/commitments.json",
-                                   "data/football/game_commitments.json",
-                                   "data/post_status.json",
-                                   "football/"],
-}
+# And two workflows that already had the right ORDERING still had the wrong
+# LOOP: a `for ... done` whose last command is a successful rebase exits 0, so
+# three rejected pushes reported SUCCESS having pushed nothing.
+#
+# These assertions pin the SHAPE, for every push site at once so a new one
+# cannot quietly arrive without the epilogue. selftest_push_pattern.py pins the
+# BEHAVIOUR by running each shipped epilogue against real git, including a
+# negative control that replays the old pattern and requires it to publish
+# markers. Neither suite is sufficient alone: text cannot see git's exit codes,
+# and behaviour tests cannot see a site that never adopted the epilogue.
 
-cap_steps = {s.get("name"): shell(s.get("run")) for s in steps(cap_doc, "capture")}
-check(CAP_PUSH_STEPS <= set(cap_steps),
-      f"both push steps are still named as expected ({sorted(CAP_PUSH_STEPS)})")
+# EXACT staged sets, per site. Not "contains" - broadening a staged set is how
+# index.html, a plaintext board or someone else's generated file ends up in the
+# wrong commit. Ownership is the point: grade-ledger owns the site build, the
+# football workflows own football/, instagram-recovery owns one JPEG.
+STAGED = {
+    ("football-capture.yml", "Commit captures"):
+        ["data/football/odds/", "data/odds_credits.json"],
+    ("football-capture.yml", "Commit the board and pages"):
+        ["data/football/board_*.enc", "data/football/commitments.json",
+         "data/football/game_commitments.json", "data/post_status.json",
+         "football/"],
+    ("football-grade.yml", "Commit"):
+        ["data/football/football_ledger.json", "data/football/commitments.json",
+         "data/football/ncaaf_results.json", "data/football/nfl_results.json",
+         "data/football/board_*.json", "data/mercer/", "football/"],
+    ("capture-closing.yml", "Commit closing lines"):
+        ["data/closing_*.json", "data/odds_credits.json", "odds/"],
+    ("grade-ledger.yml", "Commit ledger and site"):
+        ["data/", "index.html", "feed.xml", "blog/", "picks/"],
+    ("instagram-recovery.yml", "Commit and push the card"):
+        ["data/social/ig_$D.jpg"],
+}
+# The two bare-push workflows, deliberately untouched for now: a bare push is a
+# reliability question, not the demonstrated corruption path. Listing them means
+# a NEW bare push anywhere else fails this suite instead of going unnoticed.
+BARE_PUSH_OK = {("morning-board.yml", "Commit board and site"),
+                ("rebuild-site.yml", "Commit site")}
+
+
+def push_sites():
+    """{(workflow, step): comment-stripped shell} for every step that pushes."""
+    out = {}
+    for fn in sorted(os.listdir(WF)):
+        if not fn.endswith(".yml"):
+            continue
+        doc = parsed(fn)
+        for job in doc.get("jobs", {}).values():
+            for step in job.get("steps", []) or []:
+                body = shell(step.get("run"))
+                if re.search(r"\bgit push\b", body):
+                    out[(fn, step.get("name", "<unnamed>"))] = body
+    return out
+
+
+def staged_paths(body):
+    """The paths a step stages, whether added inline or through the loop."""
+    loop = re.search(r"for p in (.+?); do", body, re.S)
+    if loop:
+        raw_paths = loop.group(1).replace("\\", " ").split()
+    else:
+        raw_paths = []
+        for a in re.findall(r"^\s*git add\s+(.+?)(?:\s+2>/dev/null)?(?:\s*\|\|.*)?$",
+                            body, re.M):
+            raw_paths.extend(a.split())
+    return [p.strip('"').strip("'").replace('${{ steps.d.outputs.date }}', '$D')
+            for p in raw_paths if p.strip('"') != "$p"]
+
+
+SITES = push_sites()
+retrying = {k: v for k, v in SITES.items() if 'pushed=""' in v}
+bare = {k for k in SITES if k not in retrying}
+
+print(f"       {len(SITES)} push sites: {len(retrying)} retrying, {len(bare)} bare")
+check(bare == BARE_PUSH_OK,
+      f"the only bare pushes left are the two known ones ({sorted(bare)})")
+# The two bare sites are not being redesigned here - a bare push is a
+# reliability question, not the demonstrated corruption path - but they must not
+# become a back door either. A second `git push` appearing inside an existing
+# known step would not change the site set above, so count them.
+for site in sorted(bare):
+    b = SITES[site]
+    check(b.count("git push") == 1,
+          f"{site[0]}:{site[1]}: still exactly one bare `git push` "
+          f"({b.count('git push')})")
+    check("--force" not in b and not re.search(r"git push\s+-f\b", b),
+          f"{site[0]}:{site[1]}: never force-pushes")
+check(set(STAGED) <= set(SITES),
+      f"every site in the staged-set table still exists "
+      f"({sorted(set(STAGED) - set(SITES))} missing)")
+
+# NOT ONE WORKFLOW, ANYWHERE, may reintroduce the pattern - including the two
+# bare-push ones and any workflow added later.
+for fn in sorted(os.listdir(WF)):
+    if not fn.endswith(".yml"):
+        continue
+    body = code_lines(fn)
+    check("--autostash" not in body, f"{fn}: no --autostash anywhere")
+    check("git pull" not in body, f"{fn}: no `git pull` anywhere - sync happens "
+                                  f"after the commit, never before the staging")
 
 epilogues = {}
-for name in sorted(CAP_PUSH_STEPS & set(cap_steps)):
-    body = cap_steps[name]
+for (fn, name), body in sorted(retrying.items()):
+    site = f"{fn}:{name}"
 
-    # -- the removed hazards --
-    check("--autostash" not in body, f"{name}: no --autostash")
-    check("git pull" not in body, f"{name}: no `git pull` at all - sync happens "
-                                  f"after the commit, not before the staging")
-    # `git add "$p" 2>/dev/null || true` is the DELIBERATE one-path-per-add
-    # pattern and must survive; only a SYNC command may not be swallowed.
-    # `git rebase --abort 2>/dev/null || true` is EXEMPT and must stay. It is
-    # cleanup on a path that exits 1 two lines later, and it has to tolerate
-    # "no rebase in progress" - which is exactly what git says when the rebase
-    # refused to START (an unstaged tracked file, say). Swallowing the CLEANUP
-    # hides nothing; swallowing the SYNC is what published conflict markers.
+    # -- nothing may be hidden, forced, or auto-resolved --
     swallowed = [l.strip() for l in body.splitlines()
                  if re.search(r"git (pull|fetch|rebase|push)\b", l)
                  and re.search(r"\|\|\s*true", l)
                  and "rebase --abort" not in l]
-    check(not swallowed, f"{name}: no `|| true` on a git sync command ({swallowed})")
+    # `git rebase --abort 2>/dev/null || true` is the one exempt `|| true`. It is
+    # cleanup on a path that exits 1 two lines later, and it must tolerate "no
+    # rebase in progress" - what git says when the rebase refused to START (an
+    # unstaged tracked file, say). Swallowing the CLEANUP hides nothing;
+    # swallowing the SYNC is what published conflict markers.
+    check(not swallowed, f"{site}: no `|| true` on a git sync command ({swallowed})")
     check("--force" not in body and not re.search(r"git push\s+-f\b", body),
-          f"{name}: never force-pushes")
-    check("--force-with-lease" not in body, f"{name}: no --force-with-lease either")
+          f"{site}: never force-pushes")
     for auto in ("--theirs", "--ours", "-X ours", "-X theirs", "-Xours", "-Xtheirs",
                  "rerere"):
-        check(auto not in body, f"{name}: no automatic conflict resolution ({auto})")
+        check(auto not in body, f"{site}: no automatic conflict resolution ({auto})")
 
-    # -- explicit staging, unchanged --
+    # -- explicit staging, exactly as owned --
     check("git add -A" not in body and not re.search(r"git add\s+\.\s*$", body, re.M),
-          f"{name}: no `git add -A` and no `git add .`")
-    added = re.findall(r"^\s*git add\s+(.+?)(?:\s+2>/dev/null)?(?:\s*\|\|.*)?$",
-                       body, re.M)
-    paths = []
-    for a in added:
-        paths.extend(p for p in a.split() if p != '"$p"')
-    loop = re.search(r"for p in (.+?); do", body, re.S)
-    if loop:
-        paths = [p for p in loop.group(1).replace("\\", " ").split() if p]
-    check(paths == STAGED[name],
-          f"{name}: stages EXACTLY {STAGED[name]} (found {paths})")
-    for never in ("index.html", "feed.xml", "blog/", "picks/",
-                  "data/football/board_*.json"):
-        check(never not in body,
-              f"{name}: never stages {never} - this workflow does not own it")
+          f"{site}: no `git add -A` and no `git add .`")
+    if (fn, name) in STAGED:
+        check(staged_paths(body) == STAGED[(fn, name)],
+              f"{site}: stages EXACTLY {STAGED[(fn, name)]} "
+              f"(found {staged_paths(body)})")
 
     # -- ordering: stage, commit, then sync --
-    i_add = body.index("git add")
-    i_commit = body.index("git commit")
-    i_push = body.index("git push")
-    check(i_add < i_commit < i_push,
-          f"{name}: order is add -> commit -> push ({i_add} < {i_commit} < {i_push})")
+    check(body.index("git add") < body.index("git commit") < body.index("git push"),
+          f"{site}: order is add -> commit -> push")
 
     # -- the retry contract --
-    check('pushed=""' in body, f"{name}: uses the `pushed` success flag")
-    check("for i in 1 2 3; do" in body, f"{name}: retries up to 3 times")
+    check("for i in 1 2 3; do" in body, f"{site}: retries up to 3 times")
+    check("if git push; then pushed=yes; break; fi" in body,
+          f"{site}: `pushed` is set ONLY after a successful push")
     check("git fetch origin main || exit 1" in body,
-          f"{name}: a failed fetch stops the step rather than being ignored")
-    check("git rebase origin/main" in body, f"{name}: rebases onto the fetched main")
-    check("git rebase --abort" in body, f"{name}: aborts a conflicted rebase")
+          f"{site}: a failed fetch stops the step rather than being ignored")
+    check("git rebase origin/main" in body, f"{site}: rebases onto the fetched main")
+    check("git rebase --abort" in body, f"{site}: aborts a conflicted rebase")
     check("auto-resolving" in body and "::error::" in body,
-          f"{name}: announces the conflict as an ::error and says it is not "
+          f"{site}: announces the conflict as an ::error and says it is not "
           f"auto-resolving")
     guard = re.search(r'if \[ -z "\$pushed" \]; then\n(.+?)\n\s*fi', body, re.S)
-    check(bool(guard) and "exit 1" in guard.group(1),
-          f"{name}: THE EXHAUSTION GUARD - three rejected pushes exit 1. Without "
-          f"it the loop's last command is a successful rebase, so the step "
-          f"reports success having pushed nothing (grade-ledger's live bug)")
+    check(bool(guard) and "exit 1" in guard.group(1) and "::error::" in guard.group(1),
+          f"{site}: THE EXHAUSTION GUARD - three rejected pushes emit an ::error "
+          f"and exit 1. Without it the loop's last command is a successful "
+          f"rebase, so the step reports success having pushed nothing")
     check(body.count("git push") == 1,
-          f"{name}: exactly one `git push`, inside the retry ({body.count('git push')})")
+          f"{site}: exactly one `git push`, inside the retry "
+          f"({body.count('git push')})")
 
     m = re.search(r'^PUSH_WHAT=.*$', body, re.M)
-    check(bool(m), f"{name}: names itself in PUSH_WHAT for the error messages")
+    check(bool(m), f"{site}: names itself in PUSH_WHAT for the error messages")
     if m:
-        epilogues[name] = re.sub(r'^PUSH_WHAT=.*$', '', body[m.start():], flags=re.M)
+        # Up to the guard's closing `fi`, not to the end of the step: two sites
+        # legitimately do more afterwards (grade-ledger and instagram-recovery
+        # both record the pushed SHA as a step output, which downstream jobs
+        # check out). The EPILOGUE is what must be identical; what a step does
+        # with a successful push is its own business.
+        tail = body[m.start():]
+        cut = tail.index('if [ -z "$pushed" ]; then')
+        cut = tail.index("fi", cut) + 2
+        epilogues[site] = re.sub(r'^PUSH_WHAT=.*$', '', tail[:cut], flags=re.M)
 
 check(len(set(epilogues.values())) == 1,
-      f"both epilogues are BYTE-IDENTICAL once PUSH_WHAT is removed - the safest "
-      f"version cannot drift into being the second-safest at one of them "
-      f"({len(set(epilogues.values()))} distinct)")
+      f"all {len(epilogues)} epilogues are BYTE-IDENTICAL once PUSH_WHAT is "
+      f"removed - the safest version cannot drift into being the second-safest "
+      f"at one of them ({len(set(epilogues.values()))} distinct)")
+
+# OWNERSHIP. Only the two site-building workflows may commit index.html/feed.xml.
+for (fn, name), body in sorted(SITES.items()):
+    if fn in ("grade-ledger.yml", "morning-board.yml", "rebuild-site.yml"):
+        continue
+    for never in ("index.html", "feed.xml"):
+        check(never not in body,
+              f"{fn}:{name}: never stages {never} - this workflow does not own it")
 
 print(f"\nworkflow-contract selftest: "
       f"{'ALL PASSED' if not fails else str(len(fails)) + ' FAILED'}")

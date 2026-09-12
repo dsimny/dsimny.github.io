@@ -72,19 +72,33 @@ def code_only(body):
                      if not l.lstrip().startswith("#"))
 
 
-def push_epilogues(workflow, job):
-    """{step name: runnable epilogue} for every retrying push step in a job."""
-    doc = yaml.safe_load(io.open(os.path.join(WF, workflow), encoding="utf-8"))
+def push_epilogues():
+    """{workflow:step -> runnable epilogue} for every retrying push in the repo.
+
+    Every workflow, not a hard-coded list: a push site added later is exactly
+    the one nobody would remember to add here.
+    """
     out = {}
-    for step in doc["jobs"][job]["steps"]:
-        body = code_only(step.get("run"))
-        if "git push" not in body or 'pushed=""' not in body:
+    for fn in sorted(os.listdir(WF)):
+        if not fn.endswith(".yml"):
             continue
-        # From the PUSH_WHAT assignment to the end: the part that is meant to be
-        # byte-identical everywhere, and the only part that is runnable without
-        # the pipeline's data.
-        m = re.search(r'^PUSH_WHAT=.*$', body, re.M)
-        out[step["name"]] = body[m.start():] if m else body
+        doc = yaml.safe_load(io.open(os.path.join(WF, fn), encoding="utf-8"))
+        for job in (doc.get("jobs") or {}).values():
+            for step in job.get("steps") or []:
+                body = code_only(step.get("run"))
+                if "git push" not in body or 'pushed=""' not in body:
+                    continue
+                # PUSH_WHAT through the guard's closing `fi`: the part that is
+                # byte-identical everywhere, and the only part runnable without
+                # the pipeline's data. What a step does AFTER a successful push
+                # (grade-ledger and instagram-recovery record the SHA as an
+                # output) is its own business and is cut off here.
+                m = re.search(r'^PUSH_WHAT=.*$', body, re.M)
+                if not m:
+                    continue
+                tail = body[m.start():]
+                cut = tail.index('if [ -z "$pushed" ]; then')
+                out[f"{fn}:{step['name']}"] = tail[:tail.index("fi", cut) + 2]
     return out
 
 
@@ -188,18 +202,16 @@ if shutil.which("git") is None or shutil.which("bash") is None:
           "on ubuntu-latest runners and in Git for Windows.")
     sys.exit(1)
 
-EPI = {}
-for wf, job in (("football-capture.yml", "capture"),):
-    for name, body in push_epilogues(wf, job).items():
-        EPI[f"{wf}:{name}"] = body
+EPI = push_epilogues()
 
-print(f"[0] the shell under test, taken from the workflows themselves")
-check(len(EPI) == 2, f"found 2 retrying push epilogues in football-capture.yml "
-                     f"({len(EPI)}: {sorted(EPI)})")
+print("[0] the shell under test, taken from the workflows themselves")
+check(len(EPI) == 6, f"found all 6 retrying push epilogues in the repository "
+                     f"({len(EPI)})")
 bodies = {re.sub(r'^PUSH_WHAT=.*$', '', b, flags=re.M) for b in EPI.values()}
 check(len(bodies) == 1,
-      "both epilogues are byte-identical once PUSH_WHAT is removed - the safest "
-      "version cannot drift into being the second-safest at one of them")
+      f"all {len(EPI)} epilogues are byte-identical once PUSH_WHAT is removed - "
+      f"the safest version cannot drift into being the second-safest at one of "
+      f"them ({len(bodies)} distinct)")
 for name in sorted(EPI):
     print(f"       {name}")
 

@@ -144,7 +144,17 @@ jobs:
         run: |
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          git pull --rebase --autostash || true
+          # NO `git pull` HERE. It used to run at this point, BEFORE staging,
+          # so the tree was dirty by construction and needed --autostash to move
+          # at all. That hid two failures rather than one:
+          # `git pull --rebase --autostash` EXITS 0 when the rebase succeeds but
+          # the stash pop conflicts, leaving UU conflict markers in the working
+          # tree and the stash undropped - so `|| true` was not even the thing
+          # swallowing it. The step then staged, committed and pushed the markers
+          # to main. Verified against real git in a scratch repo, and pinned by
+          # scripts/football/selftest_push_pattern.py.
+          # Sync happens in the push epilogue below instead, AFTER the commit,
+          # when the tree is clean and a rebase needs nothing hidden.
           # board_*.json IS staged here, unlike in football-board.yml: after
           # grading the plaintext board is exactly what we are publishing, so
           # anyone can hash it and check it against the fingerprint committed
@@ -178,7 +188,45 @@ jobs:
             git add "$p" 2>/dev/null || true
           done
           git diff --cached --quiet || git commit -m "Football grade $(date -u +%F)"
-          git push
+          PUSH_WHAT="football grade"
+          # ---- PUSH EPILOGUE ----------------------------------------
+          # Byte-identical at every retrying push point in the repository.
+          # PUSH_WHAT is the only thing that varies; selftest_workflows.py
+          # asserts the rest matches exactly, so the safest version cannot
+          # drift into being the second-safest somewhere.
+          #
+          # main takes ~2 bot commits an hour and seven workflows push to it,
+          # so a bare push can lose a race and strand the run. Commit FIRST
+          # (done above, so the tree is clean), then rebase only when a push
+          # actually loses. NEVER --autostash: it hides working-tree state, and
+          # when its stash pop conflicts it exits 0 with UU markers in the tree,
+          # which the old pre-staging `git pull` then staged, committed and
+          # pushed to main.
+          #
+          # STOP ON CONFLICT. The ledger is append-only and football commitments
+          # are frozen once recorded, so a conflict means something is genuinely
+          # wrong and must reach a human rather than be auto-resolved. Losing one
+          # run's output is a visible, recoverable incident; merge markers in the
+          # ledger, the credit log or a commitment store are not.
+          pushed=""
+          for i in 1 2 3; do
+            if git push; then pushed=yes; break; fi
+            git fetch origin main || exit 1
+            if ! git rebase origin/main; then
+              git rebase --abort 2>/dev/null || true
+              echo "::error::rebase conflict during the $PUSH_WHAT push - stopping, not auto-resolving"
+              exit 1
+            fi
+          done
+          # THE EXHAUSTION GUARD. Without it, `for ... done` whose last command
+          # is a successful rebase exits 0, so three lost races report SUCCESS
+          # having pushed nothing. That was live in grade-ledger.yml and
+          # instagram-recovery.yml until 2026-09-12. Proven in a scratch repo:
+          # exit 0, three rejections, HEAD != origin/main.
+          if [ -z "$pushed" ]; then
+            echo "::error::$PUSH_WHAT push still rejected after 3 rebase attempts - nothing was pushed"
+            exit 1
+          fi
 
       - name: Football join integrity
         id: integrity

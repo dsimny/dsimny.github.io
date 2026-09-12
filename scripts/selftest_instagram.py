@@ -63,7 +63,7 @@ FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 
 # Total checks this file is expected to run. Bump it DELIBERATELY when adding or
 # removing a check; unexplained drift means a check stopped executing.
-EXPECTED_CHECKS = 873
+EXPECTED_CHECKS = 874
 
 # Checksums of the vendored font files, as recorded in assets/fonts/README.md.
 # A swapped or corrupted face changes every card, so it fails the suite here
@@ -1321,7 +1321,20 @@ def main():
     pub_step = [s for s in steps if "post_instagram.py publish" in (s.get("run") or "")]
     check("23.7a", "it publishes with --strict",
           pub_step and "--strict" in pub_step[0]["run"])
-    check("23.7b", "no '|| true' on the publish", "|| true" not in rec_exec)
+    # SCOPED TO THE PUBLISH STEP, not the whole workflow. This used to scan
+    # rec_exec and failed the moment the push epilogue gained
+    # `git rebase --abort 2>/dev/null || true` - cleanup on a path that exits 1
+    # two lines later, in a different step, which has nothing to do with whether
+    # a failed publish can be shrugged off. A guard that fires on an unrelated
+    # line gets loosened rather than heeded; narrow the haystack instead.
+    pub_exec = "\n".join(l for l in (pub_step[0]["run"] if pub_step else "").split("\n")
+                         if not l.strip().startswith("#"))
+    check("23.7b", "no '|| true' on the publish", "|| true" not in pub_exec)
+    check("23.7b2", "and the narrowed scan still catches one if it returns",
+          "|| true" in "\n".join(
+              l for l in (pub_step[0]["run"] + "\n          x || true"
+                          if pub_step else "x || true").split("\n")
+              if not l.strip().startswith("#")))
     check("23.7c", "no continue-on-error anywhere",
           not any("continue-on-error" in str(st) for st in steps)
           and "continue-on-error" not in str(job.get("continue-on-error", "")))

@@ -983,8 +983,25 @@ cleanup on a path that exits 1 two lines later, and it must tolerate "no rebase 
 progress" for the case where the rebase refused to start.
 
 Staging stays explicit and per-site. Never `git add -A`, never `git add .`, and
-the capture workflow never stages `index.html` or `feed.xml` - it does not own
-them. Both suites assert the exact staged sets.
+only the site-building workflows (grade-ledger, morning-board, rebuild-site) may
+stage `index.html`/`feed.xml` - the football and Instagram workflows do not own
+them. Both suites assert the exact staged sets, path for path.
+
+**Where it applies.** All six retrying push sites, enforced repo-wide:
+
+| workflow | step | was |
+|---|---|---|
+| `football-capture.yml` | Commit captures | autostash pull + bare push |
+| `football-capture.yml` | Commit the board and pages | autostash pull + bare push |
+| `football-grade.yml` | Commit | autostash pull + bare push |
+| `capture-closing.yml` | Commit closing lines | autostash pull + bare push |
+| `grade-ledger.yml` | Commit ledger and site | correct ordering, no guard |
+| `instagram-recovery.yml` | Commit and push the card | correct ordering, no guard |
+
+`morning-board.yml` and `rebuild-site.yml` still use a bare push. That is a
+reliability question, not this corruption path, and is deliberately unchanged -
+but the suites pin them at exactly one non-forced push each, so they cannot
+quietly become a back door.
 
 ## Football CI: code gate vs data monitor (2026-09-11)
 

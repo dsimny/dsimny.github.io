@@ -1,244 +1,243 @@
 {
  "posts": [
   {
-   "date": "2026-09-08",
-   "mode": "pick",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-08T15:10:26Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
+   "at_utc": "2026-09-08T15:10:27Z",
    "channel_id": "1529354298436354048",
+   "date": "2026-09-08",
    "detail": "",
-   "at_utc": "2026-09-08T15:10:27Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "email",
-   "result": "failed",
-   "http_status": 422,
-   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
-   "at_utc": "2026-09-08T15:10:27Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "blog",
-   "result": "posted",
    "http_status": 200,
+   "mode": "board",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-08T15:10:27Z",
+   "date": "2026-09-08",
+   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
+   "http_status": 422,
+   "mode": "email",
+   "result": "failed"
+  },
+  {
+   "at_utc": "2026-09-08T15:10:28Z",
    "channel_id": "1529354000020013116",
+   "date": "2026-09-08",
    "detail": "",
-   "at_utc": "2026-09-08T15:10:28Z"
+   "http_status": 200,
+   "mode": "blog",
+   "result": "posted"
   },
   {
-   "date": "2026-09-08",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
+   "at_utc": "2026-09-09T08:10:22Z",
    "channel_id": "",
+   "date": "2026-09-08",
    "detail": "",
-   "at_utc": "2026-09-09T08:10:22Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "x",
-   "result": "failed",
-   "http_status": 402,
-   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
-   "at_utc": "2026-09-09T08:10:23Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "facebook",
-   "result": "no_config",
    "http_status": null,
+   "mode": "recap",
+   "result": "nothing_to_post"
+  },
+  {
+   "at_utc": "2026-09-09T08:10:23Z",
+   "date": "2026-09-08",
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "http_status": 402,
+   "mode": "x",
+   "result": "failed"
+  },
+  {
+   "at_utc": "2026-09-09T08:10:23Z",
+   "date": "2026-09-08",
    "detail": "missing FB_PAGE_ACCESS_TOKEN",
-   "at_utc": "2026-09-09T08:10:23Z"
-  },
-  {
-   "date": "2026-09-09",
-   "mode": "pick",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-09T15:10:35Z"
-  },
-  {
-   "date": "2026-09-09",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-09-09T15:10:35Z"
-  },
-  {
-   "date": "2026-09-09",
-   "mode": "email",
-   "result": "failed",
-   "http_status": 422,
-   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
-   "at_utc": "2026-09-09T15:10:36Z"
-  },
-  {
-   "date": "2026-09-09",
-   "mode": "blog",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-09T15:10:36Z"
-  },
-  {
-   "date": "2026-09-09",
-   "mode": "recap",
-   "result": "nothing_to_post",
    "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-09-10T08:10:23Z"
-  },
-  {
-   "date": "2026-09-09",
-   "mode": "x",
-   "result": "failed",
-   "http_status": 402,
-   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
-   "at_utc": "2026-09-10T08:10:23Z"
-  },
-  {
-   "date": "2026-09-09",
    "mode": "facebook",
-   "result": "no_config",
+   "result": "no_config"
+  },
+  {
+   "at_utc": "2026-09-09T15:10:35Z",
+   "channel_id": "1529354000020013116",
+   "date": "2026-09-09",
+   "detail": "",
+   "http_status": 200,
+   "mode": "pick",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-09T15:10:35Z",
+   "channel_id": "1529354298436354048",
+   "date": "2026-09-09",
+   "detail": "",
+   "http_status": 200,
+   "mode": "board",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-09T15:10:36Z",
+   "date": "2026-09-09",
+   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
+   "http_status": 422,
+   "mode": "email",
+   "result": "failed"
+  },
+  {
+   "at_utc": "2026-09-09T15:10:36Z",
+   "channel_id": "1529354000020013116",
+   "date": "2026-09-09",
+   "detail": "",
+   "http_status": 200,
+   "mode": "blog",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-10T08:10:23Z",
+   "channel_id": "",
+   "date": "2026-09-09",
+   "detail": "",
    "http_status": null,
+   "mode": "recap",
+   "result": "nothing_to_post"
+  },
+  {
+   "at_utc": "2026-09-10T08:10:23Z",
+   "date": "2026-09-09",
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "http_status": 402,
+   "mode": "x",
+   "result": "failed"
+  },
+  {
+   "at_utc": "2026-09-10T08:10:23Z",
+   "date": "2026-09-09",
    "detail": "missing FB_PAGE_ACCESS_TOKEN",
-   "at_utc": "2026-09-10T08:10:23Z"
-  },
-  {
-   "date": "2026-09-10",
-   "mode": "pick",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-10T15:10:25Z"
-  },
-  {
-   "date": "2026-09-10",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-09-10T15:10:25Z"
-  },
-  {
-   "date": "2026-09-10",
-   "mode": "email",
-   "result": "failed",
-   "http_status": 422,
-   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
-   "at_utc": "2026-09-10T15:10:27Z"
-  },
-  {
-   "date": "2026-09-10",
-   "mode": "blog",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-10T15:10:27Z"
-  },
-  {
-   "date": "2026-09-10",
-   "mode": "recap",
-   "result": "nothing_to_post",
    "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-09-11T08:10:20Z"
-  },
-  {
-   "date": "2026-09-10",
-   "mode": "x",
-   "result": "failed",
-   "http_status": 402,
-   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
-   "at_utc": "2026-09-11T08:10:20Z"
-  },
-  {
-   "date": "2026-09-10",
    "mode": "facebook",
-   "result": "failed",
-   "http_status": 403,
+   "result": "no_config"
+  },
+  {
+   "at_utc": "2026-09-10T15:10:25Z",
+   "channel_id": "1529354000020013116",
+   "date": "2026-09-10",
+   "detail": "",
+   "http_status": 200,
+   "mode": "pick",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-10T15:10:25Z",
+   "channel_id": "1529354298436354048",
+   "date": "2026-09-10",
+   "detail": "",
+   "http_status": 200,
+   "mode": "board",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-10T15:10:27Z",
+   "date": "2026-09-10",
+   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
+   "http_status": 422,
+   "mode": "email",
+   "result": "failed"
+  },
+  {
+   "at_utc": "2026-09-10T15:10:27Z",
+   "channel_id": "1529354000020013116",
+   "date": "2026-09-10",
+   "detail": "",
+   "http_status": 200,
+   "mode": "blog",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-11T08:10:20Z",
+   "channel_id": "",
+   "date": "2026-09-10",
+   "detail": "",
+   "http_status": null,
+   "mode": "recap",
+   "result": "nothing_to_post"
+  },
+  {
+   "at_utc": "2026-09-11T08:10:20Z",
+   "date": "2026-09-10",
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "http_status": 402,
+   "mode": "x",
+   "result": "failed"
+  },
+  {
+   "at_utc": "2026-09-11T08:10:21Z",
+   "date": "2026-09-10",
    "detail": "{\"error\":{\"message\":\"(#200) If posting to a group, requires app being installed in the group, and \\\\\\n          either publish_to_groups permission with user token, or both pages_read_engagement \\\\\\n ",
-   "at_utc": "2026-09-11T08:10:21Z"
-  },
-  {
-   "date": "2026-09-11",
-   "mode": "pick",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-11T15:10:36Z"
-  },
-  {
-   "date": "2026-09-11",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-09-11T15:10:37Z"
-  },
-  {
-   "date": "2026-09-11",
-   "mode": "email",
-   "result": "sent",
-   "http_status": 200,
-   "detail": "5d336d19-06df-4c12-b191-7767f2a0b9de",
-   "at_utc": "2026-09-11T15:10:37Z"
-  },
-  {
-   "date": "2026-09-11",
-   "mode": "blog",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-11T15:10:38Z"
-  },
-  {
-   "date": "2026-09-11",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-09-12T08:10:22Z"
-  },
-  {
-   "date": "2026-09-11",
-   "mode": "x",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-12T08:10:22Z"
-  },
-  {
-   "date": "2026-09-11",
+   "http_status": 403,
    "mode": "facebook",
-   "result": "nothing_to_post",
-   "http_status": null,
+   "result": "failed"
+  },
+  {
+   "at_utc": "2026-09-11T15:10:36Z",
+   "channel_id": "1529354000020013116",
+   "date": "2026-09-11",
    "detail": "",
-   "at_utc": "2026-09-12T08:10:22Z"
+   "http_status": 200,
+   "mode": "pick",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-11T15:10:37Z",
+   "channel_id": "1529354298436354048",
+   "date": "2026-09-11",
+   "detail": "",
+   "http_status": 200,
+   "mode": "board",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-11T15:10:37Z",
+   "date": "2026-09-11",
+   "detail": "5d336d19-06df-4c12-b191-7767f2a0b9de",
+   "http_status": 200,
+   "mode": "email",
+   "result": "sent"
+  },
+  {
+   "at_utc": "2026-09-11T15:10:38Z",
+   "channel_id": "1529354000020013116",
+   "date": "2026-09-11",
+   "detail": "",
+   "http_status": 200,
+   "mode": "blog",
+   "result": "posted"
+  },
+  {
+   "at_utc": "2026-09-12T08:10:22Z",
+   "channel_id": "",
+   "date": "2026-09-11",
+   "detail": "",
+   "http_status": null,
+   "mode": "recap",
+   "result": "nothing_to_post"
+  },
+  {
+   "at_utc": "2026-09-12T08:10:22Z",
+   "date": "2026-09-11",
+   "detail": "",
+   "http_status": null,
+   "mode": "x",
+   "result": "nothing_to_post"
+  },
+  {
+   "at_utc": "2026-09-12T08:10:22Z",
+   "date": "2026-09-11",
+   "detail": "",
+   "http_status": null,
+   "mode": "facebook",
+   "result": "nothing_to_post"
+  },
+  {
+   "at_utc": "2026-09-12T13:37:26Z",
+   "date": "2026-09-08",
+   "detail": "1 message(s)",
+   "http_status": 200,
+   "mode": "mercer_members",
+   "result": "posted"
   },
   {
    "date": "2026-09-08",
@@ -246,7 +245,7 @@
    "result": "no_board",
    "http_status": null,
    "detail": "",
-   "at_utc": "2026-09-12T12:47:30Z"
+   "at_utc": "2026-09-12T13:37:26Z"
   },
   {
    "date": "2026-09-08",
@@ -254,7 +253,7 @@
    "result": "no_board",
    "http_status": null,
    "detail": "",
-   "at_utc": "2026-09-12T12:47:30Z"
+   "at_utc": "2026-09-12T13:37:27Z"
   }
  ]
 }

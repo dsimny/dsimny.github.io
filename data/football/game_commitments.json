@@ -1446,6 +1446,41 @@
    "sha256": "d0f82e21aab9278b86b59f6b3ed41a26afb483e6a2e5fc57a072cdc3ed114e29",
    "sport": "ncaaf"
   },
+  "nfl|ATL @ PIT|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "ATL @ PIT",
+   "sha256": "179270bb6798867387cab7e2a1178acc1ab5fb07af3f837f6488092cba4bf2e5",
+   "sport": "nfl"
+  },
+  "nfl|BAL @ IND|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "BAL @ IND",
+   "sha256": "7682a4c8a3369217fded39ac26485ee0e6b562dbd0b7f26efb14de2313e3c0e3",
+   "sport": "nfl"
+  },
+  "nfl|BUF @ HOU|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "BUF @ HOU",
+   "sha256": "86a95da1d4f3c68cda9cffed79c8ba8ea3b77daea55a055a802cfefa33609ca4",
+   "sport": "nfl"
+  },
+  "nfl|CHI @ CAR|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "CHI @ CAR",
+   "sha256": "225293650d6cf582fb6bd1df73254d72107591311ba51b4255cee8ad158c4ac8",
+   "sport": "nfl"
+  },
+  "nfl|CLE @ JAX|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "CLE @ JAX",
+   "sha256": "e4a9d6e9ecbb142b34b0944aa9a5e59833115cc701855ec77b73fac03ee14a83",
+   "sport": "nfl"
+  },
   "nfl|NE @ SEA|2026-09-10T00:15:00Z": {
    "committed_utc": "2026-09-08T18:32:08Z",
    "kickoff_utc": "2026-09-10T00:15:00Z",
@@ -1460,11 +1495,32 @@
    "sha256": "cb9a82d9a497db6d8343404922354b7e25f13b1f1192137b999c45fd40b854d0",
    "sport": "nfl"
   },
+  "nfl|NO @ DET|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "NO @ DET",
+   "sha256": "443c770be1a8fd93adb223c2a90df0a39396a2bcae9571056afa89c556050b28",
+   "sport": "nfl"
+  },
+  "nfl|NYJ @ TEN|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "NYJ @ TEN",
+   "sha256": "fcd0cd480e880f2750ca02265c47e51c4d8ce030d7fabc3ff0d0774d0cb7b2b9",
+   "sport": "nfl"
+  },
   "nfl|SF @ LA|2026-09-11T00:35:00Z": {
    "committed_utc": "2026-09-09T18:37:27Z",
    "kickoff_utc": "2026-09-11T00:35:00Z",
    "matchup": "SF @ LA",
    "sha256": "c5cedd4733116380df430ab980f7174337cca9160301ef25d78ce557ffc49be0",
+   "sport": "nfl"
+  },
+  "nfl|TB @ CIN|2026-09-13T17:00:00Z": {
+   "committed_utc": "2026-09-12T11:37:22Z",
+   "kickoff_utc": "2026-09-13T17:00:00Z",
+   "matchup": "TB @ CIN",
+   "sha256": "805350ece770af37beb883c370bfae1b50f6cd6af405ff35cde91d2d76c00c70",
    "sport": "nfl"
   }
  }

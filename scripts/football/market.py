@@ -36,6 +36,7 @@ import io
 import json
 import os
 import statistics
+import record_policy
 import sys
 from datetime import datetime, timedelta, timezone
 
@@ -268,9 +269,12 @@ def evaluate(q, away, home):
     eff = implied(bh["price"]) + implied(ba["price"]) - 1.0
 
     # step 3 — the side whose best price sits furthest above de-vigged fair
-    opts = [{"side": away, **ba, "gap": f[away] - implied(ba["price"])},
-            {"side": home, **bh, "gap": f[home] - implied(bh["price"])}]
-    pick = max(opts, key=lambda o: o["gap"])
+    opts = [{"side": away, **ba, "gap": (f[away] - implied(ba["price"])) / f[away]},
+            {"side": home, **bh, "gap": (f[home] - implied(bh["price"])) / f[home]}]
+    # Normalize the price discount by fair probability. Absolute negative
+    # gaps mechanically favour tiny probabilities under proportional vig.
+    # Near-equal normalized discounts break toward the higher fair probability.
+    pick = max(opts, key=lambda o: (round(o["gap"], 10), f[o["side"]], o["side"]))
 
     # step 2 — corroboration guard. fb-v0.2's rule selected the single largest
     # book-vs-consensus disagreement and posted CLV of -0.49: the biggest
@@ -287,6 +291,11 @@ def evaluate(q, away, home):
             offshore = {"price": cand["price"], "book": cand["book"]}
 
     return {
+        "selection_version": record_policy.VERSION,
+        "selection_eligible": min(f[away], f[home]) >= 0.20 and pick["price"] <= 400,
+        "selection_reason": ("eligible" if min(f[away], f[home]) >= 0.20 and pick["price"] <= 400
+                             else "PASS: outside launch moneyline range (20%-80% fair, max +400)"),
+        "relative_price_discount": round(pick["gap"], 10),
         "n_books": len(q),
         "fair_away": round(f[away], 5),
         "fair_home": round(f[home], 5),
@@ -314,7 +323,8 @@ def rank(games):
     """
     return sorted(games, key=lambda g: (g["eff_overround_pts"],
                                         -g["n_books"],
-                                        g.get("kickoff_utc") or ""))
+                                        g.get("kickoff_utc") or "",
+                                        g.get("sport", ""), g.get("matchup", "")))
 
 
 def assign(ranked):
@@ -326,6 +336,7 @@ def assign(ranked):
     is looser. That is the rule working; it ranks by the toll you pay and does
     not know what is on television.
     """
+    ranked = [g for g in ranked if g.get("selection_eligible", False)]
     premium = ranked[0] if ranked else None
     free = ranked[1] if len(ranked) > 1 else None
     return premium, free

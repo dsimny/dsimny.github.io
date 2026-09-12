@@ -139,7 +139,7 @@ try:
     # exactly this coupling before production data flipped it red.
     boardmod.GAME_COMMITMENTS = os.path.join(tmp, "game_commitments.json")
     D = boardmod.decision_moment(WEEK)
-    b = boardmod.build(["nfl", "ncaaf"], WEEK, D + timedelta(hours=6), commit=False)
+    b = boardmod.build(["nfl", "ncaaf"], WEEK, D, commit=False)
     # Fake prose so the card path is exercised without an API key.
     for g in b["games"]:
         g["writeup"] = "The market is tight and the best price is corroborated."
@@ -150,6 +150,10 @@ try:
     io.open(plain, "w", encoding="utf-8").write(json.dumps(b, indent=1))
     boardmod.board_paths = lambda w: (plain, plain + ".enc")
 
+    import crypto_box
+    boardmod.COMMITMENTS = os.path.join(tmp, "commitments.json")
+    with open(boardmod.COMMITMENTS, "w", encoding="utf-8") as f:
+        json.dump({"commitments": [{"slate_week": WEEK, "board_sha256": crypto_box.sha256_of(b), "revealed": False}]}, f)
     prem = b["premium"]
     print(f"premium play: {prem['league']} {prem['matchup']} -> "
           f"{prem['side']} {prem['best_price']:+d}, eff {prem['eff_overround_pts']}")

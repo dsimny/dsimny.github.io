@@ -290,3 +290,14 @@ delivered since that renewal?) that only a human checking
 `data/post_status.json` can establish. **Automatic refunds must be disabled for
 this product before checkout goes live.** It cannot be verified from the repo;
 see the launch checklist in `docs/REFUND_CANCELLATION_POLICY.md`.
+
+
+## Football launch amendment — September 11, 2026
+
+The prospective official cohort and fp-v0.4 product rule are defined in
+[FOOTBALL_RESET_2026-09-11.md](FOOTBALL_RESET_2026-09-11.md).
+Prior graded entries and commitments remain intact and publicly labeled as
+pre-launch / invalidated selection tests. Official totals exclude that cohort;
+this is a disclosed restart, not an undefeated lifetime record. Frozen research
+studies are not reopened. The amendment supersedes conflicting live selection
+and grading descriptions above, without authorizing deletion of history.

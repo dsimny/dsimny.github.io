@@ -59,6 +59,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, ".."))
+import record_policy
 import market                                        # noqa: E402
 import board as boardmod                             # noqa: E402
 import crypto_box                                    # noqa: E402
@@ -133,8 +134,7 @@ def load_board(week, reveal=None):
         b = crypto_box.decrypt_from(enc)
     if b is None:
         return None, False
-    if reveal is not None:
-        return b, reveal
+
     # Auto: revealed once the commitment log says so. One switch, not a
     # judgement call taken weekly.
     log = {}
@@ -143,8 +143,10 @@ def load_board(week, reveal=None):
             log = json.load(f)
     for c in log.get("commitments", []):
         if c.get("slate_week") == week:
-            return b, bool(c.get("revealed"))
-    return b, False
+            if crypto_box.sha256_of(b) != c["board_sha256"]:
+                raise ValueError("Board fingerprint mismatch; refusing render/delivery")
+            return b, bool(c.get("revealed")) if reveal is None else reveal
+    raise ValueError("Board has no commitment; refusing render/delivery")
 
 
 def game_card(g, full):
@@ -159,6 +161,7 @@ def game_card(g, full):
                 f'</article>')
     off = g.get("offshore_best")
     rows = [
+        ("Selection eligibility", E(g.get("selection_reason", "Legacy pilot rule"))),
         ("Side", E(str(g.get("side", "")))),
         ("Best takeable price", f'{money(g.get("best_price"))} at '
                                 f'{E(str(g.get("best_book","")))}'),
@@ -271,6 +274,8 @@ def render_week(week, reveal=None):
   <span class="postdate">{nice_date(week)}</span>
   <h1>{b.get("n_covered", 0)} games covered, one play</h1>
   <p class="lede">{NOCLAIM}</p>
+  <p class="mut">Record reset disclosed: <a href="/football/#pilot">pre-launch test history</a>.
+  Official cohort starts September 11, 2026 under fp-v0.4; earlier boards retain their original rules.</p>
   {warn}
   <p class="mut">{b.get("n_covered",0)} covered · {b.get("n_excluded",0)} no
   market · decision moment {E(b.get("decision_moment_utc",""))}</p>
@@ -320,8 +325,7 @@ def render_hub():
     # SEPARATION, NEVER OMISSION. The 39 research rows stay on the page in full,
     # under their own heading and labelled. Hiding them would trade one
     # transparency failure for a worse one.
-    official = [e for e in entries if e.get("tier") in ("premium", "free")]
-    research = [e for e in entries if e.get("tier") not in ("premium", "free")]
+    official, pilot, research = record_policy.partition(entries)
 
     def _rec(rows):
         w = sum(1 for e in rows if e.get("result") == "win")
@@ -347,11 +351,11 @@ def render_hub():
                 f'<th>Result</th><th>CLV</th></tr></thead>'
                 f'<tbody>{body}</tbody></table></div>')
 
-    if entries:
+    if True:  # Even an empty official cohort must display 0-0.
         w, l, pu = _rec(official)
         pnl = sum(e.get("pnl_per_unit", 0) or 0 for e in official)
         clvs = [e.get("clv_pts") for e in official if e.get("clv_pts") is not None]
-        avg_clv = sum(clvs) / len(clvs) if clvs else 0.0
+        avg_clv = f"{sum(clvs) / len(clvs):+.2f} pts" if clvs else "N/A"
         rec = f"{w}–{l}" + (f"–{pu}" if pu else "")
 
         # NO ROI AND NO UNITS FIGURE, deliberately, and this is not pedantry.
@@ -366,7 +370,7 @@ def render_hub():
     <p class="commitlead">Official football record</p>
     <p class="commithash">{rec} &nbsp;|&nbsp; {len(official)} committed plays
     &nbsp;|&nbsp; <strong>0 units staked</strong> &nbsp;|&nbsp; avg CLV
-    {avg_clv:+.2f} pts</p>
+    {avg_clv}</p>
     <p class="commitsub">At one unit these would have returned
     <strong>{pnl:+.2f}u</strong> — hypothetical, shown because it is
     checkable, not because anything was risked. Football does not size stakes.</p>
@@ -401,14 +405,29 @@ def render_hub():
   <span class="kicker">Football</span>
   <h1>The football record</h1>
   <p class="lede">{NOCLAIM}</p>
+  <p class="mut">Record reset disclosed: <a href="/football/#pilot">pre-launch test history</a>.
+  Official cohort starts September 11, 2026 under fp-v0.4; earlier boards retain their original rules.</p>
   {headline}
   {scope}
+  <p>Official football begins with eligible kickoffs on or after September 11, 2026
+  (America/New_York), under fp-v0.4. No retroactive selections. The weekly Saturday
+  decision schedule remains in force; a date boundary does not guarantee a Friday pick.</p>
   <h2>Official record — committed plays</h2>
   <p class="mut">Append-only. Nothing is edited, nothing is deleted, losses
   publish exactly like wins. Every one of these was fingerprinted before
   kickoff.</p>
   {official_tbl}
   {upgrade_block()}
+  <h2 id="pilot">Pre-launch / invalidated selection test</h2>
+  <p>Prior selections and results remain intact, including losses. They are excluded
+  from official W–L, CLV and hypothetical returns. This is a disclosed restart,
+  not an undefeated lifetime record. The old grader re-ranked results rather than
+  settling the committed board; historical tier labels are not proof of a committed play.</p>
+  <p><a href="/docs/FOOTBALL_RESET_2026-09-11.md">Reset amendment and selection rule</a> ·
+  <a href="/data/football/football_ledger.json">Full unchanged historical entries</a> ·
+  <a href="/data/football/commitments.json">Commitment evidence</a> ·
+  <a href="/data/football/reset_2026-09-11.json">Pilot audit manifest</a></p>
+  {_table(pilot, ("Historical tier", "tier"))}
   <h2>Full covered slate — research, not the record</h2>
   {research_note}
   {research_tbl}
@@ -498,6 +517,26 @@ def main():
     elif not args.hub_only and args.week:
         render_week(args.week, True if args.reveal else None)
     render_hub()
+    # A revealed pilot may have only encrypted source locally. Label its existing
+    # public HTML without needing a secret or changing the committed payload.
+    if os.path.exists(boardmod.COMMITMENTS):
+        with open(boardmod.COMMITMENTS, encoding="utf-8") as f:
+            log = json.load(f)
+        for c in log.get("commitments", []):
+            if c.get("selection_version") == record_policy.VERSION:
+                continue
+            path = os.path.join(OUT, c["slate_week"], "index.html")
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as f:
+                    text = f.read()
+                if 'id="pilot-disclosure"' not in text:
+                    banner = ('<p id="pilot-disclosure"><strong>Pre-launch / invalidated selection test.</strong> '
+                              'This historical slate is excluded from the official football launch record. '
+                              'All original selections and evidence remain available. '
+                              '<a href="/football/#pilot">Reset disclosure and full pilot results</a>.</p>')
+                    text = text.replace('<div class="wrap">', '<div class="wrap">' + banner, 1)
+                    with open(path, "w", encoding="utf-8") as f:
+                        f.write(text)
     return 0
 
 

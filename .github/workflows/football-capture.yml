@@ -248,8 +248,12 @@ jobs:
       # published unencrypted before kickoff is the product given away.
       # ANTHROPIC_API_KEY is optional - without it the board publishes its
       # numbers and every game reads "no writeup (no API key configured)".
+      - name: Football reset regression checks
+        id: reset_checks
+        run: python scripts/football/selftest_reset.py
+
       - name: Build the board
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.reset_checks.outcome == 'success' }}
         env:
           BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

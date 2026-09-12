@@ -328,3 +328,14 @@ precisely when the temptation peaks.
 | fp-v0.1 | Aug 24 | Adopted. Three layers, coverage markers, the effective-overround selection rule with its corroboration guard, free/premium split under House Rules 2 and 7, own ledger at 0u. No expectation claim made. |
 | fp-v0.2 | Aug 26 | Section 4 step 0: ONE combined NFL + NCAA FBS slate, so one premium play a week rather than one per sport. Measured consequence recorded — college takes rank 1 most weeks on volume, not quality — along with the limit that no NCAA FBS price history exists to characterise it on. Decided before week 1 and before any football result existed; no rule was moved in response to a result. |
 | fp-v0.3 | Aug 26 | Section 4 step 0b: commit per game at its own T−24 (append-only, evaluation frozen), choose per week at a precommitted decision moment D = Saturday 14:00 US/Eastern. Closes the gap that fp-v0.2 opened — the week's full field never exists at one instant, so without a stated D the play could silently change after being committed. Records the consequence that the eligible pool is always `D < kickoff ≤ D+24h`, and names what that excludes. Still before week 1 and before any result. |
+
+
+## Football launch amendment — September 11, 2026
+
+The prospective official cohort and fp-v0.4 product rule are defined in
+[FOOTBALL_RESET_2026-09-11.md](FOOTBALL_RESET_2026-09-11.md).
+Prior graded entries and commitments remain intact and publicly labeled as
+pre-launch / invalidated selection tests. Official totals exclude that cohort;
+this is a disclosed restart, not an undefeated lifetime record. Frozen research
+studies are not reopened. The amendment supersedes conflicting live selection
+and grading descriptions above, without authorizing deletion of history.

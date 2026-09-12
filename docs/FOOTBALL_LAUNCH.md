@@ -746,3 +746,14 @@ deliberately rather than discover next July.
 | fl-v0.1 | Aug 26 | Initial plan. Gaps A-K, two hard deadlines (capture 08-29, NFL allowlist 09-10), four phases targeting premium live NFL Week 2-3, two open decisions (Odds API tier, price). |
 | fl-v0.2 | Aug 26 | Gap A closed (branch merged, `b55f732`). **Gap I withdrawn: the free-tier premise was wrong** — a paid 100,000/month tier has been live since ~08-21 with 71,695 remaining, so credits gate nothing and decision 6a is resolved rather than open. Capture deadline sharpened from "Sat 08-29" to the measured first window, 2026-08-28 10:00Z, with the 08-26 17:00Z preseason rehearsal noted. |
 | fl-v0.3 | Aug 26 | Capture half of gap H shipped and pushed (`football-capture.yml`, live). Decision 6b half-settled: ONE combined slate, one premium play a week (spec bumped to fp-v0.2), with the college-skew measured and recorded; price still open and reframed around layer 2's volume rather than four picks a month. New section 9 records the year-round direction and the one thing it changes immediately — gaps B and E get written sport-parameterised from the first line, because the market-derived chassis is not football-specific. |
+
+
+## Football launch amendment — September 11, 2026
+
+The prospective official cohort and fp-v0.4 product rule are defined in
+[FOOTBALL_RESET_2026-09-11.md](FOOTBALL_RESET_2026-09-11.md).
+Prior graded entries and commitments remain intact and publicly labeled as
+pre-launch / invalidated selection tests. Official totals exclude that cohort;
+this is a disclosed restart, not an undefeated lifetime record. Frozen research
+studies are not reopened. The amendment supersedes conflicting live selection
+and grading descriptions above, without authorizing deletion of history.

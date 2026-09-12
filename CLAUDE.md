@@ -1332,3 +1332,14 @@ were provided); Whop upgrade button on the site is still dormant
 4. Third-party verification (Pikkit/Juice Reel) after ~1 month of record.
 5. NRFI market (activates the two dormant breakers). Then, only once the ledger
    has earned it: paid tier (Whop on Discord, ~$20-30/mo lane).
+
+
+## Football launch amendment — September 11, 2026
+
+The prospective official cohort and fp-v0.4 product rule are defined in
+[FOOTBALL_RESET_2026-09-11.md](docs/FOOTBALL_RESET_2026-09-11.md).
+Prior graded entries and commitments remain intact and publicly labeled as
+pre-launch / invalidated selection tests. Official totals exclude that cohort;
+this is a disclosed restart, not an undefeated lifetime record. Frozen research
+studies are not reopened. The amendment supersedes conflicting live selection
+and grading descriptions above, without authorizing deletion of history.

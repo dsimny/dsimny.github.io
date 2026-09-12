@@ -63,6 +63,10 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
 
+      - name: Football reset regression checks
+        id: reset_checks
+        run: python scripts/football/selftest_reset.py
+
       # A generous window rather than "yesterday": a game postponed into the
       # following week, or a run that failed for two days, must still be picked
       # up. Both fetchers key by event id and overwrite in place, so re-fetching
@@ -88,11 +92,15 @@ jobs:
       # Each sport grades independently: one sport's results feed being down
       # must not stop the other's week being booked.
       - name: Grade NCAA FBS
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.reset_checks.outcome == 'success' }}
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
         run: python scripts/football/grade_football.py --sport ncaaf
 
       - name: Grade NFL
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.reset_checks.outcome == 'success' }}
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
         run: python scripts/football/grade_football.py --sport nfl
 
       # The D.J. Mercer Spotlight: human picks on their own append-only record.
@@ -104,27 +112,8 @@ jobs:
         if: ${{ !cancelled() }}
         run: python scripts/football/mercer.py grade
 
-      # Reveal every week the ledger has now booked. Driven off the LEDGER
-      # rather than off a date calculation: a week is revealed exactly when it
-      # has actually been graded, which is the only definition that cannot
-      # drift from what the record says.
-      - name: Reveal graded weeks
-        if: ${{ !cancelled() }}
-        run: |
-          python - <<'PY'
-          import io, json, os, subprocess, sys
-          p = "data/football/football_ledger.json"
-          weeks = []
-          if os.path.exists(p):
-              with io.open(p, encoding="utf-8") as f:
-                  weeks = sorted({e.get("slate_week") for e in
-                                  json.load(f).get("entries", []) if e.get("slate_week")})
-          if not weeks:
-              print("no graded weeks yet; nothing to reveal.")
-          for w in weeks:
-              subprocess.run([sys.executable, "scripts/football/board.py",
-                              "--mark-revealed", w], check=False)
-          PY
+      # grade_committed reveals only after both selected positions have settled.
+      # A partial sport result must never reveal the other sport early.
 
       - name: Render the football pages
         if: ${{ !cancelled() }}

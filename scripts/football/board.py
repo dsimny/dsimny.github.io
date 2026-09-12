@@ -66,6 +66,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import record_policy
 import market                                        # noqa: E402
 import crypto_box                                    # noqa: E402
 
@@ -115,7 +116,7 @@ def decision_moment(week):
 def game_key(g):
     """Identity of a game for commitment purposes. Kickoff is included because a
     rescheduled game is a different market, not the same one moved."""
-    return f"{g['sport']}|{g['matchup']}|{g['kickoff_utc']}"
+    return f"{g.get('selection_version', 'legacy')}|{g['sport']}|{g['matchup']}|{g['kickoff_utc']}"
 
 
 def load_game_commitments():
@@ -142,6 +143,7 @@ def commit_games(covered, now, write=True):
     """
     store = load_game_commitments()
     games, new = store["games"], 0
+    changed = False
     for g in covered:
         k = game_key(g)
         block = {kk: g[kk] for kk in sorted(g) if kk not in
@@ -155,18 +157,29 @@ def commit_games(covered, now, write=True):
                 games[k].setdefault("later_disagreements", [])
                 if sha not in games[k]["later_disagreements"]:
                     games[k]["later_disagreements"].append(sha)
+                    changed = True
+            if "block" not in games[k]:
+                raise ValueError("missing frozen game block")
+            if "block" in games[k]:
+                if crypto_box.sha256_of(games[k]["block"]) != games[k]["sha256"]:
+                    raise ValueError("tampered game commitment")
+                g.clear()
+                g.update(games[k]["block"])
             g["committed_utc"] = games[k]["committed_utc"]
             g["commitment_sha"] = games[k]["sha256"]
             g["restated"] = games[k]["sha256"] != sha
             continue
-        games[k] = {"sha256": sha, "committed_utc": market.iso(now),
+        if market.parse_utc(g["kickoff_utc"]) <= now:
+            g["restated"] = True
+            continue
+        games[k] = {"block": block, "sha256": sha, "committed_utc": market.iso(now),
                     "kickoff_utc": g["kickoff_utc"], "sport": g["sport"],
                     "matchup": g["matchup"]}
         g["committed_utc"] = games[k]["committed_utc"]
         g["commitment_sha"] = sha
         g["restated"] = False
         new += 1
-    if write and new:
+    if write and (new or changed):
         with io.open(GAME_COMMITMENTS, "w", encoding="utf-8") as f:
             json.dump(store, f, indent=1, sort_keys=True)
     return store, new
@@ -251,9 +264,24 @@ def build(sports, week, asof, commit=True):
     covered, excluded = [], []
     for sport in sports:
         snaps = market.load_snapshots(sport, ODDS_DIR)
-        c, e = collect(sport, snaps, week, asof)
+        c, e = collect(sport, snaps, week, min(asof, decision_moment(week)))
         covered += c
         excluded += e
+
+    # Retain frozen coverage even if a later capture fails a market marker.
+    # A later feed cannot remove an already committed candidate from the pool.
+    present = {game_key(g) for g in covered}
+    for key, saved in load_game_commitments()["games"].items():
+        g = saved.get("block")
+        if (g and g.get("selection_version") == record_policy.VERSION
+                and g.get("sport") in sports
+                and market.slate_week(market.parse_utc(g["kickoff_utc"])) == week
+                and market.parse_utc(saved["committed_utc"]) <= min(asof, decision_moment(week))
+                and key not in present):
+            if crypto_box.sha256_of(g) != saved["sha256"]:
+                raise ValueError("tampered frozen game block")
+            covered.append(dict(g))
+            excluded = [e for e in excluded if (e[0], e[1]) != (g["sport"], g["matchup"])]
 
     # Step 0b part 1: freeze every newly-evaluable game at its own T-24.
     _store, n_new = commit_games(covered, asof, write=commit)
@@ -267,7 +295,15 @@ def build(sports, week, asof, commit=True):
 
     # Step 0b part 2: choose at D, from games committed and not yet kicked off.
     D = decision_moment(week)
-    eligible = [g for g in ranked if market.parse_utc(g["kickoff_utc"]) > D]
+    eligible = [g for g in ranked
+                if market.parse_utc(g["kickoff_utc"]) > max(D, asof)
+                and market.parse_utc(g["kickoff_utc"]) <= D + timedelta(hours=24)
+                and record_policy.after_start(g["kickoff_utc"])
+                and g.get("selection_version") == record_policy.VERSION
+                and g.get("selection_eligible", False)
+                and g.get("committed_utc")
+                and market.parse_utc(g["committed_utc"]) <= D
+                and g.get("commitment_sha")]
     premium = free = None
     if asof >= D:
         premium, free = market.assign(market.rank(eligible))
@@ -278,6 +314,7 @@ def build(sports, week, asof, commit=True):
     total = len(covered) + len(excluded)
     share = (len(excluded) / total) if total else 0.0
     return {
+        "selection_version": record_policy.VERSION,
         "slate_week": week,
         "decision_moment_utc": market.iso(D),
         "decision_made": asof >= D,
@@ -345,6 +382,7 @@ def record_commitment(week, board_sha, committed_utc):
     log["commitments"].append({
         "slate_week": week,
         "board_sha256": board_sha,
+        "selection_version": record_policy.VERSION,
         "committed_utc": committed_utc,
         "revealed": False,
     })
@@ -430,6 +468,8 @@ def main():
     asof = market.parse_utc(args.asof) if args.asof else market.now_utc()
     if args.asof and not asof:
         raise SystemExit(f"could not parse --asof {args.asof!r}")
+    if args.asof and not args.dry_run:
+        raise SystemExit("--asof is read-only; historical commitments cannot be backfilled")
     week = args.week or market.slate_week(asof)
     sports = [s.strip() for s in args.sports.split(",") if s.strip()]
     for s in sports:
@@ -475,6 +515,10 @@ def main():
         import writeup
         wstatus = writeup.annotate(b)
 
+    committed_at = market.now_utc()
+    if any(market.parse_utc(g["kickoff_utc"]) <= committed_at
+           for g in (b.get("premium"), b.get("free")) if g):
+        raise SystemExit("selected game started during board preparation; refusing late commitment")
     sha = crypto_box.sha256_of(b)
     if crypto_box.have_key():
         crypto_box.encrypt_to(enc, b)

@@ -145,8 +145,12 @@ try:
                 fails.append(f"{label}: {g['matchup']} chosen but not in (D, D+24h]")
 
     # ---- per-game commitments are issued and frozen ----
-    b = [bb for _, bb in boards if bb["decision_made"]][-1]
+    b = [bb for _, bb in boards if bb["decision_made"]][0]
     for g in b["games"]:
+        if market.parse_utc(g["kickoff_utc"]) <= D:
+            if g.get("commitment_sha"):
+                fails.append("already-started game was freshly committed")
+            continue
         if not g.get("commitment_sha") or not g.get("committed_utc"):
             fails.append(f"uncommitted game on the board: {g['matchup']}")
         if g.get("restated"):
@@ -234,7 +238,8 @@ try:
                "rank", "tier",
                # fp-v0.3 commitment metadata. Board bookkeeping, not market
                # numbers - layer 2 must not narrate these either.
-               "commitment_sha", "committed_utc", "restated"}
+               "commitment_sha", "committed_utc", "restated", "selection_version",
+               "selection_eligible", "selection_reason", "relative_price_discount"}
     extra = set(prem) - ALLOWED
     if extra:
         fails.append(f"board game carries unexpected fields: {sorted(extra)}")
@@ -248,7 +253,7 @@ try:
     overlap = {g["matchup"] for g in b["games"]}
     io.open(poisoned, "w", encoding="utf-8").write(json.dumps({
         "games": {
-            f"{g['sport']}|{g['matchup']}|{g['kickoff_utc']}": {
+            board.game_key(g): {
                 "sha256": "0" * 64,          # deliberately wrong fingerprint
                 "committed_utc": "2026-01-01T00:00:00Z",
                 "kickoff_utc": g["kickoff_utc"],
@@ -257,20 +262,20 @@ try:
         }
     }, indent=1))
     board.GAME_COMMITMENTS = poisoned
-    poisoned_board = board.build(["nfl", "ncaaf"], WEEK,
-                                 D + timedelta(hours=6), commit=False)
+    try:
+        board.build(["nfl", "ncaaf"], WEEK, D, commit=False)
+        fails.append("poisoned versioned commitment was accepted")
+    except ValueError:
+        pass
     board.GAME_COMMITMENTS = os.path.join(tmp, "game_commitments.json")
-    restated_now = [g["matchup"] for g in poisoned_board["games"] if g.get("restated")]
-    if not restated_now:
-        fails.append("hermeticity control: a poisoned store did NOT mark anything "
-                     "restated, so the restated check proves nothing")
     clean_board = board.build(["nfl", "ncaaf"], WEEK,
-                              D + timedelta(hours=6), commit=False)
-    if [g["matchup"] for g in clean_board["games"] if g.get("restated")]:
+                              D, commit=False)
+    if [g["matchup"] for g in clean_board["games"]
+        if g.get("restated") and market.parse_utc(g["kickoff_utc"]) > D]:
         fails.append("hermeticity control: the isolated store still reports "
                      "restated games — isolation is not holding")
     print(f"    hermeticity: {len(overlap)} overlapping matchups in a poisoned "
-          f"store flag {len(restated_now)} restated; the isolated store flags 0")
+          "store is refused; the isolated store remains valid")
 
     print("=" * 62)
     if fails:

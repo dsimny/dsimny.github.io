@@ -232,8 +232,8 @@ def build(sport, snaps, results):
             "books_at_best": pick["near"], "n_books_t24": len(q24),
             "eff_overround_pts": m["eff_overround_pts"],
             "fair_t24": round(f24[pick["side"]], 5),
-            "fair_close": round(fcl[pick["side"]], 5),
-            "clv_pts": round(100 * (fcl[pick["side"]] - implied(pick["price"])), 3),
+            "fair_close": round(fcl[close_side], 5),
+            "clv_pts": round(100 * (fcl[close_side] - implied(pick["price"])), 3),
             "t24_capture": t24[1],
             "t24_hours_before_kickoff": round((kick - t24[0]).total_seconds() / 3600, 2),
             "close_capture": close[1],
@@ -250,7 +250,7 @@ def load_ledger():
     try:
         with io.open(LEDGER, encoding="utf-8") as f:
             return json.load(f)
-    except (OSError, ValueError):
+    except FileNotFoundError:
         return {"_note": ("Football record, append-only (House Rule 1). ZERO UNITS "
                           "throughout - pnl_per_unit is what one unit WOULD have "
                           "returned, not money risked. Makes no expectation claim; "
@@ -267,9 +267,6 @@ def main():
     args = ap.parse_args()
 
     snaps = load_snapshots(args.sport)
-    if not snaps:
-        print(f"no {args.sport} odds captures on disk; nothing to grade.")
-        return 0
     cfg = SPORTS[args.sport]
     results = cfg["results"].load_store()["events"]
     n_final = sum(1 for r in results.values() if r.get("final"))
@@ -279,57 +276,17 @@ def main():
         line += f", {n_ok} on the season-type allowlist"
     print(line)
 
-    cands, skipped = build(args.sport, snaps, results)
-    if not cands:
-        print("\nno gradeable games yet.")
-        for a, h, why in skipped[:15]:
-            print(f"  {a} @ {h}: {why}")
-        return 0
-
+    import grade_committed
     ledger = load_ledger()
-    done = {(e["slate_week"], e["sport"]) for e in ledger["entries"]}
-    by_week = {}
-    for c in cands:
-        by_week.setdefault(c["slate_week"], []).append(c)
-
-    new = []
-    for week, cs in sorted(by_week.items()):
-        if (week, args.sport) in done:
-            print(f"\nslate week {week}: already graded, refusing to recompute "
-                  f"(House Rule 1).")
-            continue
-        # section 4 step 1: rank ascending by the toll to play
-        cs.sort(key=lambda c: (c["eff_overround_pts"], -c["n_books_t24"],
-                               c["kickoff_utc"]))
-        for i, c in enumerate(cs):
-            if i == 0:
-                c["tier"] = "premium"
-            elif i == 1:
-                c["tier"] = "free"
-            else:
-                c["tier"] = "covered"      # written up, not played
-            c["rank"] = i + 1
-        new.extend(cs)
-        print(f"\nslate week {week}: {len(cs)} gradeable")
-        for c in cs[:2]:
-            print(f"  {c['tier']:<8} rank{c['rank']}  {c['matchup']}")
-            print(f"           {c['side']} {c['price']:+d} @ {c['book']} "
-                  f"({c['books_at_best']} books at best) | overround "
-                  f"{c['eff_overround_pts']:.2f} pts")
-            print(f"           T-24 {c['t24_hours_before_kickoff']}h  close "
-                  f"{c['close_hours_before_kickoff']}h  CLV {c['clv_pts']:+.2f}")
-            print(f"           final {c['final']} -> {c['result'].upper()} "
-                  f"({c['pnl_per_unit']:+.2f}u at 1 unit; staked 0)")
-
-    if skipped:
-        print(f"\n{len(skipped)} game(s) not covered (recorded, never silently dropped):")
-        for a, h, why in skipped[:10]:
-            print(f"  {a} @ {h}: {why}")
+    new = grade_committed.additions(args.sport, ledger, results, cfg, snaps)
+    for row in new:
+        print(f"{row['slate_week']} {row['tier']}: {row['side']} {row['result']}")
 
     if args.dry_run:
         print("\n--dry-run: ledger untouched")
         return 0
     if not new:
+        grade_committed.reveal_completed(ledger)
         print("\nnothing new to append.")
         return 0
 
@@ -338,6 +295,7 @@ def main():
     os.makedirs(FB, exist_ok=True)
     with io.open(LEDGER, "w", encoding="utf-8", newline="\n") as f:
         json.dump(ledger, f, indent=1)
+    grade_committed.reveal_completed(ledger)
     print(f"\nappended {len(new)} entries -> {os.path.relpath(LEDGER, ROOT)} "
           f"({len(ledger['entries'])} total)")
     return 0

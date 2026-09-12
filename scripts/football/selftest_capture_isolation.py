@@ -153,6 +153,49 @@ if os.path.isdir(mdir):
         check("h2h" in (s.get("markets") or ""),
               f"{p}: still carries h2h, so it stays readable by the same code")
 
+print("\n[7] the per-game commitment store is still an append-only extension of "
+      "the reset baseline")
+#
+# LIVE CHECK, AND THIS IS THE RIGHT HOME FOR IT. data/football/game_commitments.json
+# is written by board.py, which runs in football-capture.yml - the same workflow
+# whose final step runs this suite - so a violation is attributable to the run
+# that caused it. selftest_reset.py holds the HERMETIC half, proving the checker
+# catches deletions, mutations and back-dated insertions against synthetic
+# stores; putting this live read there instead would make a red run in the code
+# gate mean data drift, which is the one thing that gate must never mean.
+#
+# The reset artifact used to fingerprint this file under historical_files_sha256,
+# whose meaning is "byte-identical forever". It never was: the pipeline appends
+# on every run and the recorded hash was stale within hours. Reclassified under
+# append_only_baselines, and what is asserted now is the property that must
+# actually hold.
+import record_policy  # noqa: E402
+
+ART = os.path.join(ROOT, "data", "football", "reset_2026-09-11.json")
+GC = os.path.join(ROOT, "data", "football", "game_commitments.json")
+KEY = "data/football/game_commitments.json"
+if os.path.exists(ART) and os.path.exists(GC):
+    art = json.load(io.open(ART, encoding="utf-8"))
+    base = (art.get("append_only_baselines") or {}).get(KEY)
+    check(base is not None,
+          f"the reset artifact carries an append-only baseline for {KEY}")
+    check(KEY not in (art.get("historical_files_sha256") or {}),
+          f"{KEY} is NOT claimed as a frozen historical file - it is live state")
+    if base:
+        games = json.load(io.open(GC, encoding="utf-8"))["games"]
+        n, _ = record_policy.baseline_digest(games, base["baseline_cutoff_utc"])
+        problems = record_policy.check_append_only(games, base)
+        check(not problems,
+              f"every pre-reset commitment survives unchanged "
+              f"({n} at or before {base['baseline_cutoff_utc']}, "
+              f"{len(games)} total now)" if not problems else
+              f"APPEND-ONLY VIOLATED: {problems}")
+        check(len(games) >= base["entry_count_at_reset"],
+              f"the store has not shrunk since the reset "
+              f"({len(games)} >= {base['entry_count_at_reset']})")
+else:
+    print("       (no reset artifact or commitment store on disk; nothing to check)")
+
 print(f"\ncapture-isolation selftest: {'ALL PASSED' if not fails else str(len(fails)) + ' FAILED'}")
 for f in fails:
     print("  - " + f)

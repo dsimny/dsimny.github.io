@@ -1,0 +1,24 @@
+{
+ "amendment": "docs/FOOTBALL_RESET_2026-09-11.md",
+ "effective_kickoff_date": "2026-09-11",
+ "timezone": "America/New_York",
+ "official_selection_version": "fp-v0.4",
+ "pilot_entry_count": 44,
+ "pilot_entries_sha256": "d192e8cbaaf76db4069a04943ea2fd767802a877e8a194c5b3a8ff423c004c08",
+ "historical_files_sha256": {
+  "data/football/football_ledger.json": "3f36d431e498f4a99ccd4fc1b49e997e776260175a8ee62abddc26b589ce50ad",
+  "data/football/commitments.json": "d73711943bc2b367b606870161f4ffc852c0238d3693e3dd5b6cd53e038b96f4",
+  "data/football/board_2026-08-25.enc": "7722d8f5e5114ffc9779a9d3be28f75b4db3a58a1dcd84d9d1ea99fd2d103ce1",
+  "data/football/board_2026-09-01.enc": "663255fdf2e0c294d974f82b6230146cba6ecba7d640776f5018d475badb318e"
+ },
+ "reason": "Pre-launch selection and grading defects; history retained, official cohort restarted.",
+ "append_only_baselines": {
+  "data/football/game_commitments.json": {
+   "entry_count_at_reset": 132,
+   "sha256_at_reset": "5e7b78457d9c4dd26c9ef0b96b1356b0fe8a94b33c36a1f2fd5d9f8a6a808b8e",
+   "baseline_cutoff_utc": "2026-09-12T00:00:00Z",
+   "baseline_entries_sha256": "3fc14dcc751a73080877e968e74757524ed530e81403c406586ee2d399f947a9",
+   "note": "LIVE APPEND-ONLY STATE, not a frozen file. sha256_at_reset is this file's whole-file value at the reset boundary and is EXPECTED to diverge as new per-game commitments append; do not assert whole-file equality against it. What must hold forever: every entry whose committed_utc is at or before baseline_cutoff_utc is still present and byte-identical, and there are exactly entry_count_at_reset of them. baseline_entries_sha256 is the sha256 of the sorted [[game_key, sha256(entry)]] pairs for that subset, so a deletion, a mutation, or a back-dated insertion into the pre-reset window all change it. Verified by selftest_reset.py."
+  }
+ }
+}

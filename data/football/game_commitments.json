@@ -965,6 +965,40 @@
    "sha256": "869519a55287b9abada7ab32f8044b0651b715c10186f27bce36a84c6d752dc0",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Oregon Ducks @ Oklahoma State Cowboys|2026-09-12T17:30:00Z": {
+   "block": {
+    "away": "Oregon Ducks",
+    "best_book": "fanatics",
+    "best_price": 1200,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 2.93,
+    "fair_away": 0.92,
+    "fair_home": 0.08,
+    "fair_side": 0.08,
+    "home": "Oklahoma State Cowboys",
+    "kickoff_utc": "2026-09-12T17:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Oregon Ducks @ Oklahoma State Cowboys",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.167,
+    "relative_price_discount": 0.0384615385,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Oklahoma State Cowboys",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260911T173722Z.json",
+    "t24_hours_before_kickoff": 23.88
+   },
+   "committed_utc": "2026-09-12T16:37:26Z",
+   "kickoff_utc": "2026-09-12T17:30:00Z",
+   "matchup": "Oregon Ducks @ Oklahoma State Cowboys",
+   "sha256": "cd11d62bdbffc107c32a4e4b58cc699f85927911f5f21c2b24a57b4f4e3eccbb",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Penn State Nittany Lions @ Temple Owls|2026-09-12T16:00:00Z": {
    "block": {
     "away": "Penn State Nittany Lions",

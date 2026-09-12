@@ -63,7 +63,31 @@ FONT_DIR = os.path.join(ROOT, "assets", "fonts")
 
 # Total checks this file is expected to run. Bump it DELIBERATELY when adding or
 # removing a check; unexplained drift means a check stopped executing.
-EXPECTED_CHECKS = 874
+EXPECTED_CHECKS = 875
+
+# BASELINE FOR CHECK 16.zz, captured before any group runs.
+#
+# 16.zz used to assert `not os.path.exists(data/instagram_status.json)` - using
+# "the path is absent" as a proxy for "the suite did not write there". That held
+# only while production had never published, and it broke the moment the pipeline
+# committed a real status file (703add9, "Grade 2026-09-11"): a correct suite
+# started failing because a correct production file existed.
+#
+# The same mistake as check 21.9, which asserted a real card did not exist, and
+# the same fix: snapshot the path BEFORE, compare AFTER, and assert the suite
+# neither created nor modified it. Absence was never the property that mattered.
+_LIVE_STATUS = os.path.join(ROOT, "data", "instagram_status.json")
+
+
+def _status_state():
+    """(exists, sha256-or-None) for the live status file."""
+    if not os.path.exists(_LIVE_STATUS):
+        return (False, None)
+    with open(_LIVE_STATUS, "rb") as f:
+        return (True, hashlib.sha256(f.read()).hexdigest())
+
+
+_STATUS_BEFORE = _status_state()
 
 # Checksums of the vendored font files, as recorded in assets/fonts/README.md.
 # A swapped or corrupted face changes every card, so it fails the suite here
@@ -1969,8 +1993,32 @@ def main():
 
     clear_env()
     pi.STATUS_PATH, pi.SLEEP = real_status_path, real_sleep
-    check("16.zz", "no live status file was created during the suite",
-          not os.path.exists(os.path.join(ROOT, "data", "instagram_status.json")))
+    # NOT "the path is absent" - "the suite did not write there". Production
+    # publishes a real status file, so absence stopped being true without
+    # anything being wrong. See the _STATUS_BEFORE note at the top.
+    check("16.zz", "the live status file was neither created nor modified",
+          _status_state() == _STATUS_BEFORE)
+    # CONTROL. Narrowing a guard is only safe if it still catches what it exists
+    # to catch. Point the helper at a scratch path, write through it, and require
+    # the comparison to move - proving 16.zz is sensitive to a WRITE and not just
+    # to the file's absence.
+    global _LIVE_STATUS
+    _real_live = _LIVE_STATUS
+    try:
+        with tempfile.TemporaryDirectory() as _td:
+            _LIVE_STATUS = os.path.join(_td, "instagram_status.json")
+            _absent = _status_state()
+            with open(_LIVE_STATUS, "w", encoding="utf-8") as f:
+                f.write('{"posted": "fake"}')
+            _created = _status_state()
+            with open(_LIVE_STATUS, "w", encoding="utf-8") as f:
+                f.write('{"posted": "fake2"}')
+            _modified = _status_state()
+        caught = (_absent != _created) and (_created != _modified)
+    finally:
+        _LIVE_STATUS = _real_live
+    check("16.zz1", "and that comparison catches both a creation and an in-place "
+                    "edit, so it is not merely an existence test", caught)
     check("16.zz2", "requests is STILL not imported after the whole transport suite",
           "requests" not in sys.modules)
 

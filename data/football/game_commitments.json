@@ -1617,6 +1617,43 @@
    "sha256": "047f0685512cdc99413197cb6eb42d3fb9ce98317d4819102525f356b96195a3",
    "sport": "ncaaf"
   },
+  "fp-v0.4|nfl|ARI @ LAC|2026-09-13T20:25:00Z": {
+   "block": {
+    "away": "Arizona Cardinals",
+    "best_book": "williamhill_us",
+    "best_price": 400,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.759,
+    "fair_away": 0.2,
+    "fair_home": 0.8,
+    "fair_side": 0.2,
+    "home": "Los Angeles Chargers",
+    "kickoff_utc": "2026-09-13T20:25:00Z",
+    "league": "NFL",
+    "matchup": "ARI @ LAC",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betus",
+     "price": 400
+    },
+    "raw_overround_pts": 4.167,
+    "relative_price_discount": -0.0,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Arizona Cardinals",
+    "sport": "nfl",
+    "t24_capture": "nfl_20260912T143728Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-09-12T14:37:30Z",
+   "kickoff_utc": "2026-09-13T20:25:00Z",
+   "matchup": "ARI @ LAC",
+   "sha256": "fd9b0525c32a7c69361f47b07e53089d57bcf05a2d1cf6a18a5af7a15e799bd7",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|ATL @ PIT|2026-09-13T17:00:00Z": {
    "block": {
     "away": "Atlanta Falcons",
@@ -1647,6 +1684,9 @@
    },
    "committed_utc": "2026-09-12T13:37:25Z",
    "kickoff_utc": "2026-09-13T17:00:00Z",
+   "later_disagreements": [
+    "091b9a614719b564923fa4505041806633be3c70d2e052c08528cdbf34871340"
+   ],
    "matchup": "ATL @ PIT",
    "sha256": "571d7601003519daf51bef51b772b3c1f417ffccba0c6549ff706e4e644c3011",
    "sport": "nfl"
@@ -1684,6 +1724,9 @@
    },
    "committed_utc": "2026-09-12T13:37:25Z",
    "kickoff_utc": "2026-09-13T17:00:00Z",
+   "later_disagreements": [
+    "bd65a40054b5f64bc7d60b5a8e8b273edbbe446c1b37eb44c9870b05816e39c3"
+   ],
    "matchup": "BAL @ IND",
    "sha256": "c4542096ca8723a69b711eaff9de5960a15721be4aa252b87c494ae26b6b5af3",
    "sport": "nfl"
@@ -1752,6 +1795,9 @@
    },
    "committed_utc": "2026-09-12T13:37:25Z",
    "kickoff_utc": "2026-09-13T17:00:00Z",
+   "later_disagreements": [
+    "923a4558aeb9337d18b9176568df9314d947216918c83309a529a63398c5a1da"
+   ],
    "matchup": "CHI @ CAR",
    "sha256": "6fe5fafa54544e61125058364cda070169222707aac61f130b9871d47a5cbd1b",
    "sport": "nfl"
@@ -1786,8 +1832,79 @@
    },
    "committed_utc": "2026-09-12T13:37:25Z",
    "kickoff_utc": "2026-09-13T17:00:00Z",
+   "later_disagreements": [
+    "c4f31021f74a7e782b236b674875a7ffed7491a5ab22fbc35658551c19e504fb"
+   ],
    "matchup": "CLE @ JAX",
    "sha256": "436af705916e9441bd272e6bf7af6d0a2837c93836e6b04470df06fd52f25007",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|GB @ MIN|2026-09-13T20:25:00Z": {
+   "block": {
+    "away": "Green Bay Packers",
+    "best_book": "fanatics",
+    "best_price": 110,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.976,
+    "fair_away": 0.46457,
+    "fair_home": 0.53543,
+    "fair_side": 0.46457,
+    "home": "Minnesota Vikings",
+    "kickoff_utc": "2026-09-13T20:25:00Z",
+    "league": "NFL",
+    "matchup": "GB @ MIN",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.491,
+    "relative_price_discount": -0.0250052444,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Green Bay Packers",
+    "sport": "nfl",
+    "t24_capture": "nfl_20260912T143728Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-09-12T14:37:30Z",
+   "kickoff_utc": "2026-09-13T20:25:00Z",
+   "matchup": "GB @ MIN",
+   "sha256": "d2669a38e808975d2caad2316f16cd86774b568e6a04638526a2c9866f9d08f2",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|MIA @ LV|2026-09-13T20:25:00Z": {
+   "block": {
+    "away": "Miami Dolphins",
+    "best_book": "betrivers",
+    "best_price": -159,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.712,
+    "fair_away": 0.40091,
+    "fair_home": 0.59909,
+    "fair_side": 0.59909,
+    "home": "Las Vegas Raiders",
+    "kickoff_utc": "2026-09-13T20:25:00Z",
+    "league": "NFL",
+    "matchup": "MIA @ LV",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.931,
+    "relative_price_discount": -0.0247162747,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Las Vegas Raiders",
+    "sport": "nfl",
+    "t24_capture": "nfl_20260912T143728Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-09-12T14:37:30Z",
+   "kickoff_utc": "2026-09-13T20:25:00Z",
+   "matchup": "MIA @ LV",
+   "sha256": "30860962b8f031c3d385fbced04ab077d6849c4adcce3030a8f5f4f04b6e2bdb",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|NO @ DET|2026-09-13T17:00:00Z": {
@@ -1820,6 +1937,9 @@
    },
    "committed_utc": "2026-09-12T13:37:25Z",
    "kickoff_utc": "2026-09-13T17:00:00Z",
+   "later_disagreements": [
+    "830d6e5fe61656d6c91faf7d1f261e96a67321662d9647692829de81b3c2e19d"
+   ],
    "matchup": "NO @ DET",
    "sha256": "9429155ffd61e98fd3741a97d467d4df3f08b8be855d84186f3cf7a1f9d8c06b",
    "sport": "nfl"
@@ -1854,6 +1974,9 @@
    },
    "committed_utc": "2026-09-12T13:37:25Z",
    "kickoff_utc": "2026-09-13T17:00:00Z",
+   "later_disagreements": [
+    "4bb4a8b38686bdc14b8a4dbb054a516daa293d35e0bfdf999cadb7a7a25a42d8"
+   ],
    "matchup": "NYJ @ TEN",
    "sha256": "6fa735aa71548dc02d98562bc6ed6194e08f0c6ea2174db3dbec5cb850799937",
    "sport": "nfl"
@@ -1891,8 +2014,45 @@
    },
    "committed_utc": "2026-09-12T13:37:25Z",
    "kickoff_utc": "2026-09-13T17:00:00Z",
+   "later_disagreements": [
+    "119512f4e1d44861ddb47670fa7d9f43aaadae54de6f7cfdf8769f5f6d22d9a3"
+   ],
    "matchup": "TB @ CIN",
    "sha256": "624d333ccfadf62aebb1295ac43ff23377ecd4d35b04507e9c014e9454c4ea9b",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|WAS @ PHI|2026-09-13T20:25:00Z": {
+   "block": {
+    "away": "Washington Commanders",
+    "best_book": "betmgm",
+    "best_price": -235,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.936,
+    "fair_away": 0.31535,
+    "fair_home": 0.68465,
+    "fair_side": 0.68465,
+    "home": "Philadelphia Eagles",
+    "kickoff_utc": "2026-09-13T20:25:00Z",
+    "league": "NFL",
+    "matchup": "WAS @ PHI",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.968,
+    "relative_price_discount": -0.0246065088,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Philadelphia Eagles",
+    "sport": "nfl",
+    "t24_capture": "nfl_20260912T143728Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-09-12T14:37:30Z",
+   "kickoff_utc": "2026-09-13T20:25:00Z",
+   "matchup": "WAS @ PHI",
+   "sha256": "bdfb3bd78854247b2ed99df8b3a4740cd4dae847997b97186ab684bbe107f984",
    "sport": "nfl"
   },
   "ncaaf|Akron Zips @ Wake Forest Demon Deacons|2026-09-03T23:00:00Z": {

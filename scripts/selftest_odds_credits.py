@@ -34,7 +34,13 @@ helper and changed NO behaviour, including the behaviours that look wrong.
       relative to the request, the status check and the body parse, and which
       clock stamps it. fetch_historical_odds.py books ONCE PER BATCH;
   [10] NEGATIVE CONTROLS: deliberately broken helpers and wrappers must fail [1];
-  [11] the real ledger is untouched.
+  [11] the suite's own CI gate, .github/workflows/odds-credits-selftest.yml:
+       read-only, no secrets, runs only this suite, identical push/PR filters
+       that cover this suite's import graph - RE-DERIVED here on every run, so a
+       new import cannot silently fall outside the trigger. (That the suite is
+       NOT in Football code self-tests is asserted by selftest_workflows.py,
+       the suite that runs when that gate's file changes.);
+  [12] the real ledger is untouched.
 
 THESE TESTS PIN PHASE 1. THEY DO NOT ENDORSE WHAT THEY PIN. Before- vs
 after-response timestamps, batch-level historical booking, a silent NOTE on a
@@ -91,7 +97,7 @@ try:
 except ImportError:
     oc = None
 
-EXPECTED_CHECKS = 472
+EXPECTED_CHECKS = 489
 fails = []
 n = [0]
 
@@ -422,8 +428,13 @@ def sections():
     else:
         check(False, "negative controls need scripts/odds_credits.py")
 
-    # ---- 11. the real ledger --------------------------------------------------
-    print("\n[11] the real ledger")
+    # ---- 11. this suite's own CI gate -----------------------------------------
+    print("\n[11] the Odds credit self-tests workflow: offline, read-only, and "
+          "triggered by the suite's whole import graph")
+    ci_contract()
+
+    # ---- 12. the real ledger --------------------------------------------------
+    print("\n[12] the real ledger")
     check(_sha(REAL_LEDGER) == REAL_LEDGER_SHA,
           "data/odds_credits.json is byte-for-byte what it was before this test ran")
 
@@ -1240,6 +1251,113 @@ def _wrapper_mutants():
              odds_ignores_credit_log),
             ("fetch_historical_odds derives its path from ROOT, ignoring CREDIT_LOG",
              "fetch_historical_odds", historical_ignores_credit_log)]
+
+
+CI_WORKFLOW = os.path.join(ROOT, ".github", "workflows", "odds-credits-selftest.yml")
+CREDIT_PATHS = ["scripts/odds_credits.py", "scripts/selftest_odds_credits.py",
+                "scripts/fetch_closing.py", "scripts/fetch_data.py",
+                "scripts/football/fetch_odds.py", "scripts/football/fetch_historical_odds.py",
+                ".github/workflows/odds-credits-selftest.yml"]
+# Not derivable from imports: the job installs from requirements.txt, and
+# teams.from_name() READS the names table during [6]'s unmatched-team case.
+NON_IMPORT_PATHS = ["requirements.txt", "data/football/team_names.json"]
+
+
+def module_level_imports(path):
+    """Top-level module names imported when `path` is IMPORTED - including imports
+    inside module-level try/if/with blocks, excluding function and class bodies,
+    which run only if called."""
+    with open(path, encoding="utf-8") as f:
+        tree = ast.parse(f.read())
+    names = []
+
+    def visit(stmts):
+        for s in stmts:
+            if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            if isinstance(s, ast.Import):
+                names.extend(a.name.split(".")[0] for a in s.names)
+            elif isinstance(s, ast.ImportFrom) and s.level == 0 and s.module:
+                names.append(s.module.split(".")[0])
+            for field in ("body", "orelse", "finalbody", "handlers"):
+                sub = getattr(s, field, None)
+                if isinstance(sub, list):
+                    visit(sub)
+    visit(tree.body)
+    return names
+
+
+def import_closure():
+    """Project files reached from this suite through module-level imports."""
+    start = os.path.join(SCRIPTS, "selftest_odds_credits.py")
+    seen, queue = {start}, [start]
+    while queue:
+        for name in module_level_imports(queue.pop()):
+            for d in (SCRIPTS, FOOTBALL):
+                p = os.path.join(d, name + ".py")
+                if os.path.exists(p) and p not in seen:
+                    seen.add(p)
+                    queue.append(p)
+    return sorted(os.path.relpath(p, ROOT).replace(os.sep, "/") for p in seen)
+
+
+def ci_contract():
+    import yaml
+    check(os.path.isfile(CI_WORKFLOW), ".github/workflows/odds-credits-selftest.yml exists")
+    if not os.path.isfile(CI_WORKFLOW):
+        return
+    with open(CI_WORKFLOW, encoding="utf-8") as f:
+        raw = f.read()
+    doc = yaml.safe_load(raw)
+    code = "\n".join(l for l in raw.splitlines() if not l.lstrip().startswith("#"))
+    on = doc.get("on", doc.get(True)) or {}                 # YAML 1.1 reads `on` as True
+    check(doc.get("name") == "Odds credit self-tests", f"named 'Odds credit self-tests' "
+          f"({doc.get('name')!r})")
+    check(sorted(on) == ["pull_request", "push", "workflow_dispatch"],
+          f"triggers are exactly workflow_dispatch, push and pull_request ({sorted(on)})")
+    push, pr = on.get("push") or {}, on.get("pull_request") or {}
+    check(push.get("branches") == ["main"] and pr.get("branches") == ["main"],
+          "push and pull_request are filtered to main")
+    paths = push.get("paths") or []
+    check(paths and paths == pr.get("paths"),
+          "push and pull_request path filters are IDENTICAL, entry for entry")
+    check(len(paths) == len(set(paths)), "no path is listed twice")
+    check(not any(k in push or k in pr for k in ("paths-ignore", "branches-ignore", "tags")),
+          "no paths-ignore / branches-ignore / tags that could narrow the filter")
+    missing = [p for p in CREDIT_PATHS if p not in paths]
+    check(not missing, f"all six credit files and the workflow itself are in the filter "
+          f"(missing {missing})")
+    closure = import_closure()
+    missing = [p for p in closure if p not in paths]
+    check(not missing, f"EVERY project module in the suite's module-level import closure is "
+          f"in the filter - derived now, not remembered: {closure} (missing {missing})")
+    missing = [p for p in NON_IMPORT_PATHS if p not in paths]
+    check(not missing, f"requirements.txt and the runtime-read team_names.json are in the "
+          f"filter (missing {missing})")
+    stale = [p for p in paths if not os.path.exists(os.path.join(ROOT, p))]
+    extra = [p for p in paths if p not in set(CREDIT_PATHS) | set(closure) | set(NON_IMPORT_PATHS)]
+    check(not stale and not extra,
+          f"every filter entry exists and has a derived reason (stale {stale}, "
+          f"unexplained {extra})")
+    check("secrets." not in code and "secrets" not in json.dumps(doc),
+          "no secrets.* reference anywhere in the workflow")
+    check(doc.get("permissions") == {"contents": "read"},
+          f"permissions: contents: read ({doc.get('permissions')})")
+    jobs = doc.get("jobs") or {}
+    check(len(jobs) == 1 and all("permissions" not in j for j in jobs.values()),
+          "one job, and it does not widen permissions")
+    steps = [s for j in jobs.values() for s in (j.get("steps") or [])]
+    runs = [s["run"].strip() for s in steps if "run" in s]
+    check(runs == ["pip install -r requirements.txt", "python scripts/selftest_odds_credits.py"],
+          f"it runs only the dependency install and python scripts/selftest_odds_credits.py "
+          f"({runs})")
+    py = [s.get("with", {}).get("python-version") for s in steps
+          if str(s.get("uses", "")).startswith("actions/setup-python")]
+    check(py == ["3.12"], f"Python 3.12 ({py})")
+    envs = [k for s in steps for k in (s.get("env") or {})] + \
+           [k for j in jobs.values() for k in (j.get("env") or {})] + list(doc.get("env") or {})
+    check(envs == ["PYTHONIOENCODING"],
+          f"no environment beyond PYTHONIOENCODING - nothing a key could ride in on ({envs})")
 
 
 def negative_controls():

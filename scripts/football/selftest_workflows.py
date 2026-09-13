@@ -519,6 +519,31 @@ cap_groups = set(groups_by_wf.get("football-capture.yml", []))
 check(not (cap_groups & set(cc_groups)),
       "and the two workflows share no group")
 
+# --------------------------------------------------------------------------
+print("\n[11] odds credit accounting has its OWN gate, separate from this one")
+# selftest_odds_credits.py covers two MLB scripts as well as two football ones,
+# so it runs in "Odds credit self-tests", never here: a red X in Football code
+# self-tests must keep meaning football code. That workflow's own contract
+# (filters, permissions, secrets, import graph) is asserted by the suite it
+# runs, which fires whenever that file changes. THIS check lives here because
+# it can only be broken by editing football-selftest.yml - which is exactly
+# what triggers this suite.
+ODDS = "odds-credits-selftest.yml"
+check(os.path.isfile(os.path.join(WF, ODDS)), f"{ODDS} exists")
+check("odds_credits" not in code_lines(SELFTEST),
+      "Football code self-tests does not run selftest_odds_credits.py or trigger on "
+      "its paths")
+suites_line = re.search(r'^\s*SUITES="([^"]*)"', code_lines(SELFTEST), re.M)
+check(suites_line is not None and "odds_credits" not in suites_line.group(1).split(),
+      "and odds_credits is not in its SUITES list")
+if os.path.isfile(os.path.join(WF, ODDS)):
+    odds_doc = parsed(ODDS)
+    check(odds_doc.get("name") == "Odds credit self-tests"
+          and odds_doc.get("name") != parsed(SELFTEST).get("name"),
+          "the two gates are distinct workflows with distinct names")
+    check("scripts/football/selftest_" not in code_lines(ODDS),
+          f"{ODDS} runs no football suite: the separation holds in both directions")
+
 print(f"\nworkflow-contract selftest: "
       f"{'ALL PASSED' if not fails else str(len(fails)) + ' FAILED'}")
 for f in fails:

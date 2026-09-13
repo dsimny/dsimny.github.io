@@ -1,0 +1,98 @@
+name: Odds credit self-tests
+# The regression gate for Odds API credit accounting: scripts/odds_credits.py,
+# the one writer of data/odds_credits.json, and the four callers that book
+# readings through it (fetch_closing, fetch_data, football/fetch_odds,
+# football/fetch_historical_odds).
+#
+# A RED RUN HERE MEANS A CREDIT-ACCOUNTING CODE REGRESSION. The suite holds the
+# four original writers frozen and requires byte-identical behaviour, pins each
+# caller's booking position and clock, and pins the known hazards it does not
+# fix. It reads the committed ledger only to prove it did not change.
+#
+# DELIBERATELY NOT PART OF "Football code self-tests". Two of the four callers
+# are MLB scripts, and a red X in that gate must keep meaning football code and
+# nothing else. selftest_workflows.py (in that gate) asserts the separation.
+#
+# NEEDS NO SECRETS AND THE SUITE TOUCHES NO NETWORK: every Odds API response is
+# a fake, every write lands in a temp directory. The pip install below is the
+# only network access, as in every other self-test workflow.
+#
+# THE PATH FILTER IS THE SUITE'S IMPORT GRAPH, DERIVED, NOT GUESSED. A change to
+# any file listed can change what the suite observes; a change to anything else
+# cannot. selftest_odds_credits.py re-derives the module-level import closure on
+# every run and fails if a module is missing from both lists below. Beyond the
+# six credit files and this workflow:
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/odds_credits.py"
+      - "scripts/selftest_odds_credits.py"
+      - "scripts/fetch_closing.py"
+      - "scripts/fetch_data.py"
+      - "scripts/football/fetch_odds.py"
+      - "scripts/football/fetch_historical_odds.py"
+      - ".github/workflows/odds-credits-selftest.yml"
+      # The job installs from it, and the suite imports requests, yaml, and
+      # (through the modules below) cryptography and zoneinfo/tzdata.
+      - "requirements.txt"
+      # fetch_data.py imports these two at module level: the suite cannot
+      # import fetch_data without executing them.
+      - "scripts/crypto_box.py"
+      - "scripts/season.py"
+      # fetch_odds.py and fetch_historical_odds.py import these at module level,
+      # in-process and again in the suite's run-as-a-script subprocesses. teams
+      # is also EXECUTED: the unmatched-team characterisation calls from_name().
+      - "scripts/football/localenv.py"
+      - "scripts/football/teams.py"
+      - "scripts/football/asof.py"
+      # Data, not code, but read at run time by teams.from_name() in that same
+      # characterisation. Changed once since it was built.
+      - "data/football/team_names.json"
+      # NOT LISTED, deliberately: scripts/post_discord.py is imported only inside
+      # fetch_data.alert_low_credits(), which the suite replaces and never runs;
+      # data/odds_credits.json is only hashed before and after the run, and a bot
+      # rewrites it every capture - listing it would fire this gate hourly.
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/odds_credits.py"
+      - "scripts/selftest_odds_credits.py"
+      - "scripts/fetch_closing.py"
+      - "scripts/fetch_data.py"
+      - "scripts/football/fetch_odds.py"
+      - "scripts/football/fetch_historical_odds.py"
+      - ".github/workflows/odds-credits-selftest.yml"
+      - "requirements.txt"
+      - "scripts/crypto_box.py"
+      - "scripts/season.py"
+      - "scripts/football/localenv.py"
+      - "scripts/football/teams.py"
+      - "scripts/football/asof.py"
+      - "data/football/team_names.json"
+
+# Read-only. This job validates; it never commits, never pushes, and never
+# posts anywhere.
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    name: Odds credit self-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run selftest_odds_credits.py
+        # PYTHONIOENCODING: the suite prints non-ASCII test data; never depend
+        # on the runner's default stdout encoding.
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/selftest_odds_credits.py

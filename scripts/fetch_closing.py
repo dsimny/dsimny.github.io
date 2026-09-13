@@ -121,6 +121,25 @@ def fetch_market_odds(games, team_names, key):
                 "away_ml": int(statistics.median(a_mls)),
                 "home_ml": int(statistics.median(h_mls)),
                 "total": float(statistics.median(tots)) if tots else None,
+                # PER-LINE CREDIT PROVENANCE: the reading of the call that
+                # produced THIS line, riding into the store via main()'s {**o}.
+                # Per game rather than top-level like fetch_odds.py, because every
+                # top-level key here is a gamePk: odds_page.py iterates
+                # store.items() as games and crashes on anything else.
+                #
+                # PROVENANCE, NOT ACCOUNTING. DO NOT SUM THIS FIELD. One API call
+                # captures many games, and this same reading is copied onto EVERY
+                # game that call produced - three games from one 2-credit call carry
+                # three copies of last_call_cost=2, so summing them reports 6 for a
+                # call that cost 2. It answers "what did the call behind this line
+                # cost, against what balance?" and nothing else.
+                #
+                # THE ONLY LEDGER IS data/odds_credits.json, written once per call
+                # by record_credits() above. Any spend total, burn rate or credit
+                # alert must read that file, never these per-game copies.
+                # selftest_closing.py pins the overstatement so it cannot be
+                # "fixed" into a silent miscount.
+                "credits": credits,
             }
             if ovr and und:
                 rec["over_price"] = int(statistics.median(ovr))

@@ -104,9 +104,24 @@ permissions:
 # Several jobs share data/ and push to the same branch. Queue rather than cancel:
 # a cancelled capture is a possibly-missed window, which is the one outcome this
 # job exists to prevent.
+#
+# `queue: max` IS WHAT MAKES THAT SENTENCE TRUE. cancel-in-progress: false alone
+# does not: GitHub's default (`queue: single`) keeps ONE pending run per group,
+# and a newer arrival CANCELS it. So a hung capture spanning two dispatches would
+# silently drop the first waiting run. That setup is real - run 33649709233 hung
+# 45 min on 2026-09-02 while 33650789076 waited 35 min behind it - it simply never
+# had a second arrival in that window. `max` keeps up to 100 pending, processed
+# roughly FIFO; each late run finds its windows already satisfied and exits fast.
+# Invalid with cancel-in-progress: true, which is why that stays false.
+#
+# DELIBERATELY NOT SHARED with capture-closing. Measured 2026-09-13 over 14 days:
+# zero overlaps, 370s minimum clearance, and capture-closing lands as little as
+# 4 minutes before first pitch - queueing it behind this job's 45-minute worst
+# case would cross first pitch. See selftest_workflows.py.
 concurrency:
   group: football-capture
   cancel-in-progress: false
+  queue: max
 
 jobs:
   capture:

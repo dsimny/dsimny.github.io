@@ -465,6 +465,60 @@ for (fn, name), body in sorted(SITES.items()):
         check(never not in body,
               f"{fn}:{name}: never stages {never} - this workflow does not own it")
 
+# --------------------------------------------------------------------------
+print("\n[10] football-capture queues rather than cancels, and stays independent")
+#
+# `cancel-in-progress: false` was believed to mean "queue". It does not. GitHub's
+# default `queue: single` keeps ONE pending run per group and a newer arrival
+# CANCELS it, so a hung capture spanning two dispatches silently dropped the first
+# waiting run - "a possibly-missed window, which is the one outcome this job exists
+# to prevent", in the workflow's own words. `queue: max` makes the comment true.
+#
+# And the group stays PRIVATE to football-capture. Sharing it with
+# capture-closing was measured and rejected (2026-09-13): zero overlaps in 14 days,
+# 370s minimum clearance, while capture-closing lands as little as 4 minutes before
+# first pitch. Under default queueing a shared group would CANCEL capture-closing
+# on the next football dispatch; under queue: max it would make capture-closing
+# wait out this job's 45-minute worst case and cross first pitch.
+conc = cap_doc.get("concurrency") or {}
+check(conc.get("group") == "football-capture",
+      f"football-capture's group is still 'football-capture' ({conc.get('group')!r})")
+check(conc.get("cancel-in-progress") is False,
+      f"cancel-in-progress is still false - queue: max is INVALID with true "
+      f"({conc.get('cancel-in-progress')!r})")
+check(conc.get("queue") == "max",
+      f"queue is 'max', so a newer dispatch cannot cancel a waiting capture "
+      f"({conc.get('queue')!r})")
+check(set(conc) == {"group", "cancel-in-progress", "queue"},
+      f"no other concurrency key has crept in ({sorted(conc)})")
+
+# EVERY workflow's groups, top-level and per-job, so a group attached to a job
+# rather than the workflow cannot slip past.
+groups_by_wf = {}
+for fn in sorted(os.listdir(WF)):
+    if not fn.endswith(".yml"):
+        continue
+    doc = parsed(fn)
+    found = []
+    for scope in [doc] + list((doc.get("jobs") or {}).values()):
+        c = scope.get("concurrency") if isinstance(scope, dict) else None
+        if isinstance(c, dict) and c.get("group") is not None:
+            found.append(str(c["group"]))
+        elif isinstance(c, str):
+            found.append(c)
+    groups_by_wf[fn] = found
+owners = sorted(fn for fn, gs in groups_by_wf.items()
+                if any("football-capture" in g for g in gs))
+check(owners == ["football-capture.yml"],
+      f"no other workflow joins the football-capture group ({owners})")
+cc_groups = groups_by_wf.get("capture-closing.yml", [])
+check(not cc_groups,
+      f"capture-closing declares no concurrency group at all - it runs "
+      f"independently ({cc_groups})")
+cap_groups = set(groups_by_wf.get("football-capture.yml", []))
+check(not (cap_groups & set(cc_groups)),
+      "and the two workflows share no group")
+
 print(f"\nworkflow-contract selftest: "
       f"{'ALL PASSED' if not fails else str(len(fails)) + ' FAILED'}")
 for f in fails:

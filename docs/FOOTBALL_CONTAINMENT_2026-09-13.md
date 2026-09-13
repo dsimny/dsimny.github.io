@@ -34,3 +34,25 @@ price and hashes remain unchanged; the appended result records the resolution
 identifier and provider kickoff separately. Changed provider identity/timing
 fails closed. CLV admits no capture after the earlier of the two kickoffs.
 Future adjudications must be separate files, never edits to this record.
+
+## Record classification amendment
+
+At the user's direction, the exact incident board hash
+`da33da68ad7e9f444c18dc1337c81af4fc172a22a361bc83d6b65f6f92e55a34` is now
+excluded from the official football record. Its two settled rows remain in the
+append-only ledger, with original prices, outcomes, CLV, event IDs and hashes.
+They render as **INVALIDATED INCIDENT** in a separate disclosed incident
+history and contribute no official W-L, CLV or hypothetical return. This is a
+hash-scoped cohort classification, not deletion, result editing, or a general
+loss-exclusion rule. Future classifications require their own dated amendment.
+
+This September 13 amendment supersedes the earlier no-further-reset statement
+only for this exact board. It is a post-result classification: both featured
+positions had already settled as losses. The full slate contains 72 cards:
+two featured picks and 70 additional coverage games. All are invalidated as
+recommendations; coverage cards were never part of the official aggregate.
+The original ledger, board, encrypted board and commitments are preserved.
+Settlement deduplication uses board hash and tier regardless of classification.
+The public hub and original weekly page disclose this exclusion. A 0-0
+official aggregate is not an undefeated lifetime record. Automated football
+delivery remains paused pending validation of a separately registered strategy.

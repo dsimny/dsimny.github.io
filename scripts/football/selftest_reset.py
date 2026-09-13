@@ -30,6 +30,12 @@ def fixture():
 
 
 class ResetTests(unittest.TestCase):
+    def test_incident_board_is_not_official(self):
+        row = {"record_cohort": policy.VERSION, "selection_version": policy.VERSION,
+               "tier": "premium", "board_sha256": "da33da68ad7e9f444c18dc1337c81af4fc172a22a361bc83d6b65f6f92e55a34",
+               "kickoff_utc": "2026-09-13T04:00:00Z"}
+        self.assertFalse(policy.is_official(row))
+
     def test_eastern_boundary_and_fail_closed(self):
         self.assertFalse(policy.after_start("2026-09-11T03:59:59Z"))
         self.assertTrue(policy.after_start("2026-09-11T04:00:00Z"))

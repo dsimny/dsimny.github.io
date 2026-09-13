@@ -7,6 +7,14 @@ from zoneinfo import ZoneInfo
 VERSION = "fp-v0.4"
 START_DATE = "2026-09-11"
 
+# Incident cohort excluded from the official record by the September 13, 2026
+# containment amendment. Rows remain append-only evidence and render under the
+# invalidated/pilot section; this exact board hash cannot affect official W-L,
+# CLV or hypothetical returns. Future exclusions require a new dated amendment.
+INVALIDATED_BOARD_SHA256 = frozenset({
+    "da33da68ad7e9f444c18dc1337c81af4fc172a22a361bc83d6b65f6f92e55a34",
+})
+
 
 def baseline_digest(games, cutoff_utc):
     """(count, sha256) over the entries committed at or before cutoff_utc.
@@ -65,6 +73,7 @@ def is_official(row):
             and row.get("selection_version") == VERSION
             and row.get("tier") in ("premium", "free")
             and bool(row.get("board_sha256"))
+            and row.get("board_sha256") not in INVALIDATED_BOARD_SHA256
             and after_start(row.get("kickoff_utc")))
 
 
@@ -73,7 +82,8 @@ def partition(entries):
     for row in entries:
         if is_official(row):
             official.append(row)
-        elif row.get("record_cohort") != VERSION:
+        elif (row.get("board_sha256") in INVALIDATED_BOARD_SHA256
+              or row.get("record_cohort") != VERSION):
             pilot.append(row)
         else:
             research.append(row)

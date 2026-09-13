@@ -215,6 +215,12 @@ def render_week(week, reveal=None):
                 'listed below with its reason.</p>')
 
     parts = []
+    if crypto_box.sha256_of(b) in record_policy.INVALIDATED_BOARD_SHA256:
+        parts.append('<p class="commit"><strong>Invalidated incident slate.</strong> '
+                     'This entire slate was excluded from official performance on September 13, '
+                     '2026, after its two featured picks had settled as losses. All cards, '
+                     'original commitments and results remain available. '
+                     '<a href="/football/#incident">Classification disclosure</a>.</p>')
     if not b.get("decision_made"):
         parts.append('<p class="mut">The play for this week has not been chosen '
                      'yet. Games are fingerprinted as each one reaches 24 hours '
@@ -337,6 +343,8 @@ def render_hub():
     # under their own heading and labelled. Hiding them would trade one
     # transparency failure for a worse one.
     official, pilot, research = record_policy.partition(entries)
+    incident = [e for e in pilot if e.get("board_sha256") in record_policy.INVALIDATED_BOARD_SHA256]
+    pilot = [e for e in pilot if e.get("board_sha256") not in record_policy.INVALIDATED_BOARD_SHA256]
 
     def _rec(rows):
         w = sum(1 for e in rows if e.get("result") == "win")
@@ -353,7 +361,7 @@ def render_hub():
     def _table(rows, tier_col):
         body = "".join(
             f'<tr><td>{E(e.get("slate_week",""))}</td>'
-            f'<td>{E(STATUS.get(e.get(tier_col[1]), str(e.get(tier_col[1], "")).upper()))}</td>'
+            f'<td>{E("INVALIDATED INCIDENT" if e.get("board_sha256") in record_policy.INVALIDATED_BOARD_SHA256 else STATUS.get(e.get(tier_col[1]), str(e.get(tier_col[1], "")).upper()))}</td>'
             f'<td>{E(e.get("matchup",""))}</td><td>{E(str(e.get("side","")))}</td>'
             f'<td>{money(e.get("price"))}</td><td>{E(str(e.get("result","")))}</td>'
             f'<td>{e.get("clv_pts","")}</td></tr>' for e in rows)
@@ -419,6 +427,9 @@ def render_hub():
   <p class="mut">Record reset disclosed: <a href="/football/#pilot">pre-launch test history</a>.
   Official cohort starts September 11, 2026 under fp-v0.4; earlier boards retain their original rules.</p>
   {headline}
+  <p class="mut">The September 8 incident slate is excluded after audit, including
+  its two featured losses. A zero official record is not an undefeated lifetime
+  record. <a href="#incident">See retained results and the dated amendment</a>.</p>
   {scope}
   <p>Official football begins with eligible kickoffs on or after September 11, 2026
   (America/New_York), under fp-v0.4. No retroactive selections. The weekly Saturday
@@ -429,6 +440,17 @@ def render_hub():
   kickoff.</p>
   {official_tbl}
   {upgrade_block()}
+  <h2 id="incident">Invalidated incident slate — excluded from official performance</h2>
+  <p>The full September 8 slate (two featured picks and 70 additional coverage cards)
+  was invalidated on September 13, 2026, after both featured picks settled as losses.
+  This post-result classification corrects a defective recommendation process;
+  it is not a claim that these picks were never published. Original selections,
+  prices, losses and hashes remain unchanged. No result from this board contributes
+  to official W–L, CLV or hypothetical returns.</p>
+  <p><a href="/docs/FOOTBALL_CONTAINMENT_2026-09-13.md">Dated classification amendment</a> ·
+  <a href="/football/2026-09-08/">Full original slate</a> ·
+  <a href="/data/football/football_ledger.json">Unchanged ledger</a></p>
+  {_table(incident, ("Status", "tier"))}
   <h2 id="pilot">Pre-launch / invalidated selection test</h2>
   <p>Prior selections and results remain intact, including losses. They are excluded
   from official W–L, CLV and hypothetical returns. This is a disclosed restart,

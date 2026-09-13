@@ -162,8 +162,9 @@ def additions(sport, ledger, results, cfg, snaps):
         return []
     with open(board.COMMITMENTS, encoding="utf-8") as f:
         commitments = json.load(f)["commitments"]
+    # Settlement identity survives later record classifications.
     done = {(e.get("board_sha256"), e.get("tier")) for e in ledger["entries"]
-            if record_policy.is_official(e)}
+            if e.get("board_sha256") and e.get("tier") in ("premium", "free")}
     out = []
     for c in commitments:
         if c.get("selection_version") != record_policy.VERSION:

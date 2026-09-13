@@ -41,8 +41,12 @@ from datetime import datetime, timezone, timedelta
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# scripts/ too, for the shared odds_credits.py. APPENDED, not inserted, so it can
+# never shadow a module in this directory.
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import asof                                        # noqa: E402
 import localenv                                    # noqa: E402
+import odds_credits                                # noqa: E402
 from teams import from_name, UnknownTeam           # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -98,16 +102,11 @@ def snap_path(stamp):
 
 
 def record_credits(entry):
-    try:
-        log = {"readings": []}
-        if os.path.exists(CREDIT_LOG):
-            with io.open(CREDIT_LOG, encoding="utf-8") as f:
-                log = json.load(f)
-        log["readings"] = (log.get("readings", []) + [entry])[-60:]
-        with io.open(CREDIT_LOG, "w", encoding="utf-8") as f:
-            json.dump(log, f, indent=1)
-    except Exception as exc:
-        print(f"NOTE: could not record odds credits: {exc}")
+    """Append one reading to CREDIT_LOG via the shared odds_credits.py. Never
+    raises. Takes the helper's KEEP - 60, the number this copy used to hardcode.
+    No create_parent: this caller never made the directory (main() has already
+    made data/ by the time it books)."""
+    odds_credits.record(entry, path=CREDIT_LOG)
 
 
 def normalise(payload, requested, markets, regions):
@@ -306,6 +305,15 @@ def main():
                   f"({rate*60:.0f}/min)")
         time.sleep(args.sleep)
 
+    # ONE READING PER BATCH, BOOKED HERE AFTER THE LOOP - deliberately not one per
+    # call. The ledger keeps only the newest 60 readings and a backfill makes
+    # hundreds of calls: booking each would flush every operational reading (the
+    # scheduled captures, the closing and morning fetches) out of the window in a
+    # single run. It carries the LAST call's balance, stamped when the batch ends.
+    # The known costs are accepted for now: a stop mid-batch (credit floor, a
+    # garbled body) books nothing for the calls that did succeed, and a non-200
+    # books only itself, in fetch_one(). What those calls spent still shows in the
+    # next reading's remaining/used. selftest_odds_credits.py [8] pins all of it.
     record_credits({"remaining": rem, "used": used, "last_call_cost": cost,
                     "markets": args.markets, "regions": args.regions,
                     "http_status": 200, "source": "football_historical",

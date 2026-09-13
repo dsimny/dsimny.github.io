@@ -501,6 +501,9 @@ never the cause, but the run was flying blind on them):
   the 8 daily credits and none of its readings reached the repo, so the log
   showed the balance without ever showing which caller moved it). Any new odds
   caller must stage this file too.
+- Odds API credit ledger writes must go through `scripts/odds_credits.py`; do not
+  add new independent `record_credits()` implementations.
+  `data/odds_credits.json` is the canonical summable accounting ledger.
 - The
   snapshot carries the same numbers under `odds_credits`, but the snapshot is
   encrypted until grading, so it cannot be what makes the balance visible in the

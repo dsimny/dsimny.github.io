@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 import requests
 
 import crypto_box
+import odds_credits
 import season
 
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
@@ -106,6 +107,9 @@ def fetch_odds(key, credits_out):
 
 
 CREDIT_LOG_KEEP = 60
+CREDIT_LOG_NOTE = ("The Odds API bills one credit per market per region per call. "
+                   "Free tier: 500/month. See CLAUDE.md for the budget and the "
+                   "decision rule for upgrading.")
 
 def record_credits(credits):
     """Append the reading to data/odds_credits.json, IN THE CLEAR.
@@ -114,22 +118,15 @@ def record_credits(credits):
     grading reveals it — so it cannot be what makes the balance "visible in the
     repo". This file can, and it costs nothing: no picks, no model output, just
     a counter and a timestamp.
+
+    The append lives in scripts/odds_credits.py and never raises - telemetry
+    must never sink the board. The path is built here, before the append, exactly
+    where this function always built it. This caller alone writes the note, and
+    it has always created data/.
     """
     path = os.path.join(ROOT, "data", "odds_credits.json")
-    try:
-        log = {"readings": []}
-        if os.path.exists(path):
-            with open(path, encoding="utf-8") as f:
-                log = json.load(f)
-        log["readings"] = (log.get("readings", []) + [credits])[-CREDIT_LOG_KEEP:]
-        log["note"] = ("The Odds API bills one credit per market per region per call. "
-                       "Free tier: 500/month. See CLAUDE.md for the budget and the "
-                       "decision rule for upgrading.")
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(log, f, indent=1)
-    except Exception as exc:                 # telemetry must never sink the board
-        print(f"NOTE: could not record odds credits: {exc}")
+    odds_credits.record(credits, path=path, note=CREDIT_LOG_NOTE,
+                        keep=CREDIT_LOG_KEEP, create_parent=True)
 
 
 def alert_low_credits(remaining):

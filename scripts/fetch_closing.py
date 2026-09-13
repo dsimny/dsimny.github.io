@@ -32,6 +32,8 @@ from zoneinfo import ZoneInfo
 
 import requests
 
+import odds_credits
+
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 MLB = "https://statsapi.mlb.com/api/v1"
 DATE = sys.argv[1] if len(sys.argv) > 1 else datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
@@ -53,28 +55,23 @@ def parse_utc(s):
 
 # This job runs several times a day, so it is the bulk of the Odds API spend —
 # 3 captures/day against the board's 1. Any honest credit budget has to count it,
-# so it reads and logs the same balance headers fetch_data.py does. Kept as a
-# local copy rather than an import: this script deliberately never imports the
-# committed morning pipeline (see the module docstring). If you change one,
-# eyeball the other.
+# so it reads and logs the same balance headers fetch_data.py does. The header
+# read is kept as a local copy rather than an import: this script deliberately
+# never imports the committed morning pipeline (see the module docstring). If you
+# change one, eyeball the other. The ledger append is shared - odds_credits.py
+# is a leaf module with no pipeline in it.
 ODDS_MARKETS = os.environ.get("ODDS_MARKETS", "h2h,totals").strip()
 ODDS_REGIONS = os.environ.get("ODDS_REGIONS", "us").strip()
 CREDIT_LOG_KEEP = 60
 
 
 def record_credits(credits):
-    """Append a plaintext credit reading to data/odds_credits.json. Never raises."""
+    """Append a plaintext credit reading to data/odds_credits.json. Never raises
+    once the path is built - the path is built here, before the append, exactly
+    where this function always built it. No create_parent: this caller never made
+    data/, and a missing one still drops the reading with a NOTE."""
     path = os.path.join(ROOT, "data", "odds_credits.json")
-    try:
-        log = {"readings": []}
-        if os.path.exists(path):
-            with open(path, encoding="utf-8") as f:
-                log = json.load(f)
-        log["readings"] = (log.get("readings", []) + [credits])[-CREDIT_LOG_KEEP:]
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(log, f, indent=1)
-    except Exception as exc:
-        print(f"NOTE: could not record odds credits: {exc}")
+    odds_credits.record(credits, path=path, keep=CREDIT_LOG_KEEP)
 
 
 def fetch_market_odds(games, team_names, key):

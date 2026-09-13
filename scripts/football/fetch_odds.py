@@ -49,7 +49,11 @@ from datetime import datetime, timezone
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# scripts/ too, for the shared odds_credits.py. APPENDED, not inserted, so it can
+# never shadow a module in this directory.
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import localenv                                    # noqa: E402
+import odds_credits                                # noqa: E402
 from teams import from_name, UnknownTeam           # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -97,18 +101,11 @@ def iso(dt):
 
 
 def record_credits(credits):
-    """Append a plaintext credit reading. Never raises - mirrors fetch_closing."""
-    try:
-        log = {"readings": []}
-        if os.path.exists(CREDIT_LOG):
-            with open(CREDIT_LOG, encoding="utf-8") as f:
-                log = json.load(f)
-        log["readings"] = (log.get("readings", []) + [credits])[-CREDIT_LOG_KEEP:]
-        os.makedirs(os.path.dirname(CREDIT_LOG), exist_ok=True)
-        with open(CREDIT_LOG, "w", encoding="utf-8") as f:
-            json.dump(log, f, indent=1)
-    except Exception as exc:
-        print(f"NOTE: could not record odds credits: {exc}")
+    """Append a plaintext credit reading to CREDIT_LOG. Never raises. The append
+    lives in scripts/odds_credits.py; the reading, its pre-request stamp and the
+    moment it is booked stay here. create_parent=True: this caller always made
+    the ledger's directory."""
+    odds_credits.record(credits, path=CREDIT_LOG, keep=CREDIT_LOG_KEEP, create_parent=True)
 
 
 def normalise(events, captured_utc, sport_key, identity="canonical"):

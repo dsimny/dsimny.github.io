@@ -1144,9 +1144,32 @@
    "pnl_per_unit": -1.0,
    "tier": "premium",
    "rank": 1
+  },
+  {
+   "sport": "ncaaf",
+   "slate_week": "2026-09-08",
+   "tier": "free",
+   "selection_version": "fp-v0.4",
+   "record_cohort": "fp-v0.4",
+   "board_sha256": "da33da68ad7e9f444c18dc1337c81af4fc172a22a361bc83d6b65f6f92e55a34",
+   "committed_utc": "2026-09-12T18:37:41Z",
+   "game_commitment_sha": "8b1c2446bd6c3800d3ebc220acd63056fc8c26db32b2d9c4bb70b3ad985f4f22",
+   "espn_event_id": "401856790",
+   "matchup": "UCF Knights @ Pittsburgh Panthers",
+   "kickoff_utc": "2026-09-12T19:30:00Z",
+   "side": "UCF Knights",
+   "price": 240,
+   "book": "draftkings",
+   "result": "loss",
+   "final": "7-12",
+   "units": 0,
+   "pnl_per_unit": -1,
+   "clv_pts": -0.271,
+   "close_capture": "ncaaf_20260912T191040Z.json",
+   "clv_status": "measured"
   }
  ],
  "created_utc": "2026-08-26T13:25:43Z",
  "_created_note": "Created deliberately and EMPTY on 2026-08-26, per docs/FOOTBALL_LAUNCH.md gap D - not as a side effect of a test run. Under House Rule 1 the first entry is permanent, so the file exists before anything can append to it by accident. An empty entries list means no football week has been graded yet; it does not mean a week was graded and produced nothing.",
- "updated_utc": "2026-09-10T14:45:54Z"
+ "updated_utc": "2026-09-13T14:44:02Z"
 }

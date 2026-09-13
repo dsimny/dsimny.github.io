@@ -4367,14 +4367,46 @@
    "actual_total": 12,
    "result": "LOSS",
    "pnl": -1.0
+  },
+  {
+   "date": "2026-09-12",
+   "gamePk": 822768,
+   "game": "BAL @ TOR",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8.5 (-109, LowVig.ag)",
+   "price": -109,
+   "book": "LowVig.ag",
+   "model_p": 0.5746,
+   "edge": 0.0531,
+   "divergence": 0.0703,
+   "actual_total": 10,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-09-12",
+   "gamePk": 824955,
+   "game": "SEA @ ATH",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 9.5 (-107, LowVig.ag)",
+   "price": -107,
+   "book": "LowVig.ag",
+   "model_p": 0.5756,
+   "edge": 0.0587,
+   "divergence": 0.0756,
+   "actual_total": 20,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "149-116-8p",
-  "n_graded": 273,
-  "win_pct": 56.2,
-  "paper_units_net": 14.584,
-  "paper_roi_pct": 5.5,
+  "record": "149-118-8p",
+  "n_graded": 275,
+  "win_pct": 55.8,
+  "paper_units_net": 12.584,
+  "paper_roi_pct": 4.71,
   "by_tag": {
    "R8-hold": {
     "record": "27-4",
@@ -4391,11 +4423,11 @@
     "paper_roi_pct": 18.4
    },
    "market-proving": {
-    "record": "109-103-8p",
-    "n_graded": 220,
-    "win_pct": 51.4,
-    "paper_units_net": 1.979,
-    "paper_roi_pct": 0.93
+    "record": "109-105-8p",
+    "n_graded": 222,
+    "win_pct": 50.9,
+    "paper_units_net": -0.021,
+    "paper_roi_pct": -0.01
    }
   },
   "by_market": {
@@ -4407,14 +4439,14 @@
     "paper_roi_pct": 23.78
    },
    "total": {
-    "record": "109-103-8p",
-    "n_graded": 220,
-    "win_pct": 51.4,
-    "paper_units_net": 1.979,
-    "paper_roi_pct": 0.93
+    "record": "109-105-8p",
+    "n_graded": 222,
+    "win_pct": 50.9,
+    "paper_units_net": -0.021,
+    "paper_roi_pct": -0.01
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-09-11"
+  "last_graded": "2026-09-12"
  }
 }

@@ -695,24 +695,48 @@
    "close_ml": -114,
    "clv_pts": 0.99,
    "beat_close": true
+  },
+  {
+   "date": "2026-09-12",
+   "gamePk": 825035,
+   "game": "TEX @ AZ",
+   "pick": "Arizona Diamondbacks ML (-120, LowVig.ag)",
+   "market": "moneyline",
+   "price": -120,
+   "book": "LowVig.ag",
+   "model_p": 0.5514,
+   "blend_p": 0.5465,
+   "edge": 0.001,
+   "score": 0.5936,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "6-2",
+   "result": "LOSS",
+   "pnl_paper": -0.25,
+   "pnl_staked": -0.0,
+   "open_ml": -130,
+   "close_ml": -130,
+   "clv_pts": 0.47,
+   "beat_close": true
   }
  ],
  "aggregates": {
-  "record": "17-12",
+  "record": "17-13",
   "wins": 17,
-  "losses": 12,
+  "losses": 13,
   "voids": 0,
-  "paper_units_net": 1.152,
-  "paper_roi_pct": 15.89,
+  "paper_units_net": 0.902,
+  "paper_roi_pct": 12.03,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 29,
-   "avg_clv_pts": -0.39,
-   "beat_close_pct": 34.5
+   "graded_with_clv": 30,
+   "avg_clv_pts": -0.36,
+   "beat_close_pct": 36.7
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-09-10"
+  "last_graded": "2026-09-12"
  }
 }

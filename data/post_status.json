@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "at_utc": "2026-09-09T08:10:23Z",
-   "date": "2026-09-08",
-   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
-   "http_status": 402,
-   "mode": "x",
-   "result": "failed"
-  },
-  {
-   "at_utc": "2026-09-09T08:10:23Z",
-   "date": "2026-09-08",
-   "detail": "missing FB_PAGE_ACCESS_TOKEN",
-   "http_status": null,
-   "mode": "facebook",
-   "result": "no_config"
-  },
-  {
-   "at_utc": "2026-09-09T15:10:35Z",
-   "channel_id": "1529354000020013116",
-   "date": "2026-09-09",
-   "detail": "",
-   "http_status": 200,
-   "mode": "pick",
-   "result": "posted"
-  },
-  {
    "at_utc": "2026-09-09T15:10:35Z",
    "channel_id": "1529354298436354048",
    "date": "2026-09-09",
@@ -254,6 +229,31 @@
    "http_status": 204,
    "detail": "11 messages",
    "at_utc": "2026-09-12T18:38:02Z"
+  },
+  {
+   "date": "2026-09-12",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-13T08:10:20Z"
+  },
+  {
+   "date": "2026-09-12",
+   "mode": "x",
+   "result": "failed",
+   "http_status": 402,
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "at_utc": "2026-09-13T08:10:21Z"
+  },
+  {
+   "date": "2026-09-12",
+   "mode": "facebook",
+   "result": "failed",
+   "http_status": 403,
+   "detail": "{\"error\":{\"message\":\"(#200) If posting to a group, requires app being installed in the group, and \\\\\\n          either publish_to_groups permission with user token, or both pages_read_engagement \\\\\\n ",
+   "at_utc": "2026-09-13T08:10:22Z"
   }
  ]
 }

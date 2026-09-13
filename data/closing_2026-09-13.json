@@ -449,18 +449,18 @@
   "mins_to_first_pitch": 220
  },
  "823171": {
-  "away_ml": -127,
-  "home_ml": 109,
+  "away_ml": -142,
+  "home_ml": 120,
   "total": 7.5,
   "credits": {
-   "remaining": 99802,
-   "used": 198,
+   "remaining": 99799,
+   "used": 201,
    "last_call_cost": 2,
    "markets": "h2h,totals",
    "regions": "us",
    "http_status": 200,
    "source": "fetch_closing",
-   "read_utc": "2026-09-13T16:30:24Z"
+   "read_utc": "2026-09-13T22:30:22Z"
   },
   "over_price": -105,
   "under_price": -115,
@@ -475,9 +475,17 @@
     "over_price": -105,
     "under_price": -115,
     "captured_utc": "2026-09-13T16:30:24Z"
+   },
+   {
+    "away_ml": -142,
+    "home_ml": 120,
+    "total": 7.5,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-09-13T22:30:22Z"
    }
   ],
-  "captured_utc": "2026-09-13T16:30:24Z",
-  "mins_to_first_pitch": 410
+  "captured_utc": "2026-09-13T22:30:22Z",
+  "mins_to_first_pitch": 50
  }
 }

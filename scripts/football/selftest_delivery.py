@@ -10,6 +10,18 @@ from selftest_discord import board
 
 
 class DeliveryTests(unittest.TestCase):
+    def test_shipped_pause_is_enabled(self):
+        self.assertIs(policy.PAUSED, True)
+
+    def test_public_pause_preserves_history(self):
+        with patch.object(policy, 'PAUSED', True), \
+             patch.object(discord.fbpage, 'PREMIUM_URL', 'https://example.com/checkout'):
+            self.assertIn('recommendations are paused', discord.fbpage.pause_notice())
+            self.assertEqual(discord.fbpage.upgrade_block(), '')
+            card = discord.fbpage.game_card(self.b['free'], True)
+            self.assertIn('Historical captured price', card)
+            self.assertIn(self.b['free']['side'], card)
+
     def setUp(self):
         self.now = datetime(2026, 9, 12, 18, 40, tzinfo=timezone.utc)
         self.b = board(3)
@@ -73,6 +85,18 @@ class DeliveryTests(unittest.TestCase):
             self.assertEqual(round(100 * (policy.market.implied(best_a) +
                                          policy.market.implied(best_h) - 1), 3), effective)
             self.assertEqual(round(ia / (ia + ih), 5), fair)
+
+    def test_pause_prevents_new_weekly_board(self):
+        import board as boardmod
+        b = dict(self.b, n_newly_committed=0)
+        with patch('sys.argv', ['board.py', '--week', '2026-09-08', '--writeups']), \
+             patch.object(boardmod, 'build', return_value=b), \
+             patch.object(boardmod, 'render', return_value='fixture'), \
+             patch.object(boardmod, 'record_commitment') as commit, \
+             patch.object(boardmod.crypto_box, 'encrypt_to') as encrypt, \
+             patch.object(policy, 'PAUSED', True):
+            self.assertEqual(boardmod.main(), 0)
+            commit.assert_not_called(); encrypt.assert_not_called()
 
 
 if __name__ == '__main__':

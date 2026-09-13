@@ -142,6 +142,8 @@ def normalise(events, captured_utc, sport_key, identity="canonical"):
             books.append({
                 "book": bk.get("key"),
                 "last_update": bk.get("last_update"),
+                "market_last_update": {m["key"]: m.get("last_update")
+                                       for m in bk.get("markets", [])},
                 "markets": markets,
             })
         out.append({

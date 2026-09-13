@@ -1,5 +1,9 @@
 # Football launch plan — getting premium live for the 2026 season
 
+**September 13 containment:** automated football recommendations are paused.
+See [the prospective containment amendment](FOOTBALL_CONTAINMENT_2026-09-13.md).
+Existing selections still grade and reveal; resumption requires a validated new strategy.
+
 Written 2026-08-26. This is an EXECUTION plan, not a spec and not a
 pre-registration. It commits to no methodology; `docs/FOOTBALL_PIPELINE.md`
 (fp-v0.1, frozen 2026-08-24) already did that and this plan may not amend it.

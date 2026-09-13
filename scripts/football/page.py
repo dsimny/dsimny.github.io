@@ -70,6 +70,17 @@ FB = os.path.join(ROOT, "data", "football")
 OUT = os.path.join(ROOT, "football")
 
 E = html.escape
+import delivery_policy
+
+
+def pause_notice():
+    if not delivery_policy.PAUSED:
+        return ""
+    return ('<section class="commit" role="status"><h2>Automated football '
+            'recommendations are paused</h2><p>New recommendations will not '
+            'resume until a new strategy is validated. Cards below are historical '
+            'records, not current betting instructions. Original selections '
+            'and results remain visible, including losses.</p></section>')
 
 # The paid tier stays INVISIBLE until WHOP_CHECKOUT_URL is set, exactly as
 # build_site.py does it: the site never advertises something that cannot be
@@ -86,7 +97,7 @@ def upgrade_block(week=None):
     promise a win - a comparison this brand loses by design, because it has
     disarmed on claims. The ~57 reasoned games are the product.
     """
-    if not PREMIUM_URL:
+    if not PREMIUM_URL or delivery_policy.PAUSED:
         return ""
     return f'''
     <div class="upgrade">
@@ -163,7 +174,7 @@ def game_card(g, full):
     rows = [
         ("Selection eligibility", E(g.get("selection_reason", "Legacy pilot rule"))),
         ("Side", E(str(g.get("side", "")))),
-        ("Best takeable price", f'{money(g.get("best_price"))} at '
+        ("Historical captured price", f'{money(g.get("best_price"))} at '
                                 f'{E(str(g.get("best_book","")))}'),
         ("Tier-1 books at or near it", E(str(g.get("books_at_best", "")))),
         ("De-vigged fair (this side)", pct(g["fair_side"])
@@ -476,6 +487,7 @@ def write(dirpath, inner, title, desc):
   </nav>
 </div></header>
 <div class="wrap">
+{pause_notice()}
 {inner}
 <footer class="legal"><p>{LEGAL}</p></footer>
 </div>

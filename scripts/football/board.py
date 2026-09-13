@@ -488,6 +488,13 @@ def main():
     if args.commit_only:
         print("(--commit-only: no selection made)")
         return 0
+    # Prospective containment only. Historical boards still load, settle and
+    # reveal. Game capture/freeze evidence continues; no new weekly paid play
+    # may be manufactured while recommendation delivery is under review.
+    import delivery_policy
+    if delivery_policy.PAUSED:
+        print(delivery_policy.PAUSE_REASON + "; no new weekly board or writeups.")
+        return 0
     if not b["decision_made"]:
         print(f"\nDecision moment {b['decision_moment_utc']} not reached; "
               f"no play selected. Nothing else to write.")

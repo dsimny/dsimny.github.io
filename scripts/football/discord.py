@@ -48,6 +48,7 @@ import requests
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, ".."))
+import delivery_policy
 import page as fbpage                                # noqa: E402
 from post_discord import webhook_host_ok, FOOTER     # noqa: E402
 
@@ -136,6 +137,12 @@ def money(p):
 
 def game_embed(g, color=GREY, label=None):
     lines = []
+    if not label:
+        lines.append("MARKET COVERAGE ONLY - not a recommended play.")
+        if g.get("selection_reason"):
+            lines.append(g["selection_reason"])
+    lines.append(f"Kickoff (UTC): {g.get('kickoff_utc', 'unknown')} | "
+                 f"Historical capture: {g.get('t24_capture', 'unknown')}")
     if g.get("writeup"):
         lines.append(g["writeup"])
     lines.append(
@@ -143,9 +150,11 @@ def game_embed(g, color=GREY, label=None):
         f"{g.get('best_book')} | {g.get('books_at_best')} Tier-1 books at/near it")
     fair = g.get("fair_side")
     lines.append(
-        f"de-vigged fair {fair * 100:.1f}% | overround "
-        f"{g.get('raw_overround_pts')} -> **{g.get('eff_overround_pts')}** pts at "
-        f"best | {g.get('n_books')} books")
+        f"Market-implied probability (proportional de-vig): {fair * 100:.1f}% | "
+        f"Median-market overround {g.get('raw_overround_pts')} percentage points; "
+        f"cross-book best-price overround **{g.get('eff_overround_pts')}** "
+        f"percentage points | {g.get('n_books')} books. "
+        "These are market margins, not expected returns.")
     off = g.get("offshore_best")
     if off:
         lines.append(f"offshore colour only: {money(off.get('price'))} "
@@ -291,6 +300,10 @@ def main():
                     help="post even if this week already went out")
     args = ap.parse_args()
 
+    if delivery_policy.PAUSED and not args.dry_run:
+        print(delivery_policy.PAUSE_REASON + "; no send and no status mutation.")
+        return 0
+
     status_mode, webhook, varname, builder = MODES[args.mode]
     week = args.week
 
@@ -314,6 +327,11 @@ def main():
               f"{b.get('decision_moment_utc')}); not posting.")
         return 0
 
+    try:
+        delivery_policy.validate(b, week)
+    except (ValueError, TypeError):
+        print("Football delivery blocked: board failed delivery safety checks.")
+        return 1
     messages = builder(b, week)
     print(f"{args.mode}: {len(messages)} message(s) for week {week}")
 

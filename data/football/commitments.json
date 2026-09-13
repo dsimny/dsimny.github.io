@@ -20,7 +20,8 @@
    "board_sha256": "da33da68ad7e9f444c18dc1337c81af4fc172a22a361bc83d6b65f6f92e55a34",
    "selection_version": "fp-v0.4",
    "committed_utc": "2026-09-12T18:37:41Z",
-   "revealed": false
+   "revealed": true,
+   "revealed_utc": "2026-09-13T14:50:57Z"
   }
  ]
 }

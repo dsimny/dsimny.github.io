@@ -6,6 +6,7 @@ import board
 import crypto_box
 import market
 import record_policy
+import result_identity
 
 
 def read_board(week):
@@ -108,6 +109,11 @@ def settle(g, tier, b, commitment, results, cfg, snaps):
                and market.parse_utc(r.get("kickoff_utc")) == market.parse_utc(g["kickoff_utc"])]
     if len(matches) > 1:
         raise ValueError("Ambiguous result identity")
+    resolution = None
+    if not matches:
+        resolved, resolution = result_identity.resolve(g, commitment, results, keyfn)
+        if resolved is not None:
+            matches = [resolved]
     if not matches or not matches[0].get("final"):
         return None
     r = matches[0]
@@ -120,6 +126,9 @@ def settle(g, tier, b, commitment, results, cfg, snaps):
     result = "push" if margin == 0 else ("win" if home == (margin > 0) else "loss")
     clv, close_file = None, None
     kick = market.parse_utc(g["kickoff_utc"])
+    if resolution:
+        # A one-minute timestamp correction must not admit an in-play close.
+        kick = min(kick, market.parse_utc(r['kickoff_utc']))
     for t, name, snap in reversed(snaps):
         if not 0 < (kick - t).total_seconds() <= market.MAX_CLOSE_H * 3600:
             continue
@@ -132,7 +141,7 @@ def settle(g, tier, b, commitment, results, cfg, snaps):
             clv = round(100 * (f[side] - market.implied(g["best_price"])), 3)
             close_file = name
             break
-    return dict(sport=g["sport"], slate_week=b["slate_week"], tier=tier,
+    row = dict(sport=g["sport"], slate_week=b["slate_week"], tier=tier,
                 selection_version=record_policy.VERSION, record_cohort=record_policy.VERSION,
                 board_sha256=commitment["board_sha256"], committed_utc=commitment["committed_utc"],
                 game_commitment_sha=g["commitment_sha"], espn_event_id=r["espn_event_id"],
@@ -142,6 +151,10 @@ def settle(g, tier, b, commitment, results, cfg, snaps):
                 pnl_per_unit=round(market.payout(g["best_price"]), 4) if result == "win" else (-1 if result == "loss" else 0),
                 clv_pts=clv, close_capture=close_file,
                 clv_status="measured" if clv is not None else "unavailable; settlement retained")
+    if resolution:
+        row['result_identity_resolution'] = resolution['resolution_id']
+        row['result_kickoff_utc'] = r['kickoff_utc']
+    return row
 
 
 def additions(sport, ledger, results, cfg, snaps):

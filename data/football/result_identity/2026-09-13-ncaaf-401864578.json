@@ -1,0 +1,14 @@
+{
+  "resolution_id": "2026-09-13-ncaaf-401864578",
+  "recorded_utc": "2026-09-13T14:47:39Z",
+  "board_sha256": "da33da68ad7e9f444c18dc1337c81af4fc172a22a361bc83d6b65f6f92e55a34",
+  "game_commitment_sha": "ab40faabfc9dc59bf56b2e1164372f771f2a69a2660570271d89ef5d4dd251df",
+  "sport": "ncaaf",
+  "away": "New Mexico State Aggies",
+  "home": "Hawaii Rainbow Warriors",
+  "committed_kickoff_utc": "2026-09-13T04:00:00Z",
+  "result_kickoff_utc": "2026-09-13T03:59:00Z",
+  "espn_event_id": "401864578",
+  "source": "https://www.espn.com/college-football/game/_/gameId/401864578/new-mexico-st-hawaii",
+  "reason": "Verified same away/home matchup and game date; ESPN kickoff differs by one minute from the frozen odds event. Exact named-event resolution only. Original board, kickoff, pick, price and fingerprints are unchanged. No general time tolerance is introduced."
+}

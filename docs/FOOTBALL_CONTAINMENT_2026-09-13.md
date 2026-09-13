@@ -21,3 +21,16 @@ independent review and explicit approval. Debugging the incident or requiring
 a positive price discount does not demonstrate an edge. Failed studies and the
 historical holdout are not reopened by this amendment. Original picks continue
 to grade and reveal, including losses. There is no further record reset.
+
+## Named result identity adjudication
+
+The September 13 grading run left one committed position pending because the
+results provider reports 03:59 UTC and the odds commitment reports 04:00 UTC.
+The same fixture and final result were verified directly on ESPN event
+401864578. `data/football/result_identity/2026-09-13-ncaaf-401864578.json`
+adds an exact, dated cross-reference scoped to both the original board and
+game hashes. It grants no generic time tolerance. Original kickoff, side,
+price and hashes remain unchanged; the appended result records the resolution
+identifier and provider kickoff separately. Changed provider identity/timing
+fails closed. CLV admits no capture after the earlier of the two kickoffs.
+Future adjudications must be separate files, never edits to this record.

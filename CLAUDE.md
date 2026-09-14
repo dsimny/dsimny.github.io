@@ -1347,6 +1347,43 @@ this is a disclosed restart, not an undefeated lifetime record. Frozen research
 studies are not reopened. The amendment supersedes conflicting live selection
 and grading descriptions above, without authorizing deletion of history.
 
+## D.J. Mercer developmental cohorts (2026-09-14) — BUILT, NOT ACTIVE
+
+Two strategies, never combined: `mercer-nfl-dev` and `mercer-ncaaf-dev`. Code
+`scripts/mercer_dev/`, data `data/mercer_dev/`, gate `mercer-dev-selftest.yml`,
+release `mercer-dev-release.yml` (dispatch only). Read, in order:
+`docs/FOOTBALL_INCIDENT_ROOT_CAUSE_2026-09-14.md` (why every control exists),
+`docs/MERCER_DEVELOPMENTAL_PROTOCOL.md` (evaluation + proposed v1),
+`docs/MERCER_DEVELOPMENTAL_RELEASE_CONTROLS.md` (operating manual + activation
+checklist).
+
+- **No model edge is claimed, because none survived.** The NFL development
+  evaluation (train 2022-23, validate 2024, both previously scored) chose blend
+  weight w = 0 and the fixed rule selected 0 plays in 800 games. v1 is the Mercer
+  research process under registered guardrails with a market reference
+  probability. Do not "fix" this by lowering thresholds or adding features.
+- **2025 NFL holdout: still unspent, deliberately.** Recommendation recorded;
+  claiming it is Daniel's one-time decision.
+- **No historical college data exists.** NCAA v1 is prospective-only.
+- **Registrations ship PROPOSED and are never binding until `register` logs their
+  SHA-256.** After that the file is frozen; methodology changes are new versions.
+- **Nothing publishes by default.** Needs: REGISTERED + effective, `control.json`
+  on for the sport, variable `MERCER_DEV_PUBLICATION=enabled`, an approver on
+  `MERCER_DEV_APPROVERS` supplying the exact artifact hash, and every release check.
+- **Approval is atomic.** The Discord payload is rendered once into the sealed
+  artifact; the sender posts those bytes, fetches the message back and compares.
+  Uncertain sends block every retry; workflow re-runs never publish.
+- **Public logs.** Print check names only; previews go to the private review
+  webhook. Publication rows enter the ledger only after kickoff.
+
+Mercer **Spotlight** delivery (`mercer.py deliver`, hourly) gained the same
+class of protections on 2026-09-14: kill switch `MERCER_DELIVERY=paused`,
+durable `data/mercer/deliveries.json` (post_status.json is trimmed to 30 rows),
+no-card weeks exit 0, kickoff and webhook-host checks, legal footer.
+
+Daily Pick staking review held 2026-09-14: **stays 0u**
+(`docs/DAILY_PICK_STAKING_REVIEW_2026-09-14.md`, next-review criteria proposed).
+
 ## Mercer Live — ML-1, the live observation boundary (2026-09-14)
 
 A NEW subsystem, research-only, in SHADOW MODE by pre-registration:

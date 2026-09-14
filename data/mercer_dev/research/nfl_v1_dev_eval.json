@@ -1,0 +1,691 @@
+{
+ "_note": "D.J. Mercer NFL Developmental Cohort v1 - historical DEVELOPMENT evaluation.",
+ "chosen_model": {
+  "train": {
+   "accuracy": 0.6654,
+   "brier": 0.21518,
+   "calibration": [
+    {
+     "bucket": "0.1-0.2",
+     "mean_p": 0.1575,
+     "n": 12,
+     "win_rate": 0.3333
+    },
+    {
+     "bucket": "0.2-0.3",
+     "mean_p": 0.2506,
+     "n": 36,
+     "win_rate": 0.2778
+    },
+    {
+     "bucket": "0.3-0.4",
+     "mean_p": 0.3582,
+     "n": 65,
+     "win_rate": 0.3538
+    },
+    {
+     "bucket": "0.4-0.5",
+     "mean_p": 0.4445,
+     "n": 89,
+     "win_rate": 0.4045
+    },
+    {
+     "bucket": "0.5-0.6",
+     "mean_p": 0.5553,
+     "n": 118,
+     "win_rate": 0.6017
+    },
+    {
+     "bucket": "0.6-0.7",
+     "mean_p": 0.6434,
+     "n": 109,
+     "win_rate": 0.6147
+    },
+    {
+     "bucket": "0.7-0.8",
+     "mean_p": 0.7494,
+     "n": 79,
+     "win_rate": 0.7848
+    },
+    {
+     "bucket": "0.8-0.9",
+     "mean_p": 0.8422,
+     "n": 31,
+     "win_rate": 0.871
+    },
+    {
+     "bucket": "0.9-1.0",
+     "mean_p": 0.9125,
+     "n": 2,
+     "win_rate": 1.0
+    }
+   ],
+   "log_loss": 0.61901,
+   "n": 541
+  },
+  "validation": {
+   "accuracy": 0.7315,
+   "brier": 0.20174,
+   "calibration": [
+    {
+     "bucket": "0.1-0.2",
+     "mean_p": 0.1373,
+     "n": 2,
+     "win_rate": 0.0
+    },
+    {
+     "bucket": "0.2-0.3",
+     "mean_p": 0.269,
+     "n": 17,
+     "win_rate": 0.2353
+    },
+    {
+     "bucket": "0.3-0.4",
+     "mean_p": 0.3533,
+     "n": 43,
+     "win_rate": 0.2093
+    },
+    {
+     "bucket": "0.4-0.5",
+     "mean_p": 0.4475,
+     "n": 38,
+     "win_rate": 0.2895
+    },
+    {
+     "bucket": "0.5-0.6",
+     "mean_p": 0.5583,
+     "n": 56,
+     "win_rate": 0.6071
+    },
+    {
+     "bucket": "0.6-0.7",
+     "mean_p": 0.6504,
+     "n": 44,
+     "win_rate": 0.8636
+    },
+    {
+     "bucket": "0.7-0.8",
+     "mean_p": 0.7434,
+     "n": 45,
+     "win_rate": 0.6667
+    },
+    {
+     "bucket": "0.8-0.9",
+     "mean_p": 0.8412,
+     "n": 11,
+     "win_rate": 0.9091
+    },
+    {
+     "bucket": "0.9-1.0",
+     "mean_p": 0.9313,
+     "n": 1,
+     "win_rate": 1.0
+    }
+   ],
+   "log_loss": 0.59171,
+   "n": 257
+  }
+ },
+ "chosen_model_rule": {
+  "train": {
+   "bets": {
+    "n": 0
+   },
+   "by_edge_bucket": {},
+   "by_price_side": {},
+   "by_season": {},
+   "holds": 0
+  },
+  "validation": {
+   "bets": {
+    "n": 0
+   },
+   "by_edge_bucket": {},
+   "by_price_side": {},
+   "by_season": {},
+   "holds": 0
+  }
+ },
+ "chosen_on_train": {
+  "candidate": "A",
+  "tie_break": "lowest train log loss, then smaller w, then A",
+  "w": 0.0
+ },
+ "generated_utc": "2026-09-14T04:32:23Z",
+ "market_only": {
+  "train": {
+   "accuracy": 0.6654,
+   "brier": 0.21518,
+   "calibration": [
+    {
+     "bucket": "0.1-0.2",
+     "mean_p": 0.1575,
+     "n": 12,
+     "win_rate": 0.3333
+    },
+    {
+     "bucket": "0.2-0.3",
+     "mean_p": 0.2506,
+     "n": 36,
+     "win_rate": 0.2778
+    },
+    {
+     "bucket": "0.3-0.4",
+     "mean_p": 0.3582,
+     "n": 65,
+     "win_rate": 0.3538
+    },
+    {
+     "bucket": "0.4-0.5",
+     "mean_p": 0.4445,
+     "n": 89,
+     "win_rate": 0.4045
+    },
+    {
+     "bucket": "0.5-0.6",
+     "mean_p": 0.5553,
+     "n": 118,
+     "win_rate": 0.6017
+    },
+    {
+     "bucket": "0.6-0.7",
+     "mean_p": 0.6434,
+     "n": 109,
+     "win_rate": 0.6147
+    },
+    {
+     "bucket": "0.7-0.8",
+     "mean_p": 0.7494,
+     "n": 79,
+     "win_rate": 0.7848
+    },
+    {
+     "bucket": "0.8-0.9",
+     "mean_p": 0.8451,
+     "n": 29,
+     "win_rate": 0.8621
+    },
+    {
+     "bucket": "0.9-1.0",
+     "mean_p": 0.9125,
+     "n": 2,
+     "win_rate": 1.0
+    }
+   ],
+   "log_loss": 0.61901,
+   "n": 541
+  },
+  "validation": {
+   "accuracy": 0.7315,
+   "brier": 0.20174,
+   "calibration": [
+    {
+     "bucket": "0.1-0.2",
+     "mean_p": 0.1373,
+     "n": 2,
+     "win_rate": 0.0
+    },
+    {
+     "bucket": "0.2-0.3",
+     "mean_p": 0.269,
+     "n": 17,
+     "win_rate": 0.2353
+    },
+    {
+     "bucket": "0.3-0.4",
+     "mean_p": 0.3533,
+     "n": 43,
+     "win_rate": 0.2093
+    },
+    {
+     "bucket": "0.4-0.5",
+     "mean_p": 0.4475,
+     "n": 38,
+     "win_rate": 0.2895
+    },
+    {
+     "bucket": "0.5-0.6",
+     "mean_p": 0.5583,
+     "n": 56,
+     "win_rate": 0.6071
+    },
+    {
+     "bucket": "0.6-0.7",
+     "mean_p": 0.6504,
+     "n": 44,
+     "win_rate": 0.8636
+    },
+    {
+     "bucket": "0.7-0.8",
+     "mean_p": 0.7434,
+     "n": 45,
+     "win_rate": 0.6667
+    },
+    {
+     "bucket": "0.8-0.9",
+     "mean_p": 0.8412,
+     "n": 11,
+     "win_rate": 0.9091
+    },
+    {
+     "bucket": "0.9-1.0",
+     "mean_p": 0.9313,
+     "n": 1,
+     "win_rate": 1.0
+    }
+   ],
+   "log_loss": 0.59171,
+   "n": 257
+  }
+ },
+ "market_only_rule": {
+  "train": {
+   "bets": {
+    "n": 0
+   },
+   "by_edge_bucket": {},
+   "by_price_side": {},
+   "by_season": {},
+   "holds": 0
+  },
+  "validation": {
+   "bets": {
+    "n": 0
+   },
+   "by_edge_bucket": {},
+   "by_price_side": {},
+   "by_season": {},
+   "holds": 0
+  }
+ },
+ "n_rows": {
+  "train": 543,
+  "validation": 257
+ },
+ "random_side_baseline": {
+  "train": {
+   "L": 24,
+   "W": 25,
+   "beat_close_pct": 34.0,
+   "breakeven_win_rate": 0.532,
+   "clv_mean_pts": -0.595,
+   "clv_n": 50,
+   "longest_losing_streak": 5,
+   "max_drawdown_u": 9.818,
+   "n": 50,
+   "push": 1,
+   "roi_95ci_pct": [
+    -34.2,
+    18.3
+   ],
+   "roi_pct": -7.97,
+   "units": -3.984,
+   "win_rate": 0.5102
+  },
+  "validation": {
+   "L": 25,
+   "W": 25,
+   "beat_close_pct": 12.5,
+   "breakeven_win_rate": 0.501,
+   "clv_mean_pts": -1.687,
+   "clv_n": 48,
+   "longest_losing_streak": 3,
+   "max_drawdown_u": 8.434,
+   "n": 50,
+   "push": 0,
+   "roi_95ci_pct": [
+    -36.5,
+    16.3
+   ],
+   "roi_pct": -10.1,
+   "units": -5.049,
+   "win_rate": 0.5
+  }
+ },
+ "rating_only": {
+  "A_elo": {
+   "train": {
+    "accuracy": 0.6155,
+    "brier": 0.22954,
+    "calibration": [
+     {
+      "bucket": "0.1-0.2",
+      "mean_p": 0.166,
+      "n": 8,
+      "win_rate": 0.125
+     },
+     {
+      "bucket": "0.2-0.3",
+      "mean_p": 0.2747,
+      "n": 28,
+      "win_rate": 0.3929
+     },
+     {
+      "bucket": "0.3-0.4",
+      "mean_p": 0.3614,
+      "n": 58,
+      "win_rate": 0.4655
+     },
+     {
+      "bucket": "0.4-0.5",
+      "mean_p": 0.4532,
+      "n": 115,
+      "win_rate": 0.4348
+     },
+     {
+      "bucket": "0.5-0.6",
+      "mean_p": 0.5487,
+      "n": 134,
+      "win_rate": 0.5149
+     },
+     {
+      "bucket": "0.6-0.7",
+      "mean_p": 0.6442,
+      "n": 116,
+      "win_rate": 0.7241
+     },
+     {
+      "bucket": "0.7-0.8",
+      "mean_p": 0.7402,
+      "n": 68,
+      "win_rate": 0.7206
+     },
+     {
+      "bucket": "0.8-0.9",
+      "mean_p": 0.8331,
+      "n": 14,
+      "win_rate": 0.7857
+     }
+    ],
+    "log_loss": 0.6504,
+    "n": 541
+   },
+   "validation": {
+    "accuracy": 0.6732,
+    "brier": 0.20927,
+    "calibration": [
+     {
+      "bucket": "0.1-0.2",
+      "mean_p": 0.1557,
+      "n": 5,
+      "win_rate": 0.2
+     },
+     {
+      "bucket": "0.2-0.3",
+      "mean_p": 0.2797,
+      "n": 11,
+      "win_rate": 0.2727
+     },
+     {
+      "bucket": "0.3-0.4",
+      "mean_p": 0.36,
+      "n": 35,
+      "win_rate": 0.2857
+     },
+     {
+      "bucket": "0.4-0.5",
+      "mean_p": 0.4455,
+      "n": 57,
+      "win_rate": 0.386
+     },
+     {
+      "bucket": "0.5-0.6",
+      "mean_p": 0.5557,
+      "n": 56,
+      "win_rate": 0.5179
+     },
+     {
+      "bucket": "0.6-0.7",
+      "mean_p": 0.6541,
+      "n": 47,
+      "win_rate": 0.7021
+     },
+     {
+      "bucket": "0.7-0.8",
+      "mean_p": 0.738,
+      "n": 35,
+      "win_rate": 0.8286
+     },
+     {
+      "bucket": "0.8-0.9",
+      "mean_p": 0.8617,
+      "n": 10,
+      "win_rate": 0.9
+     },
+     {
+      "bucket": "0.9-1.0",
+      "mean_p": 0.9037,
+      "n": 1,
+      "win_rate": 1.0
+     }
+    ],
+    "log_loss": 0.60743,
+    "n": 257
+   }
+  },
+  "B_game_model": {
+   "train": {
+    "accuracy": 0.6192,
+    "brier": 0.2291,
+    "calibration": [
+     {
+      "bucket": "0.1-0.2",
+      "mean_p": 0.1649,
+      "n": 7,
+      "win_rate": 0.1429
+     },
+     {
+      "bucket": "0.2-0.3",
+      "mean_p": 0.2671,
+      "n": 27,
+      "win_rate": 0.4074
+     },
+     {
+      "bucket": "0.3-0.4",
+      "mean_p": 0.3618,
+      "n": 60,
+      "win_rate": 0.45
+     },
+     {
+      "bucket": "0.4-0.5",
+      "mean_p": 0.455,
+      "n": 101,
+      "win_rate": 0.4158
+     },
+     {
+      "bucket": "0.5-0.6",
+      "mean_p": 0.5479,
+      "n": 131,
+      "win_rate": 0.4962
+     },
+     {
+      "bucket": "0.6-0.7",
+      "mean_p": 0.6442,
+      "n": 114,
+      "win_rate": 0.7193
+     },
+     {
+      "bucket": "0.7-0.8",
+      "mean_p": 0.7472,
+      "n": 82,
+      "win_rate": 0.6951
+     },
+     {
+      "bucket": "0.8-0.9",
+      "mean_p": 0.8354,
+      "n": 18,
+      "win_rate": 0.8889
+     },
+     {
+      "bucket": "0.9-1.0",
+      "mean_p": 0.9216,
+      "n": 1,
+      "win_rate": 1.0
+     }
+    ],
+    "log_loss": 0.64974,
+    "n": 541
+   },
+   "validation": {
+    "accuracy": 0.6809,
+    "brier": 0.21026,
+    "calibration": [
+     {
+      "bucket": "0.1-0.2",
+      "mean_p": 0.1502,
+      "n": 4,
+      "win_rate": 0.25
+     },
+     {
+      "bucket": "0.2-0.3",
+      "mean_p": 0.2572,
+      "n": 5,
+      "win_rate": 0.2
+     },
+     {
+      "bucket": "0.3-0.4",
+      "mean_p": 0.3572,
+      "n": 45,
+      "win_rate": 0.2667
+     },
+     {
+      "bucket": "0.4-0.5",
+      "mean_p": 0.4478,
+      "n": 48,
+      "win_rate": 0.375
+     },
+     {
+      "bucket": "0.5-0.6",
+      "mean_p": 0.5498,
+      "n": 51,
+      "win_rate": 0.5098
+     },
+     {
+      "bucket": "0.6-0.7",
+      "mean_p": 0.6521,
+      "n": 49,
+      "win_rate": 0.7143
+     },
+     {
+      "bucket": "0.7-0.8",
+      "mean_p": 0.7452,
+      "n": 42,
+      "win_rate": 0.7857
+     },
+     {
+      "bucket": "0.8-0.9",
+      "mean_p": 0.8439,
+      "n": 9,
+      "win_rate": 0.7778
+     },
+     {
+      "bucket": "0.9-1.0",
+      "mean_p": 0.9127,
+      "n": 4,
+      "win_rate": 1.0
+     }
+    ],
+    "log_loss": 0.6095,
+    "n": 257
+   }
+  }
+ },
+ "reachable_edge_at_best_price_pts": {
+  "train": {
+   "max": 2.47,
+   "p50": -0.632,
+   "p90": 0.371,
+   "p99": 1.299,
+   "share_ge_1pt": 0.0203,
+   "share_ge_2pt": 0.0023,
+   "sides": 888
+  },
+  "validation": {
+   "max": 0.957,
+   "p50": -1.314,
+   "p90": -0.322,
+   "p99": 0.536,
+   "share_ge_1pt": 0.0,
+   "share_ge_2pt": 0.0,
+   "sides": 438
+  }
+ },
+ "rule": {
+  "market": "moneyline",
+  "max_divergence_pts": 4.0,
+  "max_fair": 0.75,
+  "max_plays_per_week": 3,
+  "max_price": 300,
+  "min_books": 5,
+  "min_books_at_best": 2,
+  "min_edge_pts": 2.0,
+  "min_fair": 0.25,
+  "min_price": -300,
+  "stake_units": 1.0
+ },
+ "seasons": {
+  "contamination": "2022-2024 previously scored by fb-v0.1, fb-v0.2 and fp-v0.4; development evidence only",
+  "train": [
+   2022,
+   2023
+  ],
+  "untouched_test": "2025 NOT RUN - requires holdout claim approval",
+  "validation": [
+   2024
+  ]
+ },
+ "sensitivity_train_min_edge_NOT_USED_FOR_SELECTION": {
+  "1.0": {
+   "L": 2,
+   "W": 1,
+   "beat_close_pct": 33.3,
+   "breakeven_win_rate": 0.3312,
+   "clv_mean_pts": 1.675,
+   "clv_n": 3,
+   "longest_losing_streak": 2,
+   "max_drawdown_u": 2.0,
+   "n": 3,
+   "push": 0,
+   "roi_95ci_pct": [
+    -166.6,
+    105.2
+   ],
+   "roi_pct": -30.67,
+   "units": -0.92,
+   "win_rate": 0.3333
+  },
+  "2.0": {
+   "n": 0
+  },
+  "3.0": {
+   "n": 0
+  },
+  "4.0": {
+   "n": 0
+  }
+ },
+ "train_w_grid_log_loss": {
+  "A": {
+   "0.0": 0.61901,
+   "0.05": 0.61974,
+   "0.1": 0.62055,
+   "0.15": 0.62144,
+   "0.2": 0.62242,
+   "0.3": 0.62465,
+   "0.5": 0.63017
+  },
+  "B": {
+   "0.0": 0.61901,
+   "0.05": 0.61979,
+   "0.1": 0.62064,
+   "0.15": 0.62158,
+   "0.2": 0.62259,
+   "0.3": 0.62484,
+   "0.5": 0.63033
+  }
+ },
+ "unmatched": {
+  "no_rating": 0,
+  "no_t24_snapshot_or_market": 15
+ }
+}

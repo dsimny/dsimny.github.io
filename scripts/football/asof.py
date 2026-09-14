@@ -67,6 +67,8 @@ PREREG = os.path.join(ROOT, "docs", "FOOTBALL_PREREG.md")
 SPECS = [
     {"name": "fb-v0.1", "path": PREREG},
     {"name": "fb-v0.2", "path": os.path.join(ROOT, "docs", "FOOTBALL_PREREG_V02.md")},
+    {"name": "nfl-representation-v1", "path": os.path.join(
+        ROOT, "docs", "FOOTBALL_PREREG_NFL_REPRESENTATION_V1.md")},
 ]
 SPEC_NAMES = [s["name"] for s in SPECS]
 

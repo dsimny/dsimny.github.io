@@ -8,10 +8,12 @@ from the next day the members board has no baseball.
 
 After 2026-09-27 a $49/month member receives, today:
 
-- D.J. Mercer Spotlight football picks — human-researched, weekly, **no guaranteed
-  volume** (Week 1 was one pick).
-- Nothing else. The automated football pipeline is paused; the developmental
-  cohorts are not registered; no other sport has a validated strategy.
+- D.J. Mercer Spotlight football picks — the weekly premium featured selection,
+  human-researched, **no guaranteed volume** (Week 1 was one pick).
+- After commissioning, and only then: NFL and NCAA developmental plays,
+  human-researched, flat 0.25u, each approved, capped at 1u per day across both.
+- Nothing else. The automated football pipeline is paused and no other sport has a
+  validated strategy. Mercer Live is capture-only.
 
 A membership that justifies itself only by pick volume cannot be honest about
 this. The structure below is designed to be worth something **without** claiming

@@ -435,7 +435,8 @@ def render_hub():
   <p>The official cohort began with eligible kickoffs on or after September 11, 2026
   (America/New_York), under fp-v0.4. No retroactive selections. No new automated boards
   are being built while this pipeline is paused. D.J. Mercer's human-researched picks
-  keep their own, separate record.</p>
+  are recorded separately: on the Spotlight ledger, and, from each cohort's effective date,
+  on the <a href="/football/mercer/developmental/">NFL and NCAA developmental records</a>.</p>
   <h2>Official record — committed plays</h2>
   <p class="mut">Append-only. Nothing is edited, nothing is deleted, losses
   publish exactly like wins. Every one of these was fingerprinted before

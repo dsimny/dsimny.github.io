@@ -506,26 +506,29 @@ commit_block = f'''
 # section 1, House Rules 4 and 8). One "our edge" spanning both would be a claim
 # we have already published the evidence against.
 #
-# FOOTBALL COPY SINCE 2026-09-14 (House Rule 8). The automated slate this block
-# used to sell has been paused since the September 8 incident, so it may not be
-# described as something members receive. What members DO receive for football
-# is the D.J. Mercer Spotlight card (human-researched, fingerprinted, delivered to
-# the members channel). The NFL/NCAA developmental cohorts are built but not
-# registered or publishing, so they are named as in preparation and nothing more.
-# No volume is promised: a Mercer week can carry no pick. When the cohorts go
-# live, this paragraph changes in the same commit that enables them.
+# FOOTBALL COPY (House Rule 8), owner decisions of 2026-09-14. The automated
+# slate is paused and may not be described as something members receive. The
+# D.J. Mercer Spotlight stays the weekly premium featured selection. NFL and NCAA
+# are separate DEVELOPMENTAL cohorts: human-researched, supported by market and
+# analytical data, never described as a proven model or a model edge. Releases
+# have NOT started - they begin only after commissioning, and this paragraph
+# must change in the same commit that switches publication on. No volume is
+# promised. scripts/mercer_dev/selftest_mercer_dev.py [24] pins these claims.
 upgrade_block = f'''
     <div class="upgrade">
       <p class="joinlead">Premium: everything we publish, before it happens.</p>
       <p class="joinsub"><strong>Baseball.</strong> Every play we allocate — side, price, sizing,
       model edge and the full circuit-breaker log — in Discord before first pitch.</p>
-      <p class="joinsub"><strong>Football.</strong> The D.J. Mercer Spotlight: human-researched NFL and
-      college picks, each fingerprinted before kickoff, delivered in full to members in Discord and graded
-      on its own public record, win or lose. There is no guaranteed number of picks; some weeks have none.
-      The original automated football pipeline remains paused following the September 8 incident while its
-      release process is reviewed. Separate NFL and NCAA developmental strategies are in preparation and are
-      not publishing yet. <strong>No football selection is presented as proven or as a way to beat the
-      market</strong>: we ran two pre-registered studies and published both failures.</p>
+      <p class="joinsub"><strong>Football.</strong> The D.J. Mercer Spotlight is the weekly premium featured
+      selection: human-researched, with the case for it and the strongest case against it, fingerprinted before
+      kickoff and graded in public, win or lose. NFL and college football each have a separate developmental
+      record: human-researched selections supported by market and analytical data, each approved individually,
+      flat-staked at 0.25 units and graded publicly. A Spotlight pick in either sport counts on that record only.
+      Developmental releases have not started yet; they begin only after commissioning is complete. There is no
+      guaranteed number of picks; some weeks have none. The original automated football pipeline remains paused
+      following the September 8 incident. <strong>No football selection is presented as proven or as a way to
+      beat the market</strong>, and no model edge is claimed: we ran two pre-registered studies and published
+      both failures.</p>
       <p class="joinsub">{PREMIUM_PRICE}. What arrives depends on what is in season.</p>
       <p class="joinsub">Every one of them still publishes on the public ledger after grading, winners
       and losers alike, so you can check the record before you pay and keep checking after. If the

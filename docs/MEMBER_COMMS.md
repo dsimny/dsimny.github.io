@@ -52,17 +52,20 @@ instruction leads rather than sits in a FAQ.
 > model allocates — side, price, sizing and the full circuit-breaker log — in
 > #members-only before first pitch.
 >
-> **Football:** the D.J. Mercer Spotlight — human-researched NFL and college
-> picks, each with the case for it and the strongest case against it,
-> fingerprinted before kickoff, delivered in full in #members-only and graded on
-> its own public record. There is no guaranteed number of picks; some weeks have
-> none.
+> **Football:** the D.J. Mercer Spotlight is the weekly premium featured
+> selection — human-researched, with the case for it and the strongest case
+> against it, fingerprinted before kickoff and graded in public.
 >
-> The original automated football pipeline is paused following the September 8
-> incident while its release process is reviewed. Separate NFL and NCAA
-> developmental strategies are being prepared. They are not publishing yet, and
-> when they do they will be labelled developmental and tracked separately —
-> not presented as proven.
+> NFL and college football each have a separate developmental record:
+> human-researched selections supported by market and analytical data, each
+> approved individually before release, flat-staked at 0.25 units and graded
+> publicly, win or lose. A Spotlight pick in either sport is counted on that
+> record only. Developmental releases have not started yet; they begin only after
+> commissioning is complete, and we will announce it first. Neither record is a
+> proven model, and no model edge is claimed.
+>
+> There is no guaranteed number of picks; some weeks have none. The original
+> automated football pipeline remains paused following the September 8 incident.
 >
 > We do not manufacture official plays simply to create more action or make a
 > subscription appear busier. If nothing meets the standard, nothing gets
@@ -132,8 +135,10 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 >
 > Your membership gives you access to what Open Ledger is actively publishing:
 > the MLB members board while baseball is in season, and D.J. Mercer's
-> human-researched football picks. The automated football pipeline is paused
-> after the September 8 incident. There is no guaranteed number of picks.
+> human-researched football picks — the weekly Spotlight featured selection and,
+> once commissioning is complete, the separate NFL and NCAA developmental plays
+> (announced before they start). The automated football pipeline is paused after
+> the September 8 incident. There is no guaranteed number of picks.
 >
 > Open Ledger does not claim those plays are proven to beat the market. The
 > research, methodology, limitations, and results are published so you can
@@ -158,10 +163,10 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 > rhythm of the member board changes as the calendar changes.
 >
 > As the MLB regular season ends, our normal daily baseball schedule will wind
-> down. Football continues through D.J. Mercer's human-researched picks. The
-> automated football pipeline remains paused while its release process is
-> reviewed, and the NFL and NCAA developmental strategies will be announced
-> separately, if and when they begin publishing.
+> down. Football continues through D.J. Mercer's human-researched picks: the
+> weekly Spotlight featured selection, and separate NFL and college developmental
+> records that begin releasing only after commissioning is complete. None of it is
+> presented as a proven model. The automated football pipeline remains paused.
 >
 > That means you may notice an important difference:
 >
@@ -330,8 +335,9 @@ label; the posts went out on Saturday September 12.
 > public record. They were not part of that slate and continue to be posted
 > here, each fingerprinted before kickoff and graded win or lose.
 >
-> We are also preparing separate NFL and college developmental strategies. They
-> are not publishing yet. If they start, we will say so first, label them
-> developmental, and track them separately. None of it is presented as proven.
+> Separate NFL and college developmental records are being commissioned. They
+> are human-researched, not a model, and have not started releasing. When they do,
+> we will say so first, label every play developmental, approve each one before it
+> is posted, and track each sport separately. None of it is presented as proven.
 >
 > 21+ • Analytics only • Not a sportsbook • No guarantee of results • 1-800-GAMBLER

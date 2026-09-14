@@ -1,149 +1,191 @@
-# D.J. Mercer developmental release controls — design and operating manual
+# D.J. Mercer developmental cohorts — release controls and operating manual
 
-Written 2026-09-14. Code: `scripts/mercer_dev/` (`mdcore.py` registry and
-ledgers, `mdmarket.py` quotes and identity, `mdrelease.py` artifact, checks,
-publish and grading, `mercer_dev.py` CLI and real I/O). Tests:
-`scripts/mercer_dev/selftest_mercer_dev.py`. Workflows:
-`mercer-dev-release.yml` (dispatch only), `mercer-dev-selftest.yml`.
+Updated 2026-09-14 for Daniel's owner decisions. Code: `scripts/mercer_dev/`
+(`mdcore.py` registry and ledgers, `mdmarket.py` quotes and identity,
+`mdrelease.py` artifact, checks, publish, grading, `render.py` public page,
+`mercer_dev.py` CLI and real I/O). Tests: `scripts/mercer_dev/selftest_mercer_dev.py`.
+Workflows: `mercer-dev-release.yml` (dispatch only), grading and render steps in
+`football-grade.yml`, hourly render in `football-capture.yml`,
+`mercer-dev-selftest.yml`.
 
-**Current state: built, tested, NOT ACTIVE.** Both registrations are
-`PROPOSED`; `data/mercer_dev/control.json` is off; no webhook exists. Nothing
-can reach a member until every item in section 7 is done.
+**State: built and tested, NOT ACTIVE.** Registrations are PROPOSED,
+`data/mercer_dev/control.json` is off, `MERCER_DEV_PUBLICATION` is off, and no
+webhook exists. Every control answers a defect in
+`FOOTBALL_INCIDENT_ROOT_CAUSE_2026-09-14.md`.
 
-Every control here answers a defect in `FOOTBALL_INCIDENT_ROOT_CAUSE_2026-09-14.md`.
+## 1. The owner decisions this implements
 
-## 1. The chain
+| # | decision | where enforced |
+|---|---|---|
+| 1 | Spotlight stays the weekly premium featured selection | Spotlight card unchanged; cohort artifact carries `featured` + Spotlight link and a ★ SPOTLIGHT label |
+| 2 | Separate NFL and NCAA cohorts | two registrations, two ledgers, two page sections, no combined figure (tested) |
+| 3, 5 | Human-researched; no proven model or model edge; NCAA no model | registrations `model_type: none`; copy checks [24]; barred phrases in artifacts |
+| 4, 6 | NFL research may continue; 2025 holdout unspent | registration `historical_research`; preservation checks [P] |
+| 7 | A Spotlight pick counts on exactly one record | `mercer.cohort_gate`, grade skip, deliver skip; test [S] |
+| 8 | Prospective only | `validate_publication` refuses rows before effective; `cohort_gate` refuses pre-effective cohort ids |
+| 9 | 0.25u per play, ≤1u per day across all developmental plays | registration fields; `exposure_limits` counts both ledgers AND released receipts; test [X] |
+| 10 | Daniel approves every exact artifact | `human_approval` binds the full artifact hash; registration `manual_review` |
+| 11 | Mercer Live capture-only | nothing here imports or schedules it; check [P] |
+| 12 | Publication off until commissioning | `control.json` off; variable off; commissioning mode |
+| 13 | Automated pause and incident preserved | check [P]; unchanged files |
+| 14 | Daily Pick at 0u | check [P] |
+
+## 2. Relationship between Spotlight and the cohort records
 
 ```
-draft (local, gitignored)                         author
-  → candidate: fresh quote + ESPN event, circuit breakers,
-    Discord payload rendered ONCE, artifact sealed (.enc),
-    SHA-256 appended to data/mercer_dev/commitments.json   author, then push
-  → preview: private review channel (CI) or console (local)
-  → publish dispatch: play id + full artifact SHA-256      Daniel (approver)
-      approval record (create-only)
-      release checks against a FRESH quote and ESPN event
-      reservation (create-only)  → send stored payload bytes
-      → fetch the message back from Discord and compare
-      → receipt (create-only)
-  → grade (after kickoff): publication row from artifact + receipt,
-    then settlement row from the ESPN final                automated later
+               commit time < cohort effective_utc           commit time >= effective_utc
+Spotlight      pick has NO cohort_play_id                   pick MUST carry cohort_play_id
+OFFICIAL pick  -> mercer_ledger.json (Spotlight record)     = <strategy>-v<version>-<ESPN event>-<market>
+               -> delivered hourly to #members-only         and units == 0.25
+                                                            -> NOT booked on the Spotlight ledger
+                                                            -> NOT delivered by the hourly step
+                                                            -> released as a featured cohort artifact
+                                                               through the approved path
+                                                            -> graded ONLY in its cohort ledger
+                                                            -> Spotlight card revealed once the
+                                                               cohort ledger has settled it
 ```
 
-## 2. Release checks (all must pass; names print in the public log, details do not)
+- `mercer.py commit` refuses a post-effective official pick without the right
+  `cohort_play_id`, and a pre-effective pick that claims one (no backfill).
+- `mercer.py grade` never books a cohort-owned pick; it reveals the Spotlight card
+  only after the cohort ledger holds a settlement for that play.
+- `mercer.py deliver` never sends a cohort-owned pick.
+- `mercer_dev.py candidate --spotlight-week W --pick-id P` builds the artifact from
+  the fingerprinted pick (refusing an edited one) and checks the play id matches.
+- The Spotlight page card says which cohort record holds the pick.
+- Leans and passes stay editorial on the Spotlight card and are never graded.
 
-| check | incident defect it answers |
+## 3. The release chain
+
+```
+draft or Spotlight pick (local)                                   author
+  → candidate: fresh quote + ESPN event, circuit breakers, Discord payload rendered
+    ONCE, artifact sealed (.enc), SHA-256 appended to commitments.json
+  → commit and PUSH artifact + commitment to main                  author
+  → preview: #mercer-review only (CI) or console (local)
+  → commission (optional, required before activation): offline double
+  → publish dispatch: play id + full artifact SHA-256              Daniel
+      approval (create-only) → release checks on a FRESH quote and ESPN event
+      → reservation (create-only) → send stored payload bytes
+      → fetch the message back and compare → receipt (create-only)
+  → football-grade.yml daily: publication row after kickoff, settlement on the
+    final, CLV where data exists, artifact revealed
+  → render: /football/mercer/developmental/ (grade run and hourly capture run)
+```
+
+## 4. Release checks (names print in the public log; details do not)
+
+| check | answers |
 |---|---|
-| `kill_switch_off` — control.json enabled for the sport AND `MERCER_DEV_PUBLICATION=enabled` | no independent stop existed |
-| `registration_active` — REGISTERED, effective, version and hash match the artifact | unregistered rule reached members |
-| `artifact_hash`, `publicly_committed` — latest public commitment equals the approved hash | posts preceded the public commitment (D7) |
-| `human_approval` — approver on `MERCER_DEV_APPROVERS` approved this exact hash | no human saw the board (D4) |
-| `payload_is_stored_render` — the stored payload equals the render of the stored fields, within Discord limits | PASS reasons dropped in rendering (D3) |
-| `event_identity_and_teams` — ESPN id, odds id, both team names, home/away | kickoff-drift duplicates (D2) |
-| `league` — sport matches the registration, ESPN regular season | — |
-| `pregame_now` — ESPN status scheduled, ≥30 min before start | 24 started games posted (D1) |
-| `start_time_unchanged` — kickoff within 15 min of the approved artifact | stale schedule |
-| `odds_fresh` — quote ≤15 min old at publication | undisclosed 20-23 h old prices (D6) |
-| `market_exists`, `line_exists` — ≥5 fresh Tier-1 books, ≥3 at the exact number | thin markets |
-| `book_still_offers_price` — the named book still offers this number at this price or better | never substitute a worse line |
-| `price_vs_consensus_now` — price no more than 3.0 pts worse than consensus | buying bad numbers |
-| `breakers_at_build` — every circuit breaker passed when sealed | — |
-| `no_duplicate`, `no_conflicting_play` — one position per event and market | duplicates |
-| `exposure_limits` — per-play and per-ET-day units, plays per day | — |
+| `kill_switch_off` — control.json on for the sport AND `MERCER_DEV_PUBLICATION=enabled` | no independent stop existed |
+| `registration_active` — REGISTERED, effective, version and hash match | unregistered rule reached members |
+| `artifact_hash`, `artifact_committed_publicly`, `publicly_committed` — the sealed file on origin/main is byte-identical, and origin/main's latest commitment matches | posts preceded the public commitment |
+| `human_approval` — approver on `MERCER_DEV_APPROVERS` approved this exact hash | no human reviewed the board |
+| `payload_is_stored_render` — stored payload equals the render of the stored fields, within Discord limits | PASS reasons dropped in rendering |
+| `event_identity_and_teams` — ESPN id, odds id, both names, home/away (never kickoff) | kickoff-drift duplicates |
+| `league`, `pregame_now`, `start_time_unchanged` | started games posted |
+| `odds_fresh`, `market_exists`, `line_exists` | stale, thin markets |
+| `book_still_offers_price`, `price_vs_consensus_now` | never a worse number |
+| `breakers_at_build` | — |
+| `no_duplicate`, `no_conflicting_play` — both ledgers AND released receipts | duplicates |
+| `exposure_limits` — flat 0.25u; ≤1.00u and ≤4 plays per ET day across both cohorts, released-but-not-started included | — |
 
-Before any reservation: a `discord.com` webhook must be set. A missing or foreign
-webhook is refused with nothing written.
+Before any reservation a `discord.com` webhook must exist (publish) — or, in
+commissioning, the non-URL offline marker is the only possible target.
 
-## 3. Delivery states and what to do
+## 5. Delivery states
 
-| state | files | meaning | action |
-|---|---|---|---|
-| published | `.reserved`, `.delivered` | sent and verified | none |
-| failed | `.reserved`, `.failed` | Discord refused (HTTP 4xx) before delivery | fix cause; re-dispatch with `--retry-after-definitive-failure` via a local run or a workflow edit reviewed by Daniel |
-| uncertain | `.reserved` only | timeout, 5xx, or the stored message differs | **do not re-run.** Look in the channel. Record what you found in a dated note beside the reservation. No automatic path retries this |
-| refused | nothing new | a check failed | read the check names in the log |
+| state | files | action |
+|---|---|---|
+| published | `.reserved`, `.delivered` | none |
+| failed | `.reserved`, `.failed` | Discord refused (4xx). Fix cause; retry needs `--retry-after-definitive-failure` |
+| uncertain | `.reserved` only | **do not re-run.** Check `#dj-mercer-plays`; record what you found in a dated note. Nothing retries it |
+| refused | nothing new | read the check names |
+| commissioned | nothing written | commissioning run completed; nothing was sent |
 
-Workflow re-runs (`GITHUB_RUN_ATTEMPT` > 1) never publish. A second publish of a
-play with a receipt is refused.
+Workflow re-runs never publish. A second publish of a play with a receipt is refused.
 
-## 4. Kill switches
+## 6. Grading and metrics
+
+`football-grade.yml` runs `mercer_dev.py grade` **before** the Spotlight grade:
+
+- A released play enters its ledger only after kickoff (publication row from the
+  sealed artifact + receipt); it settles only on an ESPN final, or VOIDs with a
+  stated reason (postponed/cancelled, not regular season, no final 7 days after start).
+- Results, units, ROI: every graded play (price and stake are in the artifact).
+- CLV: **moneyline only**, from existing football captures — the latest pregame
+  capture within 6 h of kickoff with ≥3 fresh Tier-1 books. Otherwise, and always
+  for spreads and totals, the settlement records `clv_unavailable_reason`.
+- Calibration uses the recorded market reference probability and is labelled as
+  describing the market reference, not a model.
+- Settled artifacts are revealed to `data/mercer_dev/revealed/`.
+
+## 7. Public record
+
+`/football/mercer/developmental/`: one section per cohort with registration and
+publication status, record, units/ROI and CLV tiles (CLV "unavailable" with
+reasons), released-not-started plays as proof only (matchup, start, release time,
+artifact hash), the graded table, and NFL historical research shown separately
+and labelled as not an untouched test. NCAA states that no model exists. There
+is no combined figure.
+
+## 8. Kill switches
 
 | switch | stops | does not touch |
 |---|---|---|
-| repository variable `MERCER_DEV_PUBLICATION` ≠ `enabled` | developmental publication | MLB, grading, capture, site, Spotlight |
-| `data/mercer_dev/control.json` sport false | that sport's publication | everything else |
-| repository variable `MERCER_DELIVERY=paused` | Mercer **Spotlight** member delivery (hourly) | everything else |
-| `delivery_policy.PAUSED` (existing) | the automated fp-v0.4 football pipeline | everything else |
+| variable `MERCER_DEV_PUBLICATION` ≠ `enabled` | developmental publication | MLB, grading, capture, site, Spotlight |
+| `control.json` sport false | that sport | everything else |
+| variable `MERCER_DELIVERY=paused` | hourly Spotlight delivery of pre-cohort picks | everything else |
+| `delivery_policy.PAUSED` | the automated fp-v0.4 pipeline | everything else |
 
-## 5. Discord structure (recommendation)
+## 9. Discord structure
 
-| channel | who sees it | webhook secret | content |
+| channel | who | secret | content |
 |---|---|---|---|
-| `#dj-mercer-plays` | paid Members role only | `DISCORD_WEBHOOK_URL_MERCER_PLAYS` | released developmental plays, one message each |
-| `#mercer-review` | Daniel (and any approver) only; **not** the Members role | `DISCORD_WEBHOOK_URL_MERCER_REVIEW` | previews headed "PREVIEW ONLY" with the hash to approve |
-| `#members-only` (existing) | paid | `DISCORD_WEBHOOK_URL_MEMBERS` | MLB board, Mercer Spotlight card; never developmental plays |
-| alerts (existing) | ops | `DISCORD_WEBHOOK_URL_ALERTS` | pipeline failures |
+| `#dj-mercer-plays` | paid Members role | `DISCORD_WEBHOOK_URL_MERCER_PLAYS` | every developmental play, including the ★ Spotlight featured play once its sport's cohort is effective |
+| `#mercer-review` | Daniel only | `DISCORD_WEBHOOK_URL_MERCER_REVIEW` | previews headed PREVIEW ONLY with the hash to approve |
+| `#members-only` | paid | `DISCORD_WEBHOOK_URL_MEMBERS` | MLB board; pre-cohort Spotlight cards |
 
-`#mercer-live` is not recommended yet: Mercer Live is a research-only shadow
-capture and v1 registrations forbid live plays.
+**Decision for Daniel before registration:** featured Spotlight plays move to
+`#dj-mercer-plays` once cohorts are effective. If they should stay in
+`#members-only`, that is a registration field (`publication.channel_secret`) and
+must be settled before the file is frozen.
 
-Each released message shows: DJ Mercer branding, NFL or NCAA, developmental
-cohort and version, PREGAME/LIVE, matchup, selection, line and odds, book and
-reference source, price timestamp, recommended units, brief reasoning, key risks,
-play ID and the responsible-gambling footer. **Publication timestamp:** Discord
-displays the message time natively and the receipt records it; it is not written
-into the payload, because the payload is fixed at approval and must not change
-afterwards.
+## 10. Commissioning checklist (all required, in order)
 
-## 6. Premium withholding
+**Decisions**
+1. Approve the registrations as updated, including the Discord channel for featured plays.
+2. Approve an `effective_utc` (proposed: 2026-09-22T04:00:00Z, Tuesday 00:00 ET).
 
-Pregame, the public repository holds only proof: sealed artifact, commitment
-hash, approval, reservation and receipt — none carries side, line, price, book or
-reasoning (tested). Publication rows enter the ledger only after kickoff, from
-the sealed artifact plus the receipt, so the public record never leaks a live
-play and never omits a released one.
+**Discord (Daniel, manual)**
+3. Create `#dj-mercer-plays`: deny `@everyone` View Channel; allow the Whop-managed
+   Members role View Channel and Read Message History; deny Send Messages.
+4. Create `#mercer-review`: deny `@everyone`; allow only your account. Not Members.
+5. In each: Edit Channel → Integrations → Webhooks → New Webhook → Copy Webhook URL.
 
-## 7. Activation checklist (all required, in order)
+**GitHub (Daniel, Settings → Secrets and variables → Actions)**
+6. Secrets `DISCORD_WEBHOOK_URL_MERCER_PLAYS`, `DISCORD_WEBHOOK_URL_MERCER_REVIEW`
+   (paste straight from Discord; never into chat or a file).
+7. Variables `MERCER_DEV_APPROVERS` = your GitHub login; `MERCER_DEV_PUBLICATION` = `off`.
 
-**Daniel — decisions**
-1. Approve or amend the proposed v1 registrations (protocol section 7). Confirm the
-   selection source is the Mercer research process and that no model edge is
-   claimed.
-2. Decide NCAA: prospective human track, shadow only, or wait for data.
-3. Decide how Mercer Spotlight relates to the cohorts after cutover (recommended:
-   Spotlight's existing record closes after its pre-cutover picks settle, and new
-   Mercer picks go only through the cohorts, so one play is never on two records).
-4. Confirm the 2025 holdout stays unspent.
+**Registration and merge**
+8. Set both files REGISTERED with the approved `effective_utc`, timestamp and code
+   commit; run `mercer_dev.py register` for each; commit and push with the branch merge.
+9. Confirm the next grade run renders `/football/mercer/developmental/` and stays green.
 
-**Daniel — Discord (manual; no secret values are needed by Claude)**
-5. Server Settings → Channels → create `#dj-mercer-plays`. Permissions: deny
-   `@everyone` View Channel; allow the Whop-managed Members role View Channel and
-   Read Message History; deny Send Messages for Members.
-6. Create `#mercer-review`. Deny `@everyone` View Channel; allow only your own
-   account or an admin role. Do NOT allow the Members role.
-7. In each channel: Edit Channel → Integrations → Webhooks → New Webhook → name it
-   (e.g. "DJ Mercer plays", "DJ Mercer review") → Copy Webhook URL.
+**Commissioning — per sport, before any member send**
+10. Pick a real upcoming regular-season game. Build a candidate locally, commit and push.
+11. Dispatch `preview`: confirm the message in `#mercer-review` looks right.
+12. Dispatch `commission` with the play id and hash: every check PASS except
+    `kill_switch_off` (expected OFF); status COMMISSIONED; nothing in any customer channel.
+13. Dispatch `dry-run`: same checks, nothing written.
+14. Repeat 10–13 across two weekends per sport (college Saturday, NFL Sunday and a
+    standalone game), per the v1 gates' operational minimum, recording any mismatch.
 
-**Daniel — GitHub (Settings → Secrets and variables → Actions)**
-8. Secrets: `DISCORD_WEBHOOK_URL_MERCER_PLAYS` and
-   `DISCORD_WEBHOOK_URL_MERCER_REVIEW` — paste each URL straight from Discord.
-   Never paste them into chat or a file.
-9. Variables: `MERCER_DEV_APPROVERS` = your GitHub login (e.g. `dsimny`);
-   `MERCER_DEV_PUBLICATION` = `off` for now.
-
-**Build — after decisions 1-4**
-10. Set each approved registration to `REGISTERED` with a future `effective_utc`,
-    `registration_timestamp_utc` and the code commit; run
-    `python scripts/mercer_dev/mercer_dev.py register --strategy <id> --version 1 --approved-by <you>`;
-    commit and push the registration and `registry_log.json`.
-11. Wire `mercer_dev.py grade` into `football-grade.yml` (stage
-    `data/mercer_dev/ledgers/`), add a closing capture for released plays, and a
-    public cohort page. Not built yet.
-12. Update site and member copy to describe the cohorts as live, only once they are.
-
-**Commissioning — before the first member send**
-13. One complete dry run per sport on a real upcoming game: candidate → preview →
-    `dry-run` dispatch with every check PASS, with `MERCER_DEV_PUBLICATION` still off.
-14. Flip `control.json` for that sport (committed, reviewed) and set
-    `MERCER_DEV_PUBLICATION=enabled`. Publish one play. Confirm the message in
-    `#dj-mercer-plays`, the receipt, and nothing in `#members-only`.
+**Activation (Daniel's explicit go)**
+15. Commit `control.json` with the sport enabled; set `MERCER_DEV_PUBLICATION=enabled`;
+    update the homepage paragraph in the same commit ("releases have not started"
+    stops being true).
+16. Publish one approved play. Confirm the message in `#dj-mercer-plays`, the receipt,
+    and nothing in `#members-only`.

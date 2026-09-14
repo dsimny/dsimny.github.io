@@ -254,6 +254,23 @@ Recommended, in order of fit:
 ML-1 ships the callable and the bounded loop, plus a dispatch-only, read-only
 smoke workflow. It deliberately deploys nothing.
 
+### Known limitation: `--digest` date on a loop that crosses ET midnight (2026-09-14)
+
+`capture.main()` names the digest after all ticks finish, from
+`common.et_date(common.now_utc())`, while each run and shard is filed under the
+ET date of its own tick. A `--loop` that crosses US/Eastern midnight therefore
+writes a digest only for the date it ENDS on; the earlier date's runs are on
+disk but have no digest file until `Store.digest(<that date>)` is run for it.
+A single tick at 23:59:59 ET followed by `--digest` at 00:00:01 ET likewise
+digests the new, nearly empty day.
+
+Not fixed: nothing schedules Mercer Live, and the digest is recomputable from the
+raw store at any time. **If a scheduler is ever deployed**, the loop should digest
+every ET date it touched (or the scheduler should run a separate digest job for
+the previous ET date after 00:05 ET). That is a production change and needs its
+own review. The self-test pins the current behaviour at the Monday/Tuesday,
+ET-vs-UTC and DST boundaries (`selftest_mercer_live.py`, main() plumbing block).
+
 ## 12. Verifying the unverified fields
 
 `Actions → Mercer Live smoke capture (read-only) → Run workflow` with

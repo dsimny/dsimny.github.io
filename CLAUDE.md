@@ -1351,35 +1351,50 @@ and grading descriptions above, without authorizing deletion of history.
 
 Two strategies, never combined: `mercer-nfl-dev` and `mercer-ncaaf-dev`. Code
 `scripts/mercer_dev/`, data `data/mercer_dev/`, gate `mercer-dev-selftest.yml`,
-release `mercer-dev-release.yml` (dispatch only). Read, in order:
+release `mercer-dev-release.yml` (dispatch only; preview / commission / dry-run /
+publish), grading + render in `football-grade.yml`, hourly render in
+`football-capture.yml`. Read, in order:
 `docs/FOOTBALL_INCIDENT_ROOT_CAUSE_2026-09-14.md` (why every control exists),
-`docs/MERCER_DEVELOPMENTAL_PROTOCOL.md` (evaluation + proposed v1),
-`docs/MERCER_DEVELOPMENTAL_RELEASE_CONTROLS.md` (operating manual + activation
-checklist).
+`docs/MERCER_DEVELOPMENTAL_PROTOCOL.md` (evaluation + v1 design),
+`docs/MERCER_DEVELOPMENTAL_RELEASE_CONTROLS.md` (operating manual, Spotlight
+relationship, commissioning checklist),
+`docs/FOOTBALL_PREGAME_RELEASE_GATES_AMENDMENT_2026-09-14.md`,
+`docs/NCAA_DATA_ACQUISITION_PLAN.md`.
 
-- **No model edge is claimed, because none survived.** The NFL development
-  evaluation (train 2022-23, validate 2024, both previously scored) chose blend
-  weight w = 0 and the fixed rule selected 0 plays in 800 games. v1 is the Mercer
-  research process under registered guardrails with a market reference
-  probability. Do not "fix" this by lowering thresholds or adding features.
-- **2025 NFL holdout: still unspent, deliberately.** Recommendation recorded;
-  claiming it is Daniel's one-time decision.
-- **No historical college data exists.** NCAA v1 is prospective-only.
-- **Registrations ship PROPOSED and are never binding until `register` logs their
-  SHA-256.** After that the file is frozen; methodology changes are new versions.
-- **Nothing publishes by default.** Needs: REGISTERED + effective, `control.json`
-  on for the sport, variable `MERCER_DEV_PUBLICATION=enabled`, an approver on
-  `MERCER_DEV_APPROVERS` supplying the exact artifact hash, and every release check.
-- **Approval is atomic.** The Discord payload is rendered once into the sealed
-  artifact; the sender posts those bytes, fetches the message back and compares.
-  Uncertain sends block every retry; workflow re-runs never publish.
-- **Public logs.** Print check names only; previews go to the private review
-  webhook. Publication rows enter the ledger only after kickoff.
+OWNER DECISIONS (2026-09-14), all enforced in code or tests:
+- **Human-researched, supported by market and analytical data. Never a proven
+  model; no model edge claimed.** The NFL evaluation chose w = 0 and selected 0
+  plays in 800 games. NFL research may continue separately. **NCAA has no model
+  and none may be claimed** until point-in-time historical data is acquired and
+  tested. Do not "fix" either by lowering thresholds or adding features.
+- **Spotlight stays the weekly premium featured selection, and a Spotlight pick
+  counts on exactly one record.** From a cohort's effective date, an official
+  Spotlight pick in that sport carries `cohort_play_id`; `mercer.py` refuses it
+  otherwise, never books or delivers it, and reveals the card only after the
+  cohort ledger settles the play.
+- **Prospective only.** No backfill; registrations frozen by SHA-256 once
+  `register` logs them; methodology changes are new versions.
+- **Flat 0.25u per play; ≤1u per ET day across BOTH cohorts**, counting released
+  receipts as well as ledger rows (publication rows enter only after kickoff).
+- **Daniel approves every exact artifact.** The sealed artifact and its commitment
+  must be on origin/main before any send; the stored payload bytes are sent,
+  read back and compared; uncertain sends block retries; re-runs never publish.
+- **CLV only where data exists:** moneyline from existing captures (latest ≤6 h
+  pregame, ≥3 fresh Tier-1 books); spreads/totals always marked unavailable.
+- **`MERCER_DEV_PUBLICATION` stays off until commissioning.** The `commission`
+  action runs the full chain against an offline double that cannot post.
+- Unchanged: 2025 NFL holdout unspent; Mercer Live capture-only and unscheduled;
+  automated pipeline paused; Sept 8 incident preserved; Daily Pick at 0u.
+- **Public logs.** Print check names only; previews go to the private review webhook.
 
 Mercer **Spotlight** delivery (`mercer.py deliver`, hourly) gained the same
 class of protections on 2026-09-14: kill switch `MERCER_DELIVERY=paused`,
 durable `data/mercer/deliveries.json` (post_status.json is trimmed to 30 rows),
 no-card weeks exit 0, kickoff and webhook-host checks, legal footer.
+
+Mercer Live known limitation (documented, not fixed): `--digest` names the digest
+from the clock at the END of a loop, so a loop crossing ET midnight digests only
+its final ET date (`docs/MERCER_LIVE_ML1_ARCHITECTURE.md`). Revisit before any scheduler.
 
 Daily Pick staking review held 2026-09-14: **stays 0u**
 (`docs/DAILY_PICK_STAKING_REVIEW_2026-09-14.md`, next-review criteria proposed).

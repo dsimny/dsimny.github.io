@@ -143,7 +143,7 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           set +e
-          SUITES="reset allowlist board discord delivery market_input private_validation research_feasibility nfl_representation_prereg record_classification result_identity mercer mercer_premium page push_pattern staging workflows writeup"
+          SUITES="reset allowlist board discord delivery market_input private_validation research_feasibility nfl_representation_prereg nfl_representation record_classification result_identity mercer mercer_premium page push_pattern staging workflows writeup"
           FAILED=""
           for s in $SUITES; do
             echo "::group::selftest_$s.py"

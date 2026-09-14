@@ -35,7 +35,7 @@ class FeasibilityTests(unittest.TestCase):
 
     def test_schema_hash_and_holdout_boundary(self):
         with tempfile.TemporaryDirectory() as td:
-            header = sorted(set().union(*rf.FAMILIES.values()))
+            header = sorted(set().union(*rf.FAMILIES.values()) | rf.REQUIRED_IDENTITY)
             raw = gzip.compress((','.join(header)+'\n').encode())
             Path(td, 'play_by_play_2010.csv.gz').write_bytes(raw)
             Path(td, 'play_by_play_2025.csv.gz').write_bytes(b'never parse holdout')

@@ -15,6 +15,8 @@ FAMILIES = {
     'red_zone': {'yardline_100', 'fixed_drive', 'fixed_drive_result'},
     'drive_points': {'fixed_drive', 'fixed_drive_result'},
 }
+REQUIRED_IDENTITY = {'game_id', 'season_type', 'posteam', 'defteam',
+                     'qb_kneel', 'qb_spike'}
 
 
 def inventory(cache, manifest):
@@ -35,7 +37,7 @@ def inventory(cache, manifest):
             else:
                 with gzip.open(path, 'rt', encoding='utf-8-sig', newline='') as f:
                     header = next(csv.reader(f))
-                row['missing_columns'] = {name: sorted(cols - set(header)) for name, cols in FAMILIES.items()}
+                row['missing_columns'] = {name: sorted((cols | REQUIRED_IDENTITY) - set(header)) for name, cols in FAMILIES.items()}
                 row['ready'] = not any(row['missing_columns'].values())
                 row['reason'] = 'schema/hash verified; feature completeness and point-in-time validity untested'
         out.append(row)

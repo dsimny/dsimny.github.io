@@ -1,0 +1,14 @@
+{
+  "_note": "Append-only research freeze evidence. Add new versions; never replace an existing entry.",
+  "registrations": [
+    {
+      "id": "nfl-representation-v1",
+      "frozen_date": "2026-09-14",
+      "path": "docs/FOOTBALL_PREREG_NFL_REPRESENTATION_V1.md",
+      "first_commit": "153580b752305d75b2f81db9d47858ad99d8d450",
+      "bytes": 9458,
+      "sha256": "563440b7866a86c1fcae55de90e97a684b4413b8e7ce6f1db63565889f66491d",
+      "authority": "research_only_no_selection_delivery_or_holdout"
+    }
+  ]
+}

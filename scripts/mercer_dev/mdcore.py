@@ -56,7 +56,8 @@ REQUIRED_FIELDS = (
     "max_market_divergence", "min_data_quality", "odds_limits", "unit_sizing",
     "max_play_units", "max_daily_units", "max_plays_per_day", "manual_review",
     "live_plays_permitted", "conflicting_plays_permitted", "known_limitations",
-    "change_control", "code_commit")
+    "change_control", "code_commit", "daily_exposure_scope", "featured_selection",
+    "metric_availability")
 # Changing any of these is a new version, never an amendment.
 METHODOLOGY_FIELDS = (
     "feature_definitions", "model_type", "selection_source", "eligible_markets",
@@ -73,11 +74,11 @@ PUBLICATION_FIELDS = (
     "selection", "line", "odds", "book", "reference_source", "model_probability",
     "market_implied_probability", "edge_pts", "confidence", "recommended_units",
     "circuit_breakers", "manual_approver", "approved_utc", "artifact_sha256",
-    "discord_message_ids")
+    "discord_message_ids", "featured", "spotlight_pick_id")
 SETTLEMENT_FIELDS = (
     "row_type", "play_id", "result", "profit_units", "graded_utc", "home_score",
     "away_score", "closing_line", "closing_odds", "closing_probability", "clv_pts",
-    "void_reason", "corrects")
+    "clv_unavailable_reason", "void_reason", "corrects")
 RESULTS = ("WIN", "LOSS", "PUSH", "VOID")
 
 
@@ -191,6 +192,10 @@ def validate_registration(reg):
         raise IntegrityError("unit_sizing.flat_units must be within max_play_units")
     if reg["live_plays_permitted"] not in (True, False):
         raise IntegrityError("live_plays_permitted must be boolean")
+    if reg["daily_exposure_scope"] != "all_developmental_cohorts":
+        raise IntegrityError("daily exposure is capped across ALL developmental cohorts combined")
+    if float(reg["max_play_units"]) != float(units):
+        raise IntegrityError("developmental plays are flat-staked: max_play_units must equal flat_units")
     return True
 
 
@@ -435,6 +440,11 @@ def aggregates(led):
         streak = streak + 1 if s["result"] == "LOSS" else 0
         worst = max(worst, streak)
     clv = [s["clv_pts"] for _, s in graded if isinstance(s.get("clv_pts"), (int, float))]
+    clv_missing = {}
+    for _, s in graded:
+        if not isinstance(s.get("clv_pts"), (int, float)):
+            why = s.get("clv_unavailable_reason") or "no closing line recorded"
+            clv_missing[why] = clv_missing.get(why, 0) + 1
     decided = [(p, s) for p, s in graded if s["result"] in ("WIN", "LOSS")]
     brier = None
     if decided:
@@ -455,8 +465,11 @@ def aggregates(led):
         "units": round(units, 3), "risked_units": round(risked, 3),
         "roi_pct": round(100 * units / risked, 2) if risked else None,
         "max_drawdown_units": round(dd, 3), "longest_losing_streak": worst,
-        "clv": {"n": len(clv), "mean_pts": round(sum(clv) / len(clv), 3) if clv else None,
-                "beat_close_pct": round(100 * sum(c > 0 for c in clv) / len(clv), 1) if clv else None},
+        "clv": {"n": len(clv), "of_graded": len(graded),
+                "mean_pts": round(sum(clv) / len(clv), 3) if clv else None,
+                "beat_close_pct": round(100 * sum(c > 0 for c in clv) / len(clv), 1) if clv else None,
+                "unavailable": clv_missing},
+        "featured": sum(1 for p in pubs if p.get("featured")),
         "brier_reference_probability": brier,
         "calibration": {k: {"n": len(v), "mean_p": round(sum(a for a, _ in v) / len(v), 4),
                             "win_rate": round(sum(b for _, b in v) / len(v), 4)}

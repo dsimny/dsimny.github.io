@@ -1,12 +1,14 @@
 {
- "_status_note": "PROPOSED is never binding. Registration = Daniel approves, status set to REGISTERED with a future effective_utc and the code commit, then `mercer_dev.py register` logs the SHA-256. The file is frozen from then on.",
- "change_control": "New version for any change to features, weights, model family, market blending, eligibility, edge or divergence thresholds, markets, sizing, exposure or data-quality rules. Ratings and rolling inputs updating is not a new version. Clerical amendments are separate logged files and may not touch methodology fields. No version is ever applied retroactively.",
+ "_status_note": "Owner decisions of 2026-09-14 are applied. Still PROPOSED, therefore not binding: registration sets status REGISTERED with a future effective_utc, the registration timestamp and the code commit, then `mercer_dev.py register` logs the SHA-256 and the file is frozen. Nothing before effective_utc is ever recorded in this cohort (no backfill).",
+ "change_control": "New version for any change to selection source, features, model use, market blending, eligibility, edge or divergence thresholds, markets, sizing, exposure, approval or data-quality rules. Clerical amendments are separate logged files and may not touch methodology fields. No version is ever applied retroactively.",
  "code_commit": null,
  "conflicting_plays_permitted": false,
+ "daily_exposure_scope": "all_developmental_cohorts",
  "data_sources": [
   "The Odds API v4 event odds (h2h, spreads, totals; US region; Tier-1 books)",
   "ESPN scoreboard (event identity, schedule, status, finals)",
-  "Human research notes under the D.J. Mercer byline (injury feed, depth charts, news)"
+  "Open Ledger football moneyline captures (data/football/odds) for closing moneyline CLV",
+  "Human research notes under the D.J. Mercer byline (injury reports, depth charts, news)"
  ],
  "effective_utc": null,
  "eligible_markets": [
@@ -16,33 +18,46 @@
  ],
  "feature_definitions": {
   "confidence": "standard | strong | spotlight; an ordering, never a probability, never changes stake",
-  "edge_pts": "100 * (reference_probability - market_implied_probability); usually <= 0 and published as it is",
+  "edge_pts": "100 * (reference_probability - market_implied_probability); usually <= 0, published as it is, never described as an edge claim",
   "market_implied_probability": "implied probability of the American price taken",
   "reference_probability": "median over fresh Tier-1 books quoting the same number of p_side/(p_side+p_other), implied from American odds"
  },
+ "featured_selection": {
+  "rule": "When the weekly featured Spotlight pick is in this sport it IS a play in this cohort: the pick carries cohort_play_id, the artifact carries featured=true and the Spotlight link, it is released only through the approved path, and it is recorded and graded ONLY in this cohort's ledger. The Spotlight ledger never books it.",
+  "source": "D.J. Mercer Spotlight, the weekly premium featured selection",
+  "volume": "no guaranteed number of plays or featured selections"
+ },
+ "historical_research": "NFL model research continues separately and does not select or size plays. The 2026-09-14 development evaluation (docs/MERCER_DEVELOPMENTAL_PROTOCOL.md; train 2022-23, validation 2024, both previously scored) found no independent edge: best blend weight 0, and its fixed rule selected 0 plays in 800 games.",
  "known_limitations": [
-  "No model edge: the best blend weight on 2022-24 is 0 (docs/MERCER_DEVELOPMENTAL_PROTOCOL.md section 4).",
-  "Selections are human judgement; no historical record of this process exists before effective_utc.",
-  "No untouched historical test; the 2025 holdout is deliberately not spent.",
-  "CLV for spreads and totals needs a closing capture per play that is not yet scheduled.",
-  "Per-market timestamps depend on the provider supplying them; missing ones block release."
+  "No demonstrated model edge; plays are human judgement supported by market and analytical data.",
+  "No record of this process exists before effective_utc, and none is backfilled.",
+  "CLV is unavailable for spreads and totals and for moneylines without a close enough capture.",
+  "Per-market timestamps depend on the provider; missing ones block release.",
+  "Sample sizes for any performance reading will be small for a long time."
  ],
  "league": "NFL",
  "live_plays_permitted": false,
  "manual_review": {
-  "approval_binds": "the full artifact SHA-256, including the exact Discord payload",
-  "approver_allowlist_variable": "MERCER_DEV_APPROVERS",
-  "period": "every play until 8 weeks after effective_utc or 30 plays in this cohort, whichever is later",
+  "approval_binds": "the full SHA-256 of the sealed artifact, which contains the exact Discord payload",
+  "approver": "Daniel, by GitHub login on MERCER_DEV_APPROVERS",
+  "artifact_must_be_on_origin_main_before_send": true,
+  "period": "every play, with no end date in this version; removing it is a new version",
   "required": true
  },
  "max_daily_units": 1.0,
  "max_market_divergence": {
   "max_price_below_consensus_pts": 3.0,
-  "note": "no model disagreement exists at w=0; divergence is controlled as price vs consensus and the recorded walk-away boundary. 3.0 pts admits an ordinary -110/-110 number (2.38 pts below proportional fair) and blocks a price materially worse than that.",
+  "note": "no model disagreement exists; divergence is controlled as price vs consensus (3.0 pts admits an ordinary -110/-110 number, 2.38 pts below fair) and the recorded walk-away boundary",
   "walk_away_required": true
  },
- "max_play_units": 0.5,
- "max_plays_per_day": 3,
+ "max_play_units": 0.25,
+ "max_plays_per_day": 4,
+ "metric_availability": {
+  "calibration": "reference probability against results - this describes the market reference, not a model",
+  "clv_moneyline": "only when an existing pregame capture of the event within 6 hours of kickoff has at least 3 fresh Tier-1 books; otherwise marked unavailable with the reason",
+  "clv_spread_total": "unavailable: spreads and totals have no closing capture",
+  "results_units_roi": "every graded play (price taken and flat stake are in the artifact)"
+ },
  "min_data_quality": {
   "espn_event_resolved": true,
   "max_quote_age_minutes": 15,
@@ -52,7 +67,7 @@
   "require_market_timestamps": true
  },
  "min_edge_pts": null,
- "model_type": "market reference probability: median proportionally de-vigged Tier-1 consensus at the exact number, at selection time. Model weight w = 0.",
+ "model_type": "none. No predictive model selects plays, and none is claimed. The recorded reference probability is the proportionally de-vigged median Tier-1 market consensus at the exact number at selection time.",
  "odds_limits": {
   "max_spread_magnitude": 10.5,
   "moneyline_max": 250,
@@ -60,23 +75,31 @@
   "price_max": 115,
   "price_min": -130
  },
+ "publication": {
+  "channel_secret": "DISCORD_WEBHOOK_URL_MERCER_PLAYS",
+  "commissioning_required_before_first_send": true,
+  "kill_switches": [
+   "data/mercer_dev/control.json per sport",
+   "repository variable MERCER_DEV_PUBLICATION=enabled"
+  ]
+ },
  "registration_timestamp_utc": null,
- "selection_source": "D.J. Mercer research process (docs/MERCER_SPOTLIGHT.md sections 2b-2c: Research Filter v1.0, independent-case rule, required Case Against, walk-away boundary recorded before the number is checked).",
+ "selection_source": "Human-researched selections by D.J. Mercer, supported by market data (Tier-1 consensus, price and line movement, book coverage) and analytical context (public efficiency, schedule and personnel information). Research follows docs/MERCER_SPOTLIGHT.md sections 2b-2c: the independent-case rule, a required case against, and a walk-away boundary recorded before the price is checked. No model selects, ranks or sizes plays.",
  "selection_time": {
   "designation": "pregame",
   "min_minutes_before_start": 30,
-  "note": "the artifact is built from a quote no older than max_quote_age_minutes and re-checked at publication"
+  "note": "the artifact is built from a quote no older than max_quote_age_minutes and every check is repeated at publication"
  },
  "sport": "nfl",
  "status": "PROPOSED",
  "strategy_id": "mercer-nfl-dev",
  "strategy_name": "DJ Mercer NFL — Developmental Cohort",
- "training_window": "2022-2023 NFL regular season, T-24 Tier A odds (market blend weight); ratings burn-in 2010-14, tuned 2015-21 (fb-v0.1, frozen). CONTAMINATED: previously scored.",
+ "training_window": "not applicable: human-researched process; no model is trained or registered.",
  "unit_sizing": {
-  "basis": "recorded paper stake; no staking claim",
+  "basis": "flat 0.25 units per play, recorded; no variable sizing",
   "flat_units": 0.25
  },
- "untouched_test_window": "none. See docs/MERCER_DEVELOPMENTAL_PROTOCOL.md section 6; the live record from effective_utc is the only untouched evidence.",
- "validation_window": "2024 NFL regular season. CONTAMINATED: previously scored.",
+ "untouched_test_window": "not applicable: no model is registered. The 2025 NFL holdout remains unspent.",
+ "validation_window": "not applicable.",
  "version": 1
 }

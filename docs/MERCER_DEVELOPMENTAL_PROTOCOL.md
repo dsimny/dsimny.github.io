@@ -1,9 +1,8 @@
 # D.J. Mercer Developmental Cohorts — modeling protocol, evaluation, proposed v1
 
-Written 2026-09-14. Status: **PROPOSAL. Nothing here is registered or
-effective, and nothing here authorizes publication.** Registration requires
-Daniel's explicit approval of section 7 (see
-`data/mercer_dev/registrations/*.json`, status `PROPOSED`).
+Written 2026-09-14; section 7 updated the same day for Daniel's owner
+decisions. **Nothing here is registered or effective yet, and nothing here
+authorizes publication.** Registration binds `data/mercer_dev/registrations/*.json`.
 
 Two cohorts, never combined:
 
@@ -204,45 +203,37 @@ season that `nfl-representation-v1` may later need. **Recommendation: leave
 2025 unclaimed.** If Daniel wants it claimed anyway, that is a one-time,
 irreversible decision recorded through `asof.claim_holdout()`.
 
-## 7. Proposed v1 design for both cohorts
+## 7. v1 design — owner decisions of 2026-09-14 (supersedes the earlier proposal)
 
-Because no model edge survives evaluation, v1 does not pretend to have one.
+The registrations in `data/mercer_dev/registrations/` are the binding text once
+registered; this section summarises them.
 
-**Selection source:** the D.J. Mercer research process already documented in
-`MERCER_SPOTLIGHT.md` (Research Filter v1.0, the independent-case rule, a
-required Case Against and a pre-recorded walk-away number), applied per sport.
+- **Human-researched, not a model.** Both cohorts are D.J. Mercer's human research
+  process supported by market and analytical data. No model selects, ranks or sizes
+  plays; no model edge is claimed. The recorded probability is the market reference.
+- **NFL:** historical model research may continue separately. Section 4's
+  evaluation found no independent edge, and its output does not select plays.
+- **NCAA:** human-researched only. No NCAA model exists or may be claimed until
+  point-in-time historical data is acquired and tested (`NCAA_DATA_ACQUISITION_PLAN.md`).
+- **Spotlight:** stays the weekly premium featured selection. From a cohort's
+  effective date, a Spotlight pick in that sport is a cohort play and is counted
+  on that cohort's record only (`MERCER_DEVELOPMENTAL_RELEASE_CONTROLS.md` §2).
+- **Prospective only.** No backfill.
+- **Staking:** flat 0.25 units per play; at most 1 unit per ET day across all
+  developmental plays in both cohorts, released-but-not-started plays included.
+- **Approval:** Daniel approves the exact immutable artifact of every play.
+- **Guardrails** unchanged from the proposal: pregame only, ≥30 minutes before
+  start, moneyline −250..+250, spread/total prices −130..+115, spread magnitude
+  ≤10.5 (NFL) / ≤17.5 (NCAA), taken price ≤3.0 pts worse than consensus, ≥5
+  fresh Tier-1 books and ≥3 at the number, recorded walk-away boundary, no live plays.
+- **2025 NFL holdout:** unspent.
+- **Publication:** off until commissioning is complete.
 
-**Model probability:** the market reference — de-vigged Tier-1 consensus at
-selection time (w = 0, per section 4). Recorded on every play so calibration
-and CLV are measurable. The play's recorded *edge* is reference probability
-minus the implied probability of the price taken; it will usually be at or
-below zero, and it is published as it is.
+**What makes a new version:** any change to selection source, features, model
+use, market blending, eligibility, edge or divergence thresholds, markets, sizing,
+exposure, approval or data-quality rules. Ratings and rolling inputs updating is
+not a new version.
 
-**Registered guardrails (proposed values — Daniel to confirm):**
-
-| rule | NFL v1 | NCAA v1 |
-|---|---|---|
-| markets | full-game moneyline, spread, total | same |
-| timing | pregame only; published ≥30 min before kickoff | same |
-| live plays | not permitted in v1 | not permitted |
-| moneyline odds window | −250 to +250 | −250 to +250 |
-| spread/total price window | −130 to +115 | −130 to +115 |
-| spread magnitude | ≤10.5 | ≤17.5 |
-| price vs consensus | taken price may be at most 3.0 pts worse than consensus fair (an ordinary −110/−110 number is 2.38 pts worse) | same |
-| data quality | ≥5 Tier-1 books quoting that market; fresh quote ≤15 min at publish; ESPN event resolved and pregame | same |
-| market divergence | line/price must sit inside the play's recorded walk-away boundary; outside → HOLD | same |
-| stake | flat 0.25u recorded (paper; no staking claim) | same |
-| max play size | 0.5u | 0.5u |
-| max daily exposure | 1.0u per ET day | 1.0u per ET day |
-| max plays per ET day | 3 | 3 |
-| conflicting plays | one position per event and market; no opposite sides | same |
-| manual review | every play approved by Daniel during stabilization (first 8 weeks or 30 plays, whichever is later) | same |
-
-**What makes a new version:** any change to features, weights, model family,
-market blending, eligibility, edge or divergence thresholds, markets, sizing,
-exposure limits or data-quality rules. Ratings and rolling inputs updating after
-games is not a new version.
-
-**Record:** each cohort's ledger starts empty at its effective date. The Mercer
-Spotlight Week 1 pick is not backfilled. Historical development results
-(section 4) are shown separately from the live record and labelled.
+**Record:** each cohort's ledger starts empty at its effective date. Historical
+development results (section 4) are shown separately from the live record and
+labelled.

@@ -10,8 +10,8 @@
    "matchup": "Green Bay Packers @ Minnesota Vikings",
    "pick_id": "2026-09-08-nfl-01",
    "pregame_public": true,
-   "revealed": false,
-   "revealed_utc": null,
+   "revealed": true,
+   "revealed_utc": "2026-09-14T16:45:01Z",
    "sha256": "f57680c86533e66a84970fa5941829b2a4d30eea9d2fbe264668b5ed43235411",
    "slate_week": "2026-09-08",
    "sport": "nfl"

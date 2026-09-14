@@ -2,5 +2,31 @@
  "_created_note": "Created deliberately and EMPTY on 2026-09-06 when the Mercer Spotlight was built - not as a side effect of a run. Under House Rule 1 the first entry is permanent, so the file exists before anything can append to it by accident. An empty entries list means no Mercer pick has settled yet.",
  "_note": "D.J. Mercer Spotlight record, append-only (House Rule 1). Human-researched football picks under the Mercer byline. NEVER mixed with football_ledger.json (the model's record) or any MLB ledger. A VOID entry is a pick that could not be graded honestly \u2014 its void_reason says why, and it stays here in public. Leans and passes are never booked.",
  "created_utc": "2026-09-06T13:28:08Z",
- "entries": []
+ "entries": [
+  {
+   "book": "Fanatics",
+   "commitment_sha256": "f57680c86533e66a84970fa5941829b2a4d30eea9d2fbe264668b5ed43235411",
+   "committed_utc": "2026-09-12T00:47:26Z",
+   "conviction": "standard",
+   "espn_event_id": "401872927",
+   "final": "Green Bay Packers 22, Minnesota Vikings 39",
+   "graded_utc": "2026-09-14T16:45:01Z",
+   "hours_before_kickoff": 43.6,
+   "kickoff_utc": "2026-09-13T20:25:00Z",
+   "line": 46.5,
+   "market": "total",
+   "matchup": "Green Bay Packers @ Minnesota Vikings",
+   "pick_id": "2026-09-08-nfl-01",
+   "pnl": -0.25,
+   "price": -110,
+   "result": "LOSS",
+   "selection": "Under 46.5",
+   "side": "under",
+   "slate_week": "2026-09-08",
+   "sport": "nfl",
+   "status": "OFFICIAL",
+   "team": null,
+   "units": 0.25
+  }
+ ]
 }

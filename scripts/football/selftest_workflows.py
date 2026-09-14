@@ -306,7 +306,7 @@ STAGED = {
     ("football-capture.yml", "Commit the board and pages"):
         ["data/football/board_*.enc", "data/football/commitments.json",
          "data/football/game_commitments.json", "data/post_status.json",
-         "football/"],
+         "data/mercer/deliveries.json", "football/"],
     ("football-grade.yml", "Commit"):
         ["data/football/football_ledger.json", "data/football/commitments.json",
          "data/football/ncaaf_results.json", "data/football/nfl_results.json",

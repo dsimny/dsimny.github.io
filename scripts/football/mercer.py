@@ -79,6 +79,7 @@ import teams                                         # noqa: E402
 import espn_nfl                                      # noqa: E402
 import espn_ncaaf                                    # noqa: E402
 import crypto_box                                    # noqa: E402
+import post_discord                                  # noqa: E402  (webhook host check)
 from blog import PAGE_CSS, LEGAL, nice_date, et_time, ET  # noqa: E402
 
 ROOT = os.path.join(HERE, "..", "..")
@@ -829,13 +830,53 @@ def cmd_grade(dry_run=False, stores=None, now=None):
 MEMBERS_WEBHOOK_ENV = "DISCORD_WEBHOOK_URL_MEMBERS"
 STATUS_PATH = os.path.join(ROOT, "data", "post_status.json")
 STATUS_KEEP = 200
+# DURABLE delivery record (2026-09-14). post_status.json is SHARED and every
+# other writer trims it to its newest 30 rows (about four days), so a
+# "mercer_members posted" row could be trimmed away while its week was still
+# current and the hourly run would post the whole card again. This file is
+# append-only and never trimmed; both are consulted.
+DELIVERIES = os.path.join(DATA, "deliveries.json")
+# Kill switch, set as the repository VARIABLE MERCER_DELIVERY. "paused" stops
+# member delivery and nothing else: grading, render, capture, MLB and the site
+# are untouched. Unset = enabled, so existing behaviour is unchanged.
+DELIVERY_SWITCH_ENV = "MERCER_DELIVERY"
+MEMBER_FOOTER = ("Open Ledger Sports · analytics, not betting advice · no guarantee of "
+                 "results · 21+ · 1-800-GAMBLER")
 
 
 def _status_load():
     return load_json(STATUS_PATH, {"posts": []})
 
 
+def _deliveries_load():
+    return load_json(DELIVERIES, {
+        "_note": ("Append-only record of Mercer member deliveries. Never trimmed. "
+                  "A 'sending' row with no later 'posted' or 'failed' row for the "
+                  "same week means the outcome is uncertain: check Discord before "
+                  "anything is re-sent."),
+        "deliveries": []})
+
+
+def _delivery_rows(week):
+    return [d for d in _deliveries_load()["deliveries"] if d.get("week") == week]
+
+
+def _delivery_append(week, result, **extra):
+    log = _deliveries_load()
+    row = {"week": week, "result": result, "at_utc": market.iso(market.now_utc())}
+    row.update(extra)
+    log["deliveries"].append(row)
+    save_json(DELIVERIES, log)
+
+
+def delivery_uncertain(week):
+    rows = _delivery_rows(week)
+    return bool(rows) and rows[-1].get("result") == "sending"
+
+
 def already_delivered(week):
+    if any(d.get("result") == "posted" for d in _delivery_rows(week)):
+        return True
     for p in _status_load().get("posts", []):
         if (p.get("date") == week and p.get("mode") == "mercer_members"
                 and p.get("result") == "posted"):
@@ -879,8 +920,14 @@ def member_messages(week, doc, commits):
         if c.get("sha256"):
             lines += ["", f"Commitment `{c['sha256'][:24]}…` at {c.get('committed_utc','')}"]
         body = "\n".join(lines)
+        # The legal footer is appended AFTER any truncation so no card length
+        # can cut it off (House Rule 5).
+        room = 4000 - len(MEMBER_FOOTER) - 3
+        if len(body) > room:
+            body = body[:room - 1] + "…"
+        body = body + "\n\n" + MEMBER_FOOTER
         embeds.append({"title": f"Pick #{i} — {p.get('away','')} @ {p.get('home','')}",
-                       "description": body[:4000], "color": 0x3987E5})
+                       "description": body, "color": 0x3987E5})
     msgs = [{"content": head, "embeds": embeds[:10]}]
     for extra in range(10, len(embeds), 10):
         msgs.append({"embeds": embeds[extra:extra + 10]})
@@ -892,6 +939,18 @@ def cmd_deliver(week=None, dry_run=False, now=None):
     now = now or market.now_utc()
     week = week or current_week(now)
     hook = os.environ.get(MEMBERS_WEBHOOK_ENV, "").strip()
+    in_ci = os.environ.get("GITHUB_ACTIONS", "").lower() == "true"
+    if os.environ.get(DELIVERY_SWITCH_ENV, "").strip().lower() == "paused" and not dry_run:
+        print(f"{week}: Mercer member delivery is PAUSED ({DELIVERY_SWITCH_ENV}=paused). "
+              "Nothing sent, nothing recorded.")
+        return 0
+    plain, enc = week_paths(week)
+    if not os.path.exists(plain) and not os.path.exists(enc):
+        # A week with no card yet is the normal state every Tuesday until the
+        # card is written. It is not a failure, and turning every hourly
+        # capture run red for it would bury real alerts.
+        print(f"{week}: no Mercer card for this week yet; nothing to deliver.")
+        return 0
     doc = load_week(week)
     if doc is None:
         print(f"{week}: card unreadable here (sealed and no key). Nothing delivered.")
@@ -902,6 +961,10 @@ def cmd_deliver(week=None, dry_run=False, now=None):
     if already_delivered(week) and not dry_run:
         print(f"{week}: already delivered to members; refusing to double-post.")
         return 0
+    if delivery_uncertain(week) and not dry_run:
+        print(f"{week}: a previous delivery attempt has no recorded outcome. REFUSING "
+              "to send again; check the members channel and record the outcome by hand.")
+        return 1
     commits = load_commitments()["commitments"]
     unstamped = [p["id"] for p in doc["picks"] if not commit_for(p["id"], commits)]
     if unstamped:
@@ -909,8 +972,21 @@ def cmd_deliver(week=None, dry_run=False, now=None):
         # pick with no public proof behind it - the wrong order.
         print(f"{week}: REFUSING to deliver - not fingerprinted yet: {unstamped}")
         return 1
+    started = [p["id"] for p in doc["picks"]
+               if (market.parse_utc(p.get("kickoff_utc")) or now) <= now]
+    if started and not dry_run:
+        # A pregame pick delivered after kickoff is not a pick. Never send a
+        # card containing one; the author must split or withdraw it.
+        print(f"{week}: REFUSING to deliver - kickoff has passed for {started}")
+        return 1
     msgs = member_messages(week, doc, commits)
     if dry_run or not hook:
+        if not hook and not dry_run and in_ci:
+            # Actions logs of a public repository are public. Never print an
+            # unrevealed actionable card there because a secret is missing.
+            print(f"  {MEMBERS_WEBHOOK_ENV} is not set - nothing sent, card NOT printed "
+                  f"(public log). {len(msgs)} message(s) withheld.")
+            return 1
         if not hook:
             print(f"  {MEMBERS_WEBHOOK_ENV} is not set - printing instead of posting.")
         for i, m in enumerate(msgs, 1):
@@ -921,19 +997,31 @@ def cmd_deliver(week=None, dry_run=False, now=None):
                 print(f"  [embed] {e['title']}")
                 print("    " + e["description"].replace("\n", "\n    "))
         return 0
+    if not post_discord.webhook_host_ok(hook):
+        print(f"  {MEMBERS_WEBHOOK_ENV} does not point at discord.com - REFUSING to send.")
+        return 1
     import requests
+    payload_sha = crypto_box.sha256_of(msgs)
+    _delivery_append(week, "sending", messages=len(msgs), payload_sha256=payload_sha,
+                     pick_ids=[p["id"] for p in doc["picks"]])
     for i, m in enumerate(msgs, 1):
         try:
             r = requests.post(hook, json=m, timeout=20)
         except Exception as exc:
-            _status_record(week, "failed", None, str(exc))
-            print(f"  delivery FAILED on message {i}: {exc}")
+            # Transport errors are ambiguous (the message may have landed), so
+            # the 'sending' row stays last and the next run refuses to resend.
+            _status_record(week, "failed", None, type(exc).__name__)
+            print(f"  delivery UNCERTAIN on message {i}: {type(exc).__name__}")
             return 1
         if r.status_code >= 300:
             _status_record(week, "failed", r.status_code, r.text[:160])
+            if i == 1:
+                _delivery_append(week, "failed", http_status=r.status_code,
+                                 detail="first message refused; nothing delivered")
             print(f"  delivery FAILED on message {i}: HTTP {r.status_code}")
             return 1
     _status_record(week, "posted", 200, f"{len(msgs)} message(s)")
+    _delivery_append(week, "posted", messages=len(msgs), payload_sha256=payload_sha)
     print(f"{week}: delivered the full card to members ({len(msgs)} message(s))")
     return 0
 

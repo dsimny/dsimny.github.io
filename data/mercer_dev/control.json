@@ -1,0 +1,8 @@
+{
+ "_note": "KILL SWITCH for D.J. Mercer developmental publication. Publication needs this file enabled for the sport AND the repository variable MERCER_DEV_PUBLICATION=enabled. Setting either to off stops publication and nothing else: MLB, grading, capture, the site and the Mercer Spotlight are unaffected. Default: OFF.",
+ "publication_enabled": false,
+ "sports": {
+  "ncaaf": false,
+  "nfl": false
+ }
+}

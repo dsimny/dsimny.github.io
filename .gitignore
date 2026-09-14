@@ -43,3 +43,8 @@ data/football/raw/pbp/
 # credit usage - so the bytes can be verified wherever they are kept. Same
 # split as data/football/raw/pbp/ + pbp_manifest.json above.
 data/mercer_live/raw/
+
+# D.J. Mercer developmental drafts are ACTIONABLE pregame selections written by
+# hand. They are sealed into data/mercer_dev/artifacts/*.enc by `mercer_dev.py
+# candidate`; the plaintext draft must never be committed to this public repo.
+data/mercer_dev/drafts/

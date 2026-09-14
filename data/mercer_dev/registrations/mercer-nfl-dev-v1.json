@@ -1,0 +1,82 @@
+{
+ "_status_note": "PROPOSED is never binding. Registration = Daniel approves, status set to REGISTERED with a future effective_utc and the code commit, then `mercer_dev.py register` logs the SHA-256. The file is frozen from then on.",
+ "change_control": "New version for any change to features, weights, model family, market blending, eligibility, edge or divergence thresholds, markets, sizing, exposure or data-quality rules. Ratings and rolling inputs updating is not a new version. Clerical amendments are separate logged files and may not touch methodology fields. No version is ever applied retroactively.",
+ "code_commit": null,
+ "conflicting_plays_permitted": false,
+ "data_sources": [
+  "The Odds API v4 event odds (h2h, spreads, totals; US region; Tier-1 books)",
+  "ESPN scoreboard (event identity, schedule, status, finals)",
+  "Human research notes under the D.J. Mercer byline (injury feed, depth charts, news)"
+ ],
+ "effective_utc": null,
+ "eligible_markets": [
+  "moneyline",
+  "spread",
+  "total"
+ ],
+ "feature_definitions": {
+  "confidence": "standard | strong | spotlight; an ordering, never a probability, never changes stake",
+  "edge_pts": "100 * (reference_probability - market_implied_probability); usually <= 0 and published as it is",
+  "market_implied_probability": "implied probability of the American price taken",
+  "reference_probability": "median over fresh Tier-1 books quoting the same number of p_side/(p_side+p_other), implied from American odds"
+ },
+ "known_limitations": [
+  "No model edge: the best blend weight on 2022-24 is 0 (docs/MERCER_DEVELOPMENTAL_PROTOCOL.md section 4).",
+  "Selections are human judgement; no historical record of this process exists before effective_utc.",
+  "No untouched historical test; the 2025 holdout is deliberately not spent.",
+  "CLV for spreads and totals needs a closing capture per play that is not yet scheduled.",
+  "Per-market timestamps depend on the provider supplying them; missing ones block release."
+ ],
+ "league": "NFL",
+ "live_plays_permitted": false,
+ "manual_review": {
+  "approval_binds": "the full artifact SHA-256, including the exact Discord payload",
+  "approver_allowlist_variable": "MERCER_DEV_APPROVERS",
+  "period": "every play until 8 weeks after effective_utc or 30 plays in this cohort, whichever is later",
+  "required": true
+ },
+ "max_daily_units": 1.0,
+ "max_market_divergence": {
+  "max_price_below_consensus_pts": 3.0,
+  "note": "no model disagreement exists at w=0; divergence is controlled as price vs consensus and the recorded walk-away boundary. 3.0 pts admits an ordinary -110/-110 number (2.38 pts below proportional fair) and blocks a price materially worse than that.",
+  "walk_away_required": true
+ },
+ "max_play_units": 0.5,
+ "max_plays_per_day": 3,
+ "min_data_quality": {
+  "espn_event_resolved": true,
+  "max_quote_age_minutes": 15,
+  "min_books_at_line": 3,
+  "min_books_market": 5,
+  "regular_season_only": true,
+  "require_market_timestamps": true
+ },
+ "min_edge_pts": null,
+ "model_type": "market reference probability: median proportionally de-vigged Tier-1 consensus at the exact number, at selection time. Model weight w = 0.",
+ "odds_limits": {
+  "max_spread_magnitude": 10.5,
+  "moneyline_max": 250,
+  "moneyline_min": -250,
+  "price_max": 115,
+  "price_min": -130
+ },
+ "registration_timestamp_utc": null,
+ "selection_source": "D.J. Mercer research process (docs/MERCER_SPOTLIGHT.md sections 2b-2c: Research Filter v1.0, independent-case rule, required Case Against, walk-away boundary recorded before the number is checked).",
+ "selection_time": {
+  "designation": "pregame",
+  "min_minutes_before_start": 30,
+  "note": "the artifact is built from a quote no older than max_quote_age_minutes and re-checked at publication"
+ },
+ "sport": "nfl",
+ "status": "PROPOSED",
+ "strategy_id": "mercer-nfl-dev",
+ "strategy_name": "DJ Mercer NFL — Developmental Cohort",
+ "training_window": "2022-2023 NFL regular season, T-24 Tier A odds (market blend weight); ratings burn-in 2010-14, tuned 2015-21 (fb-v0.1, frozen). CONTAMINATED: previously scored.",
+ "unit_sizing": {
+  "basis": "recorded paper stake; no staking claim",
+  "flat_units": 0.25
+ },
+ "untouched_test_window": "none. See docs/MERCER_DEVELOPMENTAL_PROTOCOL.md section 6; the live record from effective_utc is the only untouched evidence.",
+ "validation_window": "2024 NFL regular season. CONTAMINATED: previously scored.",
+ "version": 1
+}

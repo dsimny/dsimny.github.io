@@ -228,7 +228,7 @@ below zero, and it is published as it is.
 | moneyline odds window | −250 to +250 | −250 to +250 |
 | spread/total price window | −130 to +115 | −130 to +115 |
 | spread magnitude | ≤10.5 | ≤17.5 |
-| price vs consensus | taken price may be at most 1.5 pts worse than consensus fair | same |
+| price vs consensus | taken price may be at most 3.0 pts worse than consensus fair (an ordinary −110/−110 number is 2.38 pts worse) | same |
 | data quality | ≥5 Tier-1 books quoting that market; fresh quote ≤15 min at publish; ESPN event resolved and pregame | same |
 | market divergence | line/price must sit inside the play's recorded walk-away boundary; outside → HOLD | same |
 | stake | flat 0.25u recorded (paper; no staking claim) | same |

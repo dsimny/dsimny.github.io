@@ -1,0 +1,80 @@
+name: Mercer developmental code self-tests
+# The hermetic regression gate for scripts/mercer_dev/ (D.J. Mercer NFL and
+# NCAA developmental cohorts: registry, ledgers, release controls, publish,
+# grading).
+#
+# A RED RUN HERE MEANS A CODE REGRESSION IN THE MERCER DEVELOPMENTAL CODE, never
+# live-data drift and never a football-pipeline, Mercer Live or MLB regression.
+# Its own workflow for the same reason Mercer Live has one: a red X that could
+# mean any of several subsystems is a red X that gets ignored.
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. Fake I/O, a temporary directory, and
+# a before/after hash proving the real data/mercer_dev tree was not written.
+#
+# READ-ONLY. It never commits, pushes, or posts anywhere.
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/mercer_dev/**"
+      - "data/mercer_dev/registrations/**"
+      - "data/mercer_dev/control.json"
+      - ".github/workflows/mercer-dev-selftest.yml"
+      - ".github/workflows/mercer-dev-release.yml"
+      - "requirements.txt"
+      # Football modules the suite imports read-only.
+      - "scripts/football/price_test.py"
+      - "scripts/football/teams.py"
+      - "scripts/football/espn_nfl.py"
+      - "scripts/football/espn_ncaaf.py"
+      - "scripts/football/settle.py"
+      - "scripts/football/asof.py"
+      - "scripts/football/record_policy.py"
+      - "scripts/football/elo.py"
+      - "scripts/football/game_model.py"
+      - "scripts/football/ridge.py"
+      - "scripts/football/market_compare.py"
+      - "data/football/team_names.json"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/mercer_dev/**"
+      - "data/mercer_dev/registrations/**"
+      - "data/mercer_dev/control.json"
+      - ".github/workflows/mercer-dev-selftest.yml"
+      - ".github/workflows/mercer-dev-release.yml"
+      - "requirements.txt"
+      - "scripts/football/price_test.py"
+      - "scripts/football/teams.py"
+      - "scripts/football/espn_nfl.py"
+      - "scripts/football/espn_ncaaf.py"
+      - "scripts/football/settle.py"
+      - "scripts/football/asof.py"
+      - "scripts/football/record_policy.py"
+      - "scripts/football/elo.py"
+      - "scripts/football/game_model.py"
+      - "scripts/football/ridge.py"
+      - "scripts/football/market_compare.py"
+      - "data/football/team_names.json"
+
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    name: Mercer developmental code self-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run selftest_mercer_dev.py
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/mercer_dev/selftest_mercer_dev.py

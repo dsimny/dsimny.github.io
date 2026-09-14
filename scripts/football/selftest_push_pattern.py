@@ -205,7 +205,10 @@ if shutil.which("git") is None or shutil.which("bash") is None:
 EPI = push_epilogues()
 
 print("[0] the shell under test, taken from the workflows themselves")
-check(len(EPI) == 6, f"found all 6 retrying push epilogues in the repository "
+# 7 since 2026-09-14: mercer-dev-release.yml "Commit the credit reading" joined,
+# because its fresh odds quote writes a credit reading that must not die with
+# the runner. A count change is a deliberate, reviewed edit - never a loosening.
+check(len(EPI) == 7, f"found all 7 retrying push epilogues in the repository "
                      f"({len(EPI)})")
 bodies = {re.sub(r'^PUSH_WHAT=.*$', '', b, flags=re.M) for b in EPI.values()}
 check(len(bodies) == 1,

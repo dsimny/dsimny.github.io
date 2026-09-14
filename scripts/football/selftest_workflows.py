@@ -317,6 +317,8 @@ STAGED = {
         ["data/", "index.html", "feed.xml", "blog/", "picks/"],
     ("instagram-recovery.yml", "Commit and push the card"):
         ["data/social/ig_$D.jpg"],
+    ("mercer-dev-release.yml", "Commit the credit reading"):
+        ["data/odds_credits.json"],
 }
 # The two bare-push workflows, deliberately untouched for now: a bare push is a
 # reliability question, not the demonstrated corruption path. Listing them means

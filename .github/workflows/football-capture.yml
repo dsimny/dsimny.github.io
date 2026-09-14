@@ -292,12 +292,16 @@ jobs:
       # PREMIUM DELIVERY. The public site is static and cannot authenticate
       # anyone, so the actionable card goes to the Discord members channel,
       # whose role Whop grants and revokes on the subscription. Idempotent per
-      # week via data/post_status.json, so the hourly cadence cannot double-post.
+      # week via the append-only data/mercer/deliveries.json (never trimmed) as
+      # well as data/post_status.json, so the hourly cadence cannot double-post.
+      # KILL SWITCH: set the repository variable MERCER_DELIVERY to "paused".
+      # It stops member delivery only; capture, grading, render and MLB go on.
       - name: Deliver the Mercer card to members
         if: ${{ !cancelled() }}
         env:
           BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
           DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_WEBHOOK_URL_MEMBERS }}
+          MERCER_DELIVERY: ${{ vars.MERCER_DELIVERY }}
         run: python scripts/football/mercer.py deliver
 
       - name: Render the Mercer Spotlight
@@ -355,6 +359,7 @@ jobs:
                    data/football/commitments.json \
                    data/football/game_commitments.json \
                    data/post_status.json \
+                   data/mercer/deliveries.json \
                    football/; do
             git add "$p" 2>/dev/null || true
           done

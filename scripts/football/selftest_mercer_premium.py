@@ -215,6 +215,86 @@ try:
     check(len(mercer.load_ledger()["entries"]) == 0, "nothing booked from a tampered card")
     check(mercer.load_commitments()["commitments"][0].get("revealed") is not True,
           "a tampered card is NOT revealed")
+
+    print("\n[J] member delivery controls (2026-09-14)")
+    import contextlib
+    import types
+    shutil.rmtree(mercer.DATA); os.makedirs(mercer.WEEKS)
+    mercer.DELIVERIES = os.path.join(mercer.DATA, "deliveries.json")
+    mercer.STATUS_PATH = os.path.join(mercer.DATA, "post_status.json")
+    sent = []
+
+    class FakeResp:
+        def __init__(self, code):
+            self.status_code, self.text = code, ""
+
+    def fake_post(codes):
+        it = iter(codes)
+
+        def post(url, json=None, timeout=None):
+            code = next(it)
+            if code == "boom":
+                raise ConnectionError("reset")
+            sent.append(json)
+            return FakeResp(code)
+        return post
+
+    def deliver(now, env, codes=(204,), week=WEEK):
+        fake = types.ModuleType("requests")
+        fake.post = fake_post(codes)
+        saved = {k: os.environ.get(k) for k in
+                 ("DISCORD_WEBHOOK_URL_MEMBERS", "MERCER_DELIVERY", "GITHUB_ACTIONS")}
+        for k in saved:
+            os.environ.pop(k, None)
+        os.environ.update(env)
+        sys.modules["requests"] = fake
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                rc = mercer.cmd_deliver(week, now=now)
+        finally:
+            sys.modules.pop("requests", None)
+            for k, v in saved.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+        return rc, buf.getvalue()
+
+    HOOK = {"DISCORD_WEBHOOK_URL_MEMBERS": "https://discord.com/api/webhooks/1/abc"}
+    rc, out = deliver(T0, HOOK, week="2026-09-22")
+    check(rc == 0 and not sent, "a week with no card yet exits 0 and sends nothing")
+
+    mercer.save_json(os.path.join(mercer.WEEKS, f"{WEEK}.json"), fixture_doc())
+    mercer.cmd_commit(WEEK, now=T0, stores=stores)
+    rc, out = deliver(T0, dict(HOOK, MERCER_DELIVERY="paused"))
+    check(rc == 0 and not sent and not os.path.exists(mercer.DELIVERIES),
+          "kill switch MERCER_DELIVERY=paused: nothing sent, nothing recorded")
+    rc, out = deliver(T0, {"DISCORD_WEBHOOK_URL_MEMBERS": "https://evil.example/hook"})
+    check(rc == 1 and not sent, "a non-discord.com webhook is refused")
+    rc, out = deliver(T0, {"GITHUB_ACTIONS": "true"})
+    check(rc == 1 and not any(s in out for s in SECRETS),
+          "missing webhook in CI: exit 1 and the actionable card is NOT printed")
+    rc, out = deliver(market.parse_utc(KICK) + timedelta(minutes=1), HOOK)
+    check(rc == 1 and not sent, "a card whose kickoff has passed is refused")
+    rc, out = deliver(T0, HOOK, codes=(204,))
+    check(rc == 0 and len(sent) == 1, "a clean delivery posts once")
+    footer_ok = all(mercer.MEMBER_FOOTER in e["description"]
+                    for m in sent for e in m.get("embeds", []))
+    check(footer_ok, "every member embed carries the 21+ / no-guarantee footer")
+    # Simulate the shared status file being trimmed by another writer.
+    mercer.save_json(mercer.STATUS_PATH, {"posts": []})
+    rc, out = deliver(T0, HOOK, codes=(204,))
+    check(rc == 0 and len(sent) == 1,
+          "trimmed post_status.json cannot cause a re-post (durable deliveries.json)")
+
+    shutil.rmtree(mercer.DATA); os.makedirs(mercer.WEEKS); sent.clear()
+    mercer.save_json(os.path.join(mercer.WEEKS, f"{WEEK}.json"), fixture_doc())
+    mercer.cmd_commit(WEEK, now=T0, stores=stores)
+    rc, out = deliver(T0, HOOK, codes=("boom",))
+    check(rc == 1, "a transport error is reported as uncertain")
+    rc, out = deliver(T0, HOOK, codes=(204,))
+    check(rc == 1 and not sent, "after an uncertain send the retry is REFUSED, not resent")
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

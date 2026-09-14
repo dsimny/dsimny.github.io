@@ -34,3 +34,12 @@ data/backtest/
 #                is the failure that would actually matter, stays detectable.
 data/football/odds/hist/
 data/football/raw/pbp/
+
+# Mercer Live (ML-1) raw observation stream. One-minute live game-state and
+# market observations for two football leagues: measured at ~4 MB compressed
+# per NFL Sunday and ~4x that per college Saturday, hundreds of MB a season.
+# Far too large for a repository GitHub Pages serves. The committed record is
+# data/mercer_live/digest/<date>.json - SHA-256 of every raw shard, row counts,
+# credit usage - so the bytes can be verified wherever they are kept. Same
+# split as data/football/raw/pbp/ + pbp_manifest.json above.
+data/mercer_live/raw/

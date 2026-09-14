@@ -1,0 +1,69 @@
+name: Mercer Live code self-tests
+# The hermetic regression gate for scripts/mercer_live/ (Mercer Live, ML-1).
+#
+# A RED RUN HERE MEANS A CODE REGRESSION IN MERCER LIVE, never live-data drift
+# and never a football or MLB regression. That is the same split the football
+# gate uses (football-selftest.yml) and it is why this is a separate workflow
+# rather than a new name in that workflow's SUITES list: a red X that could
+# mean any of three subsystems is a red X that gets ignored.
+#
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. The suite injects fake providers,
+# writes only under a temporary directory, and reads the repository for the
+# contract checks (workflow files, football constants it must not drift from,
+# the gitignore rule). It never reads a mutable production capture.
+#
+# READ-ONLY. This job validates; it never commits, pushes, or posts anywhere.
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/mercer_live/**"
+      - "requirements.txt"
+      - ".github/workflows/mercer-live-selftest.yml"
+      - ".github/workflows/mercer-live-smoke.yml"
+      # Read-only football dependencies the suite imports or compares against.
+      - "scripts/football/teams.py"
+      - "scripts/football/espn_ncaaf.py"
+      - "scripts/football/fetch_odds.py"
+      - "scripts/football/capture_schedule.py"
+      - "scripts/football/localenv.py"
+      - "scripts/odds_credits.py"
+      - "data/football/team_names.json"
+      - ".gitignore"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/mercer_live/**"
+      - "requirements.txt"
+      - ".github/workflows/mercer-live-selftest.yml"
+      - ".github/workflows/mercer-live-smoke.yml"
+      - "scripts/football/teams.py"
+      - "scripts/football/espn_ncaaf.py"
+      - "scripts/football/fetch_odds.py"
+      - "scripts/football/capture_schedule.py"
+      - "scripts/football/localenv.py"
+      - "scripts/odds_credits.py"
+      - "data/football/team_names.json"
+      - ".gitignore"
+
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    name: Mercer Live code self-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run selftest_mercer_live.py
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/mercer_live/selftest_mercer_live.py

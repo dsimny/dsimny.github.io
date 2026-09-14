@@ -1,0 +1,73 @@
+name: Mercer Live smoke capture (read-only)
+# ONE TICK of the Mercer Live ML-1 capture against the REAL providers, so the
+# live-state fields the audit could not verify (docs/MERCER_LIVE_AUDIT_2026-09-14.md,
+# section 7) can be checked by a human without deploying anything.
+#
+# WHAT IT IS NOT. It is not the production scheduler and must never become one:
+# GitHub's scheduler is measured 15-23 minutes late in this repository and a
+# one-minute cadence needs a host that can keep time. This workflow has no
+# `schedule:`, runs only on manual dispatch, holds `contents: read`, commits
+# nothing, pushes nothing, posts nothing, and writes only to a temporary
+# directory that is uploaded as a short-lived artifact for inspection.
+#
+# CREDITS. By default the tick runs with --no-odds and spends NOTHING (ESPN is
+# free). Set spend_credits=true to make ONE Odds API call per sport that has a
+# game in progress or about to start (markets x regions credits each, i.e. 3
+# per sport at the default h2h,spreads,totals). The key reaches the process
+# only in that case; otherwise the environment variable is empty.
+on:
+  workflow_dispatch:
+    inputs:
+      sports:
+        description: "comma-separated: nfl,ncaaf"
+        default: "nfl,ncaaf"
+        required: true
+      spend_credits:
+        description: "make one Odds API call per active sport (costs credits)"
+        type: boolean
+        default: false
+      markets:
+        description: "Odds API markets (only used when spend_credits=true)"
+        default: "h2h,spreads,totals"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: One read-only tick
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run one tick into a temporary store
+        env:
+          PYTHONIOENCODING: utf-8
+          # Empty unless the operator asked to spend. The script treats an
+          # empty key as "odds unavailable" and records the skip in the run.
+          ODDS_API_KEY: ${{ inputs.spend_credits && secrets.ODDS_API_KEY || '' }}
+        run: |
+          set -e
+          ARGS=""
+          IFS=',' read -ra S <<< "${{ inputs.sports }}"
+          for s in "${S[@]}"; do ARGS="$ARGS --sport $s"; done
+          if [ "${{ inputs.spend_credits }}" != "true" ]; then ARGS="$ARGS --no-odds"; fi
+          python scripts/mercer_live/capture.py $ARGS --data-dir "$RUNNER_TEMP/mercer_live" \
+            --markets "${{ inputs.markets }}" --digest
+          echo "## Mercer Live smoke tick" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          find "$RUNNER_TEMP/mercer_live" -type f | sed "s#$RUNNER_TEMP/##" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "Nothing was committed or posted. The observations are in the run artifact for 7 days." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the tick for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: mercer-live-smoke-${{ github.run_id }}
+          path: ${{ runner.temp }}/mercer_live
+          retention-days: 7
+          if-no-files-found: warn

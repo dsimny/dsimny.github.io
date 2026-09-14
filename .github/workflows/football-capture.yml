@@ -311,6 +311,12 @@ jobs:
           WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
         run: python scripts/football/mercer.py render
 
+      # Hourly, so a play released between grading runs shows its public proof
+      # (matchup, start, release time, artifact hash) within the hour. No key.
+      - name: Render the developmental cohort record
+        if: ${{ !cancelled() }}
+        run: python scripts/mercer_dev/mercer_dev.py render
+
       - name: Post the free play
         if: ${{ !cancelled() }}
         env:

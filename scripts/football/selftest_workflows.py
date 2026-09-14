@@ -310,7 +310,8 @@ STAGED = {
     ("football-grade.yml", "Commit"):
         ["data/football/football_ledger.json", "data/football/commitments.json",
          "data/football/ncaaf_results.json", "data/football/nfl_results.json",
-         "data/football/board_*.json", "data/mercer/", "football/"],
+         "data/football/board_*.json", "data/mercer/", "data/mercer_dev/ledgers/",
+         "data/mercer_dev/revealed/", "football/"],
     ("capture-closing.yml", "Commit closing lines"):
         ["data/closing_*.json", "data/odds_credits.json", "odds/"],
     ("grade-ledger.yml", "Commit ledger and site"):

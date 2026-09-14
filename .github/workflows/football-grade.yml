@@ -103,6 +103,21 @@ jobs:
           BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
         run: python scripts/football/grade_football.py --sport nfl
 
+      # D.J. Mercer developmental cohorts (NFL and NCAA, separate ledgers).
+      # Runs BEFORE the Spotlight grade on purpose: a Spotlight pick owned by a
+      # cohort is graded only in its cohort ledger, and the Spotlight step reveals
+      # that card once this step has settled it. Enters a released play into its
+      # ledger only after kickoff, settles only on an ESPN final (or a stated
+      # VOID), takes moneyline CLV only from existing captures and marks every
+      # other close unavailable, then reveals the settled artifact. The key is
+      # required: an artifact that cannot be decrypted and re-hashed against its
+      # receipt is never booked.
+      - name: Grade the Mercer developmental cohorts
+        if: ${{ !cancelled() }}
+        env:
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+        run: python scripts/mercer_dev/mercer_dev.py grade
+
       # The D.J. Mercer Spotlight: human picks on their own append-only record.
       # Reads the same two results stores refreshed above and never touches
       # football_ledger.json. Exits non-zero ONLY for a pick edited after its
@@ -135,6 +150,12 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL }}
           WHOP_CHECKOUT_URL: ${{ vars.WHOP_CHECKOUT_URL }}
         run: python scripts/football/mercer.py render
+
+      # Public cohort record. No key: pregame it shows proof only, from
+      # commitments and receipts; selections appear once the ledger holds them.
+      - name: Render the developmental cohort record
+        if: ${{ !cancelled() }}
+        run: python scripts/mercer_dev/mercer_dev.py render
 
       - name: Commit
         if: ${{ !cancelled() }}
@@ -181,6 +202,8 @@ jobs:
                    data/football/nfl_results.json \
                    data/football/board_*.json \
                    data/mercer/ \
+                   data/mercer_dev/ledgers/ \
+                   data/mercer_dev/revealed/ \
                    football/; do
             git add "$p" 2>/dev/null || true
           done

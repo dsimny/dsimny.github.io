@@ -123,6 +123,12 @@ class FakeIO(mdrelease.IO):
         self.event = None
         self.send_mode = "ok"
         self.verify_mode = "ok"
+        self.committed = True
+        self.receipts = []
+        self.hooks = []
+
+    def artifact_committed(self, pid): return self.committed
+    def delivered(self): return list(self.receipts)
 
     def load_artifact(self, pid): return copy.deepcopy(self.artifacts.get(pid))
     def commitments(self): return self.commits
@@ -137,6 +143,7 @@ class FakeIO(mdrelease.IO):
         self.files[rel] = copy.deepcopy(obj)
 
     def send(self, hook, payload):
+        self.hooks.append(hook)
         if self.send_mode == "timeout":
             raise mdrelease.Uncertain("timeout")
         if self.send_mode == "400":
@@ -205,6 +212,21 @@ try:
           "a registration edited after registration is refused everywhere")
     mdcore.save_json(path, reg)
     REG = mdcore.verified_registration("mercer-nfl-dev", 1)
+    npath = mdcore.registration_path("mercer-ncaaf-dev", 1)
+    nreg = mdcore.load_json(npath)
+    nreg.update(status="REGISTERED", registration_timestamp_utc="2026-09-20T11:59:00Z",
+                effective_utc=EFFECTIVE, code_commit="abcdef1")
+    mdcore.save_json(npath, nreg)
+    mdcore.register("mercer-ncaaf-dev", 1, T_REG, "dsimny")
+    NREG = mdcore.verified_registration("mercer-ncaaf-dev", 1)
+    check(NREG[0]["sport"] == "ncaaf" and NREG[1]["sha256"] != REG[1]["sha256"],
+          "NCAA registers as its own strategy with its own hash")
+    bad = dict(reg, daily_exposure_scope="per_cohort")
+    check(raises(lambda: mdcore.validate_registration(bad), mdcore.IntegrityError),
+          "a registration capping exposure per cohort instead of across both is refused")
+    bad = dict(reg, max_play_units=0.5)
+    check(raises(lambda: mdcore.validate_registration(bad), mdcore.IntegrityError),
+          "variable sizing above the flat 0.25u is refused")
 
     print("\n[7] market normalisation")
     check(raises(lambda: mdmarket.normalize_event_odds({"home_team": HOME}, "nfl", "x"),
@@ -520,12 +542,17 @@ try:
     control = code_only('"""never touches football_ledger.json"""\nP = "football_ledger.json"\n')
     check("football_ledger.json" in control and "never touches" not in control,
           "negative control: the scan still sees a real reference and ignores the docstring")
-    for name in ("mdcore.py", "mdmarket.py", "mdrelease.py", "mercer_dev.py"):
+    for name in ("mdcore.py", "mdmarket.py", "mdrelease.py", "mercer_dev.py", "render.py"):
         code = code_only(open(os.path.join(HERE, name), encoding="utf-8").read())
         hits = [bad for bad in FORBIDDEN if bad in code]
         check(not hits, f"{name} code never references another record or the members webhook ({hits or 'none'})")
+    # Code only: build_site.py's copy comment names this suite, which is policy
+    # text, not an import. The control below proves a real import still trips it.
+    MLB_IMPORT = re.compile(r"\b(mdcore|mdmarket|mdrelease|mercer_dev)\b")
+    check(bool(MLB_IMPORT.search(code_only("import os\nsys.path.insert(0, 'scripts/mercer_dev')\n"))),
+          "negative control: a real mercer_dev path in code is still detected")
     mlb = [p for p in glob.glob(os.path.join(ROOT, "scripts", "*.py"))
-           if "mercer_dev" in open(p, encoding="utf-8").read()]
+           if MLB_IMPORT.search(code_only(open(p, encoding="utf-8").read()))]
     check(not mlb, f"no MLB script imports the Mercer developmental code ({mlb or 'none'})")
     import record_policy
     inc = "da33da68ad7e9f444c18dc1337c81af4fc172a22a361bc83d6b65f6f92e55a34"
@@ -539,10 +566,15 @@ try:
     up_text = re.sub(r"<[^>]+>", "", up).replace("\n", " ")
     up_text = re.sub(r"\s+", " ", up_text)
     for want, label in (("paused following the September 8 incident", "the automated pipeline is paused"),
-                        ("D.J. Mercer Spotlight", "what football members actually receive"),
-                        ("developmental strategies are in preparation and are not publishing yet",
-                         "cohorts are not described as live"),
+                        ("Spotlight is the weekly premium featured selection", "Spotlight stays the featured selection"),
+                        ("each have a separate developmental record", "NFL and NCAA are separate records"),
+                        ("human-researched selections supported by market and analytical data",
+                         "human-researched, not a model"),
+                        ("counts on that record only", "a Spotlight pick counts once"),
+                        ("Developmental releases have not started yet", "cohorts are not described as live"),
+                        ("flat-staked at 0.25 units", "flat staking stated"),
                         ("no guaranteed number of picks", "no volume promise"),
+                        ("no model edge is claimed", "no model edge claim"),
                         ("No football selection is presented as proven", "an explicit no-proven-claim sentence")):
         check(want in up_text, f"homepage premium block: {label}")
     check("every covered game" not in up_text and "the one play we would act on" not in up_text,
@@ -559,6 +591,301 @@ try:
     mp = open(os.path.join(ROOT, "scripts", "football", "mercer.py"), encoding="utf-8").read()
     check("1-800-GAMBLER" in mp.split("MEMBER_FOOTER = (")[1].split(")")[0],
           "Mercer member posts carry the responsible-gambling footer")
+
+    # ------------------------------------------------------------------ owner decisions 2026-09-14
+    def make(eid, market="moneyline", kick=KICK, now=T_BUILD, spotlight=None, **kw):
+        ev_ = espn_event(eid=eid, kick=kick)
+        q_ = mdmarket.normalize_event_odds(odds_payload(mdcore.iso(now - timedelta(minutes=2))),
+                                           "nfl", mdcore.iso(now - timedelta(minutes=2)))
+        d_ = draft(espn_event_id=eid, market=market, **kw)
+        art, h, fl = mdrelease.build_artifact(d_, REG, q_, ev_, now, spotlight=spotlight)
+        return art, h, fl, q_, ev_
+
+    def state_for(art, h, eid, kick=KICK, qnow=None):
+        io_ = FakeIO()
+        io_.artifacts[art["play_id"]] = copy.deepcopy(art)
+        io_.commits = [{"play_id": art["play_id"], "artifact_sha256": h}]
+        cap = mdcore.iso((qnow or T_PUB) - timedelta(minutes=1))
+        io_.quote = mdmarket.normalize_event_odds(odds_payload(cap), "nfl", cap)
+        io_.event = espn_event(eid=eid, kick=kick)
+        return io_
+
+    print("\n[X] daily exposure is capped across BOTH cohorts, released plays included")
+    ax, hx, fx, _, _ = make("401999101")
+    check(not fx, "a second NFL play on the same day builds cleanly")
+    same_day = "2026-09-27T20:00:00Z"
+    receipts = [{"play_id": f"r{i}", "sport": "ncaaf" if i % 2 else "nfl", "espn_event_id": f"77{i}",
+                 "market": "moneyline", "scheduled_start_utc": same_day, "recommended_units": 0.25}
+                for i in range(3)]
+    led_nfl = mdcore.load_ledger("mercer-nfl-dev")
+    led_ncaa = mdcore.load_ledger("mercer-ncaaf-dev")
+    appr = {"play_id": ax["play_id"], "artifact_sha256": hx, "approver": "dsimny"}
+    commits = [{"play_id": ax["play_id"], "artifact_sha256": hx}]
+    q_now = state_for(ax, hx, "401999101").quote
+    ev_x = espn_event(eid="401999101")
+
+    def ck(delivered, committed=True):
+        return dict((n, o) for n, o, _ in mdrelease.check_release(
+            ax, hx, appr, commits, led_nfl, q_now, ev_x, T_PUB, ENV_ON, REG,
+            delivered=delivered, artifact_committed=committed, other_ledgers=[led_ncaa]))
+    check(ck(receipts[:2])["exposure_limits"],
+          "1 ledger play + 2 released (NFL and NCAA) + this one = 1.00u: allowed")
+    check(not ck(receipts)["exposure_limits"],
+          "1 ledger play + 3 released across both cohorts + this one = 1.25u: refused")
+    check(not ck([dict(receipts[0], espn_event_id="401999101")])["no_conflicting_play"],
+          "a RELEASED but not-yet-started play on the same event and market is a conflict")
+    check(not ck([dict(receipts[0], play_id=ax["play_id"])])["no_duplicate"],
+          "a released receipt with the same play id is a duplicate before any ledger row exists")
+    check(not ck([], committed=False)["artifact_committed_publicly"],
+          "an artifact that is not on origin/main fails its check")
+    io_nc = state_for(ax, hx, "401999101")
+    io_nc.committed = False
+    enable()
+    st, _ = mdrelease.publish(ax["play_id"], hx, "dsimny", T_PUB, io_nc, ENV_ON)
+    check(st == "refused" and not io_nc.files and not io_nc.sent,
+          "publish refuses before any reservation when the artifact was not pushed first")
+
+    print("\n[C] commissioning dry run cannot reach a customer channel")
+    mdcore.save_json(mdrelease.CONTROL, {"publication_enabled": False, "sports": {}})
+    io_c = state_for(ax, hx, "401999101")
+    check(raises(lambda: mdrelease.publish(ax["play_id"], hx, "dsimny", T_PUB, io_c, ENV_ON,
+                                           commissioning=True), mdrelease.ReleaseRefused),
+          "commissioning refuses to run on anything but the offline double")
+    io_c.offline_double = True
+    env_c = dict(ENV_ON, MERCER_DEV_PUBLICATION="off")
+    st, cks = mdrelease.publish(ax["play_id"], hx, "dsimny", T_PUB, io_c, env_c, commissioning=True)
+    cmap = dict((n, o) for n, o, _ in cks)
+    check(st == "commissioned" and cmap["kill_switch_off"] is False,
+          "with publication OFF the full chain completes as COMMISSIONED")
+    check(io_c.hooks == [mdrelease.COMMISSIONING_HOOK] and HOOK not in io_c.hooks
+          and not any(h.lower().startswith(("http", "https")) for h in io_c.hooks)
+          and not mdrelease.COMMISSIONING_HOOK.lower().startswith("http"),
+          "the only 'webhook' used is a non-URL offline marker, even with a real one in the environment")
+    check(io_c.sent == [ax["discord_payload"]], "the stored payload bytes went through the chain unchanged")
+    io_c2 = state_for(ax, hx, "401999101")
+    io_c2.offline_double, io_c2.committed = True, False
+    st, _ = mdrelease.publish(ax["play_id"], hx, "dsimny", T_PUB, io_c2, env_c, commissioning=True)
+    check(st == "refused", "commissioning still fails on any real check other than the kill switch")
+    import mercer_dev as cli
+    cio = cli.CommissionIO()
+    check(raises(lambda: cio.send(HOOK, ax["discord_payload"]), mdrelease.ReleaseRefused),
+          "CommissionIO refuses a real webhook URL outright")
+    import ast
+    csrc = open(os.path.join(HERE, "mercer_dev.py"), encoding="utf-8").read()
+    ctree = ast.parse(csrc)
+    cls = next(n for n in ctree.body if isinstance(n, ast.ClassDef) and n.name == "CommissionIO")
+    check("requests" not in ast.unparse(cls), "CommissionIO contains no HTTP client at all")
+    wf = open(os.path.join(ROOT, ".github", "workflows", "mercer-dev-release.yml"), encoding="utf-8").read()
+    step = wf.split("- name: Commission the release chain offline")[1].split("- name:")[0]
+    check("DISCORD_WEBHOOK" not in step and "GH_TOKEN" not in step,
+          "the commissioning workflow step receives no webhook secret and no write token")
+
+    print("\n[S] a Spotlight pick lands on exactly one record")
+    import mercer
+    MS = os.path.join(tmp, "mercer")
+    mercer.DATA, mercer.WEEKS = MS, os.path.join(MS, "weeks")
+    mercer.LEDGER, mercer.COMMITMENTS = os.path.join(MS, "mercer_ledger.json"), os.path.join(MS, "commitments.json")
+    mercer.DELIVERIES, mercer.STATUS_PATH = os.path.join(MS, "deliveries.json"), os.path.join(MS, "post_status.json")
+    mercer.OUT, mercer.COHORT_DIR = os.path.join(tmp, "football", "mercer"), D
+    os.makedirs(mercer.WEEKS)
+    EID, K2 = "401999555", "2026-09-27T20:25:00Z"
+    SPOT_NOW = P("2026-09-26T12:00:00Z")
+    week = mercer.slate_week(P(K2))
+    pick = {"id": "w3-nfl-01", "sport": "nfl", "status": "OFFICIAL", "away": AWAY, "home": HOME,
+            "kickoff_utc": K2, "market": "moneyline", "team": HOME, "price": -150, "units": 0.25,
+            "book": "DraftKings", "conviction": "strong", "espn_event_id": EID,
+            "odds_event_id": "oddsev1", "walk_away": {"min_odds": -160},
+            "why": "Buffalo's pass rush against a patched Baltimore line.",
+            "case_against": "Baltimore's run game travels; the market priced it close.",
+            "cohort_play_id": f"mercer-nfl-dev-v1-{EID}-moneyline"}
+    ev_s = espn_event(eid=EID, kick=K2)
+    check("no backfill" in (mercer.cohort_gate(pick, ev_s, T_REG) or ""),
+          "before the cohort is effective, a pick cannot claim a cohort play id")
+    check("is now a cohort play" in (mercer.cohort_gate(dict(pick, cohort_play_id=None), ev_s, SPOT_NOW) or ""),
+          "after the cohort is effective, an official Spotlight pick without a cohort play id is refused")
+    check("must be" in (mercer.cohort_gate(dict(pick, cohort_play_id="mercer-nfl-dev-v1-1-spread"), ev_s, SPOT_NOW) or ""),
+          "a cohort play id that does not name this event and market is refused")
+    check("0.25u" in (mercer.cohort_gate(dict(pick, units=1), ev_s, SPOT_NOW) or ""),
+          "a cohort-owned Spotlight pick must be staked at exactly 0.25u")
+    check(mercer.cohort_gate(pick, ev_s, SPOT_NOW) is None, "a correctly linked Spotlight pick passes")
+    mercer.save_json(os.path.join(mercer.WEEKS, f"{week}.json"),
+                     {"slate_week": week, "title": "t", "intro": "i", "picks": [pick], "leans": [], "passes": []})
+    stores_pre = {"nfl": {EID: ev_s}, "ncaaf": {}}
+    check(mercer.cmd_commit(week, now=SPOT_NOW, stores=stores_pre) == 0, "the Spotlight card commits")
+    scommits = mercer.load_commitments()["commitments"]
+    doc = mercer.load_week(week)
+    q_s = mdmarket.normalize_event_odds(odds_payload("2026-09-26T11:58:00Z"), "nfl", "2026-09-26T11:58:00Z")
+    sdraft, slink = cli.spotlight_draft(week, pick["id"], q_s, doc, scommits)
+    a_s, h_s, f_s = mdrelease.build_artifact(sdraft, REG, q_s, ev_s, SPOT_NOW, spotlight=slink)
+    check(not f_s and a_s["play_id"] == pick["cohort_play_id"] and a_s["featured"] is True,
+          "the Spotlight pick becomes a featured cohort artifact with the matching play id")
+    check("SPOTLIGHT" in a_s["discord_payload"]["embeds"][0]["description"],
+          "the member message is labelled as the Spotlight featured selection")
+    check(sdraft["book"] == "draftkings" and raises(lambda: cli.book_key("Some Offshore Book"), mdrelease.ReleaseRefused),
+          "Spotlight book names map explicitly to Tier-1 keys; an unknown book is refused")
+    check(raises(lambda: cli.spotlight_draft(week, pick["id"], q_s,
+                                             {"picks": [dict(pick, why="edited after commit")]}, scommits),
+                 mdrelease.ReleaseRefused), "a Spotlight pick edited after its fingerprint cannot be released")
+
+    sent_hooks = []
+    import types
+    fake_req = types.ModuleType("requests")
+    fake_req.post = lambda *a_, **k_: sent_hooks.append(a_) or (_ for _ in ()).throw(AssertionError("posted"))
+    sys.modules["requests"] = fake_req
+    os.environ["DISCORD_WEBHOOK_URL_MEMBERS"] = HOOK
+    try:
+        rc = mercer.cmd_deliver(week, now=SPOT_NOW)
+    finally:
+        sys.modules.pop("requests", None)
+        os.environ.pop("DISCORD_WEBHOOK_URL_MEMBERS", None)
+    check(rc == 0 and not sent_hooks, "the hourly Spotlight delivery never sends a cohort-owned pick")
+
+    after = P("2026-09-28T03:00:00Z")
+    stores_fin = {"nfl": {EID: espn_event(eid=EID, kick=K2, status="STATUS_FINAL", final=True, hs=27, as_=20)},
+                  "ncaaf": {}}
+    mercer.cmd_grade(stores=stores_fin, now=after)
+    check(mercer.load_ledger()["entries"] == [], "the Spotlight ledger never books the cohort-owned pick")
+    check(not mercer.load_commitments()["commitments"][0].get("revealed"),
+          "the Spotlight card stays sealed until its cohort ledger has settled the play")
+    srec = {"play_id": a_s["play_id"], "artifact_sha256": h_s, "message_id": "9", "published_utc": "2026-09-26T12:30:00Z",
+            "approver": "dsimny", "approved_utc": "2026-09-26T12:29:00Z"}
+    spub = mdrelease.publication_row(a_s, srec)
+    mdcore.append_row("mercer-nfl-dev", spub, registration=REG)
+    mdcore.append_row("mercer-nfl-dev", mdrelease.settle_row(spub, stores_fin["nfl"][EID], None, after))
+    mercer.cmd_grade(stores=stores_fin, now=after)
+    check(mercer.load_ledger()["entries"] == [] and mercer.load_commitments()["commitments"][0].get("revealed") is True,
+          "once the cohort settles it, the Spotlight card is revealed - still with nothing booked there")
+    on_cohorts = sum(1 for sid in mdcore.STRATEGY_SPORT for r in mdcore.publications(mdcore.load_ledger(sid))
+                     if r.get("spotlight_pick_id") == pick["id"])
+    on_spot = sum(1 for e in mercer.load_ledger()["entries"] if e["pick_id"] == pick["id"])
+    check(on_cohorts + on_spot == 1, f"counted exactly once across every record ({on_cohorts} cohort, {on_spot} Spotlight)")
+    check(mdcore.aggregates(mdcore.load_ledger("mercer-ncaaf-dev"))["published"] == 0,
+          "and never on the other sport's cohort")
+    mercer.cmd_render(stores=stores_fin)
+    wkpage = open(os.path.join(mercer.OUT, week, "index.html"), encoding="utf-8").read()
+    check("Developmental Cohort</a> record as play" in wkpage, "the Spotlight page says which record holds the pick")
+
+    print("\n[G] prospective grading, closing lines, reveal")
+    mdcore.save_json(mdcore.ledger_path("mercer-nfl-dev"), mdcore.empty_ledger("mercer-nfl-dev"))
+    ag, hg, _, _, _ = make("401999201")
+    asp, hsp, fsp, _, _ = make("401999202", market="spread", selection=HOME, line=-2.5, odds=-110,
+                               walk_away={"line_at_least": -3.0, "min_odds": -115})
+    arts = {ag["play_id"]: ag, asp["play_id"]: asp}
+    rcpts = [{"play_id": x["play_id"], "artifact_sha256": mdcore.sha256_of(x), "message_id": "1",
+              "published_utc": "2026-09-27T12:30:00Z", "approver": "dsimny",
+              "approved_utc": "2026-09-27T12:29:00Z"} for x in (ag, asp)]
+    revealed = []
+    res_fin = {"nfl": {e: espn_event(eid=e, status="STATUS_FINAL", final=True, hs=24, as_=20)
+                       for e in ("401999201", "401999202")}}
+    close_ml = {"reference_probability": 0.63, "line": None, "odds": None}
+    rows = mdrelease.grade_all(P("2026-09-27T16:00:00Z"), rcpts, arts.get, res_fin, lambda pub: close_ml, revealed.append)
+    check(rows == [] and not revealed, "before kickoff nothing enters the ledger and nothing is revealed")
+    rows = mdrelease.grade_all(P("2026-09-27T18:00:00Z"), rcpts, arts.get, {"nfl": {}}, lambda pub: close_ml, revealed.append)
+    check([r["row_type"] for r in rows] == ["publication", "publication"] and not revealed,
+          "after kickoff, publication rows only; no final means no settlement and no reveal")
+    rows = mdrelease.grade_all(P("2026-09-28T02:00:00Z"), rcpts, arts.get, res_fin, lambda pub: close_ml, revealed.append)
+    sets_ = {r["play_id"]: r for r in rows if r["row_type"] == "settlement"}
+    check(len(sets_) == 2 and len(revealed) == 2, "finals settle both plays and reveal both artifacts")
+    check(sets_[ag["play_id"]]["clv_pts"] == round((0.63 - ag["market_implied_probability"]) * 100, 3),
+          "moneyline CLV is computed where a closing line exists")
+    check(sets_[asp["play_id"]]["clv_pts"] is None and "spreads and totals" in sets_[asp["play_id"]]["clv_unavailable_reason"],
+          "spread CLV is marked unavailable with its reason, never estimated")
+    again = mdrelease.grade_all(P("2026-09-28T03:00:00Z"), rcpts, arts.get, res_fin, lambda pub: close_ml, lambda x: None)
+    check(again == [], "a second grading run appends nothing")
+    bad_r = [dict(rcpts[0], artifact_sha256="0" * 64)]
+    check(raises(lambda: mdrelease.grade_all(P("2026-09-28T03:00:00Z"), bad_r, arts.get, res_fin,
+                                             lambda pub: None, lambda x: None), mdcore.IntegrityError),
+          "an artifact that does not match its receipt is refused, not graded")
+    agg = mdcore.aggregates(mdcore.load_ledger("mercer-nfl-dev"))
+    check(agg["clv"]["n"] == 1 and agg["clv"]["of_graded"] == 2 and len(agg["clv"]["unavailable"]) == 1,
+          "aggregates report CLV for 1 of 2 plays and name why the other has none")
+
+    kick_dt = P(KICK)
+
+    def cap(minutes_before, n_books=4, stale=False, home=-160, away=140):
+        t = kick_dt - timedelta(minutes=minutes_before)
+        lu = t - timedelta(minutes=30 if stale else 2)
+        return (t, {"events": [{"odds_api_event_id": "oddsev1", "books": [
+            {"book": b, "last_update": mdcore.iso(lu),
+             "markets": {"h2h": [{"name": HOME, "price": home}, {"name": AWAY, "price": away}]}}
+            for b in TIER1[:n_books]]}]})
+    got = mdrelease.closing_from_captures([cap(180, home=-120, away=100), cap(60)], "oddsev1", HOME, AWAY, kick_dt)
+    check(got.get("n_books") == 4 and abs(got["reference_probability"] - (0.61538 / (0.61538 + 0.41667))) < 1e-3,
+          "closing moneyline uses the LATEST pregame capture")
+    check("unavailable" in mdrelease.closing_from_captures([(kick_dt + timedelta(minutes=5), cap(0)[1])],
+                                                           "oddsev1", HOME, AWAY, kick_dt),
+          "a capture taken after kickoff is never a close")
+    check("need 3" in mdrelease.closing_from_captures([cap(30, n_books=2)], "oddsev1", HOME, AWAY, kick_dt)["unavailable"],
+          "fewer than 3 fresh Tier-1 books: unavailable, with the count")
+    check("unavailable" in mdrelease.closing_from_captures([cap(30, stale=True)], "oddsev1", HOME, AWAY, kick_dt),
+          "stale book quotes at the capture are not used")
+    check("within 6 h" in mdrelease.closing_from_captures([cap(60 * 8)], "oddsev1", HOME, AWAY, kick_dt)["unavailable"],
+          "no capture within 6 hours of kickoff: unavailable")
+
+    print("\n[R] public cohort record")
+    import render as rmod
+    os.makedirs(os.path.join(tmp, "data", "mercer_dev", "research"), exist_ok=True)
+    shutil.copy(os.path.join(ROOT, "data", "mercer_dev", "research", "nfl_v1_dev_eval.json"),
+                os.path.join(tmp, "data", "mercer_dev", "research", "nfl_v1_dev_eval.json"))
+    ap_, hp_, _, _, _ = make("401999301", kick="2026-10-04T17:00:00Z", now=P("2026-10-04T12:00:00Z"))
+    mdcore.save_json(os.path.join(D, "deliveries", f"{ap_['play_id']}.delivered.json"),
+                     {"play_id": ap_["play_id"], "sport": "nfl", "espn_event_id": "401999301",
+                      "market": "moneyline", "scheduled_start_utc": "2026-10-04T17:00:00Z",
+                      "recommended_units": 0.25, "featured": True, "artifact_sha256": hp_,
+                      "published_utc": "2026-10-04T12:30:00Z"})
+    mdcore.save_json(mdrelease.COMMITMENTS, {"commitments": [
+        {"play_id": ap_["play_id"], "matchup": "Pending Visitors @ Pending Hosts", "artifact_sha256": hp_}]})
+    out = rmod.render(now=P("2026-10-04T13:00:00Z"))
+    page = open(out, encoding="utf-8").read()
+    check(out.replace("\\", "/").endswith("football/mercer/developmental/index.html"), "writes only the cohort page")
+    check("DJ Mercer NFL — Developmental Cohort" in page and "DJ Mercer NCAA — Developmental Cohort" in page,
+          "NFL and NCAA each get their own section")
+    check("ombined" not in page, "there is no combined NFL+NCAA figure anywhere")
+    pend = page.split("Released, game not started")[1].split("</table>")[0]
+    check("Pending Visitors @ Pending Hosts" in pend and "-150" not in pend and "draftkings" not in pend.lower(),
+          "a released play before kickoff shows proof only - matchup, times, hash - no selection or price")
+    check("unavailable — no closing capture exists for spreads and totals" in page,
+          "unavailable CLV is printed as unavailable, with the reason")
+    check("Publication is off" in page, "the page states publication is off")
+    check("no independent edge" in page and "not an untouched test" in page,
+          "NFL historical research is shown separately and labelled")
+    check("no NCAA model exists" in page, "NCAA states that no model exists")
+    check("proven model" in page and "no model edge is claimed" in page and "1-800-GAMBLER" in page,
+          "the page disclaims a proven model and carries the gambling-help line")
+
+    print("\n[P] decisions that must not drift")
+    import delivery_policy
+    check(delivery_policy.PAUSED is True, "the automated football pipeline stays paused")
+    ctl_real = json.load(open(os.path.join(ROOT, "data", "mercer_dev", "control.json"), encoding="utf-8"))
+    check(ctl_real["publication_enabled"] is False and not any(ctl_real["sports"].values()),
+          "committed control.json keeps developmental publication off")
+    eng = open(os.path.join(ROOT, "scripts", "engine.py"), encoding="utf-8").read()
+    check(re.search(r"^DAILY_PICK_UNITS\s*=\s*0\.0\b", eng, re.M) is not None,
+          "the Daily Pick stays at zero units")
+    import yaml
+    for wfn in sorted(os.listdir(os.path.join(ROOT, ".github", "workflows"))):
+        doc_ = yaml.safe_load(open(os.path.join(ROOT, ".github", "workflows", wfn), encoding="utf-8"))
+        trig = doc_.get("on") or doc_.get(True) or {}
+        text = json.dumps(doc_)
+        if "mercer_live/capture.py" in text:
+            check("schedule" not in trig, f"{wfn}: Mercer Live capture is not scheduled")
+    check(not os.path.exists(os.path.join(ROOT, "data", "football", "holdout_evaluations.json")),
+          "the 2025 NFL holdout has never been claimed")
+    for sid in ("mercer-nfl-dev", "mercer-ncaaf-dev"):
+        r_ = json.load(open(os.path.join(ROOT, "data", "mercer_dev", "registrations", f"{sid}-v1.json"), encoding="utf-8"))
+        check(r_["model_type"].startswith("none.") and "Human-researched" in r_["selection_source"],
+              f"{sid}: human-researched, no model")
+        check(r_["unit_sizing"]["flat_units"] == 0.25 and r_["max_daily_units"] == 1.0
+              and r_["daily_exposure_scope"] == "all_developmental_cohorts",
+              f"{sid}: 0.25u flat, 1u per day across all developmental plays")
+        check(r_["manual_review"]["required"] is True and "every play" in r_["manual_review"]["period"],
+              f"{sid}: Daniel approves every play")
+        check("2025 NFL holdout remains unspent" in r_["untouched_test_window"], f"{sid}: holdout unspent")
+        check(r_["live_plays_permitted"] is False, f"{sid}: no live plays")
+    nfl_r = json.load(open(os.path.join(ROOT, "data", "mercer_dev", "registrations", "mercer-nfl-dev-v1.json"), encoding="utf-8"))
+    ncaa_r = json.load(open(os.path.join(ROOT, "data", "mercer_dev", "registrations", "mercer-ncaaf-dev-v1.json"), encoding="utf-8"))
+    check("no independent edge" in nfl_r["historical_research"], "NFL registration records the no-edge finding")
+    check("No NCAA model exists" in ncaa_r["historical_research"], "NCAA registration says no model exists")
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

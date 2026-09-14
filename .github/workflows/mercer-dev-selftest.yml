@@ -45,6 +45,11 @@ on:
       - "scripts/post_pickem.py"
       - "scripts/football/page.py"
       - "scripts/football/mercer.py"
+      # Decisions the preservation checks [P] pin.
+      - "scripts/football/delivery_policy.py"
+      - "scripts/engine.py"
+      - "data/mercer_dev/research/**"
+      - ".github/workflows/**"
   pull_request:
     branches:
       - main
@@ -75,6 +80,11 @@ on:
       - "scripts/post_pickem.py"
       - "scripts/football/page.py"
       - "scripts/football/mercer.py"
+      # Decisions the preservation checks [P] pin.
+      - "scripts/football/delivery_policy.py"
+      - "scripts/engine.py"
+      - "data/mercer_dev/research/**"
+      - ".github/workflows/**"
 
 permissions:
   contents: read

@@ -327,6 +327,69 @@ def week_is_revealed(week, commits):
     return bool(ws) and all(is_revealed(c) for c in ws)
 
 
+# ------------------------------------------------------- developmental cohorts --
+#
+# ONE PLAY, ONE RECORD (owner decision 2026-09-14). Once the D.J. Mercer NFL or
+# NCAA developmental cohort for a sport is registered and effective, every
+# OFFICIAL Spotlight pick in that sport IS a cohort play: it carries
+# `cohort_play_id`, it reaches members only through the approved
+# scripts/mercer_dev release path, and it is graded ONLY in that cohort's
+# ledger. This module then never books it into mercer_ledger.json and never
+# delivers it, so no Spotlight selection is counted on two performance records.
+# Picks committed before the effective date stay on the Spotlight ledger.
+# This module only READS the cohort registry and ledgers; it never writes them.
+COHORT_DIR = os.path.join(ROOT, "data", "mercer_dev")
+COHORT_STRATEGY = {"nfl": "mercer-nfl-dev", "ncaaf": "mercer-ncaaf-dev"}
+COHORT_LABEL = {"nfl": "DJ Mercer NFL Developmental Cohort",
+                "ncaaf": "DJ Mercer NCAA Developmental Cohort"}
+COHORT_FLAT_UNITS = 0.25
+
+
+def cohort_registration(sport):
+    """(version, effective datetime) of the earliest registered cohort, or (None, None)."""
+    log = load_json(os.path.join(COHORT_DIR, "registry_log.json"), {"entries": []})
+    regs = [e for e in log.get("entries", []) if e.get("kind") == "registration"
+            and e.get("strategy_id") == COHORT_STRATEGY.get(sport)
+            and market.parse_utc(e.get("effective_utc"))]
+    if not regs:
+        return None, None
+    first = min(regs, key=lambda e: e["effective_utc"])
+    return first["version"], market.parse_utc(first["effective_utc"])
+
+
+def cohort_owned(p):
+    return bool(p.get("cohort_play_id"))
+
+
+def cohort_gate(p, ev, now):
+    """Refusal text when a pick's cohort ownership is wrong for its commit time."""
+    version, eff = cohort_registration(p["sport"])
+    sid = COHORT_STRATEGY[p["sport"]]
+    if eff is None or now < eff:
+        if cohort_owned(p):
+            return (f"cohort_play_id is set but no {sid} registration is effective yet; a "
+                    f"cohort play cannot exist before registration (no backfill)")
+        return None
+    if not cohort_owned(p):
+        return (f"{sid} has been effective since {market.iso(eff)}: an official Spotlight "
+                f"pick is now a cohort play. Add cohort_play_id and release it through "
+                f"scripts/mercer_dev, so it is recorded exactly once")
+    want = f"{sid}-v{version}-{ev['espn_event_id']}-{p['market']}"
+    if p["cohort_play_id"] != want:
+        return f"cohort_play_id must be {want!r} (strategy, version, ESPN event, market)"
+    if float(p.get("units", 1)) != COHORT_FLAT_UNITS:
+        return f"a cohort play is staked at exactly {COHORT_FLAT_UNITS}u"
+    return None
+
+
+def cohort_settled(p):
+    """True once the cohort ledger holds a settlement for this pick's play."""
+    sid = COHORT_STRATEGY.get(p.get("sport"))
+    led = load_json(os.path.join(COHORT_DIR, "ledgers", f"{sid}.json"), {"rows": []})
+    return any(r.get("row_type") == "settlement" and r.get("play_id") == p.get("cohort_play_id")
+               for r in led.get("rows", []))
+
+
 # ------------------------------------------------------------- validation --
 
 def selection_text(p):
@@ -360,6 +423,8 @@ def validate_pick(p, where):
     if cv is not None and str(cv).lower() not in CONVICTIONS:
         errs.append(f"{where}: conviction must be one of {CONVICTIONS} - no numeric "
                     f"confidence, because this is not a calibrated model")
+    if "cohort_play_id" in p and not (isinstance(p["cohort_play_id"], str) and p["cohort_play_id"]):
+        errs.append(f"{where}: cohort_play_id must be a non-empty string when present")
     if "book" in p and not str(p.get("book") or "").strip():
         errs.append(f"{where}: 'book' is present but empty; name the book or omit it")
     if p.get("sport") not in SPORTS:
@@ -605,7 +670,7 @@ def cmd_commit(week, now=None, write=True, stores=None, dry_run=False):
                                    f"give the new pick a new id if the game has not started.")
                 continue
             ev, _why = resolve_event(p, stores.get(p["sport"], {}))
-            gate = commit_gate(p, ev, now)
+            gate = commit_gate(p, ev, now) or cohort_gate(p, ev, now)
             if gate:
                 refused.append(f"{p['id']}: NOT fingerprinted - {gate}")
                 continue
@@ -731,6 +796,7 @@ def cmd_grade(dry_run=False, stores=None, now=None):
     done = {e["pick_id"] for e in ledger["entries"]}
     commits = load_commitments()["commitments"]
     new, refused, waiting, altered = [], [], 0, []
+    cohort_done = set()
     booked = {e["pick_id"]: e for e in ledger["entries"]}
     for w in list_weeks():
         doc = load_week(w)
@@ -750,6 +816,14 @@ def cmd_grade(dry_run=False, stores=None, now=None):
                                    f"graded {b.get('graded_utc')}. The ledger keeps the "
                                    f"original ({b['selection']} {b['price']:+d}, "
                                    f"{b['result']}) and is not recomputed.")
+                continue
+            if cohort_owned(p):
+                # Graded in its cohort ledger, never here. Revealed on the
+                # Spotlight page once that ledger has settled it.
+                if cohort_settled(p):
+                    cohort_done.add(p["id"])
+                else:
+                    waiting += 1
                 continue
             ev, why = resolve_event(p, stores.get(p["sport"], {}))
             if ev is None:
@@ -771,17 +845,19 @@ def cmd_grade(dry_run=False, stores=None, now=None):
         print("  ALTERED-AFTER-GRADING " + m)
     print(f"grade: {len(new)} new, {waiting} waiting on finals, {len(refused)} refused, "
           f"{len(altered)} altered after grading, {len(done)} already booked")
-    if new and not dry_run:
-        ledger["entries"].extend(new)
-        save_json(LEDGER, ledger)
-        print(f"wrote {os.path.relpath(LEDGER, ROOT)}")
+    reveal_ids = {e["pick_id"] for e in new} | cohort_done
+    if reveal_ids and not dry_run:
+        if new:
+            ledger["entries"].extend(new)
+            save_json(LEDGER, ledger)
+            print(f"wrote {os.path.relpath(LEDGER, ROOT)}")
         # REVEAL, AND ONLY NOW. Ordering matters and is not arbitrary: the
         # fingerprint was verified inside grade_pick before any of these entries
         # existed, so nothing reaches the ledger on an unverified card, and
         # nothing is disclosed until it has been booked. House Rule 7 - held
         # before, published in full after, win or lose.
         com = load_commitments()
-        booked = {e["pick_id"] for e in new}
+        booked = reveal_ids
         touched = set()
         for c in com["commitments"]:
             if c["pick_id"] in booked and not c.get("revealed"):
@@ -958,6 +1034,14 @@ def cmd_deliver(week=None, dry_run=False, now=None):
     if not doc.get("picks"):
         print(f"{week}: no official picks; nothing to deliver.")
         return 0
+    cohort = [p["id"] for p in doc["picks"] if cohort_owned(p)]
+    if cohort:
+        # Cohort plays reach members only through the approved, artifact-bound
+        # release path in scripts/mercer_dev. This hourly step never sends them.
+        doc = dict(doc, picks=[p for p in doc["picks"] if not cohort_owned(p)])
+        print(f"{week}: {len(cohort)} cohort play(s) left to the approved release path: {cohort}")
+        if not doc["picks"]:
+            return 0
     if already_delivered(week) and not dry_run:
         print(f"{week}: already delivered to members; refusing to double-post.")
         return 0
@@ -1134,6 +1218,7 @@ RG_LINE = ('<p class="rgline"><strong>21+.</strong> Open Ledger Sports is an ana
            'rel="noopener">NCPG\'s safer sports betting resources</a>.</p>')
 
 SUBNAV = [("/football/mercer/", "Spotlight"), ("/football/mercer/record/", "The Mercer Ledger"),
+          ("/football/mercer/developmental/", "Developmental cohorts"),
           ("/football/mercer/about/", "About D.J. Mercer"), ("/football/", "Model football record")]
 
 
@@ -1245,6 +1330,10 @@ def pick_card(i, p, entry, commits, ev):
         why += (f'<h4>What would change my mind</h4>'
                 f'<p>{E(str(p["changes_my_mind"]))}</p>')
     why += f'<h4>Status</h4><p><strong>{OFFICIAL} PICK</strong></p>'
+    if cohort_owned(p):
+        why += (f'<p class="mut">Recorded on the <a href="/football/mercer/developmental/">'
+                f'{COHORT_LABEL[p["sport"]]}</a> record as play <code>{E(p["cohort_play_id"])}</code>, '
+                f'not on the Spotlight ledger, so it counts on exactly one record.</p>')
 
     return (f'<article class="pick{cls}" id="{E(p["id"])}"><div class="ph"><div>'
             f'<span class="pnum">Mercer\'s pick #{i} · {sport}</span>'

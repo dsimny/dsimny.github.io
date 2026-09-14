@@ -97,6 +97,9 @@ try:
     mercer.LEDGER = os.path.join(mercer.DATA, "mercer_ledger.json")
     mercer.COMMITMENTS = os.path.join(mercer.DATA, "commitments.json")
     mercer.OUT = os.path.join(tmp, "football", "mercer")
+    # No developmental cohort is registered inside the sandbox, whatever the real
+    # repository holds, so these suites keep testing pre-cohort Spotlight behaviour.
+    mercer.COHORT_DIR = os.path.join(tmp, "mercer_dev")
     os.makedirs(mercer.WEEKS)
     stores = {"nfl": {"999": fixture_event()}, "ncaaf": {}}
     mercer.save_json(os.path.join(mercer.WEEKS, f"{WEEK}.json"), fixture_doc())

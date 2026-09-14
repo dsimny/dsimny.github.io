@@ -311,6 +311,28 @@ publishing it in full rather than pretending it was ever withheld. **History was
 not rewritten and the pick was not deleted.** The flag is set only on a card that
 was actually public; it is never applied to one that was withheld.
 
+## 2e. Cohort ownership — added 2026-09-14
+
+**The Spotlight remains the weekly premium featured selection. A Spotlight pick
+counts on exactly one performance record.**
+
+From the effective date of the DJ Mercer NFL or NCAA Developmental Cohort, an
+official Spotlight pick in that sport is a play in that cohort:
+
+- the pick carries `cohort_play_id` (`<strategy>-v<version>-<ESPN event>-<market>`),
+  a structured `walk_away`, `odds_event_id`, and exactly 0.25 units — `commit`
+  refuses it otherwise, and refuses a `cohort_play_id` on any pick committed before
+  the cohort is effective (no backfill);
+- it is released to members only through the approved developmental path
+  (`scripts/mercer_dev`, `docs/MERCER_DEVELOPMENTAL_RELEASE_CONTROLS.md`), marked
+  ★ Spotlight; the hourly `deliver` step never sends it;
+- it is graded only in the cohort ledger; `grade` never books it here, and reveals
+  the card once the cohort ledger has settled the play;
+- the week page states which cohort record holds it.
+
+Picks committed before a cohort's effective date stay on this ledger exactly as
+before. Leans and passes are unaffected.
+
 ## 3. The record, and why it cannot be flattered
 
 ### Requirement 1 — ledger separation

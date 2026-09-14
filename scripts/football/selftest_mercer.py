@@ -232,6 +232,9 @@ def main():
         mercer.LEDGER = os.path.join(mercer.DATA, "mercer_ledger.json")
         mercer.COMMITMENTS = os.path.join(mercer.DATA, "commitments.json")
         mercer.OUT = os.path.join(tmp, "football", "mercer")
+        # No developmental cohort is registered inside the sandbox, whatever the real
+        # repository holds, so these suites keep testing pre-cohort Spotlight behaviour.
+        mercer.COHORT_DIR = os.path.join(tmp, "mercer_dev")
         os.makedirs(mercer.WEEKS)
 
         # ---- 7. week and date handling ----------------------------------

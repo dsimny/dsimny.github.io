@@ -94,7 +94,10 @@ def selection_text(a):
 def render_payload(a):
     """The member message. Deterministic in the artifact's fields."""
     live = a["designation"] == "live"
-    lines = [
+    lines = []
+    if a.get("featured"):
+        lines += ["**★ D.J. MERCER SPOTLIGHT — this week's featured selection**", ""]
+    lines += [
         f"**{a['matchup']}**",
         f"**{selection_text(a)}  {a['odds']:+d}**  at {a['book']}",
         f"Recommended: **{a['recommended_units']:g}u**  ·  Confidence: {a['confidence'].capitalize()}",
@@ -196,8 +199,13 @@ def evaluate_breakers(d, reg, cons, event, now):
     return out, edge
 
 
-def build_artifact(d, registration, quote, event, now):
+def build_artifact(d, registration, quote, event, now, spotlight=None):
+    """spotlight = {"week", "pick_id", "pick_sha256"} when this play is the
+    fingerprinted Spotlight pick itself; the artifact then records the link, and
+    the Spotlight ledger never books the pick (mercer.cohort_owned)."""
     reg, entry = registration
+    if spotlight is not None and set(spotlight) != {"week", "pick_id", "pick_sha256"}:
+        raise ReleaseRefused("spotlight link must carry week, pick_id and pick_sha256")
     missing = [f for f in DRAFT_FIELDS if f not in d]
     if missing:
         raise ReleaseRefused(f"draft missing {missing}")
@@ -247,6 +255,7 @@ def build_artifact(d, registration, quote, event, now):
         "confidence": d["confidence"], "recommended_units": float(d["recommended_units"]),
         "reasoning": d["reasoning"].strip(), "key_risks": d["key_risks"].strip(),
         "walk_away": d["walk_away"], "circuit_breakers": breakers,
+        "featured": spotlight is not None, "spotlight": spotlight,
         "quote": {"captured_utc": quote["captured_utc"], "sha256": mdcore.sha256_of(quote),
                   "n_books_market": cons["n_books_market"], "n_books_line": cons["n_books_line"],
                   "best_price": cons["best_price"], "best_book": cons["best_book"]},
@@ -269,8 +278,25 @@ def control_state(env):
     return ctl, env.get(PUBLICATION_ENV, "") == "enabled"
 
 
-def check_release(a, sha, approval, commitments, led, quote, event, now, env, registration):
-    """Every Phase 6 check. Returns [(name, passed, safe_detail)]."""
+def released_positions(ledgers, delivered):
+    """Every released developmental play, BOTH cohorts: ledger rows plus receipts.
+
+    Receipts matter because a publication row only enters its ledger after
+    kickoff. Counting ledger rows alone would miss every play released today
+    whose game has not started - exactly the plays a daily cap must see.
+    """
+    out = {}
+    for led in ledgers:
+        for r in mdcore.publications(led):
+            out[r["play_id"]] = r
+    for r in delivered:
+        out.setdefault(r["play_id"], r)
+    return list(out.values())
+
+
+def check_release(a, sha, approval, commitments, led, quote, event, now, env, registration,
+                  delivered=(), artifact_committed=True, other_ledgers=()):
+    """Every release check. Returns [(name, passed, safe_detail)]."""
     reg, entry = registration if registration else (None, None)
     ctl, env_on = control_state(env)
     checks = []
@@ -285,6 +311,8 @@ def check_release(a, sha, approval, commitments, led, quote, event, now, env, re
         and a["strategy_id"] == reg["strategy_id"] and a["version"] == reg["version"]
         and a["registration_sha256"] == entry["sha256"])
     add("artifact_hash", mdcore.sha256_of(a) == sha)
+    add("artifact_committed_publicly", artifact_committed is True,
+        "the sealed artifact file is present on origin/main before any send")
     latest = [c for c in commitments if c["play_id"] == a["play_id"]]
     add("publicly_committed", bool(latest) and latest[-1]["artifact_sha256"] == sha,
         "latest public commitment for this play matches")
@@ -321,16 +349,17 @@ def check_release(a, sha, approval, commitments, led, quote, event, now, env, re
     else:
         add("price_vs_consensus_now", False, "no consensus at this number")
     add("breakers_at_build", all(b["passed"] for b in a["circuit_breakers"]))
-    pubs = mdcore.publications(led)
+    pubs = released_positions([led, *other_ledgers], delivered)
     add("no_duplicate", a["play_id"] not in {p["play_id"] for p in pubs})
-    conflict = [p for p in pubs if p["espn_event_id"] == a["event"]["espn_event_id"]
+    conflict = [p for p in pubs if str(p["espn_event_id"]) == a["event"]["espn_event_id"]
                 and p["market"] == a["market"]]
     add("no_conflicting_play", not conflict or (reg or {}).get("conflicting_plays_permitted") is True)
     day = mdcore.et_date(mdcore.parse_utc(a["event"]["scheduled_start_utc"]))
     same_day = [p for p in pubs if mdcore.et_date(mdcore.parse_utc(p["scheduled_start_utc"])) == day]
     units = sum(float(p["recommended_units"]) for p in same_day) + a["recommended_units"]
-    add("exposure_limits", reg is not None and a["recommended_units"] <= reg["max_play_units"]
-        and units <= reg["max_daily_units"] and len(same_day) + 1 <= reg["max_plays_per_day"])
+    add("exposure_limits", reg is not None and a["recommended_units"] == reg["max_play_units"]
+        and units <= reg["max_daily_units"] and len(same_day) + 1 <= reg["max_plays_per_day"],
+        "flat 0.25u; daily cap counts BOTH cohorts, released and not yet started included")
     return checks
 
 
@@ -352,6 +381,9 @@ class IO:
     def read(self, relpath): raise NotImplementedError
     def send(self, webhook, payload): raise NotImplementedError       # -> dict or raises
     def fetch_message(self, webhook, message_id): raise NotImplementedError
+    def delivered(self): return []                                    # non-actionable receipts
+    def artifact_committed(self, play_id): return False               # present on origin/main
+    offline_double = False                                            # True only for commissioning
 
 
 class Uncertain(RuntimeError):
@@ -380,9 +412,24 @@ def attempts_state(io, play_id):
     return n, (n > 0 and io.exists(delivery_paths(play_id, n)["failed"]))
 
 
+COMMISSIONING_HOOK = "commissioning://offline-double/never-sent"
+
+
 def publish(play_id, approved_sha, approver, now, io, env, run_id="local",
-            run_attempt="1", dry_run=False, retry_after_definitive_failure=False):
-    """Returns (status, checks). status in {published, refused, dry_run, uncertain, failed}."""
+            run_attempt="1", dry_run=False, retry_after_definitive_failure=False,
+            commissioning=False):
+    """Returns (status, checks).
+
+    status in {published, refused, dry_run, uncertain, failed, commissioned}.
+
+    COMMISSIONING runs the whole chain - real artifact, real fresh ESPN event and
+    odds, every check, approval, reservation, send, read-back, receipt - against
+    an OFFLINE io double. It refuses to start unless io.offline_double is True,
+    it never reads a webhook from the environment, and the only check it may
+    report as failing is the kill switch, which is expected to be OFF.
+    """
+    if commissioning and getattr(io, "offline_double", False) is not True:
+        raise ReleaseRefused("commissioning requires the offline io double; refusing")
     paths = delivery_paths(play_id)
     a = io.load_artifact(play_id)
     if a is None:
@@ -395,6 +442,7 @@ def publish(play_id, approved_sha, approver, now, io, env, run_id="local",
     except mdcore.IntegrityError:
         registration = None
     led = mdcore.load_ledger(a["strategy_id"])
+    others = [mdcore.load_ledger(sid) for sid in mdcore.STRATEGY_SPORT if sid != a["strategy_id"]]
     if io.exists(paths["delivered"]):
         return "refused", [("no_duplicate", False, "a delivery receipt already exists")]
     last, last_failed = attempts_state(io, play_id)
@@ -410,14 +458,20 @@ def publish(play_id, approved_sha, approver, now, io, env, run_id="local",
     quote = io.fetch_quote(sport, a["event"]["odds_event_id"])
     event = io.fetch_event(sport, a["event"]["espn_event_id"])
     checks = check_release(a, approved_sha, approval, io.commitments(), led, quote, event,
-                           now, env, registration)
+                           now, env, registration, delivered=io.delivered(),
+                           artifact_committed=io.artifact_committed(play_id),
+                           other_ledgers=others)
     if dry_run:
         return "dry_run", checks
-    if not all(ok for _, ok, _ in checks):
+    required = [c for c in checks if not (commissioning and c[0] == "kill_switch_off")]
+    if not all(ok for _, ok, _ in required):
         return "refused", checks
-    hook = env.get(PLAYS_WEBHOOK_ENV, "").strip()
-    if not hook.startswith("https://discord.com/api/webhooks/") or "?" in hook:
-        return "refused", checks + [("credentials", False, f"{PLAYS_WEBHOOK_ENV} missing or not discord.com")]
+    if commissioning:
+        hook = COMMISSIONING_HOOK
+    else:
+        hook = env.get(PLAYS_WEBHOOK_ENV, "").strip()
+        if not hook.startswith("https://discord.com/api/webhooks/") or "?" in hook:
+            return "refused", checks + [("credentials", False, f"{PLAYS_WEBHOOK_ENV} missing or not discord.com")]
     if io.exists(paths["approval"]):
         prior = io.read(paths["approval"])
         if prior.get("artifact_sha256") != approved_sha:
@@ -427,9 +481,14 @@ def publish(play_id, approved_sha, approver, now, io, env, run_id="local",
         io.create_only(paths["approval"], approval)
     attempt = last + 1
     ap = delivery_paths(play_id, attempt)
+    # Non-actionable only: the fields the cross-cohort exposure, duplicate and
+    # conflict checks need, and nothing from which the wager can be rebuilt.
     reservation = {"play_id": play_id, "artifact_sha256": approved_sha, "run_id": run_id,
                    "reserved_utc": mdcore.iso(now), "attempt": attempt,
-                   "payload_sha256": mdcore.sha256_of(a["discord_payload"])}
+                   "payload_sha256": mdcore.sha256_of(a["discord_payload"]),
+                   "sport": a["sport"], "espn_event_id": a["event"]["espn_event_id"],
+                   "market": a["market"], "scheduled_start_utc": a["event"]["scheduled_start_utc"],
+                   "recommended_units": a["recommended_units"], "featured": a.get("featured", False)}
     io.create_only(ap["reserved"], reservation)
     try:
         sent = io.send(hook, a["discord_payload"])
@@ -449,7 +508,7 @@ def publish(play_id, approved_sha, approver, now, io, env, run_id="local",
                    published_utc=_discord_time(stored) or mdcore.iso(now), verified=True,
                    approver=approver, approved_utc=approval["approved_utc"])
     io.create_only(paths["delivered"], receipt)
-    return "published", checks
+    return ("commissioned" if commissioning else "published"), checks
 
 
 def _same_message(msg, payload):
@@ -496,6 +555,8 @@ def publication_row(a, receipt):
         "manual_approver": receipt["approver"], "approved_utc": receipt["approved_utc"],
         "artifact_sha256": receipt["artifact_sha256"],
         "discord_message_ids": [receipt["message_id"]],
+        "featured": bool(a.get("featured")),
+        "spotlight_pick_id": (a.get("spotlight") or {}).get("pick_id"),
     }
 
 
@@ -504,7 +565,8 @@ def settle_row(pub, event, closing, now):
     base = {"row_type": "settlement", "play_id": pub["play_id"], "graded_utc": mdcore.iso(now),
             "home_score": None, "away_score": None, "closing_line": None,
             "closing_odds": None, "closing_probability": None, "clv_pts": None,
-            "void_reason": None, "corrects": None, "profit_units": 0.0}
+            "clv_unavailable_reason": None, "void_reason": None, "corrects": None,
+            "profit_units": 0.0}
     start = mdcore.parse_utc(pub["scheduled_start_utc"])
     if event is None:
         if now - start > VOID_AFTER:
@@ -531,9 +593,106 @@ def settle_row(pub, event, closing, now):
                else fbsettle.settle_spread(mine, opp, float(pub["line"])))
     row = dict(base, result=res, home_score=hs, away_score=as_,
                profit_units=fbsettle.pnl(res, float(pub["recommended_units"]), pub["odds"]))
-    if closing and closing.get("reference_probability") is not None:
+    if pub["market"] != "moneyline":
+        row["clv_unavailable_reason"] = ("no closing capture exists for spreads and totals; "
+                                         "the football capture records moneylines only")
+    elif closing and closing.get("reference_probability") is not None:
         row.update(closing_line=closing.get("line"), closing_odds=closing.get("odds"),
                    closing_probability=closing["reference_probability"],
                    clv_pts=round((closing["reference_probability"] -
                                   float(pub["market_implied_probability"])) * 100, 3))
+    else:
+        row["clv_unavailable_reason"] = (closing or {}).get("unavailable") or \
+            "no pregame moneyline capture close enough to kickoff"
     return row
+
+
+CLOSE_WINDOW = timedelta(hours=6)
+CLOSE_MIN_BOOKS = 3
+CLOSE_STALE = timedelta(minutes=15)
+
+
+def closing_from_captures(captures, odds_event_id, selection, other, kickoff):
+    """Closing moneyline reference probability from EXISTING football captures.
+
+    captures: [(captured_utc datetime, capture document)]. Uses the latest capture
+    strictly before kickoff and no more than 6 h before it, Tier-1 books quoting
+    both named sides with a quote no older than 15 minutes at that capture. Needs
+    3 such books. Anything short of that returns {"unavailable": reason} - a
+    missing close is reported, never interpolated.
+    """
+    from price_test import TIER1
+    usable = [(t, d) for t, d in captures if t < kickoff and kickoff - t <= CLOSE_WINDOW
+              and any(e.get("odds_api_event_id") == odds_event_id for e in d.get("events", []))]
+    if not usable:
+        return {"unavailable": "no pregame moneyline capture of this event within 6 h of kickoff"}
+    t, doc = max(usable, key=lambda x: x[0])
+    ev = next(e for e in doc["events"] if e.get("odds_api_event_id") == odds_event_id)
+    probs = []
+    for bk in ev.get("books", []):
+        if bk.get("book") not in TIER1:
+            continue
+        lu = mdcore.parse_utc(bk.get("last_update"))
+        if not lu or t - lu > CLOSE_STALE:
+            continue
+        prices = {o.get("name"): o.get("price") for o in (bk.get("markets") or {}).get("h2h", [])}
+        if selection in prices and other in prices and None not in (prices[selection], prices[other]):
+            i_s, i_o = mdcore.implied(prices[selection]), mdcore.implied(prices[other])
+            probs.append(i_s / (i_s + i_o))
+    if len(probs) < CLOSE_MIN_BOOKS:
+        return {"unavailable": f"closing capture has {len(probs)} fresh Tier-1 books (need {CLOSE_MIN_BOOKS})"}
+    probs.sort()
+    mid = len(probs) // 2
+    med = probs[mid] if len(probs) % 2 else (probs[mid - 1] + probs[mid]) / 2
+    return {"reference_probability": round(med, 6), "captured_utc": mdcore.iso(t),
+            "n_books": len(probs), "line": None, "odds": None}
+
+
+def normalized_receipt(r):
+    """The non-actionable fields every exposure / duplicate / conflict check reads."""
+    return {k: r.get(k) for k in ("play_id", "sport", "espn_event_id", "market",
+                                  "scheduled_start_utc", "recommended_units", "featured",
+                                  "artifact_sha256", "published_utc")}
+
+
+def grade_all(now, receipts, load_artifact, results, closing_fn, reveal_fn):
+    """Ledger the released plays whose games have started; settle the finals.
+
+    receipts: delivered receipts (dicts). load_artifact(play_id) -> artifact or None.
+    results: {sport: {espn_event_id: ESPN row}}. closing_fn(publication_row) ->
+    closing dict or {"unavailable": reason}. reveal_fn(artifact) publishes the
+    plaintext artifact once its play is settled. Returns the appended rows.
+
+    Order, per play: verify artifact against receipt -> publication row (only
+    after kickoff) -> settlement (only on a final, or a stated VOID) -> reveal.
+    A receipt whose artifact is unreadable or altered is refused, never guessed.
+    """
+    appended = []
+    for receipt in sorted(receipts, key=lambda r: r["play_id"]):
+        a = load_artifact(receipt["play_id"])
+        if a is None:
+            continue
+        if mdcore.sha256_of(a) != receipt["artifact_sha256"]:
+            raise mdcore.IntegrityError(f"{receipt['play_id']}: artifact differs from its receipt")
+        sid = a["strategy_id"]
+        start = mdcore.parse_utc(a["event"]["scheduled_start_utc"])
+        if now < start:
+            continue                                   # withheld until kickoff
+        led = mdcore.load_ledger(sid)
+        if receipt["play_id"] not in {p["play_id"] for p in mdcore.publications(led)}:
+            reg = mdcore.verified_registration(sid, a["version"])
+            row = publication_row(a, receipt)
+            mdcore.append_row(sid, row, registration=reg)
+            appended.append(row)
+            led = mdcore.load_ledger(sid)
+        if receipt["play_id"] in mdcore.effective_settlements(led):
+            reveal_fn(a)
+            continue
+        pub = next(p for p in mdcore.publications(led) if p["play_id"] == receipt["play_id"])
+        ev = (results.get(a["sport"]) or {}).get(a["event"]["espn_event_id"])
+        row = settle_row(pub, ev, closing_fn(pub) if ev and ev.get("final") else None, now)
+        if row:
+            mdcore.append_row(sid, row)
+            appended.append(row)
+            reveal_fn(a)
+    return appended

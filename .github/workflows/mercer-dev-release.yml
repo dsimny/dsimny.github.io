@@ -25,10 +25,10 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "preview (review channel only) | dry-run | publish"
+        description: "preview (review channel only) | commission (offline, never posts) | dry-run | publish"
         required: true
         type: choice
-        options: [preview, dry-run, publish]
+        options: [preview, commission, dry-run, publish]
       play_id:
         description: "Play id, e.g. mercer-nfl-dev-v1-401999001-spread"
         required: true
@@ -59,6 +59,11 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
 
+      # The release checks compare the sealed artifact and its commitment with
+      # what is on origin/main, so that ref must exist and be current.
+      - name: Fetch origin/main for the public-commitment check
+        run: git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+
       - name: Preview to the private review channel
         if: ${{ inputs.action == 'preview' }}
         env:
@@ -67,6 +72,23 @@ jobs:
           DISCORD_WEBHOOK_URL_MERCER_REVIEW: ${{ secrets.DISCORD_WEBHOOK_URL_MERCER_REVIEW }}
           PLAY_ID: ${{ inputs.play_id }}
         run: python scripts/mercer_dev/mercer_dev.py preview --play-id "$PLAY_ID"
+
+      # COMMISSIONING. The whole chain - real sealed artifact, real public
+      # commitment, fresh ESPN event and odds, approval, reservation, send,
+      # read-back, receipt - against an offline double. No webhook secret is
+      # given to this step, the double refuses any real URL, and it writes
+      # nothing to the repository. The kill switch is expected to be OFF.
+      - name: Commission the release chain offline
+        if: ${{ inputs.action == 'commission' }}
+        env:
+          PYTHONIOENCODING: utf-8
+          BOARD_ENCRYPTION_KEY: ${{ secrets.BOARD_ENCRYPTION_KEY }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          MERCER_DEV_PUBLICATION: ${{ vars.MERCER_DEV_PUBLICATION }}
+          MERCER_DEV_APPROVERS: ${{ vars.MERCER_DEV_APPROVERS }}
+          PLAY_ID: ${{ inputs.play_id }}
+          ARTIFACT_SHA: ${{ inputs.artifact_sha256 }}
+        run: python scripts/mercer_dev/mercer_dev.py commission --play-id "$PLAY_ID" --sha "$ARTIFACT_SHA"
 
       - name: Release checks without sending
         if: ${{ inputs.action == 'dry-run' }}

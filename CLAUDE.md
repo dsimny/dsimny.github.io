@@ -1346,3 +1346,58 @@ pre-launch / invalidated selection tests. Official totals exclude that cohort;
 this is a disclosed restart, not an undefeated lifetime record. Frozen research
 studies are not reopened. The amendment supersedes conflicting live selection
 and grading descriptions above, without authorizing deletion of history.
+
+## Mercer Live — ML-1, the live observation boundary (2026-09-14)
+
+A NEW subsystem, research-only, in SHADOW MODE by pre-registration:
+`docs/MERCER_LIVE_V0.1_PREREGISTRATION.md` (frozen 2026-09-14, before any live
+observation existed). Audit of what it was built on:
+`docs/MERCER_LIVE_AUDIT_2026-09-14.md`. Architecture and schema:
+`docs/MERCER_LIVE_ML1_ARCHITECTURE.md`. Code: `scripts/mercer_live/`. Data:
+`data/mercer_live/`. Gate: `mercer-live-selftest.yml` (its own workflow, so a
+red X means Mercer Live code and nothing else).
+
+WHAT ML-1 IS: `capture.py` reads ESPN's scoreboard (free) for live game state
+and, only while a game is in progress or about to start, makes ONE Odds API
+call per sport (h2h,spreads,totals; 3 credits) and stores every book's quote
+with an explicit `quote_phase` (pregame / live / post / commenced_unjoined /
+unknown) joined to the SAME tick's game state by a canonical id
+`<sport>:<slate_week_et>:<AWAY>@<HOME>`. Append-only JSONL, deterministic
+observation ids, `observed_at` = the instant WE received the response, provider
+stamps kept verbatim. One run record per tick.
+
+WHAT IT MAY NOT DO, ASSERTED BY ITS SUITE: no edge, pick, unit, ledger,
+grading, Discord, LLM, site page or feed item; no write outside
+`data/mercer_live/`; no reference to any ledger, board, commitment store,
+`data/football/odds/` or `data/mercer/odds/`; nothing in `scripts/football/`
+imports it. The chain is DATA → MODEL → BREAKERS → DECISION → LEDGER →
+MERCER PRESENTATION, never LLM → opinion → wager, and ML-1 is the DATA step
+only.
+
+THE RAW STREAM IS GITIGNORED (`data/mercer_live/raw/`): one NFL Sunday at
+one-minute cadence is ~4 MB compressed, a season hundreds of MB. The committed
+record is `data/mercer_live/digest/<date>.json` — SHA-256 of every shard plus
+run/credit counts — the same split as `data/football/raw/pbp/` +
+`pbp_manifest.json`. Whoever runs the capture keeps the bytes; the digest
+proves them.
+
+CREDITS. Live polling is ~30,000 credits/month at one-minute cadence for both
+sports (30% of the allowance, 100x today's football spend). `credits.py`
+refuses a call below 5,000 remaining or above 4,000 spent per ET day, books
+into `data/odds_credits.json` through `scripts/odds_credits.py` at most hourly
+per sport on success (always on a non-200) so it cannot evict the MLB and
+football readings from the 60-slot window, and every reading lives in the run
+record regardless.
+
+SCHEDULER: NOT GitHub Actions at one-minute cadence (measured 15-23 min late
+here). The callable + bounded `--loop` is the deliverable; the recommended
+host is the cron-job.org -> bearer-token endpoint -> small machine shape Open
+Ledger Play already runs (architecture doc section 11). Nothing is deployed.
+`mercer-live-smoke.yml` is dispatch-only, `contents: read`, spends nothing by
+default, and exists to verify the ESPN live-state fields the audit could not
+reach from its build environment.
+
+NEXT PACKAGE IS ML-2 (game-state features + feed-cadence statistics), NOT
+STARTED. Three preregistration items are deferred to ML-1 evidence (freshness
+limit, stale-state rule, multi-book confirmation feasibility) and may be set
+only from measured provider behaviour, never from results.

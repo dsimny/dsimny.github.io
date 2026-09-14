@@ -1,0 +1,100 @@
+name: Mercer Live smoke capture (read-only)
+# ONE TICK (or up to ten sequential ticks into one store) of the Mercer Live
+# ML-1 capture against the REAL providers, so the
+# live-state fields the audit could not verify (docs/MERCER_LIVE_AUDIT_2026-09-14.md,
+# section 7) can be checked by a human without deploying anything.
+#
+# WHAT IT IS NOT. It is not the production scheduler and must never become one:
+# GitHub's scheduler is measured 15-23 minutes late in this repository and a
+# one-minute cadence needs a host that can keep time. This workflow has no
+# `schedule:`, runs only on manual dispatch, holds `contents: read`, commits
+# nothing, pushes nothing, posts nothing, and writes only to a temporary
+# directory that is uploaded as a short-lived artifact for inspection.
+#
+# CREDITS. By default the tick runs with --no-odds and spends NOTHING (ESPN is
+# free). Set spend_credits=true to make ONE Odds API call per sport that has a
+# game in progress or about to start (markets x regions credits each, i.e. 3
+# per sport at the default h2h,spreads,totals). The key reaches the process
+# only in that case; otherwise the environment variable is empty.
+on:
+  workflow_dispatch:
+    inputs:
+      sports:
+        description: "comma-separated: nfl,ncaaf"
+        default: "nfl,ncaaf"
+        required: true
+      spend_credits:
+        description: "make one Odds API call per active sport (costs credits)"
+        type: boolean
+        default: false
+      markets:
+        description: "Odds API markets (only used when spend_credits=true)"
+        default: "h2h,spreads,totals"
+      ticks:
+        description: "sequential ticks to capture into ONE store (1-10)"
+        default: "1"
+      interval_seconds:
+        description: "seconds between ticks when ticks > 1"
+        default: "60"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Read-only tick(s)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run the tick(s) into a temporary store
+        env:
+          PYTHONIOENCODING: utf-8
+          # Empty unless the operator asked to spend. The script treats an
+          # empty key as "odds unavailable" and records the skip in the run.
+          ODDS_API_KEY: ${{ inputs.spend_credits && secrets.ODDS_API_KEY || '' }}
+        run: |
+          set -e
+          ARGS=""
+          IFS=',' read -ra S <<< "${{ inputs.sports }}"
+          for s in "${S[@]}"; do ARGS="$ARGS --sport $s"; done
+          if [ "${{ inputs.spend_credits }}" != "true" ]; then ARGS="$ARGS --no-odds"; fi
+          TICKS="${{ inputs.ticks }}"; case "$TICKS" in ''|*[!0-9]*) TICKS=1;; esac
+          if [ "$TICKS" -gt 10 ]; then TICKS=10; fi
+          if [ "$TICKS" -gt 1 ]; then ARGS="$ARGS --loop --max-ticks $TICKS --interval ${{ inputs.interval_seconds }}"; fi
+          STORE="$RUNNER_TEMP/mercer_live"
+          python scripts/mercer_live/capture.py $ARGS --data-dir "$STORE" \
+            --markets "${{ inputs.markets }}" --digest
+          # RETRY PROOF: re-run the FIRST tick's run_id. The store must replay it
+          # (written=0) and no shard may change. Live evidence for the property
+          # the hermetic suite already asserts.
+          FIRST=$(ls "$STORE"/raw/runs/*/*.json | head -1 | xargs -n1 basename | sed 's/\.json$//')
+          sha256sum "$STORE"/raw/*/*/*.jsonl > /tmp/before.sha
+          echo "--- retry of run_id $FIRST (must replay, write nothing) ---"
+          python scripts/mercer_live/capture.py --sport nfl --no-odds --data-dir "$STORE" --run-id "$FIRST"
+          sha256sum "$STORE"/raw/*/*/*.jsonl > /tmp/after.sha
+          diff /tmp/before.sha /tmp/after.sha && echo "retry changed no shard byte"
+          # EVERYTHING INTO THE LOG, so the observations can be read without
+          # downloading the artifact. Game state only is small; quotes are
+          # summarised by the run records rather than dumped.
+          for f in "$STORE"/raw/*/*/game_state_*.jsonl; do echo "=== $f"; cat "$f"; echo; done
+          for f in "$STORE"/raw/*/*/market_event_*.jsonl; do [ -f "$f" ] && { echo "=== $f"; cat "$f"; echo; }; done
+          for f in "$STORE"/raw/runs/*/*.json; do echo "=== $f"; cat "$f"; echo; done
+          for f in "$STORE"/digest/*.json; do echo "=== $f"; cat "$f"; echo; done
+          echo "## Mercer Live smoke ($TICKS tick(s))" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          find "$STORE" -type f | sed "s#$RUNNER_TEMP/##" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "Nothing was committed or posted. The observations are in the job log and in the run artifact for 7 days." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the tick for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: mercer-live-smoke-${{ github.run_id }}
+          path: ${{ runner.temp }}/mercer_live
+          retention-days: 7
+          if-no-files-found: warn

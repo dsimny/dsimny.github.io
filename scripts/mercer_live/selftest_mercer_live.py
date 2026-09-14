@@ -756,17 +756,25 @@ except Exception as e:                                              # noqa: BLE0
 # main() plumbing: --dry-run writes nothing, --loop respects --max-ticks
 tmp = tempfile.mkdtemp(prefix="mlive")
 orig = capture.run_tick
+orig_now_utc = common.now_utc
 calls = []
+# ONE injected clock for both halves of main(). run_tick stamps runs and shards
+# with now_fn, but main() names the digest from common.now_utc() after the
+# ticks. Faking only the first made this block depend on the machine's real
+# calendar: runs landed under NOW's ET date while the digest took today's, so it
+# passed only while the real US/Eastern date happened to be 2026-09-13.
+CLOCK = [NOW]
 
 
 def fake_run_tick(sports, **kw):
     calls.append(kw.get("run_id"))
-    kw.update(now_fn=lambda: NOW, espn_fetch=nfl_espn, odds_fetch=FakeOdds(), book_fn=fake_book,
-              api_key=None)
+    kw.update(now_fn=lambda: CLOCK[0], espn_fetch=nfl_espn, odds_fetch=FakeOdds(),
+              book_fn=fake_book, api_key=None)
     return orig(sports, **kw)
 
 
 capture.run_tick = fake_run_tick
+common.now_utc = lambda: CLOCK[0]
 try:
     rc = capture.main(["--sport", "nfl", "--no-odds", "--data-dir", tmp, "--dry-run"])
     check(rc == 0 and not os.path.isdir(os.path.join(tmp, "raw")), "--dry-run exits 0 and writes nothing")
@@ -776,11 +784,33 @@ try:
     check(rc == 0 and len(runs) == 3 and len({r["run_id"] for r in runs}) == 3,
           "--loop --max-ticks 3 writes three runs with three distinct run_ids")
     check(os.path.exists(os.path.join(tmp, "digest", "2026-09-13.json")), "--digest writes the day's digest")
+    # The digest is keyed by the US/Eastern date, like runs and shards - never
+    # the UTC date and never the Tuesday slate week. Each instant sits on a
+    # boundary where one of those would give a different answer.
+    for instant, want, label in (
+            ("2026-09-15T03:59:59Z", "2026-09-14", "Mon 23:59:59 ET (UTC already Tuesday)"),
+            ("2026-09-15T04:00:00Z", "2026-09-15", "Tue 00:00:00 ET rollover"),
+            ("2026-09-14T01:30:00Z", "2026-09-13", "Sun 21:30 ET (UTC already Monday)"),
+            ("2026-11-02T04:30:00Z", "2026-11-01", "23:30 EST after DST ends (EDT would say Nov 2)"),
+            ("2027-03-15T04:30:00Z", "2027-03-15", "00:30 EDT after DST starts (EST would say Mar 14)")):
+        CLOCK[0] = common.parse_utc(instant)
+        dtmp = tempfile.mkdtemp(prefix="mlived")
+        try:
+            rc = capture.main(["--sport", "nfl", "--no-odds", "--data-dir", dtmp,
+                               "--max-ticks", "1", "--digest"])
+            files = sorted(os.listdir(os.path.join(dtmp, "digest")))
+            runs = Store(dtmp).runs_for_date(want)
+            check(files == [f"{want}.json"] and len(runs) == 1,
+                  f"--digest at {label}: digest and run both under ET date {want} ({files})")
+        finally:
+            shutil.rmtree(dtmp, ignore_errors=True)
+    CLOCK[0] = NOW
     rc = capture.main(["--sport", "nfl", "--no-odds", "--data-dir", tmp, "--until", "not-a-time"])
 except SystemExit as e:
     check(e.code == 2, "--until rejects an unparseable instant")
 finally:
     capture.run_tick = orig
+    common.now_utc = orig_now_utc
     shutil.rmtree(tmp, ignore_errors=True)
 
 print(f"\nmercer-live selftest: {n_checks} checks, "

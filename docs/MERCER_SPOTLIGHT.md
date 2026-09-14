@@ -509,7 +509,10 @@ on PATH is the Store stub.
 - **No fake confidence precision.** Three conviction levels, no percentages.
 - **No CLV on Mercer's picks.** The capture holds moneylines only and Mercer
   will mostly play spreads and totals. The record page says "not yet tracked".
-- **No Discord post** for the card yet.
+- ~~No Discord post for the card yet.~~ Superseded 2026-09-12: the full card is
+  delivered to the members channel (section 2d). Since 2026-09-14 that delivery
+  has a kill switch (`MERCER_DELIVERY=paused`), a durable never-trimmed delivery
+  record (`data/mercer/deliveries.json`) and refuses a card whose kickoff has passed.
 
 ## 8. Follow-up TODO — the model's Monday-night week boundary
 

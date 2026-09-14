@@ -88,7 +88,7 @@ def build_payload(date):
         return None
 
     tag = {"free pick": "★ today's free pick",
-           "daily pick": "🎯 today's Daily Pick (0u proving)",
+           "daily pick": "🎯 today's Daily Pick (0u)",
            "best of board": "✳ today's Best of Board (0u lean)"}[source]
     embed = {
         "title": f"🎯 Beat the Engine: {featured['matchup']}",

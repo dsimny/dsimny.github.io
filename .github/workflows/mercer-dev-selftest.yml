@@ -37,6 +37,14 @@ on:
       - "scripts/football/ridge.py"
       - "scripts/football/market_compare.py"
       - "data/football/team_names.json"
+      # Member-facing copy the disclosure checks [24] read.
+      - "scripts/build_site.py"
+      - "scripts/feed.py"
+      - "scripts/blog.py"
+      - "scripts/post_discord.py"
+      - "scripts/post_pickem.py"
+      - "scripts/football/page.py"
+      - "scripts/football/mercer.py"
   pull_request:
     branches:
       - main
@@ -59,6 +67,14 @@ on:
       - "scripts/football/ridge.py"
       - "scripts/football/market_compare.py"
       - "data/football/team_names.json"
+      # Member-facing copy the disclosure checks [24] read.
+      - "scripts/build_site.py"
+      - "scripts/feed.py"
+      - "scripts/blog.py"
+      - "scripts/post_discord.py"
+      - "scripts/post_pickem.py"
+      - "scripts/football/page.py"
+      - "scripts/football/mercer.py"
 
 permissions:
   contents: read

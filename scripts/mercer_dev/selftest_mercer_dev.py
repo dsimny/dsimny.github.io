@@ -533,6 +533,32 @@ try:
     fl = json.load(open(os.path.join(ROOT, "data", "football", "football_ledger.json"), encoding="utf-8"))
     check(sum(1 for r in fl["entries"] if r.get("board_sha256") == inc) == 2,
           "both incident rows are still present in the football ledger")
+    print("\n[24] website and member-facing disclosures (scoped to the copy blocks)")
+    bs = open(os.path.join(ROOT, "scripts", "build_site.py"), encoding="utf-8").read()
+    up = bs.split("upgrade_block = f'''")[1].split("''' if PREMIUM_URL")[0]
+    up_text = re.sub(r"<[^>]+>", "", up).replace("\n", " ")
+    up_text = re.sub(r"\s+", " ", up_text)
+    for want, label in (("paused following the September 8 incident", "the automated pipeline is paused"),
+                        ("D.J. Mercer Spotlight", "what football members actually receive"),
+                        ("developmental strategies are in preparation and are not publishing yet",
+                         "cohorts are not described as live"),
+                        ("no guaranteed number of picks", "no volume promise"),
+                        ("No football selection is presented as proven", "an explicit no-proven-claim sentence")):
+        check(want in up_text, f"homepage premium block: {label}")
+    check("every covered game" not in up_text and "the one play we would act on" not in up_text,
+          "homepage no longer sells the paused automated slate")
+    check(not re.search(r"(?<!as )\bproven\b(?! or)", up_text),
+          "homepage premium block never calls football proven")
+    pg = open(os.path.join(ROOT, "scripts", "football", "page.py"), encoding="utf-8").read()
+    check("schedule remains in force" not in pg, "football hub no longer says the paused schedule is in force")
+    check("It is sold as process and receipts" not in pg, "football hub no longer sells the paused product")
+    stale = [f for f in ("build_site.py", "feed.py", "blog.py", "post_discord.py", "post_pickem.py")
+             if re.search(r"ends September 8|0u PROVING|0u proving|proving window\*\*",
+                          open(os.path.join(ROOT, "scripts", f), encoding="utf-8").read())]
+    check(not stale, f"no surface still says the Daily Pick proving window ends September 8 ({stale or 'none'})")
+    mp = open(os.path.join(ROOT, "scripts", "football", "mercer.py"), encoding="utf-8").read()
+    check("1-800-GAMBLER" in mp.split("MEMBER_FOOTER = (")[1].split(")")[0],
+          "Mercer member posts carry the responsible-gambling footer")
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 

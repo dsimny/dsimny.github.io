@@ -371,7 +371,7 @@ def flags_html(b):
     if b["rule4_flag"]: flags += '<span class="flag">R4 FLAG</span>'
     if b.get("rule8_flag"): flags += '<span class="flag flag-scr">R8 DIVERGENCE</span>'
     if b.get("best_of_board"): flags += '<span class="flag flag-free">✳ BEST OF BOARD</span>'
-    if b.get("daily_pick"): flags += '<span class="flag flag-free">🎯 DAILY PICK · 0u PROVING</span>'
+    if b.get("daily_pick"): flags += '<span class="flag flag-free">🎯 DAILY PICK · 0u</span>'
     if free is not None and b is free: flags += '<span class="flag flag-free">★ FREE PICK</span>'
     return flags
 
@@ -506,23 +506,26 @@ commit_block = f'''
 # section 1, House Rules 4 and 8). One "our edge" spanning both would be a claim
 # we have already published the evidence against.
 #
-# It also leads football with the SLATE rather than the play, deliberately. One
-# committed play a week is ~4 a month; sold as a pick service that is
-# indefensible at this price and invites comparison with people willing to
-# promise a win. The ~57 reasoned games are the product, and after MLB ends in
-# late September they are the whole product - which is why "what arrives depends
-# on what is in season" is said out loud rather than discovered by a member in
-# October.
+# FOOTBALL COPY SINCE 2026-09-14 (House Rule 8). The automated slate this block
+# used to sell has been paused since the September 8 incident, so it may not be
+# described as something members receive. What members DO receive for football
+# is the D.J. Mercer Spotlight card (human-researched, fingerprinted, delivered to
+# the members channel). The NFL/NCAA developmental cohorts are built but not
+# registered or publishing, so they are named as in preparation and nothing more.
+# No volume is promised: a Mercer week can carry no pick. When the cohorts go
+# live, this paragraph changes in the same commit that enables them.
 upgrade_block = f'''
     <div class="upgrade">
       <p class="joinlead">Premium: everything we publish, before it happens.</p>
       <p class="joinsub"><strong>Baseball.</strong> Every play we allocate — side, price, sizing,
       model edge and the full circuit-breaker log — in Discord before first pitch.</p>
-      <p class="joinsub"><strong>Football.</strong> The whole slate reasoned through from market
-      prices — every covered game, not a shortlist — plus the one play we would act on, committed
-      and fingerprinted before kickoff. <strong>Football makes no claim to beat the market.</strong>
-      We ran two pre-registered studies and published both failures, and it is staked at zero units.
-      What you are buying there is the research and the receipts, not a forecast.</p>
+      <p class="joinsub"><strong>Football.</strong> The D.J. Mercer Spotlight: human-researched NFL and
+      college picks, each fingerprinted before kickoff, delivered in full to members in Discord and graded
+      on its own public record, win or lose. There is no guaranteed number of picks; some weeks have none.
+      The original automated football pipeline remains paused following the September 8 incident while its
+      release process is reviewed. Separate NFL and NCAA developmental strategies are in preparation and are
+      not publishing yet. <strong>No football selection is presented as proven or as a way to beat the
+      market</strong>: we ran two pre-registered studies and published both failures.</p>
       <p class="joinsub">{PREMIUM_PRICE}. What arrives depends on what is in season.</p>
       <p class="joinsub">Every one of them still publishes on the public ledger after grading, winners
       and losers alike, so you can check the record before you pay and keep checking after. If the
@@ -545,7 +548,7 @@ email_block = f'''
 join_block = f'''
     <div class="join">
       <p class="joinlead">The free pick lands in Discord every morning before first pitch.</p>
-      <p class="joinsub">Every graded result follows it, win or lose. A members channel for the rest of the board opens once the ledger has a record worth charging for; join now and you will be there when it does. The ledger is the pitch, so go read it before you decide we are worth following.</p>
+      <p class="joinsub">Every graded result follows it, win or lose. Premium members also get the rest of the board, before first pitch, in a members channel. The ledger is the pitch, so go read it before you decide we are worth following.</p>
       <a class="joinbtn" href="{DISCORD_INVITE}" rel="noopener">Join the Discord</a>
     </div>''' if DISCORD_INVITE else ""
 
@@ -657,8 +660,9 @@ elif DP is not None and dp_row is not None:
       always-on strategy: the slate's top-ranked candidate under a lower, precommitted bar
       (positive edge at the best price, model and market blend agreeing, no Rule 8 hold), published
       every eligible slate and graded on <a href="#" data-goto="ledger">its own public record</a>.
-      It is at <strong>0 units through its proving window (ends September 8)</strong>: the staking
-      review happens on that date, never early. Ranked by score, not raw win probability — a heavy
+      It is at <strong>0 units</strong>: its first staking review (held September 14, 2026) kept it
+      at zero, because 27 picks cannot separate skill from noise and its closing-line value was slightly
+      negative. Ranked by score, not raw win probability — a heavy
       favorite can be likely to win and still be a bad bet.</p>
     </div>
     {card(dp_row, False)}
@@ -779,13 +783,13 @@ daily_html = (f'''
     <h2 class="sect">The Daily Pick strategy (always-on, separate record)</h2>
     <p class="sectsub">One pick per eligible slate under a lower, precommitted bar than a Qualified
     Play: positive edge at best price, model and market blend agreeing on the side, no Rule 8 hold,
-    ranked by score. <strong>0 units staked through the proving window (ends September 8, 2026)</strong> —
-    the record below books a flat 0.25u paper basis so the scheduled staking review has evidence to
-    read. Effective date August 9, 2026; rules change only by version bump. This record never mixes
+    ranked by score. <strong>0 units staked.</strong> The first staking review (held September 14, 2026)
+    kept it at zero; the record below books a flat 0.25u paper basis so the next review, registered in
+    advance, has evidence to read. Effective date August 9, 2026; rules change only by version bump. This record never mixes
     with the Qualified Plays ledger above.</p>
     <div class="tiles">
       <div class="tile"><span class="tl">Daily Pick record</span><span class="tv">{_da["record"]}</span><span class="td">{_da["paper_units_net"]:+.2f}u on the 0.25u paper basis</span></div>
-      <div class="tile"><span class="tl">Paper ROI</span><span class="tv">{f"{_da['paper_roi_pct']:+.1f}%" if _da["paper_roi_pct"] is not None else "n/a"}</span><span class="td">staked to date: {_da["staked_units_net"]:+.2f}u (0u proving)</span></div>
+      <div class="tile"><span class="tl">Paper ROI</span><span class="tv">{f"{_da['paper_roi_pct']:+.1f}%" if _da["paper_roi_pct"] is not None else "n/a"}</span><span class="td">staked to date: {_da["staked_units_net"]:+.2f}u (0u, unstaked)</span></div>
       {f'<div class="tile"><span class="tl">Daily Pick CLV</span><span class="tv">{_da["clv"]["avg_clv_pts"]:+.2f}</span><span class="td">avg pts vs close · beat it {_da["clv"]["beat_close_pct"]:g}% of {_da["clv"]["graded_with_clv"]}</span></div>' if _da["clv"]["graded_with_clv"] else ''}
     </div>
     <div class="tablewrap">

@@ -70,10 +70,17 @@ that day.
      "http_status": 204, "detail": "9 messages",
      "at_utc": "2026-09-05T18:09:54Z"}
 
-`mode: "fb_slate"` is the members' full slate; `fb_free` is the public play and
-does not count as member content. So the question "was member content delivered
+Member content is any of: `mode: "board"` (the MLB members board),
+`mode: "mercer_members"` (the D.J. Mercer Spotlight card, also recorded durably in
+`data/mercer/deliveries.json`), `mode: "fb_slate"` (the automated football slate,
+paused since 2026-09-13), and, once the developmental cohorts publish, a
+`data/mercer_dev/deliveries/<play_id>.delivered.json` receipt. `fb_free` is the
+public play and does not count. `post_status.json` is trimmed by its writers to
+the newest 30 rows, so for anything older than a few days read the durable
+records or the file's git history. The question "was member content delivered
 after this renewal?" is answered by a timestamp in a committed file, not by
 recollection. Check it before deciding, and quote it if the answer is no.
+(Updated 2026-09-14.)
 
 If member content **has** been delivered since the renewal, the normal
 no-refund-for-the-current-period rule applies, subject to the section 2

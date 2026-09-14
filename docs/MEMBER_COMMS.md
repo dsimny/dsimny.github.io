@@ -24,6 +24,11 @@ instruction leads rather than sits in a FAQ.
 
 ---
 
+> **Updated 2026-09-14.** Assets 1–3 no longer describe the paused automated
+> football slate as something members receive (House Rule 8). What changed and
+> why: `docs/FOOTBALL_INCIDENT_ROOT_CAUSE_2026-09-14.md`. **Whop and the Discord
+> pin must be re-pasted by hand** — editing this file changes neither.
+
 ## 1. Whop post-checkout onboarding
 
 > Welcome to Open Ledger Sports.
@@ -43,21 +48,21 @@ instruction leads rather than sits in a FAQ.
 >
 > Your membership is not just access to a handful of premium picks.
 >
-> During football season, members receive the full reasoned slate: every covered
-> game Open Ledger evaluates, with the market numbers, model context, analysis,
-> and written reasoning behind it.
+> **Baseball (through the end of the MLB regular season):** every play the
+> model allocates — side, price, sizing and the full circuit-breaker log — in
+> #members-only before first pitch.
 >
-> That means a typical football week can include dozens of evaluated games —
-> including games where the conclusion is PASS.
+> **Football:** the D.J. Mercer Spotlight — human-researched NFL and college
+> picks, each with the case for it and the strongest case against it,
+> fingerprinted before kickoff, delivered in full in #members-only and graded on
+> its own public record. There is no guaranteed number of picks; some weeks have
+> none.
 >
-> From that complete slate, Open Ledger may designate a smaller number of
-> committed premium plays that meet the required standards for an official
-> position. Those plays become part of the permanent, gradeable record.
->
-> The distinction matters:
->
-> The slate is the analytical product. The committed plays are the
-> accountability mechanism.
+> The original automated football pipeline is paused following the September 8
+> incident while its release process is reviewed. Separate NFL and NCAA
+> developmental strategies are being prepared. They are not publishing yet, and
+> when they do they will be labelled developmental and tracked separately —
+> not presented as proven.
 >
 > We do not manufacture official plays simply to create more action or make a
 > subscription appear busier. If nothing meets the standard, nothing gets
@@ -125,10 +130,10 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 > After the connection is complete, the Members role should be added
 > automatically and #members-only will appear.
 >
-> Your membership gives you access to the full member slate during the sports
-> and markets Open Ledger is actively covering — including the games evaluated,
-> the reasoning behind them, PASS decisions, and any premium plays that qualify
-> for an official position.
+> Your membership gives you access to what Open Ledger is actively publishing:
+> the MLB members board while baseball is in season, and D.J. Mercer's
+> human-researched football picks. The automated football pipeline is paused
+> after the September 8 incident. There is no guaranteed number of picks.
 >
 > Open Ledger does not claim those plays are proven to beat the market. The
 > research, methodology, limitations, and results are published so you can
@@ -153,7 +158,10 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 > rhythm of the member board changes as the calendar changes.
 >
 > As the MLB regular season ends, our normal daily baseball schedule will wind
-> down and the primary focus will shift toward football.
+> down. Football continues through D.J. Mercer's human-researched picks. The
+> automated football pipeline remains paused while its release process is
+> reviewed, and the NFL and NCAA developmental strategies will be announced
+> separately, if and when they begin publishing.
 >
 > That means you may notice an important difference:
 >
@@ -163,7 +171,7 @@ Use in two places: the Whop post-purchase experience, and a permanent pinned
 > We do not intend to manufacture additional plays simply to make the membership
 > feel busier.
 >
-> If the board produces qualifying plays, they will be published.
+> If a pick qualifies, it will be published.
 > If the evidence says pass, we pass.
 > The standard does not change because the schedule does.
 >
@@ -301,3 +309,29 @@ pre-launch / invalidated selection tests. Official totals exclude that cohort;
 this is a disclosed restart, not an undefeated lifetime record. Frozen research
 studies are not reopened. The amendment supersedes conflicting live selection
 and grading descriptions above, without authorizing deletion of history.
+
+
+## 5. DRAFT — clarification of the September 13 correction (NOT SENT)
+
+Needs Daniel's approval before anyone sends it. The September 13 correction said
+"we will not resume football recommendations before that work is complete",
+which reads as all football, while the D.J. Mercer Spotlight card kept going to
+the same channel. It also called the slate "September 8", which is its week
+label; the posts went out on Saturday September 12.
+
+> **Clarifying our September 13 football correction**
+>
+> Our September 13 note said football recommendations are paused. To be precise:
+> the pause covers the **automated** football pipeline that produced the slate
+> posted on Saturday, September 12 (labelled the week of September 8). That
+> pipeline stays paused.
+>
+> D.J. Mercer's human-researched picks are a separate process with their own
+> public record. They were not part of that slate and continue to be posted
+> here, each fingerprinted before kickoff and graded win or lose.
+>
+> We are also preparing separate NFL and college developmental strategies. They
+> are not publishing yet. If they start, we will say so first, label them
+> developmental, and track them separately. None of it is presented as proven.
+>
+> 21+ • Analytics only • Not a sportsbook • No guarantee of results • 1-800-GAMBLER

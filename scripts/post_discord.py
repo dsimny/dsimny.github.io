@@ -125,7 +125,7 @@ def build_pick_payload(date):
             fields = [
                 {"name": "Pick", "value": f'**{dp["pick"]}**', "inline": True},
                 {"name": "Confidence", "value": f'{dpr["confidence"]*100:.1f}% of {dpr["n_sims"]:,} sims', "inline": True},
-                {"name": "Stake", "value": f'**0u — proving window** (through {dp["proving_until"]})', "inline": True},
+                {"name": "Stake", "value": '**0u — unstaked** (review held 2026-09-14: kept at 0)', "inline": True},
                 {"name": "Edge vs price",
                  "value": f'{dp["edge"]*100:+.1f} pts · EV {dp["ev_per_unit"]*100:+.1f}%', "inline": True},
                 {"name": "Ranking score", "value": f'{dp["score"]:.3f}', "inline": True},
@@ -138,7 +138,7 @@ def build_pick_payload(date):
                                 f'*No play cleared the strict Qualified gates today — that standard and its '
                                 f'record are unchanged. The Daily Pick is the always-on strategy: the slate\'s '
                                 f'top-ranked candidate under a lower, precommitted bar, graded on its own '
-                                f'public record. 0 units until it earns staking on the scheduled review date.*'),
+                                f'public record. 0 units: its first staking review kept it unstaked.*'),
                 "color": BLUE,
                 "fields": fields,
                 "footer": {"text": FOOTER},

@@ -60,7 +60,7 @@ def build_item_html(free, nice_date, analysis_html, site_url, daily=None):
                 f"{daily['n_sims']:,} sims{edge}<br>"
                 f"<em>No play cleared the strict Qualified gates today. The Daily Pick is the "
                 f"always-on strategy's top-ranked candidate under a lower, precommitted bar — "
-                f"published at 0 units through its proving window (ends September 8) and graded "
+                f"published at 0 units (its first staking review kept it unstaked) and graded "
                 f"on its own public record.</em></p>") + analysis_html
         title = f"Daily Pick for {nice_date}: {daily['pick']}"
         footer = (f'<p><a href="{site}">See the full board and the running record →</a></p>'

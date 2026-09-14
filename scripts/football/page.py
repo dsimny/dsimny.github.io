@@ -117,10 +117,11 @@ NOCLAIM = (
     "studies, both published in full, found this market cannot be out-forecast "
     "at the moment we can act: a market-blind model lost to the de-vigged "
     "consensus in every season and market tested, and buying the best available "
-    "price returned less than the vig it was paying. So this is not sold as an "
-    "edge. It is sold as process and receipts — the whole slate reasoned "
-    "through from market prices, one play we would actually act on, and every "
-    "one of them graded here in public, win or lose. Football is staked at "
+    "price returned less than the vig it was paying. So this pipeline was never "
+    "sold as an edge. It ran as process and receipts — the whole slate reasoned "
+    "through from market prices and one committed play a week — and it is "
+    "paused while its release process is reviewed. Every committed play is "
+    "graded here in public, win or lose. Football is staked at "
     "<strong>zero units</strong>.")
 
 
@@ -431,9 +432,10 @@ def render_hub():
   its two featured losses. A zero official record is not an undefeated lifetime
   record. <a href="#incident">See retained results and the dated amendment</a>.</p>
   {scope}
-  <p>Official football begins with eligible kickoffs on or after September 11, 2026
-  (America/New_York), under fp-v0.4. No retroactive selections. The weekly Saturday
-  decision schedule remains in force; a date boundary does not guarantee a Friday pick.</p>
+  <p>The official cohort began with eligible kickoffs on or after September 11, 2026
+  (America/New_York), under fp-v0.4. No retroactive selections. No new automated boards
+  are being built while this pipeline is paused. D.J. Mercer's human-researched picks
+  keep their own, separate record.</p>
   <h2>Official record — committed plays</h2>
   <p class="mut">Append-only. Nothing is edited, nothing is deleted, losses
   publish exactly like wins. Every one of these was fingerprinted before

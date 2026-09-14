@@ -278,8 +278,8 @@ def build_slate_article(date, B):
                       f'strategy carries the slate: <strong>{_html.escape(dp["pick"])}</strong> — '
                       f'{_html.escape(dp["matchup"])}, {et_time(dp["utc"])}. Edge '
                       f'{dp["edge"]*100:+.1f} pts at the best price, ranking score '
-                      f'{dp["score"]:.3f}. <strong>0 units through the proving window</strong> '
-                      f'(ends September 8) — it grades onto <a href="{SITE}/#ledger">its own '
+                      f'{dp["score"]:.3f}. <strong>0 units</strong> '
+                      f'(its first staking review kept it unstaked) — it grades onto <a href="{SITE}/#ledger">its own '
                       f'public record</a>, never the Qualified ledger. Full card and analysis '
                       f'<a href="{SITE}/#free">on the site</a>.</p>')
     elif free is not None:

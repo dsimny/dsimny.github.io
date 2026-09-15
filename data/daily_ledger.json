@@ -743,24 +743,48 @@
    "close_ml": -135,
    "clv_pts": 0.98,
    "beat_close": true
+  },
+  {
+   "date": "2026-09-14",
+   "gamePk": 823981,
+   "game": "SEA @ LAA",
+   "pick": "Los Angeles Angels ML (-102, BetMGM)",
+   "market": "moneyline",
+   "price": -102,
+   "book": "BetMGM",
+   "model_p": 0.534,
+   "blend_p": 0.5109,
+   "edge": 0.006,
+   "score": 0.3813,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "4-6",
+   "result": "WIN",
+   "pnl_paper": 0.245,
+   "pnl_staked": 0.0,
+   "open_ml": -103,
+   "close_ml": 139,
+   "clv_pts": -8.65,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "18-13",
-  "wins": 18,
+  "record": "19-13",
+  "wins": 19,
   "losses": 13,
   "voids": 0,
-  "paper_units_net": 1.109,
-  "paper_roi_pct": 14.31,
+  "paper_units_net": 1.354,
+  "paper_roi_pct": 16.93,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 31,
-   "avg_clv_pts": -0.32,
-   "beat_close_pct": 38.7
+   "graded_with_clv": 32,
+   "avg_clv_pts": -0.58,
+   "beat_close_pct": 37.5
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-09-13"
+  "last_graded": "2026-09-14"
  }
 }

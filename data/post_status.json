@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "at_utc": "2026-09-11T08:10:20Z",
-   "date": "2026-09-10",
-   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
-   "http_status": 402,
-   "mode": "x",
-   "result": "failed"
-  },
-  {
-   "at_utc": "2026-09-11T08:10:21Z",
-   "date": "2026-09-10",
-   "detail": "{\"error\":{\"message\":\"(#200) If posting to a group, requires app being installed in the group, and \\\\\\n          either publish_to_groups permission with user token, or both pages_read_engagement \\\\\\n ",
-   "http_status": 403,
-   "mode": "facebook",
-   "result": "failed"
-  },
-  {
-   "at_utc": "2026-09-11T15:10:36Z",
-   "channel_id": "1529354000020013116",
-   "date": "2026-09-11",
-   "detail": "",
-   "http_status": 200,
-   "mode": "pick",
-   "result": "posted"
-  },
-  {
    "at_utc": "2026-09-11T15:10:37Z",
    "channel_id": "1529354298436354048",
    "date": "2026-09-11",
@@ -254,6 +229,31 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-09-14T15:10:36Z"
+  },
+  {
+   "date": "2026-09-14",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-15T08:10:24Z"
+  },
+  {
+   "date": "2026-09-14",
+   "mode": "x",
+   "result": "failed",
+   "http_status": 402,
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "at_utc": "2026-09-15T08:10:24Z"
+  },
+  {
+   "date": "2026-09-14",
+   "mode": "facebook",
+   "result": "posted",
+   "http_status": 200,
+   "detail": "1263139090223888_122105921637472521",
+   "at_utc": "2026-09-15T08:10:29Z"
   }
  ]
 }

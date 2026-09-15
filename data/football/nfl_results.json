@@ -290,20 +290,20 @@
    "away": "DEN",
    "away_abbr": "DEN",
    "away_name": "Denver Broncos",
-   "away_score": null,
+   "away_score": 10,
    "espn_event_id": "401872931",
-   "final": false,
+   "final": true,
    "home": "KC",
    "home_abbr": "KC",
    "home_name": "Kansas City Chiefs",
-   "home_score": null,
+   "home_score": 31,
    "kickoff_utc": "2026-09-15T00:15:00Z",
-   "margin": null,
+   "margin": 21,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 41
   },
   "401873272": {
    "away": "DET",
@@ -1218,5 +1218,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-09-14T16:45:00Z"
+ "updated_utc": "2026-09-15T15:25:42Z"
 }

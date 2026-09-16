@@ -1237,6 +1237,40 @@
    "sha256": "4abeac1a5688b5f71294b20998d30acdfddec5c6108d37c5b496366052898d5c",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Syracuse Orange @ Pittsburgh Panthers|2026-09-17T23:30:00Z": {
+   "block": {
+    "away": "Syracuse Orange",
+    "best_book": "fanduel",
+    "best_price": -410,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.381,
+    "fair_away": 0.22181,
+    "fair_home": 0.77819,
+    "fair_side": 0.77819,
+    "home": "Pittsburgh Panthers",
+    "kickoff_utc": "2026-09-17T23:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Syracuse Orange @ Pittsburgh Panthers",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.483,
+    "relative_price_discount": -0.0330597203,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Pittsburgh Panthers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260916T173728Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-09-16T17:37:34Z",
+   "kickoff_utc": "2026-09-17T23:30:00Z",
+   "matchup": "Syracuse Orange @ Pittsburgh Panthers",
+   "sha256": "d2c5b2227c1f309eada8962d9e75739085b6c0d629227dc9cecdf746c79aa43f",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Tennessee Volunteers @ Georgia Tech Yellow Jackets|2026-09-12T23:00:00Z": {
    "block": {
     "away": "Tennessee Volunteers",

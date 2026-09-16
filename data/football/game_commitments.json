@@ -1907,6 +1907,43 @@
    "sha256": "436af705916e9441bd272e6bf7af6d0a2837c93836e6b04470df06fd52f25007",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|DET @ BUF|2026-09-18T00:15:00Z": {
+   "block": {
+    "away": "Detroit Lions",
+    "best_book": "fanduel",
+    "best_price": 194,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.244,
+    "fair_away": 0.33099,
+    "fair_home": 0.66901,
+    "fair_side": 0.33099,
+    "home": "Buffalo Bills",
+    "kickoff_utc": "2026-09-18T00:15:00Z",
+    "league": "NFL",
+    "matchup": "DET @ BUF",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betus",
+     "price": 195
+    },
+    "raw_overround_pts": 4.18,
+    "relative_price_discount": -0.0276231705,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Detroit Lions",
+    "sport": "nfl",
+    "t24_capture": "nfl_20260916T183726Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-09-16T18:37:29Z",
+   "kickoff_utc": "2026-09-18T00:15:00Z",
+   "matchup": "DET @ BUF",
+   "sha256": "e9f3fd148a587508aa4a4384003e6c716b83a6b5034b6e5fea2f59def4e3fd2a",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|GB @ MIN|2026-09-13T20:25:00Z": {
    "block": {
     "away": "Green Bay Packers",

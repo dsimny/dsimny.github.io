@@ -1,30 +1,6 @@
 {
  "posts": [
   {
-   "at_utc": "2026-09-12T08:10:22Z",
-   "date": "2026-09-11",
-   "detail": "",
-   "http_status": null,
-   "mode": "x",
-   "result": "nothing_to_post"
-  },
-  {
-   "at_utc": "2026-09-12T08:10:22Z",
-   "date": "2026-09-11",
-   "detail": "",
-   "http_status": null,
-   "mode": "facebook",
-   "result": "nothing_to_post"
-  },
-  {
-   "at_utc": "2026-09-12T13:37:26Z",
-   "date": "2026-09-08",
-   "detail": "1 message(s)",
-   "http_status": 200,
-   "mode": "mercer_members",
-   "result": "posted"
-  },
-  {
    "date": "2026-09-12",
    "mode": "pick",
    "result": "posted",
@@ -254,6 +230,31 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-09-15T15:10:32Z"
+  },
+  {
+   "date": "2026-09-15",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-16T08:10:21Z"
+  },
+  {
+   "date": "2026-09-15",
+   "mode": "x",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-16T08:10:21Z"
+  },
+  {
+   "date": "2026-09-15",
+   "mode": "facebook",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-09-16T08:10:21Z"
   }
  ]
 }

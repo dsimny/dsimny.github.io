@@ -1502,6 +1502,25 @@
    "status": "STATUS_FINAL",
    "total": 74
   },
+  "401858225": {
+   "away": "Syracuse Orange",
+   "away_abbr": "SYR",
+   "away_key": "syracuseorange",
+   "away_score": null,
+   "espn_event_id": "401858225",
+   "final": false,
+   "home": "Pittsburgh Panthers",
+   "home_abbr": "PITT",
+   "home_key": "pittsburghpanthers",
+   "home_score": null,
+   "kickoff_utc": "2026-09-17T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401858422": {
    "away": "Eastern Illinois Panthers",
    "away_abbr": "EIU",
@@ -3517,5 +3536,5 @@
    "total": 62
   }
  },
- "updated_utc": "2026-09-15T15:25:40Z"
+ "updated_utc": "2026-09-16T15:18:32Z"
 }

@@ -442,8 +442,45 @@
    },
    "committed_utc": "2026-09-17T17:37:57Z",
    "kickoff_utc": "2026-09-18T23:00:00Z",
+   "later_disagreements": [
+    "daa9881a4a4235b8725a11ad0c16c892726bf958177cb74a5a78cb58a9df3965"
+   ],
    "matchup": "Houston Cougars @ Texas Tech Red Raiders",
    "sha256": "ea3c8b5bc122aed5bc43dd2af9b895540a8a0243462d66cab02b323c778e6fab",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Houston Cougars @ Texas Tech Red Raiders|2026-09-19T00:00:00Z": {
+   "block": {
+    "away": "Houston Cougars",
+    "best_book": "betrivers",
+    "best_price": -315,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.681,
+    "fair_away": 0.26646,
+    "fair_home": 0.73354,
+    "fair_side": 0.73354,
+    "home": "Texas Tech Red Raiders",
+    "kickoff_utc": "2026-09-19T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Houston Cougars @ Texas Tech Red Raiders",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.248,
+    "relative_price_discount": -0.0347544022,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Texas Tech Red Raiders",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260917T180838Z.json",
+    "t24_hours_before_kickoff": 29.86
+   },
+   "committed_utc": "2026-09-17T18:08:42Z",
+   "kickoff_utc": "2026-09-19T00:00:00Z",
+   "matchup": "Houston Cougars @ Texas Tech Red Raiders",
+   "sha256": "d1a833f8935be971fcdc87434510e0c522d3ae840231ef33378a086d337f0a14",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Illinois State Redbirds @ Northern Illinois Huskies|2026-09-12T23:00:00Z": {
@@ -686,6 +723,9 @@
    },
    "committed_utc": "2026-09-17T17:37:57Z",
    "kickoff_utc": "2026-09-18T23:30:00Z",
+   "later_disagreements": [
+    "745208caeaae7f7a6d9fd8f5503b90f262ce85d073e8de634270bb6ed9459ec3"
+   ],
    "matchup": "Miami Hurricanes @ Wake Forest Demon Deacons",
    "sha256": "f3a6af0d33a7f746d4d153aad1cb41c8e122e7bc10b4632d2d5bd6413e601c63",
    "sport": "ncaaf"

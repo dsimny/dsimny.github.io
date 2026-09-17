@@ -1084,6 +1084,25 @@
    "status": "STATUS_FINAL",
    "total": 45
   },
+  "401856811": {
+   "away": "Houston Cougars",
+   "away_abbr": "HOU",
+   "away_key": "houstoncougars",
+   "away_score": null,
+   "espn_event_id": "401856811",
+   "final": false,
+   "home": "Texas Tech Red Raiders",
+   "home_abbr": "TTU",
+   "home_key": "texastechredraiders",
+   "home_score": null,
+   "kickoff_utc": "2026-09-19T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401858201": {
    "away": "Hawai'i Rainbow Warriors",
    "away_abbr": "HAW",
@@ -1514,6 +1533,25 @@
    "home_key": "pittsburghpanthers",
    "home_score": null,
    "kickoff_utc": "2026-09-17T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401858226": {
+   "away": "Miami Hurricanes",
+   "away_abbr": "MIA",
+   "away_key": "miamihurricanes",
+   "away_score": null,
+   "espn_event_id": "401858226",
+   "final": false,
+   "home": "Wake Forest Demon Deacons",
+   "home_abbr": "WAKE",
+   "home_key": "wakeforestdemondeacons",
+   "home_score": null,
+   "kickoff_utc": "2026-09-18T23:30:00Z",
    "margin": null,
    "season_slug": "regular-season",
    "season_type": 2,
@@ -2014,6 +2052,25 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 45
+  },
+  "401858455": {
+   "away": "Portland State Vikings",
+   "away_abbr": "PRST",
+   "away_key": "portlandstatevikings",
+   "away_score": null,
+   "espn_event_id": "401858455",
+   "final": false,
+   "home": "Oregon Ducks",
+   "home_abbr": "ORE",
+   "home_key": "oregonducks",
+   "home_score": null,
+   "kickoff_utc": "2026-09-19T02:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   },
   "401859184": {
    "away": "Rice Owls",
@@ -3043,7 +3100,7 @@
   },
   "401866418": {
    "away": "Jacksonville State Gamecocks",
-   "away_abbr": "JVST",
+   "away_abbr": "JXST",
    "away_key": "jacksonvillestategamecocks",
    "away_score": 27,
    "espn_event_id": "401866418",
@@ -3258,7 +3315,7 @@
    "espn_event_id": "401868140",
    "final": true,
    "home": "Jacksonville State Gamecocks",
-   "home_abbr": "JVST",
+   "home_abbr": "JXST",
    "home_key": "jacksonvillestategamecocks",
    "home_score": 49,
    "kickoff_utc": "2026-09-05T23:00:00Z",
@@ -3536,5 +3593,5 @@
    "total": 62
   }
  },
- "updated_utc": "2026-09-16T15:18:32Z"
+ "updated_utc": "2026-09-17T15:24:58Z"
 }

@@ -121,7 +121,9 @@ def build_payload(item):
         "segment_id": SEGMENT_ID,
         "from": EMAIL_FROM,
         "subject": item["title"],
-        "name": item["title"],           # broadcast name in the Resend dashboard
+        "name": item["title"][:70],      # broadcast name in the Resend dashboard; Resend
+        # enforces a 70-character limit on this field (API returns 422 if exceeded).
+        # "subject" carries the full title to recipients — no truncation there.
         "html": '<p><img src="https://openledgersports.com/assets/branding/email-header.png" width="300" height="50" alt="Open Ledger Sports" style="max-width:100%;height:auto"></p>' + item["html"],
         "text": html_to_text(item["html"]),
         "send": True,                    # create + send in one call (Resend supports this)

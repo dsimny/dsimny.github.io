@@ -1,40 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-09-12",
-   "mode": "x",
-   "result": "failed",
-   "http_status": 402,
-   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
-   "at_utc": "2026-09-13T08:10:21Z"
-  },
-  {
-   "date": "2026-09-12",
-   "mode": "facebook",
-   "result": "failed",
-   "http_status": 403,
-   "detail": "{\"error\":{\"message\":\"(#200) If posting to a group, requires app being installed in the group, and \\\\\\n          either publish_to_groups permission with user token, or both pages_read_engagement \\\\\\n ",
-   "at_utc": "2026-09-13T08:10:22Z"
-  },
-  {
-   "date": "2026-09-13",
-   "mode": "pick",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-13T15:10:28Z"
-  },
-  {
-   "date": "2026-09-13",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-09-13T15:10:28Z"
-  },
-  {
    "date": "2026-09-13",
    "mode": "email",
    "result": "failed",
@@ -255,6 +221,41 @@
    "http_status": 200,
    "detail": "1263139090223888_122108183013472521",
    "at_utc": "2026-09-17T08:10:29Z"
+  },
+  {
+   "date": "2026-09-17",
+   "mode": "pick",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-17T15:10:31Z"
+  },
+  {
+   "date": "2026-09-17",
+   "mode": "board",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354298436354048",
+   "detail": "",
+   "at_utc": "2026-09-17T15:10:31Z"
+  },
+  {
+   "date": "2026-09-17",
+   "mode": "email",
+   "result": "sent",
+   "http_status": 200,
+   "detail": "7a1916e2-ff87-4fe1-b173-437cf7c7fd0c",
+   "at_utc": "2026-09-17T15:10:32Z"
+  },
+  {
+   "date": "2026-09-17",
+   "mode": "blog",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-17T15:10:33Z"
   }
  ]
 }

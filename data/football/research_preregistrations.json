@@ -14,7 +14,7 @@
       "id": "fp-v0.4-market-observation-v1",
       "frozen_date": "2026-09-17",
       "path": "docs/FOOTBALL_RESEARCH_FP_V04_OBSERVATION.md",
-      "first_commit": null,
+      "first_commit": "959c49e078e16e4b96a573631e97c0ef5b7b1786",
       "bytes": 5020,
       "sha256": "539f6c890eb72ee4d769f3b40fce727c998f71358f7ae6f9b7c73e82903e6801",
       "authority": "research_only_no_selection_delivery_or_holdout",

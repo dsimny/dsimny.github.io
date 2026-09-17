@@ -514,6 +514,34 @@ def record(mode, date, result, status=None, detail="", channel_id=""):
         print(f"NOTE: could not record post status: {exc}")
 
 
+# Modes whose posts must not be duplicated across workflow re-runs.
+# alert: intentionally stateless — each alert carries a unique run URL and
+#        must not be suppressed. blog: lower customer harm; not re-dispatched.
+GUARDED_MODES = frozenset({"pick", "board", "recap"})
+
+
+def already_posted(mode, date):
+    """True when (mode, date) already has a 'posted' entry in post_status.json.
+
+    Only 'posted' blocks. 'failed', 'no_webhook', and 'nothing_to_post' all
+    allow a retry — a failed first attempt is still a failed first attempt.
+    Fails open (returns False) on a missing or unreadable file so a fresh
+    checkout never silently suppresses a legitimate first post.
+    Mirrors send_email.already_sent() — same file, same schema, same contract.
+    """
+    if not os.path.exists(STATUS_PATH):
+        return False
+    try:
+        with open(STATUS_PATH, encoding="utf-8") as f:
+            log = json.load(f)
+    except Exception:
+        return False
+    return any(
+        p.get("date") == date and p.get("mode") == mode and p.get("result") == "posted"
+        for p in log.get("posts", [])
+    )
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     mode = args[0] if args else "pick"
@@ -542,6 +570,11 @@ def main():
         default = datetime.now(ET).strftime("%Y-%m-%d")
     date = args[1] if len(args) > 1 else default
     dry = "--dry-run" in sys.argv
+
+    if mode in GUARDED_MODES and not dry and already_posted(mode, date):
+        print(f"NOTE: {mode} for {date} already posted — skipping to prevent duplicate. "
+              f"(Use --dry-run to preview the payload.)")
+        return   # do NOT call record() — preserve the 'posted' entry as the block signal
 
     payload = build(date)
     if payload is None:

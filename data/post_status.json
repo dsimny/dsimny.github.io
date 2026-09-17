@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-09-08",
-   "mode": "fb_free",
-   "result": "posted",
-   "http_status": 204,
-   "detail": "2 messages",
-   "at_utc": "2026-09-12T18:37:45Z"
-  },
-  {
-   "date": "2026-09-08",
-   "mode": "fb_slate",
-   "result": "posted",
-   "http_status": 204,
-   "detail": "11 messages",
-   "at_utc": "2026-09-12T18:38:02Z"
-  },
-  {
-   "date": "2026-09-12",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-09-13T08:10:20Z"
-  },
-  {
    "date": "2026-09-12",
    "mode": "x",
    "result": "failed",
@@ -255,6 +230,31 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-09-16T15:10:30Z"
+  },
+  {
+   "date": "2026-09-16",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-17T08:10:24Z"
+  },
+  {
+   "date": "2026-09-16",
+   "mode": "x",
+   "result": "failed",
+   "http_status": 402,
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "at_utc": "2026-09-17T08:10:24Z"
+  },
+  {
+   "date": "2026-09-16",
+   "mode": "facebook",
+   "result": "posted",
+   "http_status": 200,
+   "detail": "1263139090223888_122108183013472521",
+   "at_utc": "2026-09-17T08:10:29Z"
   }
  ]
 }

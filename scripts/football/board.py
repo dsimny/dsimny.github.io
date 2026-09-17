@@ -55,6 +55,7 @@ Run:
   python scripts/football/board.py --week 2026-09-01 --dry-run
   python scripts/football/board.py --commit-only    # freeze new T-24s, choose nothing
   python scripts/football/board.py                  # commits, and selects once past D
+  python scripts/football/board.py --research       # research observation (0u, separate storage)
 """
 import argparse
 import io
@@ -75,6 +76,14 @@ FB = os.path.join(ROOT, "data", "football")
 ODDS_DIR = os.path.join(FB, "odds")
 COMMITMENTS = os.path.join(FB, "commitments.json")
 GAME_COMMITMENTS = os.path.join(FB, "game_commitments.json")
+
+# Research output lives under its own subdirectory and never overlaps with
+# official board paths.  The filename carries the research version ID so the
+# provenance is self-describing without reading the file's contents.
+RESEARCH_DIR = os.path.join(FB, "research")
+RESEARCH_VERSION_ID = "fp-v0.4-market-observation-v1"
+RESEARCH_PREREG_PATH = os.path.join(ROOT, "data", "football",
+                                    "research_preregistrations.json")
 
 # Decision moment: Saturday 14:00 US/Eastern (spec s.4 step 0b).
 # EASTERN, NOT UTC, and not by accident: the rest of the project is Eastern, and
@@ -443,6 +452,114 @@ def _slate_tail(b):
     return out
 
 
+def load_research_prereg(version_id):
+    """Load and validate the preregistration entry for `version_id`.
+
+    Fails closed: raises SystemExit if the registry is missing, the entry is
+    absent, or required fields are not present.  This is the single gate that
+    prevents research observations from being generated under an unregistered or
+    mismatched version ID.
+    """
+    if not os.path.exists(RESEARCH_PREREG_PATH):
+        raise SystemExit(
+            f"research_preregistrations.json not found at {RESEARCH_PREREG_PATH}; "
+            f"register {version_id!r} before generating observations")
+    with io.open(RESEARCH_PREREG_PATH, encoding="utf-8") as f:
+        registry = json.load(f)
+    entry = next((r for r in registry.get("registrations", [])
+                  if r.get("id") == version_id), None)
+    if entry is None:
+        raise SystemExit(
+            f"research version {version_id!r} is not in research_preregistrations.json; "
+            f"commit a pre-observation document and add the registry entry first")
+    for required in ("frozen_date", "authority", "selection_rule", "units"):
+        if entry.get(required) is None:
+            raise SystemExit(
+                f"research version {version_id!r} is missing required field {required!r}")
+    if entry["authority"] != "research_only_no_selection_delivery_or_holdout":
+        raise SystemExit(
+            f"research version {version_id!r} has unexpected authority {entry['authority']!r}; "
+            f"only 'research_only_no_selection_delivery_or_holdout' is permitted here")
+    if entry["units"] != 0:
+        raise SystemExit(
+            f"research version {version_id!r} declares units={entry['units']}; "
+            f"research observations must be 0 units")
+    return entry
+
+
+def research_board_path(week, version_id):
+    """Canonical path for a research board file.
+
+    NEVER overlaps with official board paths (data/football/board_<week>.enc /
+    .json).  The version ID is embedded in the filename so provenance is
+    self-describing without opening the file.
+    """
+    return os.path.join(RESEARCH_DIR, f"board_{week}_{version_id}.json")
+
+
+def write_research_board(b, week, version_id, prereg_entry, dry_run=False):
+    """Persist a research observation to data/football/research/.
+
+    ISOLATION GUARANTEES — what this function never touches:
+      data/football/board_<week>.enc          official encrypted board
+      data/football/board_<week>.json         official revealed board
+      data/football/commitments.json          official fingerprint log
+      data/football/game_commitments.json     per-game T-24 freeze store
+      data/football/football_ledger.json      official record
+
+    The research board is PLAINTEXT by design: research plays are 0-unit
+    observations, not premium picks, so there is nothing to withhold and
+    no encryption serves the product goal here.  Plaintext also means the
+    observation is immediately verifiable against the captures on disk.
+
+    Fails closed on an existing file: a research observation for a given
+    (week, version) is immutable once written, just like official boards.
+    """
+    out_path = research_board_path(week, version_id)
+
+    if not dry_run and os.path.exists(out_path):
+        raise SystemExit(
+            f"research board for {week} / {version_id} already exists at "
+            f"{os.path.relpath(out_path, ROOT)}; refusing to overwrite "
+            f"(a research observation is immutable once written)")
+
+    # Annotate the board dict with research-specific metadata.  A shallow copy
+    # keeps the caller's dict unmodified; the research fields never appear in
+    # the official board path.
+    rb = dict(b)
+    rb.update({
+        "tier": "research",
+        "research_version_id": version_id,
+        "research_prereg_frozen_date": prereg_entry["frozen_date"],
+        "research_selection_rule": prereg_entry["selection_rule"],
+        "research_authority": prereg_entry["authority"],
+        "units": 0,
+        "_research_note": (
+            "This is a research observation produced under "
+            f"{version_id!r} (frozen {prereg_entry['frozen_date']}). "
+            "It is not a recommendation, not part of the official football "
+            "record, and may not be retroactively promoted into the official "
+            "record. All observations are 0 units. See "
+            f"{prereg_entry.get('path', 'research_preregistrations.json')} "
+            "for the full authority statement."
+        ),
+        # Override any official record_cohort / selection_version fields that
+        # build() copies from record_policy to make clear this board is not in
+        # the official cohort.
+        "record_cohort": version_id,
+    })
+
+    if dry_run:
+        print(f"(--dry-run: would write research board to "
+              f"{os.path.relpath(out_path, ROOT)})")
+        return out_path
+
+    os.makedirs(RESEARCH_DIR, exist_ok=True)
+    with io.open(out_path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(rb, f, indent=1, sort_keys=True)
+    return out_path
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sports", default="nfl,ncaaf",
@@ -457,6 +574,12 @@ def main():
                          "commitment covers the words as well as the numbers")
     ap.add_argument("--mark-revealed", metavar="WEEK",
                     help="flip a week's commitment to revealed (grading does this)")
+    ap.add_argument("--research", action="store_true",
+                    help="generate a research observation under "
+                         f"{RESEARCH_VERSION_ID!r}; writes only to "
+                         "data/football/research/, never to official board "
+                         "or commitment paths.  Does not require "
+                         "RESEARCH_DELIVERY_ENABLED.")
     args = ap.parse_args()
 
     if args.mark_revealed:
@@ -476,12 +599,35 @@ def main():
         if s not in SPORTS:
             raise SystemExit(f"unknown sport {s!r}; known: {sorted(SPORTS)}")
 
-    b = build(sports, week, asof, commit=not args.dry_run)
+    b = build(sports, week, asof, commit=not args.dry_run and not args.research)
     print(render(b))
 
     if args.dry_run:
         print("\n(--dry-run: nothing written, no commitment made)")
+        if args.research:
+            prereg = load_research_prereg(RESEARCH_VERSION_ID)
+            write_research_board(b, week, RESEARCH_VERSION_ID, prereg, dry_run=True)
         return 0
+
+    # ---- RESEARCH PATH ---------------------------------------------------
+    # Completely separate from the official path below. Research generation:
+    #   - validates the preregistration first (fails closed)
+    #   - writes only to data/football/research/
+    #   - never touches official board, commitment, or ledger files
+    #   - does not require RESEARCH_DELIVERY_ENABLED (generation != delivery)
+    #   - does not require OFFICIAL_DELIVERY_ENABLED
+    if args.research:
+        prereg = load_research_prereg(RESEARCH_VERSION_ID)
+        # build() was called with commit=False above, so game_commitments.json
+        # is NOT written and n_newly_committed is always 0 on this path.
+        # Research generation is read-only with respect to all official state.
+        out = write_research_board(b, week, RESEARCH_VERSION_ID, prereg)
+        print(f"\nwrote research board → {os.path.relpath(out, ROOT)}")
+        print(f"version: {RESEARCH_VERSION_ID}")
+        print(f"units: 0  (research observation, not a recommendation)")
+        return 0
+
+    # ---- OFFICIAL PATH ---------------------------------------------------
     if b["n_newly_committed"]:
         print(f"\nfroze {b['n_newly_committed']} game(s) at their T-24 in "
               f"{os.path.relpath(GAME_COMMITMENTS, ROOT)}")

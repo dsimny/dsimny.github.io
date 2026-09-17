@@ -10,11 +10,14 @@ from selftest_discord import board
 
 
 class DeliveryTests(unittest.TestCase):
-    def test_shipped_pause_is_enabled(self):
-        self.assertIs(policy.PAUSED, True)
+    def test_official_delivery_disabled(self):
+        self.assertIs(policy.OFFICIAL_DELIVERY_ENABLED, False)
+
+    def test_research_delivery_disabled(self):
+        self.assertIs(policy.RESEARCH_DELIVERY_ENABLED, False)
 
     def test_public_pause_preserves_history(self):
-        with patch.object(policy, 'PAUSED', True), \
+        with patch.object(policy, 'OFFICIAL_DELIVERY_ENABLED', False), \
              patch.object(discord.fbpage, 'PREMIUM_URL', 'https://example.com/checkout'):
             self.assertIn('recommendations are paused', discord.fbpage.pause_notice())
             self.assertEqual(discord.fbpage.upgrade_block(), '')
@@ -60,7 +63,7 @@ class DeliveryTests(unittest.TestCase):
         with self.assertRaises(ValueError): self.check(self.b)
 
     def test_pause_cannot_force_send_or_mutate(self):
-        with patch.object(policy, 'PAUSED', True), patch.object(discord, 'send') as send, \
+        with patch.object(policy, 'OFFICIAL_DELIVERY_ENABLED', False), patch.object(discord, 'send') as send, \
              patch.object(discord, 'record') as record, \
              patch.object(discord.fbpage, 'load_board') as load:
             for mode in ('free', 'slate'):
@@ -94,7 +97,7 @@ class DeliveryTests(unittest.TestCase):
              patch.object(boardmod, 'render', return_value='fixture'), \
              patch.object(boardmod, 'record_commitment') as commit, \
              patch.object(boardmod.crypto_box, 'encrypt_to') as encrypt, \
-             patch.object(policy, 'PAUSED', True):
+             patch.object(policy, 'OFFICIAL_DELIVERY_ENABLED', False):
             self.assertEqual(boardmod.main(), 0)
             commit.assert_not_called(); encrypt.assert_not_called()
 

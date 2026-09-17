@@ -5,10 +5,25 @@ import math
 import market
 import record_policy
 
-# Incident containment. Re-enable only through a reviewed source change after
-# the product/selection policy is agreed. --force must not bypass this pause.
-PAUSED = True
-PAUSE_REASON = "Football delivery paused for the September 13 selection audit"
+# Official premium delivery: disabled until a validated strategy passes the
+# pre-registered gate. Re-enable only through a reviewed source change after
+# the product/selection policy is agreed. --force must not bypass this.
+OFFICIAL_DELIVERY_ENABLED = False
+OFFICIAL_PAUSE_REASON = (
+    "Official premium football delivery is disabled pending a validated strategy. "
+    "Re-enable only through a reviewed source change after the product/selection "
+    "policy is agreed."
+)
+
+# Research delivery: disabled by default; enable when a research version is
+# registered in data/football/research_preregistrations.json and the
+# pre-observation document is committed and frozen.
+RESEARCH_DELIVERY_ENABLED = False
+RESEARCH_PAUSE_REASON = (
+    "Research delivery is not yet configured. Register a research version in "
+    "data/football/research_preregistrations.json and commit the pre-observation "
+    "document before enabling."
+)
 
 
 def validate(board, week, now=None):

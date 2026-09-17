@@ -300,8 +300,8 @@ def main():
                     help="post even if this week already went out")
     args = ap.parse_args()
 
-    if delivery_policy.PAUSED and not args.dry_run:
-        print(delivery_policy.PAUSE_REASON + "; no send and no status mutation.")
+    if not delivery_policy.OFFICIAL_DELIVERY_ENABLED and not args.dry_run:
+        print(delivery_policy.OFFICIAL_PAUSE_REASON + "; no send and no status mutation.")
         return 0
 
     status_mode, webhook, varname, builder = MODES[args.mode]

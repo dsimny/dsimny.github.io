@@ -74,7 +74,7 @@ import delivery_policy
 
 
 def pause_notice():
-    if not delivery_policy.PAUSED:
+    if delivery_policy.OFFICIAL_DELIVERY_ENABLED:
         return ""
     return ('<section class="commit" role="status"><h2>Automated football '
             'recommendations are paused</h2><p>New recommendations will not '
@@ -97,7 +97,7 @@ def upgrade_block(week=None):
     promise a win - a comparison this brand loses by design, because it has
     disarmed on claims. The ~57 reasoned games are the product.
     """
-    if not PREMIUM_URL or delivery_policy.PAUSED:
+    if not PREMIUM_URL or not delivery_policy.OFFICIAL_DELIVERY_ENABLED:
         return ""
     return f'''
     <div class="upgrade">

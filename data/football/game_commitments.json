@@ -443,7 +443,8 @@
    "committed_utc": "2026-09-17T17:37:57Z",
    "kickoff_utc": "2026-09-18T23:00:00Z",
    "later_disagreements": [
-    "daa9881a4a4235b8725a11ad0c16c892726bf958177cb74a5a78cb58a9df3965"
+    "daa9881a4a4235b8725a11ad0c16c892726bf958177cb74a5a78cb58a9df3965",
+    "bf98a0028d0930860c010bd4f17746c737da27d7a76a6393d3fd1e7e95c2df0e"
    ],
    "matchup": "Houston Cougars @ Texas Tech Red Raiders",
    "sha256": "ea3c8b5bc122aed5bc43dd2af9b895540a8a0243462d66cab02b323c778e6fab",
@@ -479,6 +480,9 @@
    },
    "committed_utc": "2026-09-17T18:08:42Z",
    "kickoff_utc": "2026-09-19T00:00:00Z",
+   "later_disagreements": [
+    "fbc3304cc664ae36ec9f127d3a261c9ca21051158390b41b0c7c75a10ae48ee4"
+   ],
    "matchup": "Houston Cougars @ Texas Tech Red Raiders",
    "sha256": "d1a833f8935be971fcdc87434510e0c522d3ae840231ef33378a086d337f0a14",
    "sport": "ncaaf"
@@ -724,7 +728,8 @@
    "committed_utc": "2026-09-17T17:37:57Z",
    "kickoff_utc": "2026-09-18T23:30:00Z",
    "later_disagreements": [
-    "745208caeaae7f7a6d9fd8f5503b90f262ce85d073e8de634270bb6ed9459ec3"
+    "745208caeaae7f7a6d9fd8f5503b90f262ce85d073e8de634270bb6ed9459ec3",
+    "6c3ca6770359726eee760702a5e58ae072e50a115345d46a5e02c5562deb2a4c"
    ],
    "matchup": "Miami Hurricanes @ Wake Forest Demon Deacons",
    "sha256": "f3a6af0d33a7f746d4d153aad1cb41c8e122e7bc10b4632d2d5bd6413e601c63",

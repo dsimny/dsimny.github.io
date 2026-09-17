@@ -61,6 +61,14 @@ FB = os.path.join(ROOT, "data", "football")
 ODDS_DIR = os.path.join(FB, "odds")
 LEDGER = os.path.join(FB, "football_ledger.json")
 
+# Research ledger — separate file, never mixed with the official record.
+# Written only by grade_football.py --research; never read by the official path.
+RESEARCH_DIR = os.path.join(FB, "research")
+RESEARCH_LEDGER = os.path.join(RESEARCH_DIR, "research_ledger.json")
+RESEARCH_PREREG_PATH = os.path.join(ROOT, "data", "football",
+                                    "research_preregistrations.json")
+RESEARCH_VERSION_ID = "fp-v0.4-market-observation-v1"
+
 # EVERY MARKET FUNCTION AND THRESHOLD NOW LIVES IN market.py, imported above
 # rather than defined here. They used to be defined in this file and board.py
 # would have needed its own copy; two implementations of one rule drift, and the
@@ -260,10 +268,258 @@ def load_ledger():
                 "entries": []}
 
 
+# ---------------------------------------------------------------------------
+# Research grading — completely separate from the official path above.
+# These functions never read or write LEDGER (football_ledger.json).
+# ---------------------------------------------------------------------------
+
+def load_research_prereg():
+    """Load and validate the registered research cohort entry.
+
+    Fails closed if the registry is missing, the version ID is absent,
+    required fields are missing, or the authority is wrong.
+    """
+    if not os.path.exists(RESEARCH_PREREG_PATH):
+        raise SystemExit(f"research_preregistrations.json not found")
+    with io.open(RESEARCH_PREREG_PATH, encoding="utf-8") as f:
+        registry = json.load(f)
+    entry = next((r for r in registry.get("registrations", [])
+                  if r.get("id") == RESEARCH_VERSION_ID), None)
+    if entry is None:
+        raise SystemExit(
+            f"research version {RESEARCH_VERSION_ID!r} not in registry; "
+            f"register it before grading")
+    if entry.get("authority") != "research_only_no_selection_delivery_or_holdout":
+        raise SystemExit(
+            f"research version {RESEARCH_VERSION_ID!r} has wrong authority")
+    if entry.get("units") != 0:
+        raise SystemExit(
+            f"research version {RESEARCH_VERSION_ID!r} declares non-zero units")
+    return entry
+
+
+def load_research_ledger():
+    """Load the research ledger, or return an empty one."""
+    try:
+        with io.open(RESEARCH_LEDGER, encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {
+            "_note": (
+                "Football research ledger, append-only. "
+                f"Observations produced by {RESEARCH_VERSION_ID!r}. "
+                "ZERO UNITS throughout — pnl_per_unit is hypothetical research "
+                "analysis showing what one unit would have returned, not money "
+                "risked. Never mixed with football_ledger.json or any official record. "
+                "No research entry contributes to official W-L, CLV, or ROI."
+            ),
+            "research_version_id": RESEARCH_VERSION_ID,
+            "entries": [],
+        }
+
+
+def research_entry_key(entry):
+    """Stable idempotency key for one graded research observation.
+
+    Derived from version + slate identifiers so the same observation cannot
+    be appended twice even across re-runs.  Does not use the game's result,
+    so it is safe to compute before grading.
+    """
+    return "|".join([
+        entry.get("research_version_id", ""),
+        entry.get("slate_week", ""),
+        entry.get("sport", ""),
+        entry.get("matchup", ""),
+        entry.get("kickoff_utc", ""),
+        entry.get("tier", ""),
+    ])
+
+
+def validate_research_board(b, prereg):
+    """Fail closed if the board is not a legitimate research observation.
+
+    Checks every field the fail-closed spec requires.  Returns the tier
+    string ('research_premium' or 'research_free') or raises SystemExit.
+    """
+    if b.get("tier") != "research":
+        raise SystemExit(
+            f"board tier is {b.get('tier')!r}, not 'research'; "
+            f"only boards produced by --research may be graded here")
+    if b.get("research_version_id") != RESEARCH_VERSION_ID:
+        raise SystemExit(
+            f"board research_version_id {b.get('research_version_id')!r} "
+            f"!= {RESEARCH_VERSION_ID!r}")
+    if b.get("record_cohort") != RESEARCH_VERSION_ID:
+        raise SystemExit(
+            f"board record_cohort {b.get('record_cohort')!r} "
+            f"!= {RESEARCH_VERSION_ID!r}")
+    if b.get("units", -1) != 0:
+        raise SystemExit(
+            f"board units={b.get('units')} — research boards must be 0 units")
+    if b.get("research_selection_rule") != prereg.get("selection_rule"):
+        raise SystemExit(
+            f"board selection rule {b.get('research_selection_rule')!r} "
+            f"!= registered {prereg.get('selection_rule')!r}")
+
+
+def grade_research_board(b, sport, results, cfg, snaps, prereg, done_keys):
+    """Grade the selected plays in one research board against final results.
+
+    Returns a list of new ledger rows (may be empty if nothing is final yet
+    or all observations are already graded).
+
+    ISOLATION GUARANTEES:
+    - never opens football_ledger.json
+    - never opens commitments.json or game_commitments.json
+    - never calls grade_committed.additions() or reveal_completed()
+    - settlement math (payout/implied) is shared from market.py — pure functions
+    - result sources (espn_ncaaf/nfl) are shared — read-only stores
+    """
+    new_rows = []
+    week = b.get("slate_week", "")
+
+    for tier in ("premium", "free"):
+        g = b.get(tier)
+        if not g:
+            continue
+        if g.get("sport") != sport:
+            continue
+
+        # Build a synthetic entry key to check idempotency before doing any work.
+        candidate_meta = {
+            "research_version_id": RESEARCH_VERSION_ID,
+            "slate_week": week,
+            "sport": sport,
+            "matchup": g.get("matchup", ""),
+            "kickoff_utc": g.get("kickoff_utc", ""),
+            "tier": f"research_{tier}",
+        }
+        key = research_entry_key(candidate_meta)
+        if key in done_keys:
+            continue  # already graded; skip without raising
+
+        kick = parse_utc(g.get("kickoff_utc"))
+        if not kick:
+            continue
+
+        # Find the result by matchup + kickoff join, using the same keyfn
+        # the official grader uses (handles NCAAF orthography normalisation).
+        keyfn = cfg["keyfn"] or (lambda x: x)
+        away_m, home_m = g.get("matchup", "").split(" @ ", 1) if " @ " in g.get("matchup", "") else ("", "")
+        matches = [
+            r for r in results.values()
+            if (keyfn(r.get("away", "")) == keyfn(away_m) and
+                keyfn(r.get("home", "")) == keyfn(home_m) and
+                parse_utc(r.get("kickoff_utc")) == kick)
+        ]
+
+        if len(matches) != 1 or not matches[0].get("final"):
+            continue  # not final yet or ambiguous join; try again later
+        r = matches[0]
+
+        if cfg["gradeable"] and not cfg["gradeable"](r):
+            continue  # not regular season; skip
+
+        # Settle using the observed side from the research board.
+        # The research board stores the T-24 raw strings in the premium/free
+        # block via market.evaluate().  We resolve home-or-away once from the
+        # capture's away_raw / home_raw fields, exactly as grade_committed does.
+        away_raw = g.get("away", away_m)
+        home_raw = g.get("home", home_m)
+
+        # Determine which side was selected (home or away) from the board.
+        pick_is_home = (g.get("side") == home_raw or
+                        (g.get("side") and g.get("side") == g.get("home")))
+
+        margin = r.get("margin")  # home_score - away_score
+        if margin is None:
+            continue
+        if margin == 0:
+            result, pnl = "push", 0.0
+        else:
+            won = pick_is_home == (margin > 0)
+            result = "win" if won else "loss"
+            pnl = round(payout(g["best_price"]), 4) if won else -1.0
+
+        # CLV from the closing capture, if available.
+        clv_pts, close_capture = None, None
+        _, close = pick_snapshots(snaps, kick)
+        if close and close[0] < kick:
+            try:
+                evcl = find_event(close[2], away_m, home_m, cfg["keyfn"])
+                if evcl:
+                    qcl = eligible(evcl, close[0])
+                    fcl = fair(qcl, evcl.get("away_raw", away_m),
+                               evcl.get("home_raw", home_m))
+                    if fcl:
+                        close_side_key = evcl.get("home_raw", home_m) if pick_is_home \
+                            else evcl.get("away_raw", away_m)
+                        if close_side_key in fcl:
+                            clv_pts = round(
+                                100 * (fcl[close_side_key] - implied(g["best_price"])), 3)
+                            close_capture = close[1]
+            except Exception:
+                pass  # CLV is diagnostic; never block grading over it
+
+        row = {
+            # Provenance
+            "research_version_id": RESEARCH_VERSION_ID,
+            "research_authority": "research_only_no_selection_delivery_or_holdout",
+            # Classification — explicit non-official markers
+            "tier": f"research_{tier}",
+            "record_cohort": RESEARCH_VERSION_ID,
+            "is_official": False,
+            # Observation metadata
+            "sport": sport,
+            "slate_week": week,
+            "matchup": g.get("matchup", ""),
+            "kickoff_utc": g.get("kickoff_utc", ""),
+            "side": g.get("side", ""),
+            "best_price": g.get("best_price"),
+            "best_book": g.get("best_book"),
+            "books_at_best": g.get("books_at_best"),
+            "eff_overround_pts": g.get("eff_overround_pts"),
+            "fair_side": g.get("fair_side"),
+            "t24_capture": g.get("t24_capture"),
+            "t24_hours_before_kickoff": g.get("t24_hours_before_kickoff"),
+            "observed_utc": b.get("asof_utc"),
+            # Result
+            "espn_event_id": r.get("espn_event_id"),
+            "final": f'{r.get("away_score", "?")}-{r.get("home_score", "?")}',
+            "result": result,
+            # Units and hypothetical P/L — 0 units, clearly labeled
+            "units": 0,
+            "pnl_per_unit": pnl,
+            "_pnl_note": (
+                "Hypothetical research analysis only. "
+                "pnl_per_unit shows what one unit would have returned. "
+                "No stake was placed or recorded."
+            ),
+            # CLV
+            "clv_pts": clv_pts,
+            "close_capture": close_capture,
+            "clv_status": "measured" if clv_pts is not None else "unavailable",
+            "graded_utc": iso(datetime.now(timezone.utc)),
+        }
+        # APPEND-ONLY IDENTITY. entry_key is the stable idempotency key stored
+        # directly on the row so it is visible in the ledger and verifiable
+        # without recomputing it. The key is set AFTER all fields are final so
+        # it reflects the row as written, never a draft.
+        row["entry_key"] = research_entry_key(row)
+        new_rows.append(row)
+        done_keys.add(key)
+
+    return new_rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sport", default="ncaaf", choices=sorted(SPORTS))
     ap.add_argument("--dry-run", action="store_true", help="print, write nothing")
+    ap.add_argument("--research", action="store_true",
+                    help="grade research observations from data/football/research/ "
+                         "into data/football/research/research_ledger.json; "
+                         "never touches football_ledger.json or official state")
     args = ap.parse_args()
 
     snaps = load_snapshots(args.sport)
@@ -276,6 +532,66 @@ def main():
         line += f", {n_ok} on the season-type allowlist"
     print(line)
 
+    # ---- RESEARCH PATH ---------------------------------------------------
+    # Completely separate from the official path below.  Reads only files
+    # under data/football/research/; writes only research_ledger.json.
+    if args.research:
+        prereg = load_research_prereg()
+        rl = load_research_ledger()
+        # Prefer the stored entry_key field on each row for idempotency; fall
+        # back to recomputing it for rows written before entry_key was added,
+        # so backwards-compatibility is preserved.
+        done_keys = {
+            e.get("entry_key") or research_entry_key(e)
+            for e in rl.get("entries", [])
+        }
+
+        # Find all research board files for this sport/version.
+        import glob as _glob
+        pattern = os.path.join(RESEARCH_DIR,
+                               f"board_*_{RESEARCH_VERSION_ID}.json")
+        board_files = sorted(_glob.glob(pattern))
+        print(f"research boards on disk ({args.sport}): {len(board_files)}")
+
+        new_rows = []
+        for bf in board_files:
+            with io.open(bf, encoding="utf-8") as f:
+                b = json.load(f)
+            # FAIL CLOSED on any provenance violation — wrong tier, wrong
+            # version, wrong cohort, wrong selection rule, wrong authority,
+            # non-zero units. A malformed research board is not skipped; it
+            # stops the run. Only not-yet-final games are skipped silently
+            # (inside grade_research_board), because that is a timing
+            # condition, not a provenance defect.
+            validate_research_board(b, prereg)
+            # Grade only observations for the requested sport.
+            rows = grade_research_board(
+                b, args.sport, results, cfg, snaps, prereg, done_keys)
+            for row in rows:
+                print(f"  {row['slate_week']} {row['tier']}: "
+                      f"{row['side']} {row['result']} "
+                      f"({row['pnl_per_unit']:+.4f}u hypothetical)")
+            new_rows.extend(rows)
+
+        if args.dry_run:
+            print(f"\n--dry-run: {len(new_rows)} new research row(s) found, "
+                  f"research_ledger.json untouched")
+            return 0
+        if not new_rows:
+            print("\nno new research observations to grade.")
+            return 0
+
+        rl["entries"].extend(new_rows)
+        rl["updated_utc"] = iso(datetime.now(timezone.utc))
+        os.makedirs(RESEARCH_DIR, exist_ok=True)
+        with io.open(RESEARCH_LEDGER, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(rl, f, indent=1)
+        print(f"\nappended {len(new_rows)} research row(s) → "
+              f"{os.path.relpath(RESEARCH_LEDGER, ROOT)} "
+              f"({len(rl['entries'])} total)")
+        return 0
+
+    # ---- OFFICIAL PATH ---------------------------------------------------
     import grade_committed
     ledger = load_ledger()
     new = grade_committed.additions(args.sport, ledger, results, cfg, snaps)

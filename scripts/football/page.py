@@ -471,7 +471,8 @@ def render_hub():
   <h2>Weeks</h2>
   <ul class="plain">{wl}</ul>
   <p class="backline"><a href="/">Today's board</a> ·
-  <a href="/#ledger">MLB ledger</a> · <a href="/blog/">The Morning Line</a></p>
+  <a href="/#ledger">MLB ledger</a> · <a href="/blog/">The Morning Line</a> ·
+  <a href="/football/research/">Live research observations →</a></p>
 </div>'''
     write(OUT, inner, "Football record — Open Ledger Sports",
           "Every football play we have published, graded in public, win or "

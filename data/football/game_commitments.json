@@ -239,6 +239,40 @@
    "sha256": "d28454afe4036ef6bf86def70029a80c444924eaff3cbc4a85a0554c05289d5b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Coastal Carolina Chanticleers @ Delaware Blue Hens|2026-09-19T15:30:00Z": {
+   "block": {
+    "away": "Coastal Carolina Chanticleers",
+    "best_book": "draftkings",
+    "best_price": -198,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.48,
+    "fair_away": 0.35316,
+    "fair_home": 0.64684,
+    "fair_side": 0.64684,
+    "home": "Delaware Blue Hens",
+    "kickoff_utc": "2026-09-19T15:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Coastal Carolina Chanticleers @ Delaware Blue Hens",
+    "move_pts": null,
+    "n_books": 8,
+    "offshore_best": null,
+    "raw_overround_pts": 3.91,
+    "relative_price_discount": -0.0271970517,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Delaware Blue Hens",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T093721Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-09-18T09:37:24Z",
+   "kickoff_utc": "2026-09-19T15:30:00Z",
+   "matchup": "Coastal Carolina Chanticleers @ Delaware Blue Hens",
+   "sha256": "615d3603364fb0d89dc0599cc459a9bc34ccf8da7c334d80b42d41be3069f6a9",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Colgate Raiders @ Central Michigan Chippewas|2026-09-12T17:00:00Z": {
    "block": {
     "away": "Colgate Raiders",

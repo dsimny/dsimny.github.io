@@ -61,6 +61,11 @@ SITE = (os.environ.get("SITE_URL", "").strip()
 FREE_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL", "")
 MEMBERS_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL_MEMBERS", "")
 
+# Research delivery uses a DEDICATED webhook, never the official or member
+# channels.  The variable is read here so it is visible at module level;
+# the gate (RESEARCH_DELIVERY_ENABLED) controls whether it is ever used.
+RESEARCH_WEBHOOK = os.environ.get("DISCORD_RESEARCH_WEBHOOK", "")
+
 BLUE, GREEN, GREY = 0x2C7BE5, 0x2E9E5B, 0x6B7280
 
 # KEEP MESSAGE TEXT INSIDE cp1252. Discord renders any unicode fine, but
@@ -285,21 +290,306 @@ def send(webhook, messages, dry=False):
 
 
 MODES = {
-    "free":  ("fb_free", FREE_WEBHOOK, "DISCORD_WEBHOOK_URL", free_messages),
+    "free":  ("fb_free",  FREE_WEBHOOK,    "DISCORD_WEBHOOK_URL",         free_messages),
     "slate": ("fb_slate", MEMBERS_WEBHOOK, "DISCORD_WEBHOOK_URL_MEMBERS",
               slate_messages),
+}
+
+# ---------------------------------------------------------------------------
+# Research delivery — completely separate from official modes above.
+# Reads only from data/football/research/; uses DISCORD_RESEARCH_WEBHOOK;
+# gated by RESEARCH_DELIVERY_ENABLED (independent of OFFICIAL_DELIVERY_ENABLED).
+# ---------------------------------------------------------------------------
+
+RESEARCH_VERSION_ID = "fp-v0.4-market-observation-v1"
+RESEARCH_DIR        = os.path.join(ROOT, "data", "football", "research")
+RESEARCH_STATUS_KEY = "research_board"   # distinct from fb_free / fb_slate
+RESEARCH_PREREG_PATH = os.path.join(ROOT, "data", "football",
+                                    "research_preregistrations.json")
+
+# Colour for research embeds: amber — visually distinct from official blue/green.
+AMBER = 0xF59E0B
+
+# The disclaimer that must appear in the FIRST message of every research post.
+# Every sentence is a factual statement from the preregistration document.
+RESEARCH_HEADER = (
+    "**🔬 Research Observation — 0 units — Not a recommendation.**\n"
+    f"Version: `{RESEARCH_VERSION_ID}`\n"
+    "These observations are **not part of the official Open Ledger football record** "
+    "and are **not eligible for retroactive promotion** into the official record. "
+    "No edge claim is made. All observations are 0 units. "
+    "Nothing here is betting advice."
+)
+
+
+def _research_board_path(week):
+    return os.path.join(RESEARCH_DIR, f"board_{week}_{RESEARCH_VERSION_ID}.json")
+
+
+def load_research_board(week):
+    """Load a research board from data/football/research/.
+
+    Returns the board dict, or None if the file does not exist.
+    Raises ValueError on malformed JSON — a corrupt board must not be
+    silently treated as missing.
+    Never reads official board files (board_*.enc / board_*.json).
+    """
+    path = _research_board_path(week)
+    if not os.path.exists(path):
+        return None
+    with io.open(path, encoding="utf-8") as f:
+        return json.load(f)   # ValueError propagates — fail loud, not silent
+
+
+def load_research_prereg_for_delivery():
+    """Load and validate the registry entry for RESEARCH_VERSION_ID.
+
+    Fails closed if:
+    - research_preregistrations.json is missing or corrupt
+    - the version ID is not registered
+    - authority, selection_rule, or units do not match expected values
+
+    A board that self-asserts valid provenance cannot proceed if the registry
+    does not independently confirm it.  This is the external cross-check.
+    """
+    if not os.path.exists(RESEARCH_PREREG_PATH):
+        raise SystemExit(
+            f"research_preregistrations.json not found at {RESEARCH_PREREG_PATH}; "
+            f"refusing research send")
+    try:
+        with io.open(RESEARCH_PREREG_PATH, encoding="utf-8") as f:
+            registry = json.load(f)
+    except ValueError as exc:
+        raise SystemExit(
+            f"research_preregistrations.json is corrupt ({exc}); "
+            f"refusing research send")
+    entry = next((r for r in registry.get("registrations", [])
+                  if r.get("id") == RESEARCH_VERSION_ID), None)
+    if entry is None:
+        raise SystemExit(
+            f"research version {RESEARCH_VERSION_ID!r} not in registry; "
+            f"refusing research send")
+    if entry.get("authority") != "research_only_no_selection_delivery_or_holdout":
+        raise SystemExit(
+            f"registry authority {entry.get('authority')!r} is not research-only; "
+            f"refusing research send")
+    if entry.get("selection_rule") != "fp-v0.4":
+        raise SystemExit(
+            f"registry selection_rule {entry.get('selection_rule')!r} "
+            f"!= 'fp-v0.4'; refusing research send")
+    if entry.get("units") != 0:
+        raise SystemExit(
+            f"registry units={entry.get('units')} — must be 0; "
+            f"refusing research send")
+    return entry
+
+
+def validate_research_board_for_delivery(b, prereg):
+    """Fail closed if the board is not a legitimate research observation.
+
+    `prereg` is the registry entry returned by load_research_prereg_for_delivery().
+    Every check cross-references the board against the externally registered
+    entry — self-declared provenance alone is insufficient.
+    """
+    if b.get("tier") != "research":
+        raise SystemExit(
+            f"board tier is {b.get('tier')!r}, not 'research'; refusing send")
+    if b.get("research_version_id") != RESEARCH_VERSION_ID:
+        raise SystemExit(
+            f"board research_version_id {b.get('research_version_id')!r} "
+            f"!= {RESEARCH_VERSION_ID!r}; refusing send")
+    if b.get("record_cohort") != RESEARCH_VERSION_ID:
+        raise SystemExit(
+            f"board record_cohort {b.get('record_cohort')!r} "
+            f"!= {RESEARCH_VERSION_ID!r}; refusing send")
+    # Cross-check board's claimed selection rule against the registered entry.
+    if b.get("research_selection_rule") != prereg.get("selection_rule"):
+        raise SystemExit(
+            f"board selection rule {b.get('research_selection_rule')!r} "
+            f"!= registered {prereg.get('selection_rule')!r}; refusing send")
+    if b.get("units", -1) != 0:
+        raise SystemExit(
+            f"board units={b.get('units')} — research boards must be 0 units; "
+            f"refusing send")
+    # Cross-check board's authority against the registered entry.
+    board_auth = b.get("research_authority", "")
+    if board_auth != prereg.get("authority"):
+        raise SystemExit(
+            f"board authority {board_auth!r} != registered "
+            f"{prereg.get('authority')!r}; refusing send")
+
+
+def _observation_embed(g, label, color=AMBER):
+    """One research observation embed.
+
+    DELIBERATELY avoids the words 'premium', 'free', 'pick', 'recommended',
+    'bet', 'edge', 'lock', or 'unit play'.  Internal tier names from the
+    board object are replaced with neutral labels ('Observation A / B').
+    """
+    lines = [
+        f"**Observed side:** {g.get('side', '—')} "
+        f"at {money(g.get('best_price'))} ({g.get('best_book', '—')})",
+        f"Kickoff (UTC): {g.get('kickoff_utc', '—')}",
+        f"Eligible books: {g.get('n_books', '—')} | "
+        f"Corroborating books at best price: {g.get('books_at_best', '—')}",
+        f"Effective overround at best prices: "
+        f"{g.get('eff_overround_pts', '—')} pts "
+        f"(market margin, not an expected return)",
+        f"T-24 capture: {g.get('t24_capture', '—')} | "
+        f"{g.get('t24_hours_before_kickoff', '—')}h before kickoff",
+        "0 units — research observation, not a recommendation.",
+    ]
+    fair = g.get("fair_side")
+    if fair is not None:
+        lines.insert(2, f"Market-implied probability (de-vigged): {fair * 100:.1f}%")
+    return {
+        "title": f"{label} — {g.get('matchup', '—')} ({g.get('sport', '').upper()})",
+        "description": "\n".join(lines)[:4096],
+        "color": color,
+    }
+
+
+def research_board_messages(b, week):
+    """Build the Discord message list for one research board.
+
+    Layout:
+      Message 1: header with full disclaimer + board summary
+      Message 2: observation embeds (one per selected game, neutral labels)
+      Message 3: coverage / no-market list
+      Message 4: footer with version and authority statement
+
+    The disclaimer appears in Message 1, not hidden in a footer.
+    Internal 'premium' / 'free' field names map to 'Observation A / B'.
+    """
+    url = f"{SITE}/football/research/"
+
+    # Map internal tier keys to neutral presentation labels.
+    observations = []
+    for internal_key, label in (("premium", "Observation A"),
+                                 ("free",    "Observation B")):
+        g = b.get(internal_key)
+        if g:
+            observations.append((g, label))
+
+    obs_count = len(observations)
+    covered   = b.get("n_covered", 0)
+    excluded  = b.get("n_excluded", 0)
+
+    msg1 = {
+        "username": "Open Ledger Sports",
+        "content": (
+            f"{RESEARCH_HEADER}\n\n"
+            f"**Week of {week}** — {covered} games evaluated | "
+            f"{obs_count} observation(s) selected | "
+            f"{excluded} no market\n"
+            f"{url}"
+        ),
+    }
+
+    msgs = [msg1]
+
+    if observations:
+        embeds = [_observation_embed(g, lbl) for g, lbl in observations]
+        msgs.append({"username": "Open Ledger Sports", "embeds": embeds})
+
+    nm = b.get("no_market", [])
+    if nm:
+        lines = [f"• {n.get('matchup', '')} — {n.get('reason', '')}" for n in nm]
+        body = "\n".join(lines)
+        if len(body) > 1600:
+            body = body[:1600].rsplit("\n", 1)[0] + f"\n... full list at {url}"
+        msgs.append({
+            "username": "Open Ledger Sports",
+            "content": f"**No market this week ({len(nm)} games)**\n{body}",
+        })
+
+    msgs.append({
+        "username": "Open Ledger Sports",
+        "content": (
+            f"_Version: `{RESEARCH_VERSION_ID}` | "
+            f"Authority: research only — not official, not a recommendation | "
+            f"{FOOTER}_"
+        ),
+    })
+
+    return [{k: v for k, v in m.items() if v is not None} for m in msgs]
+
+
+RESEARCH_MODES = {
+    "research_board": (
+        RESEARCH_STATUS_KEY,
+        RESEARCH_WEBHOOK,
+        "DISCORD_RESEARCH_WEBHOOK",
+        research_board_messages,
+    ),
 }
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=sorted(MODES))
+    ap.add_argument("mode", choices=sorted(MODES) + sorted(RESEARCH_MODES))
     ap.add_argument("--week", required=True)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--force", action="store_true",
                     help="post even if this week already went out")
     args = ap.parse_args()
 
+    # ---- RESEARCH BRANCH ------------------------------------------------
+    # Completely separate gate, separate board source, separate status key.
+    # --force does not bypass RESEARCH_DELIVERY_ENABLED.
+    if args.mode in RESEARCH_MODES:
+        if not delivery_policy.RESEARCH_DELIVERY_ENABLED and not args.dry_run:
+            print(delivery_policy.RESEARCH_PAUSE_REASON
+                  + "; no research send and no status mutation.")
+            return 0
+
+        status_mode, webhook, varname, builder = RESEARCH_MODES[args.mode]
+        week = args.week
+
+        # VERSION-AWARE IDEMPOTENCY KEY.  "research_board" alone is the mode;
+        # the status date carries "version|week" so a future cohort can post
+        # during the same slate week without colliding with this cohort's record.
+        idem_key = f"{RESEARCH_VERSION_ID}|{week}"
+
+        if not args.dry_run and not args.force and already_posted(idem_key, status_mode):
+            print(f"{args.mode}: {idem_key} already posted; skipping.")
+            return 0
+
+        b = load_research_board(week)
+        if b is None:
+            print(f"no research board for {week}; nothing to post.")
+            if not args.dry_run:
+                record(idem_key, status_mode, "no_board")
+            return 0
+
+        # Fail closed: load registry first, then cross-check board against it.
+        # Self-declared provenance alone is insufficient.
+        prereg = load_research_prereg_for_delivery()
+        validate_research_board_for_delivery(b, prereg)
+
+        messages = builder(b, week)
+        print(f"{args.mode}: {len(messages)} message(s) for week {week}")
+
+        if not args.dry_run:
+            if not webhook:
+                print(f"{varname} is not set; skipping (this never fails a run).")
+                record(idem_key, status_mode, "no_config")
+                return 0
+            if not webhook_host_ok(webhook):
+                print(f"WARNING: {varname} is not a discord.com URL — refusing.")
+                record(idem_key, status_mode, "refused",
+                       detail="webhook host not discord")
+                return 0
+
+        ok, status, detail = send(webhook, messages, dry=args.dry_run)
+        if args.dry_run:
+            print("\n(--dry-run: nothing sent, nothing recorded)")
+            return 0
+        record(idem_key, status_mode, "posted" if ok else "failed", status, detail)
+        print(("posted " if ok else "FAILED ") + str(detail))
+        return 0
+
+    # ---- OFFICIAL BRANCH ------------------------------------------------
     if not delivery_policy.OFFICIAL_DELIVERY_ENABLED and not args.dry_run:
         print(delivery_policy.OFFICIAL_PAUSE_REASON + "; no send and no status mutation.")
         return 0

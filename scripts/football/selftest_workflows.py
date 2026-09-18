@@ -310,7 +310,7 @@ STAGED = {
     ("football-grade.yml", "Commit"):
         ["data/football/football_ledger.json", "data/football/commitments.json",
          "data/football/ncaaf_results.json", "data/football/nfl_results.json",
-         "data/football/board_*.json", "data/mercer/", "football/"],
+         "data/football/board_*.json", "data/football/research/", "data/mercer/", "football/"],
     ("capture-closing.yml", "Commit closing lines"):
         ["data/closing_*.json", "data/odds_credits.json", "odds/"],
     ("grade-ledger.yml", "Commit ledger and site"):
@@ -543,6 +543,72 @@ if os.path.isfile(os.path.join(WF, ODDS)):
           "the two gates are distinct workflows with distinct names")
     check("scripts/football/selftest_" not in code_lines(ODDS),
           f"{ODDS} runs no football suite: the separation holds in both directions")
+
+print("\n[12] research workflow contract")
+
+# [12.1] research board generation lives in football-capture.yml
+cap_raw = raw(CAPTURE)
+check("board.py --research" in cap_raw,
+      "[12.1] research board generation command exists in football-capture.yml")
+
+# [12.2] generation is guarded against an already-existing board
+check("already exists; skipping generation" in cap_raw,
+      "[12.2] board-exists guard present before research generation")
+
+# [12.3] research page regen follows board creation in capture
+cap_steps = [s.get("name", "") for s in steps(cap_doc, "capture")]
+rg_gen_i  = next((i for i, n in enumerate(cap_steps) if "Generate research" in n), None)
+rg_commit_i = next((i for i, n in enumerate(cap_steps) if "Commit research" in n), None)
+check(rg_gen_i is not None, "[12.3a] 'Generate research board and page' step exists in capture")
+check(rg_commit_i is not None, "[12.3b] 'Commit research board and page' step exists in capture")
+check(rg_gen_i is not None and rg_commit_i is not None and rg_gen_i < rg_commit_i,
+      "[12.3c] generation step precedes commit step in capture")
+check("research_page.py" in code_lines(CAPTURE),
+      "[12.3d] research_page.py is called in football-capture.yml")
+
+# [12.4] research grading command exists in football-grade.yml
+gr_raw = raw(GRADE)
+check("grade_football.py --sport ncaaf --research" in gr_raw and
+      "grade_football.py --sport nfl   --research" in gr_raw,
+      "[12.4] research grading commands exist in football-grade.yml (both sports)")
+
+# [12.5] research page regen follows research grading in grade workflow
+gr_steps = [s.get("name", "") for s in steps(gr_doc, "grade")]
+grade_research_i = next((i for i, n in enumerate(gr_steps) if "Grade research" in n), None)
+repage_i = next((i for i, n in enumerate(gr_steps) if "Regenerate research page" in n), None)
+check(grade_research_i is not None,
+      "[12.5a] 'Grade research observations' step exists in football-grade.yml")
+check(repage_i is not None,
+      "[12.5b] 'Regenerate research page after grading' step exists in football-grade.yml")
+check(grade_research_i is not None and repage_i is not None and grade_research_i < repage_i,
+      "[12.5c] research page regen follows research grading in grade workflow")
+
+# [12.6] research Discord command uses research_board mode
+check("discord.py research_board" in cap_raw,
+      "[12.6] research Discord command uses 'research_board' mode in capture workflow")
+
+# [12.7] delivery flags — delivery_policy.py still has both False
+dp_src = open(os.path.join(ROOT, "scripts", "football", "delivery_policy.py"),
+              encoding="utf-8").read()
+check("OFFICIAL_DELIVERY_ENABLED = False" in dp_src,
+      "[12.7a] OFFICIAL_DELIVERY_ENABLED remains False in delivery_policy.py")
+check("RESEARCH_DELIVERY_ENABLED = False" in dp_src,
+      "[12.7b] RESEARCH_DELIVERY_ENABLED remains False in delivery_policy.py")
+
+# [12.8] no official board command modified — board.py (no --research) still present unchanged
+cap_code = code_lines(CAPTURE)
+check("board.py --sports nfl,ncaaf --writeups" in cap_code,
+      "[12.8] official board command unchanged in capture workflow")
+
+# [12.9] DISCORD_RESEARCH_WEBHOOK not mapped to official webhook variables
+check("DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_RESEARCH_WEBHOOK }}" not in cap_raw and
+      "DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_RESEARCH_WEBHOOK }}" not in cap_raw,
+      "[12.9] DISCORD_RESEARCH_WEBHOOK not mapped to official or member webhook variables")
+
+# [12.10] DISCORD_RESEARCH_WEBHOOK not mapped to official webhook variables in grade workflow
+check("DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_RESEARCH_WEBHOOK }}" not in gr_raw and
+      "DISCORD_WEBHOOK_URL_MEMBERS: ${{ secrets.DISCORD_RESEARCH_WEBHOOK }}" not in gr_raw,
+      "[12.10] no research secret accidentally mapped to official webhooks in grade workflow")
 
 print(f"\nworkflow-contract selftest: "
       f"{'ALL PASSED' if not fails else str(len(fails)) + ' FAILED'}")

@@ -333,6 +333,111 @@ class ResearchBoardTests(unittest.TestCase):
         self.assertEqual(rb["research_authority"],
                          "research_only_no_selection_delivery_or_holdout")
 
+    # =========================================================================
+    # Decision-moment tests (Fix 1 regression coverage)
+    # =========================================================================
+
+    def test_15_research_before_decision_returns_zero_no_file(self):
+        """--research before decision moment: exits 0, writes nothing."""
+        import io
+        from contextlib import redirect_stdout
+        # Build a board that has decision_made=False
+        b_pre = dict(minimal_board(), decision_made=False,
+                     decision_moment_utc="2099-01-01T18:00:00Z")
+        prereg = board.load_research_prereg(board.RESEARCH_VERSION_ID)
+        buf = io.StringIO()
+        real_argv = sys.argv[:]
+        sys.argv = ["board.py", "--research", "--week", "2026-09-22"]
+        try:
+            with redirect_stdout(buf):
+                with patch.object(board, "build", return_value=b_pre), \
+                     patch.object(board, "render", return_value="fixture"):
+                    rc = board.main()
+        finally:
+            sys.argv = real_argv
+        self.assertEqual(rc, 0, "--research before decision must return 0")
+        self.assertIn("not reached", buf.getvalue(),
+                      "must print decision moment not reached message")
+        out = board.research_board_path("2026-09-22", board.RESEARCH_VERSION_ID)
+        self.assertFalse(os.path.exists(out),
+                         "no research board must be written before decision moment")
+
+    def test_16_research_after_decision_creates_board(self):
+        """--research after decision moment: creates exactly one board."""
+        b_post = dict(minimal_board(), decision_made=True)
+        prereg = board.load_research_prereg(board.RESEARCH_VERSION_ID)
+        real_argv = sys.argv[:]
+        sys.argv = ["board.py", "--research", "--week", "2026-09-22"]
+        try:
+            with patch.object(board, "build", return_value=b_post), \
+                 patch.object(board, "render", return_value="fixture"):
+                rc = board.main()
+        finally:
+            sys.argv = real_argv
+        self.assertEqual(rc, 0)
+        out = board.research_board_path("2026-09-22", board.RESEARCH_VERSION_ID)
+        self.assertTrue(os.path.exists(out),
+                        "research board must be written after decision moment")
+        # Second call must refuse (immutability)
+        sys.argv = ["board.py", "--research", "--week", "2026-09-22"]
+        try:
+            with patch.object(board, "build", return_value=b_post), \
+                 patch.object(board, "render", return_value="fixture"):
+                with self.assertRaises(SystemExit):
+                    board.main()
+        finally:
+            sys.argv = real_argv
+
+    def test_17_existing_board_immutable(self):
+        """Existing research board cannot be overwritten."""
+        b_post = dict(minimal_board(), decision_made=True)
+        prereg = board.load_research_prereg(board.RESEARCH_VERSION_ID)
+        # Write initial board
+        out = board.write_research_board(b_post, "2026-09-22",
+                                          board.RESEARCH_VERSION_ID, prereg)
+        with open(out, encoding="utf-8") as f:
+            original_content = f.read()
+        # Attempt overwrite via write_research_board
+        with self.assertRaises(SystemExit) as cm:
+            board.write_research_board(b_post, "2026-09-22",
+                                        board.RESEARCH_VERSION_ID, prereg)
+        self.assertIn("refusing to overwrite", str(cm.exception))
+        # Content unchanged
+        with open(out, encoding="utf-8") as f:
+            self.assertEqual(f.read(), original_content)
+
+    def test_18_corrupt_preregistration_fails_nonzero(self):
+        """Corrupt preregistration fails closed (non-zero / SystemExit)."""
+        bad_path = os.path.join(self.tmp, "bad_prereg.json")
+        with open(bad_path, "w") as f:
+            f.write("{not valid json")
+        board.RESEARCH_PREREG_PATH = bad_path
+        with self.assertRaises((SystemExit, ValueError)):
+            board.load_research_prereg(board.RESEARCH_VERSION_ID)
+
+    def test_19_workflow_no_error_swallow(self):
+        """football-capture.yml does not contain board.py --research ... || echo."""
+        wf_path = os.path.join(ROOT, ".github", "workflows", "football-capture.yml")
+        with open(wf_path, encoding="utf-8") as f:
+            src = f.read()
+        # The || echo pattern that converts failures to success must be absent
+        # from the research board generation call
+        import re
+        # Look for the research board call followed by || on the same or next line
+        self.assertNotRegex(
+            src,
+            r"board\.py --research.*\|\|.*echo",
+            "board.py --research must not swallow failures with || echo"
+        )
+
+    def test_20_workflow_board_exists_guard_present(self):
+        """football-capture.yml shell guard checks for existing board before generating."""
+        wf_path = os.path.join(ROOT, ".github", "workflows", "football-capture.yml")
+        with open(wf_path, encoding="utf-8") as f:
+            src = f.read()
+        self.assertIn("already exists; skipping generation", src,
+                      "shell board-exists guard must be present in capture workflow")
+
 
 if __name__ == "__main__":
     unittest.main()

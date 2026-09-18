@@ -404,6 +404,102 @@ jobs:
             exit 1
           fi
 
+      - name: Generate research board and page
+        if: ${{ !cancelled() }}
+        # Research board generation:
+        # - before decision moment: board.py --research is a no-op (not enough
+        #   captures or decision not reached)
+        # - after decision moment, board absent: generates once and exits 0
+        # - after decision moment, board exists: the Python exits non-zero; the
+        #   shell guard below catches that and skips cleanly without failing the run
+        # - overwrite protection is enforced inside board.py --research itself
+        #
+        # BOARD_ENCRYPTION_KEY is NOT passed: research boards are plaintext by
+        # design (0u observations, nothing to hide before kickoff). The key is
+        # absent so board.py --research cannot accidentally write an encrypted file.
+        #
+        # RESEARCH_DELIVERY_ENABLED remains False, so the discord.py step below
+        # is a guaranteed no-send until that flag is changed in delivery_policy.py.
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          # DISCORD_RESEARCH_WEBHOOK is mapped so activation requires only a
+          # delivery_policy.py flag flip, not a workflow edit. The secret does not
+          # exist yet; the variable resolves to an empty string, and
+          # RESEARCH_DELIVERY_ENABLED=False means discord.py exits 0 without sending.
+          DISCORD_RESEARCH_WEBHOOK: ${{ secrets.DISCORD_RESEARCH_WEBHOOK }}
+        run: |
+          # Board-exists guard: check before calling Python so repeated hourly
+          # runs are a clean skip rather than a Python exit-1 on every run.
+          # data/football/research/ may not exist yet; the glob is safe even then.
+          RESEARCH_BOARD=$(ls data/football/research/board_"$SLATE_WEEK"_fp-v0.4-market-observation-v1.json 2>/dev/null || true)
+          if [ -n "$RESEARCH_BOARD" ]; then
+            echo "research board for $SLATE_WEEK already exists; skipping generation."
+          else
+            echo "generating research board for $SLATE_WEEK"
+            python scripts/football/board.py --research --week "$SLATE_WEEK"
+          fi
+          # Regenerate the research page unconditionally — it must also refresh
+          # when grading adds new results. Idempotent; safe to run every hour.
+          python scripts/football/research_page.py
+          # Attempt research Discord delivery. RESEARCH_DELIVERY_ENABLED=False
+          # means this exits 0 without sending or recording anything. When
+          # activation is desired, flip that flag in delivery_policy.py.
+          python scripts/football/discord.py research_board --week "$SLATE_WEEK" || true
+
+      - name: Commit research board and page
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          # ONE PATH PER `git add` — see the long note in football-grade.yml.
+          # Glob matching nothing causes git exit 128 and stages nothing; the
+          # `|| true` and subsequent diff check preserve correct skip behavior.
+          for p in data/football/research/ \
+                   data/post_status.json \
+                   football/research/; do
+            git add "$p" 2>/dev/null || true
+          done
+          git diff --cached --quiet || git commit -m "Research board $SLATE_WEEK"
+          PUSH_WHAT="research board"
+          # ---- PUSH EPILOGUE ----------------------------------------
+          # Byte-identical at every retrying push point in the repository.
+          # PUSH_WHAT is the only thing that varies; selftest_workflows.py
+          # asserts the rest matches exactly, so the safest version cannot
+          # drift into being the second-safest somewhere.
+          #
+          # main takes ~2 bot commits an hour and seven workflows push to it,
+          # so a bare push can lose a race and strand the run. Commit FIRST
+          # (done above, so the tree is clean), then rebase only when a push
+          # actually loses. NEVER --autostash: it hides working-tree state, and
+          # when its stash pop conflicts it exits 0 with UU markers in the tree,
+          # which the old pre-staging `git pull` then staged, committed and
+          # pushed to main.
+          #
+          # STOP ON CONFLICT. The ledger is append-only and football commitments
+          # are frozen once recorded, so a conflict means something is genuinely
+          # wrong and must reach a human rather than be auto-resolved. Losing one
+          # run's output is a visible, recoverable incident; merge markers in the
+          # ledger, the credit log or a commitment store are not.
+          pushed=""
+          for i in 1 2 3; do
+            if git push; then pushed=yes; break; fi
+            git fetch origin main || exit 1
+            if ! git rebase origin/main; then
+              git rebase --abort 2>/dev/null || true
+              echo "::error::rebase conflict during the $PUSH_WHAT push - stopping, not auto-resolving"
+              exit 1
+            fi
+          done
+          # THE EXHAUSTION GUARD. Without it, `for ... done` whose last command
+          # is a successful rebase exits 0, so three lost races report SUCCESS
+          # having pushed nothing. That was live in grade-ledger.yml and
+          # instagram-recovery.yml until 2026-09-12. Proven in a scratch repo:
+          # exit 0, three rejections, HEAD != origin/main.
+          if [ -z "$pushed" ]; then
+            echo "::error::$PUSH_WHAT push still rejected after 3 rebase attempts - nothing was pushed"
+            exit 1
+          fi
+
       - name: Capture data integrity
         id: integrity
         # RUNS AFTER BOTH PUSHES, in the same workspace, so it sees exactly the

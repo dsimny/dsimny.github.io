@@ -618,6 +618,17 @@ def main():
     #   - does not require OFFICIAL_DELIVERY_ENABLED
     if args.research:
         prereg = load_research_prereg(RESEARCH_VERSION_ID)
+        # DECISION MOMENT GUARD. The research board is immutable once written,
+        # so it must not be created before the frozen decision moment (Saturday
+        # 14:00 US/Eastern). build() returns b["decision_made"]=False until
+        # that moment is reached; check it here, after preregistration
+        # validation, before any write.
+        if not b["decision_made"]:
+            print(
+                f"\nResearch decision moment {b['decision_moment_utc']} not reached; "
+                "no research observation written."
+            )
+            return 0
         # build() was called with commit=False above, so game_commitments.json
         # is NOT written and n_newly_committed is always 0 on this path.
         # Research generation is read-only with respect to all official state.

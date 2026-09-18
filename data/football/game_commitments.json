@@ -34,7 +34,8 @@
    "later_disagreements": [
     "ef6d154ee36e78011c777df94f44123bf68a8111649d43459e4d8f0c2b2f4f61",
     "76b8435225e2a79cd89b99b173b36a86cea24d0dcf50a66bda2c6191938e48c0",
-    "c80e6586c197da695c85b75f6a1a9c77e2559a829f5772dd5e26c1354780a3c7"
+    "c80e6586c197da695c85b75f6a1a9c77e2559a829f5772dd5e26c1354780a3c7",
+    "5274a4c43f531b86559a148ccfd7166ebfa2c8fb82ed201e08de0cb58fd55875"
    ],
    "matchup": "Akron Zips @ Minnesota Golden Gophers",
    "sha256": "9aff427c0043015f1ef0aa621430904f3d0ee9f28799649f7ebf24ef3b83405c",
@@ -243,7 +244,8 @@
    "later_disagreements": [
     "cd5adaec507bb17c3b24b03378e8fed863b3911deff35c3e15e4e4ab3354652a",
     "b2dcfa8378096471533b33f8e7bf8e82066e88f4189243852a56d67279950cf4",
-    "9418e15246183419cd758c2cb0d185e58b4d0346b1fd7860be378679a473facf"
+    "9418e15246183419cd758c2cb0d185e58b4d0346b1fd7860be378679a473facf",
+    "5efde6f0bb28452c7b1c02971156c1cbe1d275ce9572953f78f56ec752cefd18"
    ],
    "matchup": "Bowling Green Falcons @ Iowa State Cyclones",
    "sha256": "c410c295b8177a487d21e7f05c9198f5241c5b385029c7b79ae47b52bb751eac",
@@ -351,7 +353,8 @@
     "2ce4a2c71bf8b6a375b607ae883c3b289d5b8bb8b57e5ae4990ebe7ff7eab7cf",
     "2d2c33346c7889c9bace5b9adcc4b7f2a75eec3c54eff7883f8eb619df4339ba",
     "a558d1758645c6c9fe0b6fe80fcdf3d855b5de32453ed7ceeac8433ea2ef997f",
-    "d02f12b54841258bba0d6b3b895847632f172f69faef2662eaaf244467531699"
+    "d02f12b54841258bba0d6b3b895847632f172f69faef2662eaaf244467531699",
+    "f0b41d95968daefc777ba492b82cc8cbbc2f22e7f6d8a207c917b08222ab8a51"
    ],
    "matchup": "Coastal Carolina Chanticleers @ Delaware Blue Hens",
    "sha256": "615d3603364fb0d89dc0599cc459a9bc34ccf8da7c334d80b42d41be3069f6a9",
@@ -531,6 +534,40 @@
    "sha256": "4509fcf5792a7f65f579fee49701a89a95952ea4dde032e5074b3036049a844c",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Florida State Seminoles @ Alabama Crimson Tide|2026-09-19T19:30:00Z": {
+   "block": {
+    "away": "Florida State Seminoles",
+    "best_book": "fanduel",
+    "best_price": 860,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 2.724,
+    "fair_away": 0.10203,
+    "fair_home": 0.89797,
+    "fair_side": 0.10203,
+    "home": "Alabama Crimson Tide",
+    "kickoff_utc": "2026-09-19T19:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida State Seminoles @ Alabama Crimson Tide",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 3.938,
+    "relative_price_discount": -0.0209722222,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Florida State Seminoles",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T133928Z.json",
+    "t24_hours_before_kickoff": 29.84
+   },
+   "committed_utc": "2026-09-18T13:39:32Z",
+   "kickoff_utc": "2026-09-19T19:30:00Z",
+   "matchup": "Florida State Seminoles @ Alabama Crimson Tide",
+   "sha256": "1bc77dc232ab06f0873ee455e02e05e555602fa7186e137054e8d96f8cb9656c",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Georgia Bulldogs @ Arkansas Razorbacks|2026-09-19T16:00:00Z": {
    "block": {
     "away": "Georgia Bulldogs",
@@ -564,7 +601,8 @@
    "later_disagreements": [
     "47e23793c826c6922279ba5cb4bd01d7329c174f1b851351a958eabb2dbee8ef",
     "8cac5439f55830f1efea68421d7287908ec11f5256a5a0044145ee0b56b61d37",
-    "537a0584c749676e0eb8eb7cb832bd7d55adb9b97816449d0791d3ce2d6366d9"
+    "537a0584c749676e0eb8eb7cb832bd7d55adb9b97816449d0791d3ce2d6366d9",
+    "54327a67a8494edef3b6bc8ce59347fffb96ccc2603af742d355e628420db5ef"
    ],
    "matchup": "Georgia Bulldogs @ Arkansas Razorbacks",
    "sha256": "616b6023c7353703ffff8b8ef2af34b70cd605724aa72332cdd460029b20729e",
@@ -829,6 +867,40 @@
    "sha256": "15bbd5aff06c1735964de61f8fa8042e4dfb84e0f6f8344df112aee3e58ac99c",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Kentucky Wildcats @ Texas A&M Aggies|2026-09-19T19:30:00Z": {
+   "block": {
+    "away": "Kentucky Wildcats",
+    "best_book": "fanduel",
+    "best_price": 680,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.294,
+    "fair_away": 0.13567,
+    "fair_home": 0.86433,
+    "fair_side": 0.13567,
+    "home": "Texas A&M Aggies",
+    "kickoff_utc": "2026-09-19T19:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Kentucky Wildcats @ Texas A&M Aggies",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.184,
+    "relative_price_discount": 0.0549974487,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Kentucky Wildcats",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T133928Z.json",
+    "t24_hours_before_kickoff": 29.84
+   },
+   "committed_utc": "2026-09-18T13:39:32Z",
+   "kickoff_utc": "2026-09-19T19:30:00Z",
+   "matchup": "Kentucky Wildcats @ Texas A&M Aggies",
+   "sha256": "3655e26c676beb37a543fc8d8d0f8673422b0af15f804a0074101468cb7ae516",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Lindenwood Lions @ Missouri State Bears|2026-09-12T23:00:00Z": {
    "block": {
     "away": "Lindenwood Lions",
@@ -1069,7 +1141,8 @@
    "kickoff_utc": "2026-09-19T16:45:00Z",
    "later_disagreements": [
     "64c4307cb0724fa14182e30dd1883567f261e5dbf297c5b269d0175bc8d0e2bb",
-    "62db9880fbfa1cabd767532c6b2247ca7e571b7351bf5167b6fa20e1664b7e41"
+    "62db9880fbfa1cabd767532c6b2247ca7e571b7351bf5167b6fa20e1664b7e41",
+    "e359f64e3eabb407db21e34c8b757d2bdccd3d2245a2c547f993cb66d2422cb3"
    ],
    "matchup": "NC State Wolfpack @ Vanderbilt Commodores",
    "sha256": "1e5344f2acb2735a9d432c4d2f261d848726a20a0619694f4eb9aecc35c00e98",
@@ -1176,7 +1249,8 @@
    "later_disagreements": [
     "55be2b67424f42ca004670927930537c2b5804164120c3f8d24cf79851903538",
     "ad00745a25300930aca02468c7f0dcd80da762b74a7e20f8e4bab9f505a7091c",
-    "a6c9ea975fb3eb79e609db62479109a3cd29eba142fa5fae1894b8aa508c0fa8"
+    "a6c9ea975fb3eb79e609db62479109a3cd29eba142fa5fae1894b8aa508c0fa8",
+    "394c9a8aae67774200cc3ed013b71379d2b57913e7cde5dc8ad1b3e570953d2a"
    ],
    "matchup": "North Carolina Tar Heels @ Clemson Tigers",
    "sha256": "c56dc01bd9eec02fd2e629af44d0f238b3eee0d3df36dae2cc9defd04c6b72b8",
@@ -1457,6 +1531,40 @@
    "sha256": "ad68ac35ad03bea885cf8aa913bdd6eed0e752dd3dd1b4b29985aa1742a253bf",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|SMU Mustangs @ Louisville Cardinals|2026-09-19T19:30:00Z": {
+   "block": {
+    "away": "SMU Mustangs",
+    "best_book": "draftkings",
+    "best_price": -118,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.148,
+    "fair_away": 0.47087,
+    "fair_home": 0.52913,
+    "fair_side": 0.52913,
+    "home": "Louisville Cardinals",
+    "kickoff_utc": "2026-09-19T19:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "SMU Mustangs @ Louisville Cardinals",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.618,
+    "relative_price_discount": -0.0229612924,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Louisville Cardinals",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T133928Z.json",
+    "t24_hours_before_kickoff": 29.84
+   },
+   "committed_utc": "2026-09-18T13:39:32Z",
+   "kickoff_utc": "2026-09-19T19:30:00Z",
+   "matchup": "SMU Mustangs @ Louisville Cardinals",
+   "sha256": "7558d1896aa680639693d1a2d4341c765db07ae39a15f775488c776ceba973e4",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Sacramento State Hornets @ Fresno State Bulldogs|2026-09-13T02:30:00Z": {
    "block": {
     "away": "Sacramento State Hornets",
@@ -1695,6 +1803,40 @@
    "sha256": "d2c5b2227c1f309eada8962d9e75739085b6c0d629227dc9cecdf746c79aa43f",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Temple Owls @ Toledo Rockets|2026-09-19T19:00:00Z": {
+   "block": {
+    "away": "Temple Owls",
+    "best_book": "draftkings",
+    "best_price": -218,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 3.641,
+    "fair_away": 0.33635,
+    "fair_home": 0.66365,
+    "fair_side": 0.66365,
+    "home": "Toledo Rockets",
+    "kickoff_utc": "2026-09-19T19:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Temple Owls @ Toledo Rockets",
+    "move_pts": null,
+    "n_books": 8,
+    "offshore_best": null,
+    "raw_overround_pts": 4.318,
+    "relative_price_discount": -0.0329790234,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Toledo Rockets",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T133928Z.json",
+    "t24_hours_before_kickoff": 29.34
+   },
+   "committed_utc": "2026-09-18T13:39:32Z",
+   "kickoff_utc": "2026-09-19T19:00:00Z",
+   "matchup": "Temple Owls @ Toledo Rockets",
+   "sha256": "66e0872a78bcf45db2c2f6abee80e405318bb79607cb0476dd65b5986ff8f28b",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Tennessee Volunteers @ Georgia Tech Yellow Jackets|2026-09-12T23:00:00Z": {
    "block": {
     "away": "Tennessee Volunteers",
@@ -1830,7 +1972,8 @@
    "later_disagreements": [
     "931acf5edb92ce47bd23a4e910401c3753e740a171da16ed8b059328f6f2f5e4",
     "d8abb32816d212ba0cf21eafe4e82bbeec24819a6032f6bc3edafdb013b41027",
-    "e4d762686a76a65a3250204b8692b061fe8a444671cc809a8d4fb143d1e3693a"
+    "e4d762686a76a65a3250204b8692b061fe8a444671cc809a8d4fb143d1e3693a",
+    "f495f521104f013c85c51465a7c1bfe0b863aca7d26d7e6b76268240e18dd28d"
    ],
    "matchup": "Tulane Green Wave @ Kansas State Wildcats",
    "sha256": "fa3df69ef92afb84ce6ed963853f3219bd69346c00e285b719b807c77a0e86d5",
@@ -1972,6 +2115,40 @@
    "sha256": "ee15fcc627e62bc4c62716cca3b29700248622e069d521471224c07532bd3491",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|USC Trojans @ Rutgers Scarlet Knights|2026-09-19T19:30:00Z": {
+   "block": {
+    "away": "USC Trojans",
+    "best_book": "betrivers",
+    "best_price": 1300,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.381,
+    "fair_away": 0.91986,
+    "fair_home": 0.08014,
+    "fair_side": 0.08014,
+    "home": "Rutgers Scarlet Knights",
+    "kickoff_utc": "2026-09-19T19:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "USC Trojans @ Rutgers Scarlet Knights",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 3.986,
+    "relative_price_discount": 0.1086956522,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Rutgers Scarlet Knights",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T133928Z.json",
+    "t24_hours_before_kickoff": 29.84
+   },
+   "committed_utc": "2026-09-18T13:39:32Z",
+   "kickoff_utc": "2026-09-19T19:30:00Z",
+   "matchup": "USC Trojans @ Rutgers Scarlet Knights",
+   "sha256": "fd9ed0e1175b74c3a83b17b2a3674d7d4331ad35a43aeba92ad83efea68cdad9",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|UTSA Roadrunners @ Texas State Bobcats|2026-09-12T19:30:00Z": {
    "block": {
     "away": "UTSA Roadrunners",
@@ -2007,6 +2184,40 @@
    "kickoff_utc": "2026-09-12T19:30:00Z",
    "matchup": "UTSA Roadrunners @ Texas State Bobcats",
    "sha256": "edc28141f61426a4758d501e4c5b85ede93a6c48abe789d463d2d39e15690e1b",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Utah State Aggies @ Utah Utes|2026-09-19T19:30:00Z": {
+   "block": {
+    "away": "Utah State Aggies",
+    "best_book": "betmgm",
+    "best_price": 2200,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.387,
+    "fair_away": 0.04632,
+    "fair_home": 0.95368,
+    "fair_side": 0.04632,
+    "home": "Utah Utes",
+    "kickoff_utc": "2026-09-19T19:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Utah State Aggies @ Utah Utes",
+    "move_pts": null,
+    "n_books": 5,
+    "offshore_best": null,
+    "raw_overround_pts": 2.801,
+    "relative_price_discount": 0.0613810742,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Utah State Aggies",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T133928Z.json",
+    "t24_hours_before_kickoff": 29.84
+   },
+   "committed_utc": "2026-09-18T13:39:32Z",
+   "kickoff_utc": "2026-09-19T19:30:00Z",
+   "matchup": "Utah State Aggies @ Utah Utes",
+   "sha256": "dcf25953a8e01c90e9dfb1292d1172e5adbf5f016e8e17d6697606aab8a19a1a",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Utah State Aggies @ Washington Huskies|2026-09-12T19:30:00Z": {

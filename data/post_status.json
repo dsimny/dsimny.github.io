@@ -2,32 +2,6 @@
  "posts": [
   {
    "date": "2026-09-13",
-   "mode": "email",
-   "result": "failed",
-   "http_status": 422,
-   "detail": "{\"statusCode\":422,\"message\":\"Field `name` has a maximum of 70 items.\",\"name\":\"validation_error\"}",
-   "at_utc": "2026-09-13T15:10:32Z"
-  },
-  {
-   "date": "2026-09-13",
-   "mode": "blog",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-13T15:10:32Z"
-  },
-  {
-   "date": "2026-09-13",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-09-14T08:10:24Z"
-  },
-  {
-   "date": "2026-09-13",
    "mode": "x",
    "result": "failed",
    "http_status": 402,
@@ -256,6 +230,31 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-09-17T15:10:33Z"
+  },
+  {
+   "date": "2026-09-17",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-18T08:10:31Z"
+  },
+  {
+   "date": "2026-09-17",
+   "mode": "x",
+   "result": "failed",
+   "http_status": null,
+   "detail": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))",
+   "at_utc": "2026-09-18T08:10:31Z"
+  },
+  {
+   "date": "2026-09-17",
+   "mode": "facebook",
+   "result": "posted",
+   "http_status": 200,
+   "detail": "1263139090223888_122109258957472521",
+   "at_utc": "2026-09-18T08:10:33Z"
   }
  ]
 }

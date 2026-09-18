@@ -791,24 +791,48 @@
    "close_ml": -125,
    "clv_pts": 0.0,
    "beat_close": false
+  },
+  {
+   "date": "2026-09-17",
+   "gamePk": 823978,
+   "game": "MIN @ LAA",
+   "pick": "Los Angeles Angels ML (-102, Caesars)",
+   "market": "moneyline",
+   "price": -102,
+   "book": "Caesars",
+   "model_p": 0.5349,
+   "blend_p": 0.5146,
+   "edge": 0.0097,
+   "score": 0.6054,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "4-5",
+   "result": "WIN",
+   "pnl_paper": 0.245,
+   "pnl_staked": 0.0,
+   "open_ml": -105,
+   "close_ml": 104,
+   "clv_pts": -2.48,
+   "beat_close": false
   }
  ],
  "aggregates": {
-  "record": "20-13",
-  "wins": 20,
+  "record": "21-13",
+  "wins": 21,
   "losses": 13,
   "voids": 0,
-  "paper_units_net": 1.566,
-  "paper_roi_pct": 18.98,
+  "paper_units_net": 1.811,
+  "paper_roi_pct": 21.31,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 33,
-   "avg_clv_pts": -0.56,
-   "beat_close_pct": 36.4
+   "graded_with_clv": 34,
+   "avg_clv_pts": -0.61,
+   "beat_close_pct": 35.3
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-09-16"
+  "last_graded": "2026-09-17"
  }
 }

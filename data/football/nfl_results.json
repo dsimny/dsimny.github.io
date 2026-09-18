@@ -309,20 +309,20 @@
    "away": "DET",
    "away_abbr": "DET",
    "away_name": "Detroit Lions",
-   "away_score": null,
+   "away_score": 31,
    "espn_event_id": "401872932",
-   "final": false,
+   "final": true,
    "home": "BUF",
    "home_abbr": "BUF",
    "home_name": "Buffalo Bills",
-   "home_score": null,
+   "home_score": 41,
    "kickoff_utc": "2026-09-18T00:15:00Z",
-   "margin": null,
+   "margin": 10,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 72
   },
   "401873272": {
    "away": "DET",
@@ -1237,5 +1237,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-09-17T15:25:00Z"
+ "updated_utc": "2026-09-18T14:45:25Z"
 }

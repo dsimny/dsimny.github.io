@@ -205,7 +205,7 @@ if shutil.which("git") is None or shutil.which("bash") is None:
 EPI = push_epilogues()
 
 print("[0] the shell under test, taken from the workflows themselves")
-check(len(EPI) == 6, f"found all 6 retrying push epilogues in the repository "
+check(len(EPI) == 7, f"found all 7 retrying push epilogues in the repository "
                      f"({len(EPI)})")
 bodies = {re.sub(r'^PUSH_WHAT=.*$', '', b, flags=re.M) for b in EPI.values()}
 check(len(bodies) == 1,

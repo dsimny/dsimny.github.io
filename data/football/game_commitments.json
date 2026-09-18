@@ -33,7 +33,8 @@
    "kickoff_utc": "2026-09-19T16:00:00Z",
    "later_disagreements": [
     "ef6d154ee36e78011c777df94f44123bf68a8111649d43459e4d8f0c2b2f4f61",
-    "76b8435225e2a79cd89b99b173b36a86cea24d0dcf50a66bda2c6191938e48c0"
+    "76b8435225e2a79cd89b99b173b36a86cea24d0dcf50a66bda2c6191938e48c0",
+    "c80e6586c197da695c85b75f6a1a9c77e2559a829f5772dd5e26c1354780a3c7"
    ],
    "matchup": "Akron Zips @ Minnesota Golden Gophers",
    "sha256": "9aff427c0043015f1ef0aa621430904f3d0ee9f28799649f7ebf24ef3b83405c",
@@ -241,7 +242,8 @@
    "kickoff_utc": "2026-09-19T16:00:00Z",
    "later_disagreements": [
     "cd5adaec507bb17c3b24b03378e8fed863b3911deff35c3e15e4e4ab3354652a",
-    "b2dcfa8378096471533b33f8e7bf8e82066e88f4189243852a56d67279950cf4"
+    "b2dcfa8378096471533b33f8e7bf8e82066e88f4189243852a56d67279950cf4",
+    "9418e15246183419cd758c2cb0d185e58b4d0346b1fd7860be378679a473facf"
    ],
    "matchup": "Bowling Green Falcons @ Iowa State Cyclones",
    "sha256": "c410c295b8177a487d21e7f05c9198f5241c5b385029c7b79ae47b52bb751eac",
@@ -348,7 +350,8 @@
    "later_disagreements": [
     "2ce4a2c71bf8b6a375b607ae883c3b289d5b8bb8b57e5ae4990ebe7ff7eab7cf",
     "2d2c33346c7889c9bace5b9adcc4b7f2a75eec3c54eff7883f8eb619df4339ba",
-    "a558d1758645c6c9fe0b6fe80fcdf3d855b5de32453ed7ceeac8433ea2ef997f"
+    "a558d1758645c6c9fe0b6fe80fcdf3d855b5de32453ed7ceeac8433ea2ef997f",
+    "d02f12b54841258bba0d6b3b895847632f172f69faef2662eaaf244467531699"
    ],
    "matchup": "Coastal Carolina Chanticleers @ Delaware Blue Hens",
    "sha256": "615d3603364fb0d89dc0599cc459a9bc34ccf8da7c334d80b42d41be3069f6a9",
@@ -560,7 +563,8 @@
    "kickoff_utc": "2026-09-19T16:00:00Z",
    "later_disagreements": [
     "47e23793c826c6922279ba5cb4bd01d7329c174f1b851351a958eabb2dbee8ef",
-    "8cac5439f55830f1efea68421d7287908ec11f5256a5a0044145ee0b56b61d37"
+    "8cac5439f55830f1efea68421d7287908ec11f5256a5a0044145ee0b56b61d37",
+    "537a0584c749676e0eb8eb7cb832bd7d55adb9b97816449d0791d3ce2d6366d9"
    ],
    "matchup": "Georgia Bulldogs @ Arkansas Razorbacks",
    "sha256": "616b6023c7353703ffff8b8ef2af34b70cd605724aa72332cdd460029b20729e",
@@ -818,7 +822,8 @@
    "kickoff_utc": "2026-09-19T16:00:00Z",
    "later_disagreements": [
     "bf4e8ec9aeae04f80d8f6302df18d3e516c1f7159fb87597a94e47d6bad19765",
-    "111d7d251a4a4b59ac404656f696ea4dba0326c9bda98391a26736a3147554f9"
+    "111d7d251a4a4b59ac404656f696ea4dba0326c9bda98391a26736a3147554f9",
+    "a5f72428499a59c65b1287b6e8356c69e8ae225e0a5e42ead24d9f21d7cdd56b"
    ],
    "matchup": "Kansas Jayhawks @ Arizona State Sun Devils",
    "sha256": "15bbd5aff06c1735964de61f8fa8042e4dfb84e0f6f8344df112aee3e58ac99c",
@@ -1063,7 +1068,8 @@
    "committed_utc": "2026-09-18T10:47:21Z",
    "kickoff_utc": "2026-09-19T16:45:00Z",
    "later_disagreements": [
-    "64c4307cb0724fa14182e30dd1883567f261e5dbf297c5b269d0175bc8d0e2bb"
+    "64c4307cb0724fa14182e30dd1883567f261e5dbf297c5b269d0175bc8d0e2bb",
+    "62db9880fbfa1cabd767532c6b2247ca7e571b7351bf5167b6fa20e1664b7e41"
    ],
    "matchup": "NC State Wolfpack @ Vanderbilt Commodores",
    "sha256": "1e5344f2acb2735a9d432c4d2f261d848726a20a0619694f4eb9aecc35c00e98",
@@ -1169,7 +1175,8 @@
    "kickoff_utc": "2026-09-19T16:00:00Z",
    "later_disagreements": [
     "55be2b67424f42ca004670927930537c2b5804164120c3f8d24cf79851903538",
-    "ad00745a25300930aca02468c7f0dcd80da762b74a7e20f8e4bab9f505a7091c"
+    "ad00745a25300930aca02468c7f0dcd80da762b74a7e20f8e4bab9f505a7091c",
+    "a6c9ea975fb3eb79e609db62479109a3cd29eba142fa5fae1894b8aa508c0fa8"
    ],
    "matchup": "North Carolina Tar Heels @ Clemson Tigers",
    "sha256": "c56dc01bd9eec02fd2e629af44d0f238b3eee0d3df36dae2cc9defd04c6b72b8",
@@ -1822,7 +1829,8 @@
    "kickoff_utc": "2026-09-19T16:00:00Z",
    "later_disagreements": [
     "931acf5edb92ce47bd23a4e910401c3753e740a171da16ed8b059328f6f2f5e4",
-    "d8abb32816d212ba0cf21eafe4e82bbeec24819a6032f6bc3edafdb013b41027"
+    "d8abb32816d212ba0cf21eafe4e82bbeec24819a6032f6bc3edafdb013b41027",
+    "e4d762686a76a65a3250204b8692b061fe8a444671cc809a8d4fb143d1e3693a"
    ],
    "matchup": "Tulane Green Wave @ Kansas State Wildcats",
    "sha256": "fa3df69ef92afb84ce6ed963853f3219bd69346c00e285b719b807c77a0e86d5",

@@ -1506,20 +1506,20 @@
    "away": "Houston Cougars",
    "away_abbr": "HOU",
    "away_key": "houstoncougars",
-   "away_score": null,
+   "away_score": 26,
    "espn_event_id": "401856811",
-   "final": false,
+   "final": true,
    "home": "Texas Tech Red Raiders",
    "home_abbr": "TTU",
    "home_key": "texastechredraiders",
-   "home_score": null,
+   "home_score": 28,
    "kickoff_utc": "2026-09-19T00:00:00Z",
-   "margin": null,
+   "margin": 2,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 54
   },
   "401856812": {
    "away": "Arizona State Sun Devils",
@@ -1981,20 +1981,20 @@
    "away": "Miami Hurricanes",
    "away_abbr": "MIA",
    "away_key": "miamihurricanes",
-   "away_score": null,
+   "away_score": 33,
    "espn_event_id": "401858226",
-   "final": false,
+   "final": true,
    "home": "Wake Forest Demon Deacons",
    "home_abbr": "WAKE",
    "home_key": "wakeforestdemondeacons",
-   "home_score": null,
+   "home_score": 20,
    "kickoff_utc": "2026-09-18T23:30:00Z",
-   "margin": null,
+   "margin": -13,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 53
   },
   "401858227": {
    "away": "Maine Black Bears",
@@ -2760,20 +2760,20 @@
    "away": "Portland State Vikings",
    "away_abbr": "PRST",
    "away_key": "portlandstatevikings",
-   "away_score": null,
+   "away_score": 0,
    "espn_event_id": "401858455",
-   "final": false,
+   "final": true,
    "home": "Oregon Ducks",
    "home_abbr": "ORE",
    "home_key": "oregonducks",
-   "home_score": null,
+   "home_score": 84,
    "kickoff_utc": "2026-09-19T02:30:00Z",
-   "margin": null,
+   "margin": 84,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 84
   },
   "401858456": {
    "away": "Buffalo Bulls",
@@ -4942,5 +4942,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-09-18T14:45:24Z"
+ "updated_utc": "2026-09-19T14:08:50Z"
 }

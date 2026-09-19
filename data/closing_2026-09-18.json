@@ -544,21 +544,21 @@
   "mins_to_first_pitch": 190
  },
  "823898": {
-  "away_ml": 250,
-  "home_ml": -310,
+  "away_ml": 260,
+  "home_ml": -321,
   "total": 8.0,
   "credits": {
-   "remaining": 99739,
-   "used": 261,
+   "remaining": 99737,
+   "used": 263,
    "last_call_cost": 2,
    "markets": "h2h,totals",
    "regions": "us",
    "http_status": 200,
    "source": "fetch_closing",
-   "read_utc": "2026-09-18T22:30:22Z"
+   "read_utc": "2026-09-19T01:30:23Z"
   },
   "over_price": -110,
-  "under_price": -110,
+  "under_price": -109,
   "away_name": "San Francisco Giants",
   "home_name": "Los Angeles Dodgers",
   "utc": "2026-09-19T02:15:00Z",
@@ -578,9 +578,17 @@
     "over_price": -110,
     "under_price": -110,
     "captured_utc": "2026-09-18T22:30:22Z"
+   },
+   {
+    "away_ml": 260,
+    "home_ml": -321,
+    "total": 8.0,
+    "over_price": -110,
+    "under_price": -109,
+    "captured_utc": "2026-09-19T01:30:23Z"
    }
   ],
-  "captured_utc": "2026-09-18T22:30:22Z",
-  "mins_to_first_pitch": 225
+  "captured_utc": "2026-09-19T01:30:23Z",
+  "mins_to_first_pitch": 45
  }
 }

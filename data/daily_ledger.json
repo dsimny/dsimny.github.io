@@ -815,24 +815,48 @@
    "close_ml": 104,
    "clv_pts": -2.48,
    "beat_close": false
+  },
+  {
+   "date": "2026-09-18",
+   "gamePk": 823572,
+   "game": "PHI @ NYM",
+   "pick": "New York Mets ML (-108, BetUS)",
+   "market": "moneyline",
+   "price": -108,
+   "book": "BetUS",
+   "model_p": 0.5332,
+   "blend_p": 0.5216,
+   "edge": 0.0023,
+   "score": 0.5172,
+   "units_staked": 0.0,
+   "paper_basis": 0.25,
+   "strategy": "daily",
+   "final_score": "3-6",
+   "result": "WIN",
+   "pnl_paper": 0.231,
+   "pnl_staked": 0.0,
+   "open_ml": -113,
+   "close_ml": -123,
+   "clv_pts": 2.07,
+   "beat_close": true
   }
  ],
  "aggregates": {
-  "record": "21-13",
-  "wins": 21,
+  "record": "22-13",
+  "wins": 22,
   "losses": 13,
   "voids": 0,
-  "paper_units_net": 1.811,
-  "paper_roi_pct": 21.31,
+  "paper_units_net": 2.042,
+  "paper_roi_pct": 23.34,
   "staked_units_net": 0.0,
   "clv": {
-   "graded_with_clv": 34,
-   "avg_clv_pts": -0.61,
-   "beat_close_pct": 35.3
+   "graded_with_clv": 35,
+   "avg_clv_pts": -0.54,
+   "beat_close_pct": 37.1
   },
   "opened": "2026-08-09",
   "proving_until": "2026-09-08",
   "note": "Daily Pick strategy (v0.15): always-on, lower precommitted bar, flat 0.25u paper basis; 0u staked through the proving window. Never mixed with the Qualified Plays ledger.",
-  "last_graded": "2026-09-17"
+  "last_graded": "2026-09-18"
  }
 }

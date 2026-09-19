@@ -55,6 +55,17 @@
    "http_status": 200,
    "detail": "confirmed live by sync-status",
    "at_utc": "2026-09-18T08:10:35Z"
+  },
+  {
+   "date": "2026-09-17",
+   "kind": "daily",
+   "ref": "OLS-DAILY-2026-09-17",
+   "result": "posted",
+   "creation_id": null,
+   "media_id": "18154861435512518",
+   "http_status": 200,
+   "detail": "confirmed live by sync-status",
+   "at_utc": "2026-09-19T08:10:29Z"
   }
  ]
 }

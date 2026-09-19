@@ -821,6 +821,40 @@
    "sha256": "1bc77dc232ab06f0873ee455e02e05e555602fa7186e137054e8d96f8cb9656c",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Georgia Bulldogs @ Arkansas Razorbacks|2026-09-19T15:59:00Z": {
+   "block": {
+    "away": "Georgia Bulldogs",
+    "best_book": "betmgm",
+    "best_price": 1550,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.612,
+    "fair_away": 0.93252,
+    "fair_home": 0.06748,
+    "fair_side": 0.06748,
+    "home": "Arkansas Razorbacks",
+    "kickoff_utc": "2026-09-19T15:59:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Georgia Bulldogs @ Arkansas Razorbacks",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 3.987,
+    "relative_price_discount": 0.1019283747,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Arkansas Razorbacks",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260918T163721Z.json",
+    "t24_hours_before_kickoff": 23.36
+   },
+   "committed_utc": "2026-09-19T12:37:25Z",
+   "kickoff_utc": "2026-09-19T15:59:00Z",
+   "matchup": "Georgia Bulldogs @ Arkansas Razorbacks",
+   "sha256": "fe5a98e5a0610de2f65a403da80867d9d3fad6249a041557ea17900bbbb90b37",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Georgia Bulldogs @ Arkansas Razorbacks|2026-09-19T16:00:00Z": {
    "block": {
     "away": "Georgia Bulldogs",

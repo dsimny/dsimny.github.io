@@ -1,0 +1,77 @@
+name: Mercer research odds refresh
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mercer-odds-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Capture NFL research odds
+        id: capture
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p data/mercer/odds
+
+          before="$(mktemp)"
+          after="$(mktemp)"
+
+          find data/mercer/odds \
+            -maxdepth 1 \
+            -type f \
+            -name 'nfl_*.json' \
+            -printf '%f\n' \
+            | sort > "$before"
+
+          python scripts/football/fetch_odds.py \
+            --sport nfl \
+            --markets h2h \
+            --out-dir data/mercer/odds \
+            --credit-log data/mercer/odds/credits.json
+
+          find data/mercer/odds \
+            -maxdepth 1 \
+            -type f \
+            -name 'nfl_*.json' \
+            -printf '%f\n' \
+            | sort > "$after"
+
+          snapshot="$(comm -13 "$before" "$after" | head -n 1)"
+
+          if [ -z "$snapshot" ]; then
+            echo "::error::No new NFL research snapshot was produced"
+            exit 1
+          fi
+
+          printf 'snapshot=data/mercer/odds/%s\n' "$snapshot" >> "$GITHUB_OUTPUT"
+
+      - name: Upload research snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: mercer-nfl-odds-${{ github.run_id }}
+          path: ${{ steps.capture.outputs.snapshot }}
+          if-no-files-found: error
+          retention-days: 7

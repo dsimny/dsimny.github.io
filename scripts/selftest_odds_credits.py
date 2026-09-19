@@ -315,7 +315,8 @@ THREE_WITH_ALT_DIR = ("three_readings+alt_dir", _with_alt_dir(seeded(3)), NEW)
 ODD_KEEPS = (0, -1, 1, True, 2.5, "60", None)
 HAS_KEEP = ("fetch_odds", "fetch_closing", "fetch_data")      # historical hardcoded 60
 PATH_FROM_ROOT = ("fetch_closing", "fetch_data")             # joined OUTSIDE the old try
-PATH_FROM_CREDIT_LOG = ("fetch_odds", "fetch_historical_odds")  # read INSIDE the old try
+PATH_FROM_CREDIT_LOG = ("fetch_historical_odds",)  # fetch_odds now accepts an optional path
+OPTIONAL_CREDIT_LOG = ("fetch_odds",)
 
 
 def golden_cases(name):
@@ -530,11 +531,11 @@ def meaning(name):
               f"{name}: a broken CREDIT_LOG is caught (NOTE, no write) - the original read it "
               f"inside its try, and so does the helper")
     o = L(THREE_WITH_ALT_DIR, {"CREDIT_LOG": _alt})
-    if name in PATH_FROM_CREDIT_LOG:
+    if name in PATH_FROM_CREDIT_LOG or name in OPTIONAL_CREDIT_LOG:
         check(o["alt_ledger"] is not None and json.loads(o["alt_ledger"]) == {"readings": [NEW]}
               and o["ledger"] == o["_before"],
-              f"{name}: CREDIT_LOG CONTROLS THE PATH - pointed elsewhere, the reading goes "
-              f"there and data/odds_credits.json is untouched")
+              f"{name}: CREDIT_LOG controls the default path and an explicit path can redirect "
+              f"the reading without touching data/odds_credits.json")
     else:
         check(o["alt_ledger"] is None and load(o)["readings"][-1] == NEW,
               f"{name}: has no CREDIT_LOG; the path comes from ROOT, as before")
@@ -693,9 +694,10 @@ def wiring():
     for name in CALLERS:
         mod = MODULES[name]
         node = _record_credits_node(name)
-        want_arg = "entry" if name == "fetch_historical_odds" else "credits"
-        check(node is not None and [a.arg for a in node.args.args] == [want_arg],
-              f"{name}: record_credits({want_arg}) still exists under its original name")
+        want_args = (["entry"] if name == "fetch_historical_odds" else
+                     ["credits", "path"] if name in OPTIONAL_CREDIT_LOG else ["credits"])
+        check(node is not None and [a.arg for a in node.args.args] == want_args,
+              f"{name}: record_credits({', '.join(want_args)}) has the expected signature")
         calls = [c for c in ast.walk(node) if isinstance(c, ast.Call)] if node else []
         names = sorted(ast.unparse(c.func) for c in calls)
         want_names = sorted(["odds_credits.record"]
@@ -712,7 +714,14 @@ def wiring():
         check(kw.get("create_parent") == want_cp,
               f"{name}: {'create_parent=True' if want_cp else 'no create_parent (default False)'}"
               f" {kw}")
-        if name in PATH_FROM_CREDIT_LOG:
+        if name in OPTIONAL_CREDIT_LOG:
+            check(kw.get("path") == "path"
+                  and len(node.args.defaults) == 1
+                  and ast.unparse(node.args.defaults[0]) == "None"
+                  and MODULES[name].CREDIT_LOG == os.path.join(MODULES[name].ROOT, "data",
+                                                               "odds_credits.json"),
+                  f"{name}: optional path defaults to the existing CREDIT_LOG")
+        elif name in PATH_FROM_CREDIT_LOG:
             check(kw.get("path") == "CREDIT_LOG"
                   and MODULES[name].CREDIT_LOG == os.path.join(MODULES[name].ROOT, "data",
                                                                "odds_credits.json"),

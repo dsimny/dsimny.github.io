@@ -100,12 +100,16 @@ def iso(dt):
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def record_credits(credits):
-    """Append a plaintext credit reading to CREDIT_LOG. Never raises. The append
-    lives in scripts/odds_credits.py; the reading, its pre-request stamp and the
-    moment it is booked stay here. create_parent=True: this caller always made
-    the ledger's directory."""
-    odds_credits.record(credits, path=CREDIT_LOG, keep=CREDIT_LOG_KEEP, create_parent=True)
+def record_credits(credits, path=None):
+    """Append a plaintext credit reading to the selected credit log. Never raises.
+
+    ``path=None`` preserves the original behavior: existing callers use the
+    module's current CREDIT_LOG value. Mercer research pulls may provide an
+    isolated path so the model's credit log is never touched.
+    """
+    if path is None:
+        path = CREDIT_LOG
+    odds_credits.record(credits, path=path, keep=CREDIT_LOG_KEEP, create_parent=True)
 
 
 def normalise(events, captured_utc, sport_key, identity="canonical"):
@@ -179,6 +183,9 @@ def main():
                          "data/football/odds, the model's evidence trail). Point "
                          "this at data/mercer/odds for a research pull so the "
                          "model's captures stay exactly what the scheduler wrote.")
+    ap.add_argument("--credit-log", default=None,
+                    help="where to write the credit log; defaults to the "
+                         "scheduled football credit log")
     ap.add_argument("--dry-run", action="store_true",
                     help="show the call and its credit cost; spend nothing")
     args = ap.parse_args()
@@ -228,7 +235,12 @@ def main():
     # the readings that matter most - survive the failure.
     print(f"credits {credits['remaining']} remaining, {credits['used']} used, "
           f"this call cost {credits['last_call_cost']}")
-    record_credits(credits)
+    credit_log = (
+        os.path.join(ROOT, args.credit_log)
+        if args.credit_log
+        else CREDIT_LOG
+    )
+    record_credits(credits, path=credit_log)
 
     if r.status_code != 200:
         print(f"ODDS FETCH FAILED (HTTP {r.status_code}): {r.text[:300]}")

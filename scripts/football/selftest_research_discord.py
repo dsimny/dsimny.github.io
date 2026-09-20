@@ -464,6 +464,114 @@ class ResearchDiscordTests(unittest.TestCase):
         self.assertFalse(fbd.already_posted(v1_key, fbd.RESEARCH_STATUS_KEY),
                          "a different version's posted record must not block v1")
 
+    # =========================================================================
+    # Empty-board delivery (premium=None, free=None, no exclusions)
+    # =========================================================================
+
+    # --- 26. An empty board posts the disclaimer and nothing else ---
+    def test_26_empty_board_posts_disclaimer_only(self):
+        # A board with NO selected observation and NO excluded game. The only
+        # correct delivery is the disclaimer/header message plus the
+        # authority/footer message: no embed, no side, no price, no matchup.
+        week = "2026-09-22"
+        board = make_research_board(week=week)
+        board["premium"] = None
+        board["free"] = None
+        board["no_market"] = []
+        board["n_covered"] = 0
+        board["n_excluded"] = 0
+
+        # --- the builder's output, exactly ---
+        msgs = fbd.research_board_messages(board, week)
+        self.assertEqual(len(msgs), 2,
+                         "an empty board is two messages, not an observation")
+        expected_header = (
+            f"{fbd.RESEARCH_HEADER}\n\n"
+            f"**Week of {week}** — 0 games evaluated | "
+            f"0 observation(s) selected | 0 no market\n"
+            f"{fbd.SITE}/football/research/"
+        )
+        expected_footer = (
+            f"_Version: `{fbd.RESEARCH_VERSION_ID}` | "
+            f"Authority: research only — not official, not a recommendation | "
+            f"{fbd.FOOTER}_"
+        )
+        self.assertEqual(msgs[0]["content"], expected_header)
+        self.assertEqual(msgs[1]["content"], expected_footer)
+
+        # Nothing may be fabricated for an empty board: no embeds at all.
+        for m in msgs:
+            self.assertNotIn("embeds", m,
+                             "an empty board must not emit an observation embed")
+
+        all_text = "\n".join(m.get("content") or "" for m in msgs)
+        self.assertIn("0 observation(s) selected", all_text)
+        self.assertIn("0 games evaluated", all_text)
+        self.assertIn("0 no market", all_text)
+        self.assertIn("Research Observation", all_text)
+        self.assertIn("Not a recommendation", all_text)
+        self.assertIn("0 units", all_text)
+        self.assertIn(fbd.RESEARCH_VERSION_ID, all_text)
+
+        # No observation-shaped content. These strings only exist inside an
+        # observation embed, so any of them means a pick was invented.
+        for phrase in ("Observed side", "Observation A", "Observation B",
+                       "Eligible books", "Corroborating books",
+                       "Effective overround", "T-24 capture",
+                       "Market-implied probability"):
+            self.assertNotIn(phrase, all_text,
+                             f"fabricated observation field {phrase!r}")
+        # No side, matchup, price or book from the fixture may leak through.
+        for value in ("Away Team", "Home Team", "240", "draftkings", "ncaaf"):
+            self.assertNotIn(value, all_text,
+                             f"fabricated value {value!r} on an empty board")
+
+        # --- the delivery path: sent once, idempotent, empty board allowed ---
+        self.write_board(week, board)
+        sent = []
+        def capture_send(webhook, messages, dry=False):
+            sent.append((webhook, messages))
+            return True, 200, "ok"
+        fake_url = "https://discord.com/api/webhooks/x/y"
+        patched_modes = {"research_board": (
+            fbd.RESEARCH_STATUS_KEY, fake_url, "DISCORD_RESEARCH_WEBHOOK",
+            fbd.research_board_messages)}
+        with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True),              patch.object(fbd, "RESEARCH_MODES", patched_modes),              patch.object(fbd, "send", capture_send):
+            rc, out = self.run_main("discord.py", "research_board",
+                                    "--week", week)
+
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(sent), 1, "the empty board is delivered once")
+        self.assertEqual(sent[0][0], fake_url,
+                         "the research webhook is still the only channel used")
+        self.assertEqual([m.get("content") for m in sent[0][1]],
+                         [expected_header, expected_footer],
+                         "the delivered payload is exactly the two messages")
+        idem_key = f"{fbd.RESEARCH_VERSION_ID}|{week}"
+        self.assertTrue(fbd.already_posted(idem_key, fbd.RESEARCH_STATUS_KEY),
+                        "an empty board records a real post, not a no_board row")
+        results = [p["result"] for p in self.get_status()["posts"]
+                   if p["mode"] == fbd.RESEARCH_STATUS_KEY]
+        self.assertEqual(results, ["posted"])
+
+        # --- the missing-board path stays a SEPARATE behaviour ---
+        # No board file at all is not an empty board: it must still skip with
+        # "no research board", send nothing, and not borrow the empty-board
+        # message. This is what keeps the two cases distinguishable in the log.
+        absent_week = "2026-10-06"
+        sent.clear()
+        with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True),              patch.object(fbd, "RESEARCH_MODES", patched_modes),              patch.object(fbd, "send", capture_send):
+            rc, out = self.run_main("discord.py", "research_board",
+                                    "--week", absent_week)
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(sent), 0, "a missing board sends nothing")
+        self.assertIn(f"no research board for {absent_week}", out)
+        absent_results = [p["result"] for p in self.get_status()["posts"]
+                          if p["mode"] == fbd.RESEARCH_STATUS_KEY
+                          and p["date"] == f"{fbd.RESEARCH_VERSION_ID}|{absent_week}"]
+        self.assertEqual(absent_results, ["no_board"],
+                         "a missing board is recorded as no_board, not posted")
+
 
 if __name__ == "__main__":
     unittest.main()

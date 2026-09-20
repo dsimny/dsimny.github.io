@@ -271,6 +271,18 @@ check(bool(suites) and "workflows" in suites.group(1).split(),
 check(bool(suites) and "push_pattern" in suites.group(1).split(),
       "and so does the real-git push-pattern harness, which proves what text "
       "inspection cannot")
+# THE RESEARCH SUITES ARE PART OF THIS GATE BY DESIGN: they are football
+# code, they are hermetic, and a red X in them must mean a research code
+# regression rather than nothing at all. They ran in NO workflow before
+# this check existed, so a broken research suite could sit on main
+# indefinitely. Pinning membership means removing one has to be argued
+# for here, in the gate it would silence.
+RESEARCH_SUITES = ("research_discord", "research_board",
+                   "research_grading", "research_page")
+check(bool(suites) and all(s in suites.group(1).split()
+                           for s in RESEARCH_SUITES),
+      "every research suite runs in the hermetic gate "
+      f"({suites.group(1) if suites else 'no SUITES list found'})")
 
 # --------------------------------------------------------------------------
 print("\n[9] no push in this repository can corrupt main")

@@ -2,15 +2,22 @@ name: Football code self-tests
 # The hermetic regression gate for the football code.
 #
 # A RED RUN HERE MEANS A CODE REGRESSION, NEVER LIVE-DATA DRIFT. That line is
-# the whole design. Two of the thirteen football suites — selftest_capture_isolation
+# the whole design. Two of the football suites — selftest_capture_isolation
 # and selftest_team_join — read live pipeline output on purpose and can go red
 # because a capture or a franchise table changed, with no code involved. Mixing
 # those in here would make a red X ambiguous, and an ambiguous red X gets
 # ignored. They belong to a separate data-integrity workflow.
 #
-# The six below were each proven hermetic by poisoning their inputs and
-# confirming the result did not move (2026-09-11 audit):
-#   allowlist, board, discord, mercer, page, writeup
+# Every suite in the list below is hermetic by evidence, not by assertion:
+#   allowlist, board, discord, mercer, page, writeup — proven by poisoning
+#     their inputs and confirming the result did not move (2026-09-11 audit);
+#   research_board, research_discord, research_grading, research_page —
+#     proven by an audit-hook trace (2026-09-20): no network call, no write
+#     inside the repository, every mutable input replaced by a temp fixture.
+#     The only repository read is source — the research suites read
+#     .github/workflows/football-capture.yml to assert where the research
+#     board is generated, exactly as selftest_workflows.py reads workflow
+#     source.
 #
 # selftest_workflows joined them afterwards. It reads .github/workflows/*.yml
 # — repository source, not pipeline output — so it is hermetic by the same
@@ -32,8 +39,8 @@ name: Football code self-tests
 # proves an unmatched glob cannot take its siblings down with it. Its negative
 # control reproduces the eleven-day football-grade outage on demand.
 #
-# NEEDS NO SECRETS AND TOUCHES NO NETWORK. None of the eleven imports a network
-# library; none writes outside a temp directory; none reads an environment
+# NEEDS NO SECRETS AND TOUCHES NO NETWORK. No suite in this gate imports a
+# network library; none writes outside a temp directory; none reads an environment
 # variable that CI must supply (selftest_mercer reads MERCER_KEEP, a documented
 # local debug flag that only controls temp-dir cleanup). That is why this job
 # runs with `contents: read` and declares no `env:` secrets at all.
@@ -129,7 +136,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Run the eleven hermetic football suites
+      - name: Run the hermetic football suites
         # EVERY SUITE RUNS EVEN AFTER ONE FAILS. Stopping at the first failure
         # would hide the rest, and "fix, push, wait, discover the next one" is a
         # slow way to learn what a change actually broke. The loop records each
@@ -143,7 +150,7 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           set +e
-          SUITES="reset allowlist board discord delivery market_input private_validation research_feasibility nfl_representation_prereg nfl_representation record_classification result_identity mercer mercer_premium page push_pattern staging workflows writeup"
+          SUITES="reset allowlist board discord delivery market_input private_validation research_feasibility research_board research_discord research_grading research_page nfl_representation_prereg nfl_representation record_classification result_identity mercer mercer_premium page push_pattern staging workflows writeup"
           FAILED=""
           for s in $SUITES; do
             echo "::group::selftest_$s.py"
@@ -170,11 +177,11 @@ jobs:
             if [ -n "$FAILED" ]; then
               echo "**Failed:**$FAILED"
               echo ""
-              echo "A red run here means a **code regression**. These eleven suites are"
-              echo "hermetic — they do not read mutable production data, so live-data"
+              echo "A red run here means a **code regression**. Every suite in this gate"
+              echo "is hermetic — none reads mutable production data, so live-data"
               echo "drift cannot cause this."
             else
-              echo "All eleven hermetic suites passed."
+              echo "All hermetic football suites passed."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -182,4 +189,4 @@ jobs:
             echo "FAILED:$FAILED"
             exit 1
           fi
-          echo "All eleven hermetic football suites passed."
+          echo "All hermetic football suites passed."

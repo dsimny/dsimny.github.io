@@ -590,6 +590,25 @@
    "status": "STATUS_SCHEDULED",
    "total": null
   },
+  "401872947": {
+   "away": "NYG",
+   "away_abbr": "NYG",
+   "away_name": "New York Giants",
+   "away_score": null,
+   "espn_event_id": "401872947",
+   "final": false,
+   "home": "LA",
+   "home_abbr": "LAR",
+   "home_name": "Los Angeles Rams",
+   "home_score": null,
+   "kickoff_utc": "2026-09-22T00:15:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873272": {
    "away": "DET",
    "away_abbr": "DET",
@@ -1503,5 +1522,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-09-19T14:08:53Z"
+ "updated_utc": "2026-09-20T14:27:27Z"
 }

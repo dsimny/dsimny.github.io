@@ -1,40 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-09-15",
-   "mode": "x",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-16T08:10:21Z"
-  },
-  {
-   "date": "2026-09-15",
-   "mode": "facebook",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-09-16T08:10:21Z"
-  },
-  {
-   "date": "2026-09-16",
-   "mode": "pick",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-16T15:10:29Z"
-  },
-  {
-   "date": "2026-09-16",
-   "mode": "board",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354298436354048",
-   "detail": "",
-   "at_utc": "2026-09-16T15:10:29Z"
-  },
-  {
    "date": "2026-09-16",
    "mode": "email",
    "result": "failed",
@@ -255,6 +221,41 @@
    "http_status": 200,
    "detail": "1263139090223888_122111664483472521",
    "at_utc": "2026-09-20T08:10:24Z"
+  },
+  {
+   "date": "2026-09-20",
+   "mode": "pick",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-20T15:10:22Z"
+  },
+  {
+   "date": "2026-09-20",
+   "mode": "board",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354298436354048",
+   "detail": "",
+   "at_utc": "2026-09-20T15:10:22Z"
+  },
+  {
+   "date": "2026-09-20",
+   "mode": "email",
+   "result": "sent",
+   "http_status": 200,
+   "detail": "9e11762e-062b-4a2a-9240-a8a23011d1fb",
+   "at_utc": "2026-09-20T15:10:23Z"
+  },
+  {
+   "date": "2026-09-20",
+   "mode": "blog",
+   "result": "posted",
+   "http_status": 200,
+   "channel_id": "1529354000020013116",
+   "detail": "",
+   "at_utc": "2026-09-20T15:10:24Z"
   }
  ]
 }

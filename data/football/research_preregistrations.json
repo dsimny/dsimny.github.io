@@ -20,6 +20,31 @@
       "authority": "research_only_no_selection_delivery_or_holdout",
       "selection_rule": "fp-v0.4",
       "units": 0
+    },
+    {
+      "id": "fp-v0.4-market-observation-v1-amendment-1",
+      "frozen_date": "2026-09-21",
+      "path": "docs/FOOTBALL_RESEARCH_FP_V04_AMENDMENT_1.md",
+      "amends": "fp-v0.4-market-observation-v1",
+      "amended_doc_path": "docs/FOOTBALL_RESEARCH_FP_V04_OBSERVATION.md",
+      "amended_doc_bytes": 5020,
+      "amended_doc_sha256": "539f6c890eb72ee4d769f3b40fce727c998f71358f7ae6f9b7c73e82903e6801",
+      "authority": "research_only_no_selection_delivery_or_holdout",
+      "selection_rule": "fp-v0.4",
+      "units": 0,
+      "enforced_by_code": false,
+      "exclusion_predicate": "slate_week <= \"2026-09-15\"",
+      "boundary_anchors": {
+        "board_path": "data/football/research/board_2026-09-15_fp-v0.4-market-observation-v1.json",
+        "board_sha256": "55cb0e58fdf99bc39a43ade1cdfa176a05ce835ec50dee898356cdc431746e2a",
+        "decision_moment_utc": "2026-09-19T18:00:00Z",
+        "push_event_utc": "2026-09-19T18:37:31Z",
+        "attested_margin_to_earliest_in_window_kickoff_s": 1349
+      },
+      "first_commit": null,
+      "_first_commit_note": "Null at authoring and remains null: this entry is never edited, at any time, for any reason. This DIVERGES deliberately from the fp-v0.4-market-observation-v1 entry, which was added with first_commit null in 959c49e and then backfilled by an edit in 4293ddb. The other existing entry, nfl-representation-v1, was created ALREADY carrying first_commit, because the document commit it names (153580b) predates the registry file (7b8282a). Retrieval method for this entry's first commit: git log --diff-filter=A --format=%H -- docs/FOOTBALL_RESEARCH_FP_V04_AMENDMENT_1.md. If a direct in-file pointer is ever required it is added as a separate additive entry, not by editing this one.",
+      "bytes": 16717,
+      "sha256": "303b689e8c61d2e5313abc2461b3563f6b737e10cd365fc99d1aa2f32e2800a9"
     }
   ]
 }

@@ -5215,14 +5215,110 @@
    "final_score": "5-6",
    "result": "WIN",
    "pnl": 0.943
+  },
+  {
+   "date": "2026-09-20",
+   "gamePk": 822922,
+   "game": "BOS @ TB",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 7.5 (+100, Fanatics)",
+   "price": 100,
+   "book": "Fanatics",
+   "model_p": 0.5336,
+   "edge": 0.0336,
+   "divergence": 0.0488,
+   "actual_total": 6,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-09-20",
+   "gamePk": 824139,
+   "game": "ATL @ HOU",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.562,
+   "edge": 0.057,
+   "divergence": 0.0728,
+   "actual_total": 6,
+   "result": "WIN",
+   "pnl": 0.98
+  },
+  {
+   "date": "2026-09-20",
+   "gamePk": 824546,
+   "game": "DET @ CWS",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (+106, LowVig.ag)",
+   "price": 106,
+   "book": "LowVig.ag",
+   "model_p": 0.5358,
+   "edge": 0.0504,
+   "divergence": 0.0508,
+   "actual_total": 9,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-09-20",
+   "gamePk": 823001,
+   "game": "WSH @ STL",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Over 8.5 (-110, BetRivers)",
+   "price": -110,
+   "book": "BetRivers",
+   "model_p": 0.5888,
+   "edge": 0.065,
+   "divergence": 0.0714,
+   "actual_total": 8,
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-09-20",
+   "gamePk": 823975,
+   "game": "MIN @ LAA",
+   "market": "moneyline",
+   "tag": "edge-band",
+   "pick": "Los Angeles Angels ML (+104, FanDuel)",
+   "price": 104,
+   "book": "FanDuel",
+   "model_p": 0.5005,
+   "edge": 0.0104,
+   "divergence": 0.0457,
+   "final_score": "8-0",
+   "result": "LOSS",
+   "pnl": -1.0
+  },
+  {
+   "date": "2026-09-20",
+   "gamePk": 823247,
+   "game": "MIA @ SD",
+   "market": "total",
+   "tag": "market-proving",
+   "pick": "Under 8 (-102, LowVig.ag)",
+   "price": -102,
+   "book": "LowVig.ag",
+   "model_p": 0.5445,
+   "edge": 0.0395,
+   "divergence": 0.0553,
+   "actual_total": 10,
+   "result": "LOSS",
+   "pnl": -1.0
   }
  ],
  "aggregates": {
-  "record": "175-142-9p",
-  "n_graded": 326,
-  "win_pct": 55.2,
-  "paper_units_net": 11.436,
-  "paper_roi_pct": 3.61,
+  "record": "176-147-9p",
+  "n_graded": 332,
+  "win_pct": 54.5,
+  "paper_units_net": 7.416,
+  "paper_roi_pct": 2.3,
   "by_tag": {
    "R8-hold": {
     "record": "31-6",
@@ -5232,37 +5328,37 @@
     "paper_roi_pct": 23.91
    },
    "edge-band": {
-    "record": "15-9",
-    "n_graded": 24,
-    "win_pct": 62.5,
-    "paper_units_net": 5.885,
-    "paper_roi_pct": 24.52
+    "record": "15-10",
+    "n_graded": 25,
+    "win_pct": 60.0,
+    "paper_units_net": 4.885,
+    "paper_roi_pct": 19.54
    },
    "market-proving": {
-    "record": "129-127-9p",
-    "n_graded": 265,
-    "win_pct": 50.4,
-    "paper_units_net": -3.297,
-    "paper_roi_pct": -1.29
+    "record": "130-131-9p",
+    "n_graded": 270,
+    "win_pct": 49.8,
+    "paper_units_net": -6.317,
+    "paper_roi_pct": -2.42
    }
   },
   "by_market": {
    "moneyline": {
-    "record": "46-15",
-    "n_graded": 61,
-    "win_pct": 75.4,
-    "paper_units_net": 14.733,
-    "paper_roi_pct": 24.15
+    "record": "46-16",
+    "n_graded": 62,
+    "win_pct": 74.2,
+    "paper_units_net": 13.733,
+    "paper_roi_pct": 22.15
    },
    "total": {
-    "record": "129-127-9p",
-    "n_graded": 265,
-    "win_pct": 50.4,
-    "paper_units_net": -3.297,
-    "paper_roi_pct": -1.29
+    "record": "130-131-9p",
+    "n_graded": 270,
+    "win_pct": 49.8,
+    "paper_units_net": -6.317,
+    "paper_roi_pct": -2.42
    }
   },
   "note": "WATCH tier PAPER record \u2014 flat 1u paper, 0u staked, never mixed into the staked ledger.",
-  "last_graded": "2026-09-19"
+  "last_graded": "2026-09-20"
  }
 }

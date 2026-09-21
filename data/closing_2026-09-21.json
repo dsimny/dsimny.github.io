@@ -1,0 +1,98 @@
+{
+ "824787": {
+  "away_ml": -107,
+  "home_ml": -110,
+  "total": 7.5,
+  "credits": {
+   "remaining": 99692,
+   "used": 308,
+   "last_call_cost": 2,
+   "markets": "h2h,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "fetch_closing",
+   "read_utc": "2026-09-21T16:30:25Z"
+  },
+  "over_price": -105,
+  "under_price": -115,
+  "away_name": "Toronto Blue Jays",
+  "home_name": "Baltimore Orioles",
+  "utc": "2026-09-21T22:35:00Z",
+  "history": [
+   {
+    "away_ml": -107,
+    "home_ml": -110,
+    "total": 7.5,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-09-21T16:30:25Z"
+   }
+  ],
+  "captured_utc": "2026-09-21T16:30:25Z",
+  "mins_to_first_pitch": 365
+ },
+ "824221": {
+  "away_ml": 115,
+  "home_ml": -135,
+  "total": 8.5,
+  "credits": {
+   "remaining": 99692,
+   "used": 308,
+   "last_call_cost": 2,
+   "markets": "h2h,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "fetch_closing",
+   "read_utc": "2026-09-21T16:30:25Z"
+  },
+  "over_price": -108,
+  "under_price": -113,
+  "away_name": "Washington Nationals",
+  "home_name": "Detroit Tigers",
+  "utc": "2026-09-21T22:40:00Z",
+  "history": [
+   {
+    "away_ml": 115,
+    "home_ml": -135,
+    "total": 8.5,
+    "over_price": -108,
+    "under_price": -113,
+    "captured_utc": "2026-09-21T16:30:25Z"
+   }
+  ],
+  "captured_utc": "2026-09-21T16:30:25Z",
+  "mins_to_first_pitch": 370
+ },
+ "823169": {
+  "away_ml": -120,
+  "home_ml": 102,
+  "total": 8.5,
+  "credits": {
+   "remaining": 99692,
+   "used": 308,
+   "last_call_cost": 2,
+   "markets": "h2h,totals",
+   "regions": "us",
+   "http_status": 200,
+   "source": "fetch_closing",
+   "read_utc": "2026-09-21T16:30:25Z"
+  },
+  "over_price": -105,
+  "under_price": -115,
+  "away_name": "Minnesota Twins",
+  "home_name": "San Francisco Giants",
+  "utc": "2026-09-22T01:45:00Z",
+  "history": [
+   {
+    "away_ml": -120,
+    "home_ml": 102,
+    "total": 8.5,
+    "over_price": -105,
+    "under_price": -115,
+    "captured_utc": "2026-09-21T16:30:25Z"
+   }
+  ],
+  "captured_utc": "2026-09-21T16:30:25Z",
+  "mins_to_first_pitch": 555
+ }
+}

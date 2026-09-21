@@ -214,7 +214,15 @@ class Store:
                             first = oa if first is None or oa < first else first
                             last = oa if last is None or oa > last else last
                 shards.append({"path": os.path.relpath(p, self.data_dir).replace(os.sep, "/"),
-                               "sport": sport, "kind": fn.split("_")[0],
+                               # rsplit, NOT split: a shard is named <kind>_<ET
+                               # hour>.jsonl and every kind contains an
+                               # underscore, so split("_")[0] truncated
+                               # game_state to "game" and collapsed BOTH
+                               # market_event and market_quote to "market" -
+                               # two different record kinds under one label in
+                               # the committed artifact. Caught by the first
+                               # live smoke run, 2026-09-21.
+                               "sport": sport, "kind": fn.rsplit("_", 1)[0],
                                "sha256": h.hexdigest(), "bytes": os.path.getsize(p),
                                "lines": n_lines, "parsed": n_parsed,
                                "first_observed_at": first, "last_observed_at": last})

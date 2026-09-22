@@ -137,8 +137,12 @@ and every quote arrived already stale (documented in
   were 16–81 s for live events, 16–78 s for pregame ones.
 - ESPN scoreboard: **no payload-level or event-level "last updated" timestamp is
   used anywhere in the repo**, and none is known to exist on the public
-  scoreboard endpoint. UNVERIFIED. ML-1 records `provider_timestamp: null` for
+  scoreboard endpoint. ML-1 records `provider_timestamp: null` for
   game state rather than inventing one.
+  **VERIFIED 2026-09-21/22** on eleven live observations: no such timestamp is
+  supplied, and its absence has a measured consequence. A payload roughly two
+  hours out of date arrived looking entirely fresh, with nothing in it to say
+  so. See `MERCER_LIVE_ML1_ARCHITECTURE.md` section 17.
 
 ## 9. Grading mechanisms
 
@@ -284,8 +288,8 @@ the `check()` self-test idiom, the read-only workflow shape of
 
 | need | source | status |
 |---|---|---|
-| live score / clock / period / status | ESPN scoreboard (free) | fetch VERIFIED-IN-REPO; live fields UNVERIFIED |
-| possession / down / distance / field position / timeouts / last play | ESPN scoreboard `competitions[].situation` | UNVERIFIED; OPTIONAL |
+| live score / clock / period / status | ESPN scoreboard (free) | **VERIFIED LIVE 2026-09-21/22** |
+| possession / down / distance / field position / timeouts / last play | ESPN scoreboard `competitions[].situation` | **VERIFIED LIVE 2026-09-21/22** while in progress; absent once final, which is correct |
 | live moneyline / spread / total quotes per book | The Odds API `/odds`, markets `h2h,spreads,totals` | in-play events present in repo captures (VERIFIED-IN-REPO for h2h); spreads/totals live coverage UNVERIFIED |
 | scores as a cross-check | The Odds API `/scores` | FUTURE, not used |
 | ESPN win probability | `situation.lastPlay.probability` | must never be Open Ledger's model; may be recorded as a reference only |

@@ -12731,17 +12731,54 @@
    "clv_runs": 0.0,
    "clv_pts": -0.22,
    "beat_close": false
+  },
+  {
+   "date": "2026-09-21",
+   "gamePk": 824787,
+   "game": "TOR @ BAL",
+   "market": "total",
+   "side": "Over",
+   "line": 7.5,
+   "price": 100,
+   "model_p": 0.5085,
+   "edge": 0.0085,
+   "wx_applied": false,
+   "actual_total": 7,
+   "result": "LOSS",
+   "pnl": -1.0,
+   "close_line": 7.5,
+   "clv_runs": 0.0,
+   "clv_pts": 2.06,
+   "beat_close": true
+  },
+  {
+   "date": "2026-09-21",
+   "gamePk": 823169,
+   "game": "MIN @ SF",
+   "market": "total",
+   "side": "Under",
+   "line": 8.0,
+   "price": 101,
+   "model_p": 0.5698,
+   "edge": 0.0723,
+   "wx_applied": true,
+   "actual_total": 7,
+   "result": "WIN",
+   "pnl": 1.01,
+   "close_line": 7.5,
+   "clv_runs": 0.5,
+   "beat_close": true
   }
  ],
  "aggregates": {
-  "record": "320-340-24p-2v",
+  "record": "321-341-24p-2v",
   "win_pct": 48.5,
-  "paper_units_net": -37.068,
-  "paper_roi_pct": -5.62,
-  "avg_clv_runs": 0.055,
-  "beat_close_pct": 54.1,
-  "graded_with_clv": 679,
+  "paper_units_net": -37.058,
+  "paper_roi_pct": -5.6,
+  "avg_clv_runs": 0.056,
+  "beat_close_pct": 54.2,
+  "graded_with_clv": 681,
   "note": "PAPER track \u2014 flat 1u, not staked, separate from the moneyline ledger.",
-  "last_graded": "2026-09-20"
+  "last_graded": "2026-09-21"
  }
 }

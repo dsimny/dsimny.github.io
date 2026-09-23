@@ -15,9 +15,10 @@ claimed for him, no résumé is invented, and no expectation claim is made for
 his picks. The record IS the credential, and the record is built so that it
 cannot be flattered:
 
-  * Every official pick is FINGERPRINTED (SHA-256 of the pick, timestamped)
+  * Standard-path official picks are FINGERPRINTED (SHA-256 of the pick, timestamped)
     before kickoff. A pick that was not fingerprinted before its game started
-    books as VOID, in public, with the reason. No screenshot handicapping.
+    books as VOID, in public, with the reason. The owner-directed one-pick
+    Discord recovery exception is documented in MERCER_LEDGER_AMENDMENT_2026-09-21.md.
   * A pick whose text changes after it was fingerprinted is REFUSED by the
     grader, loudly, until a human looks at it. Sharpening a number after the
     fact is exactly what the fingerprint exists to catch.
@@ -1453,21 +1454,55 @@ def week_body(week, doc, entries, commits, stores, show_title=False):
     return "".join(parts)
 
 
+RECOVERY_AMENDMENT = REPO_BLOB + "docs/MERCER_LEDGER_AMENDMENT_2026-09-21.md"
+RECOVERY_NOTICE = (
+    '<p class="callout"><strong>Disclosed ledger exception — September 20, 2026.</strong> '
+    'The Vikings–Bears under was announced in members-only Discord before kickoff, '
+    'but omitted from the website card and never given a public pregame fingerprint. '
+    'It was added after settlement at the owner’s request. The original post quoted '
+    'both -110 and FanDuel -102; the owner selected -102 for the ledger after settlement. '
+    'The current Discord message is weaker evidence than an immutable pregame commitment. '
+    f'<a href="{RECOVERY_AMENDMENT}">Read the evidence and one-pick amendment</a>.</p>'
+)
+
+
+def recovered_picks(entries):
+    """Display explicitly adjudicated ledger recoveries without inventing cards/stamps."""
+    recovered = [e for e in entries if e.get("provenance_type") == "discord_recovery"]
+    if not recovered:
+        return ""
+    parts = ['<h2>Selections recovered from Discord</h2>', RECOVERY_NOTICE]
+    for e in sorted(recovered, key=lambda e: e["kickoff_utc"], reverse=True):
+        parts.append(
+            f'<article class="pick graded-{E(e["result"])}">'
+            f'<h3>{E(e["matchup"])}</h3>'
+            f'<p>{E(e["kickoff_utc"][:10])} · <strong>{E(e["selection"])} '
+            f'({e["price"]:+d}, {E(e["book"])})</strong> · {e["units"]:g} unit</p>'
+            f'<p class="res-{E(e["result"])}"><strong>{E(e["result"])} '
+            f'{e["pnl"]:+.4f}u</strong> · Final: {E(e["final"])}</p>'
+            f'<p>Discord publication: {E(e["published_utc"])}. '
+            f'Added to ledger: {E(e["recorded_utc"])}. No pregame fingerprint.</p>'
+            f'<p><a href="{E(e["source_url"], quote=True)}" rel="noopener">'
+            'Original Discord announcement (members access required)</a></p></article>')
+    return "".join(parts)
+
+
 HOW_THE_RECORD_WORKS = """
 <h2>How the record works</h2>
 <ul>
-  <li><strong>Fingerprinted before kickoff, or not at all.</strong> Each official pick is hashed
+  <li><strong>Standard path: fingerprinted before kickoff.</strong> Each standard-path pick is hashed
   (SHA-256) and timestamped when it is filed. The tool <em>refuses</em> to stamp a pick whose game
   has already started, so a late selection never enters the record in the first place. The stamp is
   printed on every card.</li>
-  <li><strong>A pick counts only once its fingerprint is public.</strong> A stamp sitting on a
+  <li><strong>A standard-path pick counts only once its fingerprint is public.</strong> A stamp sitting on a
   private machine proves nothing to you, so it is not treated as evidence. The commitment is the
   moment the fingerprint reaches the public repository, before kickoff, where you or anyone else
   can read the timestamp without our help. Both times are printed on every card.</li>
-  <li><strong>Nothing is backfilled.</strong> This record begins at the first publicly committed
+  <li><strong>No automatic backfills.</strong> Except for the disclosed one-pick Discord recovery
+  amendment below, this record begins at the first publicly committed
   pick. Older opinions cannot be added later, because every one of them would fail the test above.
   A short honest record is the point; a long retrospective one would be worthless.</li>
-  <li><strong>Late is void.</strong> If a pick reaches grading with no stamp, or a stamp later than
+  <li><strong>Late is void in the automated grader.</strong> If a pick reaches grading with no stamp, or a stamp later than
   its kickoff, it books as <span class="res-VOID">VOID</span> with the reason, and it stays on the
   record where you can see it.</li>
   <li><strong>Edited is refused.</strong> If a pick's text no longer matches its stamp, the grader
@@ -1475,7 +1510,7 @@ HOW_THE_RECORD_WORKS = """
   <li><strong>Graded is frozen.</strong> Once a pick is settled, its selection, line, price, stake
   and result are never recomputed. Editing the card afterwards changes nothing in the ledger, and
   the card says plainly that it was edited.</li>
-  <li><strong>The number is the number Mercer took.</strong> The line, the price and the book are
+  <li><strong>The number is the published number.</strong> The line, the price and the book are
   recorded as they were at the moment of the pick, and are never quietly replaced by a better
   closing number.</li>
   <li><strong>Only OFFICIAL picks count.</strong> Leans and passes are published as opinion, carry
@@ -1494,7 +1529,7 @@ HOW_THE_RECORD_WORKS = """
 <p class="mut">Not yet tracked: closing-line value on Mercer's picks, and whether Mercer and the
 model agreeing on a game means anything. Agreement will be counted before it is ever described as
 making a pick stronger. Both appear here when they are built, not before.</p>
-"""
+""" + RECOVERY_NOTICE
 
 
 def pick_display_week(weeks, now=None):
@@ -1533,7 +1568,8 @@ def render_hub(entries, commits, stores, weeks=None, now=None):
   <span class="kicker">D.J. Mercer Spotlight</span>
   <h1>The games are complicated. The record shouldn't be.</h1>
   <p class="lede">Football through the eyes of a fan. Picks through the discipline of an analyst.
-  Every official pick is fingerprinted before kickoff and graded here in public, win or lose.
+  Official picks are graded here in public, win or lose. Standard-path picks carry a public
+  pregame fingerprint; the disclosed Discord recovery below is an exception.
   <strong>No claim is made that these picks win.</strong> The record below is the only argument
   offered, and it is <a href="/football/mercer/about/">explained in full</a>.</p>
   {subnav("/football/mercer/")}
@@ -1543,6 +1579,7 @@ def render_hub(entries, commits, stores, weeks=None, now=None):
   <p class="mut">Append-only. <a href="/football/mercer/record/">Every graded pick</a>, including
   the losses and the voids. Only OFFICIAL picks count; leans and passes are opinion and are never
   graded.</p>
+  {recovered_picks(entries)}
   {current}
   <h2>Every week</h2>
   <ul class="plain">{wl}</ul>
@@ -1550,7 +1587,7 @@ def render_hub(entries, commits, stores, weeks=None, now=None):
   <a href="/football/">Model football record</a> · <a href="/">Today's board</a></p>
 </div>'''
     write(OUT, inner, "D.J. Mercer Spotlight — Open Ledger Sports",
-          "D.J. Mercer's NFL and college football picks, fingerprinted before kickoff and "
+          "D.J. Mercer's NFL and college football picks with disclosed provenance and "
           "graded in public, win or lose. No outcome is guaranteed.")
     print(f"wrote football/mercer/index.html ({len(entries)} graded, {len(weeks)} weeks)")
 
@@ -1592,8 +1629,8 @@ def record_opened(entries):
     if first:
         return (f'<p class="mut">This record opened with its first committed pick on '
                 f'<strong>{E(nice_date(first[:10]))}</strong>. Nothing before that date was '
-                f'backfilled, and nothing can be: a pick is fingerprinted before kickoff or it '
-                f'never enters the record.</p>')
+                f'backfilled. Standard-path picks require a public pregame fingerprint; the '
+                f'disclosed September 20 Discord recovery is a documented exception.</p>')
     created = (led.get("created_utc") or "")[:10]
     when = f' on <strong>{E(nice_date(created))}</strong>' if created else ""
     return (f'<p class="mut">This record was opened empty{when} and is waiting for its first '
@@ -1615,11 +1652,11 @@ def render_record(entries):
                 f'<td class="res-{e["result"]}">{e["result"]}{void}</td>'
                 f'<td class="num">{e["pnl"]:+.2f}</td>'
                 f'<td>{E(e.get("final", "—"))}</td>'
-                f'<td class="num">{e.get("hours_before_kickoff", "—")}</td></tr>')
+                f'<td>{("Discord recovery; no fingerprint" if e.get("provenance_type") == "discord_recovery" else str(e.get("hours_before_kickoff", "—")) + "h · fingerprint")}</td></tr>')
         table = (f'<div class="tablewrap"><table><thead><tr><th>Week</th><th>League</th>'
                  f'<th>Game</th><th>Pick</th><th>Price</th><th>Book</th><th>Units</th>'
                  f'<th>Result</th><th>P/L</th><th>Final</th>'
-                 f'<th>Hours before kickoff</th></tr></thead>'
+                 f'<th>Pregame evidence</th></tr></thead>'
                  f'<tbody>{"".join(rows)}</tbody></table></div>')
     else:
         table = ('<p class="mut"><strong>Nothing has been graded yet.</strong> This table is empty '
@@ -1705,11 +1742,11 @@ refuses it.</p>
 
 <h2>No screenshot handicapping</h2>
 <p>Anybody can post a winning ticket after the game. That's not analysis.</p>
-<p>Official Mercer selections are fingerprinted and published before the event and become part of
+<p>Standard-path Mercer selections are fingerprinted and published before the event and become part of
 the permanent record. The winners stay. So do the losers. Because credibility shouldn't come from
 one great weekend. It should come from what the ledger says over time.</p>
 <p>There is a stricter version of that promise, and it is the one that actually binds:
-<strong>a selection does not count until its fingerprint is public before kickoff.</strong> A
+<strong>a standard-path selection does not count until its fingerprint is public before kickoff.</strong> A
 timestamp on a private machine is not evidence of anything, because you cannot see it. The
 fingerprint has to be pushed to the public repository while the game is still unplayed, and every
 card prints both the moment it was stamped and how long before kickoff that was.</p>
@@ -1759,7 +1796,7 @@ def render_about():
   <a href="/football/">Model football record</a></p>
 </div>'''
     write(os.path.join(OUT, "about"), inner, "About D.J. Mercer — Open Ledger Sports",
-          "Who D.J. Mercer is, how the Spotlight works, and why every pick is fingerprinted "
+          "Who D.J. Mercer is, how the Spotlight works, and how standard picks are fingerprinted "
           "before kickoff and graded in public.")
     print("wrote football/mercer/about/index.html")
 

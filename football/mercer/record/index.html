@@ -148,27 +148,28 @@
   <p class="lede">Every official selection. Every result. No deleted picks, no disappearing bad
   weeks. <strong>No claim is made that these picks win</strong>; the table is the whole argument.</p>
   <nav class="subnav"><a href="/football/mercer/">Spotlight</a><a href="/football/mercer/record/" class="here">The Mercer Ledger</a><a href="/football/mercer/about/">About D.J. Mercer</a><a href="/football/">Model football record</a></nav>
-  <p class="mut">This record opened with its first committed pick on <strong>Saturday, September 12, 2026</strong>. Nothing before that date was backfilled, and nothing can be: a pick is fingerprinted before kickoff or it never enters the record.</p>
-  <div class="tiles"><div class="tile"><span class="tl">NFL</span><span class="tv">0–1</span><span class="td">-0.25u · ROI -100.0%</span></div><div class="tile"><span class="tl">College Football</span><span class="tv">0–0</span><span class="td">+0.00u · ROI —</span></div><div class="tile"><span class="tl">Combined football</span><span class="tv">0–1</span><span class="td">-0.25u · ROI -100.0%</span></div></div>
-  <div class="tablewrap"><table><thead><tr><th>Week</th><th>League</th><th>Game</th><th>Pick</th><th>Price</th><th>Book</th><th>Units</th><th>Result</th><th>P/L</th><th>Final</th><th>Hours before kickoff</th></tr></thead><tbody><tr><td>2026-09-08</td><td>NFL</td><td>Green Bay Packers @ Minnesota Vikings</td><td><strong>Under 46.5</strong></td><td class="num">-110</td><td>Fanatics</td><td class="num">0.25</td><td class="res-LOSS">LOSS</td><td class="num">-0.25</td><td>Green Bay Packers 22, Minnesota Vikings 39</td><td class="num">43.6</td></tr></tbody></table></div>
+  <p class="mut">This record opened with its first committed pick on <strong>Saturday, September 12, 2026</strong>. Nothing before that date was backfilled. Standard-path picks require a public pregame fingerprint; the disclosed September 20 Discord recovery is a documented exception.</p>
+  <div class="tiles"><div class="tile"><span class="tl">NFL</span><span class="tv">1–1</span><span class="td">+0.73u · ROI +58.4%</span></div><div class="tile"><span class="tl">College Football</span><span class="tv">0–0</span><span class="td">+0.00u · ROI —</span></div><div class="tile"><span class="tl">Combined football</span><span class="tv">1–1</span><span class="td">+0.73u · ROI +58.4%</span></div></div>
+  <div class="tablewrap"><table><thead><tr><th>Week</th><th>League</th><th>Game</th><th>Pick</th><th>Price</th><th>Book</th><th>Units</th><th>Result</th><th>P/L</th><th>Final</th><th>Pregame evidence</th></tr></thead><tbody><tr><td>2026-09-08</td><td>NFL</td><td>Green Bay Packers @ Minnesota Vikings</td><td><strong>Under 46.5</strong></td><td class="num">-110</td><td>Fanatics</td><td class="num">0.25</td><td class="res-LOSS">LOSS</td><td class="num">-0.25</td><td>Green Bay Packers 22, Minnesota Vikings 39</td><td>43.6h · fingerprint</td></tr><tr><td>2026-09-15</td><td>NFL</td><td>Minnesota Vikings @ Chicago Bears</td><td><strong>Under 47.5</strong></td><td class="num">-102</td><td>FanDuel</td><td class="num">1</td><td class="res-WIN">WIN</td><td class="num">+0.98</td><td>Minnesota Vikings 9, Chicago Bears 3</td><td>Discord recovery; no fingerprint</td></tr></tbody></table></div>
   <p class="rgline"><strong>21+.</strong> Open Ledger Sports is an analytics publication, not a sportsbook, and accepts no wagers. Nothing here is betting advice and no outcome is guaranteed. If you or someone you know has a gambling problem, call or text <strong>1-800-GAMBLER</strong>, or see the <a href="https://www.ncpgambling.org/responsible-gambling/safer-sports-betting/" rel="noopener">NCPG's safer sports betting resources</a>.</p>
   <p class="mut">Raw data: <a href="https://github.com/dsimny/dsimny.github.io/blob/main/data/mercer/mercer_ledger.json" rel="noopener">mercer_ledger.json</a>
   · fingerprints: <a href="https://github.com/dsimny/dsimny.github.io/blob/main/data/mercer/commitments.json" rel="noopener">commitments.json</a>.</p>
   
 <h2>How the record works</h2>
 <ul>
-  <li><strong>Fingerprinted before kickoff, or not at all.</strong> Each official pick is hashed
+  <li><strong>Standard path: fingerprinted before kickoff.</strong> Each standard-path pick is hashed
   (SHA-256) and timestamped when it is filed. The tool <em>refuses</em> to stamp a pick whose game
   has already started, so a late selection never enters the record in the first place. The stamp is
   printed on every card.</li>
-  <li><strong>A pick counts only once its fingerprint is public.</strong> A stamp sitting on a
+  <li><strong>A standard-path pick counts only once its fingerprint is public.</strong> A stamp sitting on a
   private machine proves nothing to you, so it is not treated as evidence. The commitment is the
   moment the fingerprint reaches the public repository, before kickoff, where you or anyone else
   can read the timestamp without our help. Both times are printed on every card.</li>
-  <li><strong>Nothing is backfilled.</strong> This record begins at the first publicly committed
+  <li><strong>No automatic backfills.</strong> Except for the disclosed one-pick Discord recovery
+  amendment below, this record begins at the first publicly committed
   pick. Older opinions cannot be added later, because every one of them would fail the test above.
   A short honest record is the point; a long retrospective one would be worthless.</li>
-  <li><strong>Late is void.</strong> If a pick reaches grading with no stamp, or a stamp later than
+  <li><strong>Late is void in the automated grader.</strong> If a pick reaches grading with no stamp, or a stamp later than
   its kickoff, it books as <span class="res-VOID">VOID</span> with the reason, and it stays on the
   record where you can see it.</li>
   <li><strong>Edited is refused.</strong> If a pick's text no longer matches its stamp, the grader
@@ -176,7 +177,7 @@
   <li><strong>Graded is frozen.</strong> Once a pick is settled, its selection, line, price, stake
   and result are never recomputed. Editing the card afterwards changes nothing in the ledger, and
   the card says plainly that it was edited.</li>
-  <li><strong>The number is the number Mercer took.</strong> The line, the price and the book are
+  <li><strong>The number is the published number.</strong> The line, the price and the book are
   recorded as they were at the moment of the pick, and are never quietly replaced by a better
   closing number.</li>
   <li><strong>Only OFFICIAL picks count.</strong> Leans and passes are published as opinion, carry
@@ -195,7 +196,7 @@
 <p class="mut">Not yet tracked: closing-line value on Mercer's picks, and whether Mercer and the
 model agreeing on a game means anything. Agreement will be counted before it is ever described as
 making a pick stronger. Both appear here when they are built, not before.</p>
-
+<p class="callout"><strong>Disclosed ledger exception — September 20, 2026.</strong> The Vikings–Bears under was announced in members-only Discord before kickoff, but omitted from the website card and never given a public pregame fingerprint. It was added after settlement at the owner’s request. The original post quoted both -110 and FanDuel -102; the owner selected -102 for the ledger after settlement. The current Discord message is weaker evidence than an immutable pregame commitment. <a href="https://github.com/dsimny/dsimny.github.io/blob/main/docs/MERCER_LEDGER_AMENDMENT_2026-09-21.md">Read the evidence and one-pick amendment</a>.</p>
   <p class="backline"><a href="/football/mercer/">Spotlight</a> ·
   <a href="/football/mercer/about/">About D.J. Mercer</a> ·
   <a href="/football/">Model football record</a></p>

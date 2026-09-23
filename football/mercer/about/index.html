@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About D.J. Mercer — Open Ledger Sports</title>
-<meta name="description" content="Who D.J. Mercer is, how the Spotlight works, and why every pick is fingerprinted before kickoff and graded in public.">
+<meta name="description" content="Who D.J. Mercer is, how the Spotlight works, and how standard picks are fingerprinted before kickoff and graded in public.">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="shortcut icon" href="/favicon.ico">
 <style>
@@ -205,11 +205,11 @@ refuses it.</p>
 
 <h2>No screenshot handicapping</h2>
 <p>Anybody can post a winning ticket after the game. That's not analysis.</p>
-<p>Official Mercer selections are fingerprinted and published before the event and become part of
+<p>Standard-path Mercer selections are fingerprinted and published before the event and become part of
 the permanent record. The winners stay. So do the losers. Because credibility shouldn't come from
 one great weekend. It should come from what the ledger says over time.</p>
 <p>There is a stricter version of that promise, and it is the one that actually binds:
-<strong>a selection does not count until its fingerprint is public before kickoff.</strong> A
+<strong>a standard-path selection does not count until its fingerprint is public before kickoff.</strong> A
 timestamp on a private machine is not evidence of anything, because you cannot see it. The
 fingerprint has to be pushed to the public repository while the game is still unplayed, and every
 card prints both the moment it was stamped and how long before kickoff that was.</p>
@@ -240,18 +240,19 @@ marketing department.</p>
   
 <h2>How the record works</h2>
 <ul>
-  <li><strong>Fingerprinted before kickoff, or not at all.</strong> Each official pick is hashed
+  <li><strong>Standard path: fingerprinted before kickoff.</strong> Each standard-path pick is hashed
   (SHA-256) and timestamped when it is filed. The tool <em>refuses</em> to stamp a pick whose game
   has already started, so a late selection never enters the record in the first place. The stamp is
   printed on every card.</li>
-  <li><strong>A pick counts only once its fingerprint is public.</strong> A stamp sitting on a
+  <li><strong>A standard-path pick counts only once its fingerprint is public.</strong> A stamp sitting on a
   private machine proves nothing to you, so it is not treated as evidence. The commitment is the
   moment the fingerprint reaches the public repository, before kickoff, where you or anyone else
   can read the timestamp without our help. Both times are printed on every card.</li>
-  <li><strong>Nothing is backfilled.</strong> This record begins at the first publicly committed
+  <li><strong>No automatic backfills.</strong> Except for the disclosed one-pick Discord recovery
+  amendment below, this record begins at the first publicly committed
   pick. Older opinions cannot be added later, because every one of them would fail the test above.
   A short honest record is the point; a long retrospective one would be worthless.</li>
-  <li><strong>Late is void.</strong> If a pick reaches grading with no stamp, or a stamp later than
+  <li><strong>Late is void in the automated grader.</strong> If a pick reaches grading with no stamp, or a stamp later than
   its kickoff, it books as <span class="res-VOID">VOID</span> with the reason, and it stays on the
   record where you can see it.</li>
   <li><strong>Edited is refused.</strong> If a pick's text no longer matches its stamp, the grader
@@ -259,7 +260,7 @@ marketing department.</p>
   <li><strong>Graded is frozen.</strong> Once a pick is settled, its selection, line, price, stake
   and result are never recomputed. Editing the card afterwards changes nothing in the ledger, and
   the card says plainly that it was edited.</li>
-  <li><strong>The number is the number Mercer took.</strong> The line, the price and the book are
+  <li><strong>The number is the published number.</strong> The line, the price and the book are
   recorded as they were at the moment of the pick, and are never quietly replaced by a better
   closing number.</li>
   <li><strong>Only OFFICIAL picks count.</strong> Leans and passes are published as opinion, carry
@@ -278,7 +279,7 @@ marketing department.</p>
 <p class="mut">Not yet tracked: closing-line value on Mercer's picks, and whether Mercer and the
 model agreeing on a game means anything. Agreement will be counted before it is ever described as
 making a pick stronger. Both appear here when they are built, not before.</p>
-
+<p class="callout"><strong>Disclosed ledger exception — September 20, 2026.</strong> The Vikings–Bears under was announced in members-only Discord before kickoff, but omitted from the website card and never given a public pregame fingerprint. It was added after settlement at the owner’s request. The original post quoted both -110 and FanDuel -102; the owner selected -102 for the ledger after settlement. The current Discord message is weaker evidence than an immutable pregame commitment. <a href="https://github.com/dsimny/dsimny.github.io/blob/main/docs/MERCER_LEDGER_AMENDMENT_2026-09-21.md">Read the evidence and one-pick amendment</a>.</p>
   <p class="callout">Analysis and commentary are for informational and entertainment purposes
   only. Open Ledger Sports is not a sportsbook and does not accept wagers. No outcome is
   guaranteed. 21+. If you or someone you know has a gambling problem, call or text

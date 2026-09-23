@@ -27,6 +27,38 @@
    "status": "OFFICIAL",
    "team": null,
    "units": 0.25
+  },
+  {
+   "pick_id": "2026-09-15-nfl-discord-01",
+   "slate_week": "2026-09-15",
+   "sport": "nfl",
+   "matchup": "Minnesota Vikings @ Chicago Bears",
+   "kickoff_utc": "2026-09-20T17:00:00Z",
+   "market": "total",
+   "selection": "Under 47.5",
+   "line": 47.5,
+   "side": "under",
+   "team": null,
+   "price": -102,
+   "units": 1.0,
+   "book": "FanDuel",
+   "conviction": null,
+   "status": "OFFICIAL",
+   "result": "WIN",
+   "pnl": 0.9804,
+   "final": "Minnesota Vikings 9, Chicago Bears 3",
+   "graded_utc": "2026-09-22T00:08:23Z",
+   "recorded_utc": "2026-09-22T00:08:23Z",
+   "committed_utc": null,
+   "commitment_sha256": null,
+   "provenance_type": "discord_recovery",
+   "published_utc": "2026-09-20T13:21:38.664Z",
+   "source_url": "https://discord.com/channels/1529353623887413258/1529354298436354048/1551221805187076136",
+   "source_channel": "members-only",
+   "result_source_url": "https://www.statmuse.com/nfl/game/9-20-2026-min-at-chi-19086",
+   "amendment": "docs/MERCER_LEDGER_AMENDMENT_2026-09-21.md",
+   "price_adjudication": "Owner confirmed FanDuel -102 after settlement; original post also quoted consensus -110.",
+   "provenance_note": "Pregame Discord publication observed after settlement; no public pregame SHA-256 commitment. Added by documented owner-directed exception."
   }
  ]
 }

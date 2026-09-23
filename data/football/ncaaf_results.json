@@ -4770,6 +4770,25 @@
    "status": "STATUS_FINAL",
    "total": 36
   },
+  "401869941": {
+   "away": "Liberty Flames",
+   "away_abbr": "LIB",
+   "away_key": "libertyflames",
+   "away_score": null,
+   "espn_event_id": "401869941",
+   "final": false,
+   "home": "Coastal Carolina Chanticleers",
+   "home_abbr": "CCU",
+   "home_key": "coastalcarolinachanticleers",
+   "home_score": null,
+   "kickoff_utc": "2026-09-24T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401869948": {
    "away": "Georgia Southern Eagles",
    "away_abbr": "GASO",
@@ -4942,5 +4961,5 @@
    "total": 54
   }
  },
- "updated_utc": "2026-09-22T15:22:58Z"
+ "updated_utc": "2026-09-23T15:16:05Z"
 }

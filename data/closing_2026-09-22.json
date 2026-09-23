@@ -552,21 +552,21 @@
   "mins_to_first_pitch": 195
  },
  "823897": {
-  "away_ml": 112,
-  "home_ml": -130,
+  "away_ml": 180,
+  "home_ml": -218,
   "total": 8.5,
   "credits": {
-   "remaining": 99681,
-   "used": 319,
+   "remaining": 99679,
+   "used": 321,
    "last_call_cost": 2,
    "markets": "h2h,totals",
    "regions": "us",
    "http_status": 200,
    "source": "fetch_closing",
-   "read_utc": "2026-09-22T22:30:24Z"
+   "read_utc": "2026-09-23T01:30:28Z"
   },
-  "over_price": -105,
-  "under_price": -115,
+  "over_price": 101,
+  "under_price": -121,
   "away_name": "San Diego Padres",
   "home_name": "Los Angeles Dodgers",
   "utc": "2026-09-23T02:10:00Z",
@@ -586,9 +586,17 @@
     "over_price": -105,
     "under_price": -115,
     "captured_utc": "2026-09-22T22:30:24Z"
+   },
+   {
+    "away_ml": 180,
+    "home_ml": -218,
+    "total": 8.5,
+    "over_price": 101,
+    "under_price": -121,
+    "captured_utc": "2026-09-23T01:30:28Z"
    }
   ],
-  "captured_utc": "2026-09-22T22:30:24Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-23T01:30:28Z",
+  "mins_to_first_pitch": 40
  }
 }

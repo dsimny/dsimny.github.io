@@ -3678,6 +3678,40 @@
    "sha256": "fd9b0525c32a7c69361f47b07e53089d57bcf05a2d1cf6a18a5af7a15e799bd7",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|ATL @ GB|2026-09-25T00:15:00Z": {
+   "block": {
+    "away": "Atlanta Falcons",
+    "best_book": "fanduel",
+    "best_price": -250,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.175,
+    "fair_away": 0.30423,
+    "fair_home": 0.69577,
+    "fair_side": 0.69577,
+    "home": "Green Bay Packers",
+    "kickoff_utc": "2026-09-25T00:15:00Z",
+    "league": "NFL",
+    "matchup": "ATL @ GB",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.349,
+    "relative_price_discount": -0.0266119026,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Green Bay Packers",
+    "sport": "nfl",
+    "t24_capture": "nfl_20260923T183721Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-09-23T18:37:24Z",
+   "kickoff_utc": "2026-09-25T00:15:00Z",
+   "matchup": "ATL @ GB",
+   "sha256": "25ad34dae325e0604a6d70e2d4d0e289f2ae92c7a522ccb5d8e1eef24b51c077",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|ATL @ PIT|2026-09-13T17:00:00Z": {
    "block": {
     "away": "Atlanta Falcons",

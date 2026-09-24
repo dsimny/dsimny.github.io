@@ -281,6 +281,9 @@
    },
    "committed_utc": "2026-09-24T14:37:31Z",
    "kickoff_utc": "2026-09-25T20:00:00Z",
+   "later_disagreements": [
+    "f4ff278622e8489941c606e3847a154ccc73929faaeb6163fc6f22b4dbb25958"
+   ],
    "matchup": "Army Black Knights @ Temple Owls",
    "sha256": "222a076279c18cd85ccdda183b1f8e230a14582ba61596a7cbbea5706998f122",
    "sport": "ncaaf"
@@ -1948,6 +1951,40 @@
    "kickoff_utc": "2026-09-12T23:30:00Z",
    "matchup": "Navy Midshipmen @ Florida Atlantic Owls",
    "sha256": "754404545af9f3ce38a727a8d298b70e0adfe5aa5e0f7a1a816ff41fa5334d80",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Navy Midshipmen @ UAB Blazers|2026-09-25T23:00:00Z": {
+   "block": {
+    "away": "Navy Midshipmen",
+    "best_book": "fanduel",
+    "best_price": -260,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.968,
+    "fair_away": 0.69466,
+    "fair_home": 0.30534,
+    "fair_side": 0.69466,
+    "home": "UAB Blazers",
+    "kickoff_utc": "2026-09-25T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Navy Midshipmen @ UAB Blazers",
+    "move_pts": null,
+    "n_books": 9,
+    "offshore_best": null,
+    "raw_overround_pts": 3.968,
+    "relative_price_discount": -0.0396825397,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Navy Midshipmen",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260924T173722Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-09-24T17:37:26Z",
+   "kickoff_utc": "2026-09-25T23:00:00Z",
+   "matchup": "Navy Midshipmen @ UAB Blazers",
+   "sha256": "79c3fe953283024b8ab79a1589ea8a9a9488189edaa4d6981695d8dabf298914",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Nevada Wolf Pack @ Middle Tennessee Blue Raiders|2026-09-19T23:00:00Z": {

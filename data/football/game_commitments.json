@@ -282,7 +282,8 @@
    "committed_utc": "2026-09-24T14:37:31Z",
    "kickoff_utc": "2026-09-25T20:00:00Z",
    "later_disagreements": [
-    "f4ff278622e8489941c606e3847a154ccc73929faaeb6163fc6f22b4dbb25958"
+    "f4ff278622e8489941c606e3847a154ccc73929faaeb6163fc6f22b4dbb25958",
+    "6bde49ee9d689c2b17c6102ebf2b30d063d74a987afc1b33998af7bf29dd74ea"
    ],
    "matchup": "Army Black Knights @ Temple Owls",
    "sha256": "222a076279c18cd85ccdda183b1f8e230a14582ba61596a7cbbea5706998f122",
@@ -2252,6 +2253,40 @@
    "kickoff_utc": "2026-09-12T20:00:00Z",
    "matchup": "Northern Colorado Bears @ Wyoming Cowboys",
    "sha256": "c31375008bed1987be25f8f1614852b989d6ba0062e007500059402d40df8ccb",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Northwestern Wildcats @ Indiana Hoosiers|2026-09-26T00:00:00Z": {
+   "block": {
+    "away": "Northwestern Wildcats",
+    "best_book": "draftkings",
+    "best_price": 1100,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 2.451,
+    "fair_away": 0.08756,
+    "fair_home": 0.91244,
+    "fair_side": 0.08756,
+    "home": "Indiana Hoosiers",
+    "kickoff_utc": "2026-09-26T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Northwestern Wildcats @ Indiana Hoosiers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.828,
+    "relative_price_discount": 0.048245614,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Northwestern Wildcats",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260924T183724Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-09-24T18:37:30Z",
+   "kickoff_utc": "2026-09-26T00:00:00Z",
+   "matchup": "Northwestern Wildcats @ Indiana Hoosiers",
+   "sha256": "c1cbf1fe66d2e8c2a679048cf11ebb80cb4a0a2e3527842bb6dd5d3cf9f2eae4",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Ohio Bobcats @ South Alabama Jaguars|2026-09-19T23:00:00Z": {

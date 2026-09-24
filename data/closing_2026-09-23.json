@@ -512,20 +512,20 @@
   "mins_to_first_pitch": 190
  },
  "823894": {
-  "away_ml": 140,
-  "home_ml": -169,
+  "away_ml": 146,
+  "home_ml": -173,
   "total": 7.5,
   "credits": {
-   "remaining": 99671,
-   "used": 329,
+   "remaining": 99669,
+   "used": 331,
    "last_call_cost": 2,
    "markets": "h2h,totals",
    "regions": "us",
    "http_status": 200,
    "source": "fetch_closing",
-   "read_utc": "2026-09-23T22:30:26Z"
+   "read_utc": "2026-09-24T01:30:24Z"
   },
-  "over_price": -110,
+  "over_price": -109,
   "under_price": -110,
   "away_name": "San Diego Padres",
   "home_name": "Los Angeles Dodgers",
@@ -546,27 +546,35 @@
     "over_price": -110,
     "under_price": -110,
     "captured_utc": "2026-09-23T22:30:26Z"
+   },
+   {
+    "away_ml": 146,
+    "home_ml": -173,
+    "total": 7.5,
+    "over_price": -109,
+    "under_price": -110,
+    "captured_utc": "2026-09-24T01:30:24Z"
    }
   ],
-  "captured_utc": "2026-09-23T22:30:26Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-24T01:30:24Z",
+  "mins_to_first_pitch": 40
  },
  "823086": {
-  "away_ml": 105,
-  "home_ml": -123,
+  "away_ml": 108,
+  "home_ml": -127,
   "total": 7.5,
   "credits": {
-   "remaining": 99671,
-   "used": 329,
+   "remaining": 99669,
+   "used": 331,
    "last_call_cost": 2,
    "markets": "h2h,totals",
    "regions": "us",
    "http_status": 200,
    "source": "fetch_closing",
-   "read_utc": "2026-09-23T22:30:26Z"
+   "read_utc": "2026-09-24T01:30:24Z"
   },
-  "over_price": -118,
-  "under_price": -104,
+  "over_price": -115,
+  "under_price": -105,
   "away_name": "Houston Astros",
   "home_name": "Seattle Mariners",
   "utc": "2026-09-24T02:10:00Z",
@@ -586,9 +594,17 @@
     "over_price": -118,
     "under_price": -104,
     "captured_utc": "2026-09-23T22:30:26Z"
+   },
+   {
+    "away_ml": 108,
+    "home_ml": -127,
+    "total": 7.5,
+    "over_price": -115,
+    "under_price": -105,
+    "captured_utc": "2026-09-24T01:30:24Z"
    }
   ],
-  "captured_utc": "2026-09-23T22:30:26Z",
-  "mins_to_first_pitch": 220
+  "captured_utc": "2026-09-24T01:30:24Z",
+  "mins_to_first_pitch": 40
  }
 }

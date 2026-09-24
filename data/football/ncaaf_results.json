@@ -2129,6 +2129,25 @@
    "status": "STATUS_FINAL",
    "total": 56
   },
+  "401858234": {
+   "away": "Clemson Tigers",
+   "away_abbr": "CLEM",
+   "away_key": "clemsontigers",
+   "away_score": null,
+   "espn_event_id": "401858234",
+   "final": false,
+   "home": "California Golden Bears",
+   "home_abbr": "CAL",
+   "home_key": "californiagoldenbears",
+   "home_score": null,
+   "kickoff_utc": "2026-09-26T02:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401858422": {
    "away": "Eastern Illinois Panthers",
    "away_abbr": "EIU",
@@ -2870,6 +2889,44 @@
    "status": "STATUS_FINAL",
    "total": 64
   },
+  "401858461": {
+   "away": "Northwestern Wildcats",
+   "away_abbr": "NU",
+   "away_key": "northwesternwildcats",
+   "away_score": null,
+   "espn_event_id": "401858461",
+   "final": false,
+   "home": "Indiana Hoosiers",
+   "home_abbr": "IU",
+   "home_key": "indianahoosiers",
+   "home_score": null,
+   "kickoff_utc": "2026-09-26T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401858468": {
+   "away": "Howard Bison",
+   "away_abbr": "HOW",
+   "away_key": "howardbison",
+   "away_score": null,
+   "espn_event_id": "401858468",
+   "final": false,
+   "home": "Rutgers Scarlet Knights",
+   "home_abbr": "RUTG",
+   "home_key": "rutgersscarletknights",
+   "home_score": null,
+   "kickoff_utc": "2026-09-25T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401858471": {
    "away": "Northern Iowa Panthers",
    "away_abbr": "UNI",
@@ -3610,6 +3667,44 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 76
+  },
+  "401862778": {
+   "away": "Navy Midshipmen",
+   "away_abbr": "NAVY",
+   "away_key": "navymidshipmen",
+   "away_score": null,
+   "espn_event_id": "401862778",
+   "final": false,
+   "home": "UAB Blazers",
+   "home_abbr": "UAB",
+   "home_key": "uabblazers",
+   "home_score": null,
+   "kickoff_utc": "2026-09-25T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401862779": {
+   "away": "Army Black Knights",
+   "away_abbr": "ARMY",
+   "away_key": "armyblackknights",
+   "away_score": null,
+   "espn_event_id": "401862779",
+   "final": false,
+   "home": "Temple Owls",
+   "home_abbr": "TEM",
+   "home_key": "templeowls",
+   "home_score": null,
+   "kickoff_utc": "2026-09-25T20:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   },
   "401864424": {
    "away": "Merrimack Warriors",
@@ -4961,5 +5056,5 @@
    "total": 54
   }
  },
- "updated_utc": "2026-09-23T15:16:05Z"
+ "updated_utc": "2026-09-24T15:41:13Z"
 }

@@ -433,6 +433,13 @@
    "snapshot_sha256": "027e386946f0ffde406e7a13040d45d1d325d86038525b835502898adb214153",
    "committed_utc": "2026-09-23T15:10:27Z",
    "revealed": true
+  },
+  {
+   "date": "2026-09-24",
+   "board_sha256": "701b4792900cd92b8af199b20377c4696a287347664525c470ce0fb5ff4f7c24",
+   "snapshot_sha256": "013aeefea9d148ed7f6aeb715141c7985b53726d156e16e5000e47253ec561e2",
+   "committed_utc": "2026-09-24T15:10:22Z",
+   "revealed": false
   }
  ]
 }

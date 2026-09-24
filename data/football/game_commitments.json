@@ -251,6 +251,40 @@
    "sha256": "4981fca995bdf7cebea566fee9496848c18bbdc4be5a082e5b07308243ef0458",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Army Black Knights @ Temple Owls|2026-09-25T20:00:00Z": {
+   "block": {
+    "away": "Army Black Knights",
+    "best_book": "betmgm",
+    "best_price": 135,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.338,
+    "fair_away": 0.5833,
+    "fair_home": 0.4167,
+    "fair_side": 0.4167,
+    "home": "Temple Owls",
+    "kickoff_utc": "2026-09-25T20:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Army Black Knights @ Temple Owls",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.339,
+    "relative_price_discount": -0.0211933214,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Temple Owls",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260924T143724Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-09-24T14:37:31Z",
+   "kickoff_utc": "2026-09-25T20:00:00Z",
+   "matchup": "Army Black Knights @ Temple Owls",
+   "sha256": "222a076279c18cd85ccdda183b1f8e230a14582ba61596a7cbbea5706998f122",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|BYU Cougars @ Colorado State Rams|2026-09-19T23:30:00Z": {
    "block": {
     "away": "BYU Cougars",

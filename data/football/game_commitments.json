@@ -283,7 +283,8 @@
    "kickoff_utc": "2026-09-25T20:00:00Z",
    "later_disagreements": [
     "f4ff278622e8489941c606e3847a154ccc73929faaeb6163fc6f22b4dbb25958",
-    "6bde49ee9d689c2b17c6102ebf2b30d063d74a987afc1b33998af7bf29dd74ea"
+    "6bde49ee9d689c2b17c6102ebf2b30d063d74a987afc1b33998af7bf29dd74ea",
+    "4bc55ba23a8394dd595a45524f6bf63db35dbbb5cea1183184a3c409b0071103"
    ],
    "matchup": "Army Black Knights @ Temple Owls",
    "sha256": "222a076279c18cd85ccdda183b1f8e230a14582ba61596a7cbbea5706998f122",
@@ -478,6 +479,40 @@
    "kickoff_utc": "2026-09-12T19:30:00Z",
    "matchup": "California Golden Bears @ Syracuse Orange",
    "sha256": "d28454afe4036ef6bf86def70029a80c444924eaff3cbc4a85a0554c05289d5b",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Clemson Tigers @ California Golden Bears|2026-09-26T02:30:00Z": {
+   "block": {
+    "away": "Clemson Tigers",
+    "best_book": "williamhill_us",
+    "best_price": -110,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 3.6,
+    "fair_away": 0.50968,
+    "fair_home": 0.49032,
+    "fair_side": 0.50968,
+    "home": "California Golden Bears",
+    "kickoff_utc": "2026-09-26T02:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Clemson Tigers @ California Golden Bears",
+    "move_pts": null,
+    "n_books": 7,
+    "offshore_best": null,
+    "raw_overround_pts": 4.945,
+    "relative_price_discount": -0.0277191501,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Clemson Tigers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20260924T203725Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-09-24T20:37:29Z",
+   "kickoff_utc": "2026-09-26T02:30:00Z",
+   "matchup": "Clemson Tigers @ California Golden Bears",
+   "sha256": "b79bfbbe9e70018e035591e4aeb53118a92b52e7f2799b7e4d4a77a69c68b057",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Coastal Carolina Chanticleers @ Delaware Blue Hens|2026-09-19T15:30:00Z": {
@@ -2285,6 +2320,9 @@
    },
    "committed_utc": "2026-09-24T18:37:30Z",
    "kickoff_utc": "2026-09-26T00:00:00Z",
+   "later_disagreements": [
+    "342a0230aa50da366759ea1a9557c4dff7c326cf8377fde5968a3ef3e73b7025"
+   ],
    "matchup": "Northwestern Wildcats @ Indiana Hoosiers",
    "sha256": "c1cbf1fe66d2e8c2a679048cf11ebb80cb4a0a2e3527842bb6dd5d3cf9f2eae4",
    "sport": "ncaaf"

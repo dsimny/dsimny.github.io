@@ -181,16 +181,36 @@ supply but has not been verified from this environment.
 | current score | REQUIRED when state is in or post | recorded `null` when pre — ESPN reports "0" for an unplayed game and 0 is not a score |
 | season year / type | REQUIRED | the season-type allowlist (regular season only) is inherited for any future grading |
 | observation timestamp | REQUIRED | `observed_at` |
-| period / quarter | OPTIONAL | `status.period` |
-| clock | OPTIONAL | `status.displayClock` and `status.clock` |
-| possession | OPTIONAL | `situation.possession` (team id, resolved to home/away) |
-| down, distance, yard line | OPTIONAL | `situation.down/distance/yardLine`, plus the text forms |
-| timeout state | OPTIONAL | `situation.homeTimeouts/awayTimeouts` |
-| recent scoring event / last play | OPTIONAL | `situation.lastPlay` text, type, score value |
-| red-zone flag | OPTIONAL | `situation.isRedZone` |
-| play state, drive state | FUTURE | not on the scoreboard; would need the summary/play-by-play endpoint |
-| most recent play timestamp | FUTURE | no timestamp is attached to `lastPlay` on the scoreboard |
-| ESPN win probability | RECORDED, NEVER AN INPUT | a third party's model; may be kept as a reference series only |
+| period / quarter | OPTIONAL | `status.period`. MEASURED: present in every state, but see the zero-value note below |
+| clock | OPTIONAL | `status.displayClock` and `status.clock`. MEASURED: present in every state, same note |
+| possession | OPTIONAL | `situation.possession` (team id, resolved to home/away). MEASURED: present while in progress, absent once final |
+| down, distance, yard line | OPTIONAL | `situation.down/distance/yardLine`. MEASURED: present while in progress, absent once final. The text forms ARE present in genuine live play; their absence on 2026-09-22 came from a stale payload. `yardLine` is absolute from the home goal and does NOT match the number shown in the text form, so it is PRESENT BUT AMBIGUOUS |
+| timeout state | OPTIONAL | `situation.homeTimeouts/awayTimeouts`. MEASURED: present while in progress, absent once final |
+| recent scoring event / last play | OPTIONAL | `situation.lastPlay` text, type, score value. MEASURED: present while in progress, absent once final. Carries the scoring event through `score_value` |
+| red-zone flag | OPTIONAL | `situation.isRedZone`. MEASURED: present while in progress, absent once final |
+| play state, drive state | FUTURE | not on the scoreboard; would need the summary/play-by-play endpoint. MEASURED: confirmed absent |
+| most recent play timestamp | FUTURE | no timestamp is attached to `lastPlay` on the scoreboard. MEASURED: confirmed absent |
+| ESPN win probability | RECORDED, NEVER AN INPUT | a third party's model; may be kept as a reference series only. MEASURED 2026-09-24/25: PRESENT on every in-progress observation. It remains barred as a model input; recording it is all that is permitted |
+
+**MEASURED 2026-09-21/22 against NYG at LA, the first live captures**
+(smoke runs 35673309148 and 35682762374, ESPN only, no credits spent). Two
+provider facts that the classification above now rests on rather than assumes:
+
+1. **The `situation` block is state-dependent, not intermittent.** Every field
+   sourced from it was present while `status_state == "in"` and absent on every
+   observation once `status_state == "post"`. That is not a gap in the feed and
+   must not be treated as one: a consumer reads those fields only while the
+   game is in progress, and their absence afterwards is correct.
+2. **`period` and `clock` are ALWAYS present and are NOT always meaningful.**
+   Before kickoff ESPN sent `period 0`, `clock 0.0`, `displayClock "0:00"`.
+   After the final it sent `period 4`, `clock 0.0`, `displayClock "0:00"`. The
+   same zero appears at a genuinely meaningful moment, the end of a period in
+   progress. These fields are therefore **PRESENT BUT AMBIGUOUS READ ALONE**,
+   and any consumer must gate them on `status_state`, which is REQUIRED and was
+   present on every observation. ML-1 records what the provider sent and does
+   not null them; the gating belongs to the consumer.
+   This is the same trap the project already documents for scores, where ESPN
+   reports "0" for a game that has not been played.
 
 A REQUIRED field that is absent makes the record `incomplete` and it is stored
 as such with the missing names listed. An OPTIONAL field absent is stored as
@@ -280,6 +300,23 @@ drop. The set:
   it moves. **TO BE SET FROM ML-1 EVIDENCE:** the exact rule (consecutive
   count and clock tolerance) is set from the measured ESPN update cadence, same
   deadline, same evidence-only constraint.
+  **MEASURED 2026-09-22, AND THE GUARD IS NOW REQUIRED TO COVER A SECOND
+  FAILURE MODE.** Smoke run 35682762374 observed, at 03:20:21Z, an
+  internally consistent in-progress payload reading period 1, 0:11 on the
+  clock, 0-7, with a last play of an extra point. Ninety seconds later, and
+  for five consecutive observations after that, ESPN reported the same game
+  FINAL at 6-28 in period 4. The game had in fact kicked off at 00:47Z, so the
+  first payload was roughly two hours out of date. Nothing inside it was
+  malformed, no field was missing, and it carried no provider timestamp,
+  because the scoreboard supplies none. **A single observation cannot be shown
+  to be stale from its own contents.** The identical-values rule above would
+  never have caught this one, since the stale payload differed from its
+  neighbours rather than repeating them. The guard must therefore detect BOTH
+  a feed that has stopped moving AND a payload that has jumped backwards:
+  any decrease in period, any increase in remaining clock within a period, any
+  decrease in either score, and any `post` to `in` transition make the state
+  unusable. This is an ADDITIONAL requirement on the guard, never a relaxation
+  of it, and it is recorded here before any model reads a single observation.
 - **event identity guard** — a quote is usable only when its canonical event
   id joins exactly one game-state record for the same tick; zero or several
   is unusable.

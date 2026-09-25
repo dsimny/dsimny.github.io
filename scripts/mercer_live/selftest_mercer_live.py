@@ -722,8 +722,21 @@ check(od["n_events_returned"] == 4 and od["n_events_stored"] == 3 and od["n_even
 d = store.digest("2026-09-13")
 check(d["odds_calls"] == 2 and d["credits_spent"] == 6 and d["runs"] == 6,
       f"digest counts runs, calls and credits from the run records ({d['runs']} runs, {d['odds_calls']} calls, {d['credits_spent']} credits)")
-sh = [s for s in d["shards"] if s["kind"] == "market" or s["path"].endswith("market_quote_14.jsonl")]
-check(sh and all(s["lines"] == s["parsed"] for s in d["shards"]), "every shard line parses")
+check(all(s["lines"] == s["parsed"] for s in d["shards"]), "every shard line parses")
+# THE DIGEST NAMES EACH KIND IN FULL. The first live smoke run (2026-09-21)
+# showed game_state_15.jsonl digested as kind "game": the label came from
+# split("_")[0], which also collapsed market_event and market_quote to one
+# word. The path disambiguated it, but the labelled field in the COMMITTED
+# artifact was wrong. Asserted per kind so it cannot regress to a prefix.
+kinds = {s["kind"] for s in d["shards"]}
+check(kinds and kinds <= set(common.KINDS),
+      f"every digested shard names a real record kind ({sorted(kinds)})")
+for k in ("game_state", "market_event", "market_quote"):
+    hits = [s for s in d["shards"] if s["path"].endswith(f"{k}_14.jsonl")]
+    check(len(hits) == 1 and hits[0]["kind"] == k,
+          f"{k} shard is digested as kind {k!r}, not a truncated prefix")
+check(len({s["kind"] for s in d["shards"] if s["kind"].startswith("market")}) == 2,
+      "market_event and market_quote stay DISTINCT kinds in the digest")
 p = os.path.join(tmp, d["shards"][0]["path"])
 h0 = d["shards"][0]["sha256"]
 with io.open(p, "a", encoding="utf-8") as f:

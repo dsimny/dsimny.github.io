@@ -91,6 +91,43 @@ jobs:
           find "$STORE" -type f | sed "s#$RUNNER_TEMP/##" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           echo "Nothing was committed or posted. The observations are in the job log and in the run artifact for 7 days." >> "$GITHUB_STEP_SUMMARY"
+          # THE FIELD EVIDENCE, PRINTED LAST AND COMPACT. The raw dumps above are
+          # thousands of lines and a log reader that truncates to a tail window
+          # cannot reach them, which is exactly what happened on 2026-09-22.
+          # This block is the answer to "what does ESPN actually send while a
+          # game is in progress", so it goes where it cannot be cut off.
+          echo "===== LIVE FIELD EVIDENCE ====="
+          python - "$STORE" <<'PY'
+          import glob, json, sys
+          rows = []
+          for f in sorted(glob.glob(sys.argv[1] + "/raw/*/*/game_state_*.jsonl")):
+              for line in open(f, encoding="utf-8"):
+                  if line.strip():
+                      rows.append(json.loads(line))
+          rows.sort(key=lambda r: r["observed_at"])
+          print(f"{len(rows)} game_state observations")
+          keys = ["observed_at", "status_state", "status_name", "period", "display_clock",
+                  "clock_seconds", "away_score", "home_score", "possession", "down",
+                  "distance", "yard_line", "is_red_zone", "home_timeouts", "away_timeouts",
+                  "down_distance_text", "possession_text", "espn_win_probability_home"]
+          for r in rows:
+              print("OBS " + " | ".join(f"{k}={r.get(k)!r}" for k in keys))
+          for r in rows:
+              print("MISS", r["observed_at"], "required=", r.get("missing_required"),
+                    "optional=", r.get("missing_optional"))
+          for r in rows:
+              print("LASTPLAY", r["observed_at"], json.dumps(r.get("last_play")))
+          if rows:
+              r = rows[-1]
+              print("IDENTITY", r.get("canonical_event_id"), r.get("away"), "@", r.get("home"),
+                    "kickoff", r.get("scheduled_start"), "season_type", r.get("season_type"),
+                    "provider_event_id", r.get("provider_event_id"), "league", r.get("league"),
+                    "sport", r.get("sport"), "source", r.get("source"),
+                    "provider_timestamp", r.get("provider_timestamp"))
+          print("DISTINCT observation_ids", len({r["observation_id"] for r in rows}), "of", len(rows))
+          print("DISTINCT run_ids", len({r["run_id"] for r in rows}), "of", len(rows))
+          print("DISTINCT observed_at", len({r["observed_at"] for r in rows}), "of", len(rows))
+          PY
       - name: Upload the tick for inspection
         uses: actions/upload-artifact@v4
         with:

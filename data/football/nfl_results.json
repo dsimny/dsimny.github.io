@@ -613,20 +613,20 @@
    "away": "ATL",
    "away_abbr": "ATL",
    "away_name": "Atlanta Falcons",
-   "away_score": null,
+   "away_score": 35,
    "espn_event_id": "401872948",
-   "final": false,
+   "final": true,
    "home": "GB",
    "home_abbr": "GB",
    "home_name": "Green Bay Packers",
-   "home_score": null,
+   "home_score": 14,
    "kickoff_utc": "2026-09-25T00:15:00Z",
-   "margin": null,
+   "margin": -21,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 49
   },
   "401873272": {
    "away": "DET",
@@ -1541,5 +1541,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-09-24T15:41:14Z"
+ "updated_utc": "2026-09-25T15:42:55Z"
 }

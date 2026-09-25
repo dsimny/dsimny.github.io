@@ -413,11 +413,27 @@ line was read directly in run 35673309148 on 2026-09-21.
 and its behaviour is verified against real providers rather than fixtures.
 
 Evidence behind the freeze, all of it ESPN-only with zero Odds API credits
-spent: nineteen live observations across four runs on two game nights, covering
-pregame, in-progress and final states, a period transition, a two-hour-stale
+spent: **23 observations across 5 smoke runs on two game nights** — 14
+in-progress, 5 final, 4 pregame — covering a period transition, a two-hour-stale
 payload, and two byte-identical consecutive observations during live play.
 Twenty-two test suites green, including 229 hermetic checks in
 `selftest_mercer_live.py`.
+
+| run | date | ticks | states observed |
+|---|---|---:|---|
+| 35644644064 | 2026-09-21 | 2 | 2 pregame (rehearsal, before kickoff) |
+| 35673309148 | 2026-09-22 | 5 | 1 pregame, 4 in progress |
+| 35682762374 | 2026-09-22 | 6 | 1 in progress (the stale payload), 5 final |
+| 36080139388 | 2026-09-25 | 8 | 1 pregame, 7 in progress |
+| 36080802566 | 2026-09-25 | 2 | 2 in progress (identical pair) |
+
+**AMENDMENT, 2026-09-25, same day as the freeze.** The paragraph above first
+read "nineteen live observations across four runs". Both numbers were wrong: a
+miscount, not a change of evidence. The run ids and their tick counts are listed
+above so the total can be checked rather than taken on trust, and the underlying
+runs, logs and artifacts are unchanged. Recorded as an amendment rather than
+edited silently, because a frozen record whose numbers move without a note is
+worth nothing.
 
 **What is frozen.** The record schema (`ml1-v1`) and its three kinds; the
 canonical event id and the join rules including every named refusal; the

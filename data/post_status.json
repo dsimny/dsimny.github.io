@@ -2,32 +2,6 @@
  "posts": [
   {
    "date": "2026-09-20",
-   "mode": "email",
-   "result": "sent",
-   "http_status": 200,
-   "detail": "9e11762e-062b-4a2a-9240-a8a23011d1fb",
-   "at_utc": "2026-09-20T15:10:23Z"
-  },
-  {
-   "date": "2026-09-20",
-   "mode": "blog",
-   "result": "posted",
-   "http_status": 200,
-   "channel_id": "1529354000020013116",
-   "detail": "",
-   "at_utc": "2026-09-20T15:10:24Z"
-  },
-  {
-   "date": "2026-09-20",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-09-21T08:10:24Z"
-  },
-  {
-   "date": "2026-09-20",
    "mode": "x",
    "result": "failed",
    "http_status": 402,
@@ -256,6 +230,31 @@
    "channel_id": "1529354000020013116",
    "detail": "",
    "at_utc": "2026-09-24T15:10:25Z"
+  },
+  {
+   "date": "2026-09-24",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-09-25T08:10:24Z"
+  },
+  {
+   "date": "2026-09-24",
+   "mode": "x",
+   "result": "failed",
+   "http_status": 402,
+   "detail": "{\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}",
+   "at_utc": "2026-09-25T08:10:24Z"
+  },
+  {
+   "date": "2026-09-24",
+   "mode": "facebook",
+   "result": "posted",
+   "http_status": 200,
+   "detail": "1263139090223888_122114813871472521",
+   "at_utc": "2026-09-25T08:10:29Z"
   }
  ]
 }

@@ -355,3 +355,87 @@ exists: the stale-state guard must catch a payload that jumps BACKWARDS, not
 only a feed that stops moving. A single observation cannot carry that judgement
 on its own, so it is a property of the series, and the series is exactly what
 this package stores.
+
+
+## 18. Second live capture, 2026-09-24/25: what changed in the answers
+
+ATL at GB, runs 36080139388 (eight ticks, sixty seconds apart) and 36080802566
+(two ticks). ESPN only, no credits. Seven of the eight observations in the first
+run were genuinely in progress, and they correct three classifications that
+section 17 got wrong.
+
+**Section 17's "never supplied" list was drawn from a STALE payload, and a
+stale payload is impoverished.** During genuine live play ESPN supplied
+`downDistanceText` ("4th & 4 at GB 37"), `possessionText` ("GB 37") and its own
+win probability (0.7031, 0.6995, 0.6938, ...) on every in-progress observation.
+`missing_optional` was EMPTY on all seven. The 2026-09-22 observation that
+lacked them was the two-hour-stale one. That is a useful secondary property of
+the staleness hazard: the stale payload carried fewer fields than a fresh one.
+It is NOT a reliable detector and must not be used as one, because a fresh
+pregame payload is also sparse. The backwards-jump rule in the preregistration
+stays the guard.
+
+**Game state does evolve, and the series shows it.** Within period 2 the clock
+ran 900, 888, 845, 763, 718, 713, 634 seconds, strictly decreasing across seven
+observations a minute apart. Possession changed twice, down moved 4, 2, 1, 1, 2,
+3, 1, distance and yard line both moved, and the period transition itself was
+captured in a last play reading "END QUARTER 1". Score held at 7-7 throughout,
+which is why the freeze bar asked for any one of several fields to move rather
+than the score specifically.
+
+**`yard_line` is absolute and does NOT match the number a reader sees.** With
+Atlanta in possession at their own 24, `down_distance_text` read "2nd & 3 at ATL
+24" while `yard_line` read 76. Across all seven observations, with both teams in
+possession at different times, the value was consistent with yards measured from
+the HOME team's goal line on a 0 to 100 field. It must never be read as "yards
+to the end zone" for the team with the ball. Recorded as PRESENT BUT AMBIGUOUS.
+
+**Identical consecutive observations happen during live play, not only after
+the final.** Run 36080802566 observed the same official timeout at 10:34 twice,
+sixty seconds apart, with every single field identical. Both were stored, with
+distinct observation ids, distinct run ids and distinct observed_at. That is the
+preregistration's section 6 rule working on live data rather than on a fixture.
+
+**Retry idempotency, confirmed by count.** The compact evidence block runs AFTER
+the retry and reads the shards from disk. It reported exactly eight observations
+for the eight-tick run and exactly two for the two-tick run, so the replayed
+run_id added nothing in either case. The literal "retry changed no shard byte"
+line was read directly in run 35673309148 on 2026-09-21.
+
+**The digest fix is live.** The two-tick run's digest records
+`"kind": "game_state"` rather than the truncated `"game"`.
+
+---
+
+## 19. FREEZE: mercer-live-ml1-v1.0
+
+**Status: FROZEN 2026-09-25.** ML-1, the live observation boundary, is complete
+and its behaviour is verified against real providers rather than fixtures.
+
+Evidence behind the freeze, all of it ESPN-only with zero Odds API credits
+spent: nineteen live observations across four runs on two game nights, covering
+pregame, in-progress and final states, a period transition, a two-hour-stale
+payload, and two byte-identical consecutive observations during live play.
+Twenty-two test suites green, including 229 hermetic checks in
+`selftest_mercer_live.py`.
+
+**What is frozen.** The record schema (`ml1-v1`) and its three kinds; the
+canonical event id and the join rules including every named refusal; the
+observation-time semantics; the append-only store with its deterministic
+observation ids, confined writes and daily digests; the phase label and the rule
+that only the exact label `pregame` may be read as pregame; the credit floor,
+daily cap and hourly booking throttle; and the package's non-goals.
+
+**What is NOT frozen and never was.** The capture cadence, the lead window, the
+markets string, and the choice of scheduler. Those are operational settings, not
+contract.
+
+**What would reopen it.** A live defect found in the capture path, on the same
+terms Open Ledger Play's Package 3 freeze used: frozen unless a live defect is
+found, and a correction then ships as a dated amendment rather than by rewriting
+this record. Adding a field, a record kind or a second provider is a new
+package, not an edit here.
+
+**What this freeze does NOT authorise.** No model, no candidate, no signal, no
+unit, no ledger, no Discord mode, no site surface, and no public claim of any
+kind. ML-1 observes. Everything downstream still has to earn its place.

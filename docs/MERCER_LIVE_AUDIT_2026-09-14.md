@@ -289,7 +289,7 @@ the `check()` self-test idiom, the read-only workflow shape of
 | need | source | status |
 |---|---|---|
 | live score / clock / period / status | ESPN scoreboard (free) | **VERIFIED LIVE 2026-09-21/22** |
-| possession / down / distance / field position / timeouts / last play | ESPN scoreboard `competitions[].situation` | **VERIFIED LIVE 2026-09-21/22** while in progress; absent once final, which is correct |
+| possession / down / distance / field position / timeouts / last play | ESPN scoreboard `competitions[].situation` | **VERIFIED LIVE 2026-09-21/22 and 2026-09-24/25** while in progress, including the text forms and ESPN's win probability; absent once final, which is correct. See `MERCER_LIVE_ML1_ARCHITECTURE.md` section 18 |
 | live moneyline / spread / total quotes per book | The Odds API `/odds`, markets `h2h,spreads,totals` | in-play events present in repo captures (VERIFIED-IN-REPO for h2h); spreads/totals live coverage UNVERIFIED |
 | scores as a cross-check | The Odds API `/scores` | FUTURE, not used |
 | ESPN win probability | `situation.lastPlay.probability` | must never be Open Ledger's model; may be recorded as a reference only |

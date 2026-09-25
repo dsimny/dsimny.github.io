@@ -184,13 +184,13 @@ supply but has not been verified from this environment.
 | period / quarter | OPTIONAL | `status.period`. MEASURED: present in every state, but see the zero-value note below |
 | clock | OPTIONAL | `status.displayClock` and `status.clock`. MEASURED: present in every state, same note |
 | possession | OPTIONAL | `situation.possession` (team id, resolved to home/away). MEASURED: present while in progress, absent once final |
-| down, distance, yard line | OPTIONAL | `situation.down/distance/yardLine`. MEASURED: present while in progress, absent once final. The TEXT forms were absent even while in progress |
+| down, distance, yard line | OPTIONAL | `situation.down/distance/yardLine`. MEASURED: present while in progress, absent once final. The text forms ARE present in genuine live play; their absence on 2026-09-22 came from a stale payload. `yardLine` is absolute from the home goal and does NOT match the number shown in the text form, so it is PRESENT BUT AMBIGUOUS |
 | timeout state | OPTIONAL | `situation.homeTimeouts/awayTimeouts`. MEASURED: present while in progress, absent once final |
 | recent scoring event / last play | OPTIONAL | `situation.lastPlay` text, type, score value. MEASURED: present while in progress, absent once final. Carries the scoring event through `score_value` |
 | red-zone flag | OPTIONAL | `situation.isRedZone`. MEASURED: present while in progress, absent once final |
 | play state, drive state | FUTURE | not on the scoreboard; would need the summary/play-by-play endpoint. MEASURED: confirmed absent |
 | most recent play timestamp | FUTURE | no timestamp is attached to `lastPlay` on the scoreboard. MEASURED: confirmed absent |
-| ESPN win probability | RECORDED, NEVER AN INPUT | a third party's model; may be kept as a reference series only. MEASURED: absent on every observation so far |
+| ESPN win probability | RECORDED, NEVER AN INPUT | a third party's model; may be kept as a reference series only. MEASURED 2026-09-24/25: PRESENT on every in-progress observation. It remains barred as a model input; recording it is all that is permitted |
 
 **MEASURED 2026-09-21/22 against NYG at LA, the first live captures**
 (smoke runs 35673309148 and 35682762374, ESPN only, no credits spent). Two

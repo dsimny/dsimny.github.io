@@ -1,0 +1,668 @@
+{
+ "_note": "Layer 1 only. Every number here is measured from captured prices; none is modelled and none is predicted. Makes NO expectation claim - see docs/FOOTBALL_PIPELINE.md section 1. Zero units: football does not stake.",
+ "_research_note": "This is a research observation produced under 'fp-v0.4-market-observation-v1' (frozen 2026-09-17). It is not a recommendation, not part of the official football record, and may not be retroactively promoted into the official record. All observations are 0 units. See docs/FOOTBALL_RESEARCH_FP_V04_OBSERVATION.md for the full authority statement.",
+ "asof_utc": "2026-09-26T18:38:02Z",
+ "coverage_status": "manual review",
+ "decision_made": true,
+ "decision_moment_utc": "2026-09-26T18:00:00Z",
+ "excluded_share": 0.9368,
+ "free": null,
+ "games": [
+  {
+   "away": "New York Giants",
+   "best_book": "betrivers",
+   "best_price": 260,
+   "books_at_best": 5,
+   "clv_pts": null,
+   "eff_overround_pts": 1.804,
+   "fair_away": 0.27425,
+   "fair_home": 0.72575,
+   "fair_side": 0.27425,
+   "home": "Los Angeles Rams",
+   "kickoff_utc": "2026-09-22T00:15:00Z",
+   "league": "NFL",
+   "matchup": "NYG @ LA",
+   "move_pts": null,
+   "n_books": 11,
+   "offshore_best": null,
+   "rank": 1,
+   "raw_overround_pts": 4.181,
+   "relative_price_discount": -0.0128726287,
+   "restated": true,
+   "selection_eligible": true,
+   "selection_reason": "eligible",
+   "selection_version": "fp-v0.4",
+   "side": "New York Giants",
+   "sport": "nfl",
+   "t24_capture": "nfl_20260920T183720Z.json",
+   "t24_hours_before_kickoff": 29.63,
+   "tier": "slate"
+  },
+  {
+   "away": "Northwestern Wildcats",
+   "best_book": "draftkings",
+   "best_price": 1100,
+   "books_at_best": 6,
+   "clv_pts": null,
+   "commitment_sha": "c1cbf1fe66d2e8c2a679048cf11ebb80cb4a0a2e3527842bb6dd5d3cf9f2eae4",
+   "committed_utc": "2026-09-24T18:37:30Z",
+   "eff_overround_pts": 2.451,
+   "fair_away": 0.08756,
+   "fair_home": 0.91244,
+   "fair_side": 0.08756,
+   "home": "Indiana Hoosiers",
+   "kickoff_utc": "2026-09-26T00:00:00Z",
+   "league": "NCAA FBS",
+   "matchup": "Northwestern Wildcats @ Indiana Hoosiers",
+   "move_pts": null,
+   "n_books": 11,
+   "offshore_best": null,
+   "rank": 2,
+   "raw_overround_pts": 3.828,
+   "relative_price_discount": 0.048245614,
+   "restated": true,
+   "selection_eligible": false,
+   "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+   "selection_version": "fp-v0.4",
+   "side": "Northwestern Wildcats",
+   "sport": "ncaaf",
+   "t24_capture": "ncaaf_20260924T183724Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "tier": "slate"
+  },
+  {
+   "away": "Atlanta Falcons",
+   "best_book": "fanduel",
+   "best_price": -250,
+   "books_at_best": 4,
+   "clv_pts": null,
+   "commitment_sha": "25ad34dae325e0604a6d70e2d4d0e289f2ae92c7a522ccb5d8e1eef24b51c077",
+   "committed_utc": "2026-09-23T18:37:24Z",
+   "eff_overround_pts": 3.175,
+   "fair_away": 0.30423,
+   "fair_home": 0.69577,
+   "fair_side": 0.69577,
+   "home": "Green Bay Packers",
+   "kickoff_utc": "2026-09-25T00:15:00Z",
+   "league": "NFL",
+   "matchup": "ATL @ GB",
+   "move_pts": null,
+   "n_books": 11,
+   "offshore_best": null,
+   "rank": 3,
+   "raw_overround_pts": 4.349,
+   "relative_price_discount": -0.0266119026,
+   "restated": false,
+   "selection_eligible": true,
+   "selection_reason": "eligible",
+   "selection_version": "fp-v0.4",
+   "side": "Green Bay Packers",
+   "sport": "nfl",
+   "t24_capture": "nfl_20260923T183721Z.json",
+   "t24_hours_before_kickoff": 29.63,
+   "tier": "slate"
+  },
+  {
+   "away": "Army Black Knights",
+   "best_book": "betmgm",
+   "best_price": 135,
+   "books_at_best": 4,
+   "clv_pts": null,
+   "commitment_sha": "222a076279c18cd85ccdda183b1f8e230a14582ba61596a7cbbea5706998f122",
+   "committed_utc": "2026-09-24T14:37:31Z",
+   "eff_overround_pts": 3.338,
+   "fair_away": 0.5833,
+   "fair_home": 0.4167,
+   "fair_side": 0.4167,
+   "home": "Temple Owls",
+   "kickoff_utc": "2026-09-25T20:00:00Z",
+   "league": "NCAA FBS",
+   "matchup": "Army Black Knights @ Temple Owls",
+   "move_pts": null,
+   "n_books": 10,
+   "offshore_best": null,
+   "rank": 4,
+   "raw_overround_pts": 4.339,
+   "relative_price_discount": -0.0211933214,
+   "restated": true,
+   "selection_eligible": true,
+   "selection_reason": "eligible",
+   "selection_version": "fp-v0.4",
+   "side": "Temple Owls",
+   "sport": "ncaaf",
+   "t24_capture": "ncaaf_20260924T143724Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "tier": "slate"
+  },
+  {
+   "away": "Clemson Tigers",
+   "best_book": "williamhill_us",
+   "best_price": -110,
+   "books_at_best": 3,
+   "clv_pts": null,
+   "commitment_sha": "b79bfbbe9e70018e035591e4aeb53118a92b52e7f2799b7e4d4a77a69c68b057",
+   "committed_utc": "2026-09-24T20:37:29Z",
+   "eff_overround_pts": 3.6,
+   "fair_away": 0.50968,
+   "fair_home": 0.49032,
+   "fair_side": 0.50968,
+   "home": "California Golden Bears",
+   "kickoff_utc": "2026-09-26T02:30:00Z",
+   "league": "NCAA FBS",
+   "matchup": "Clemson Tigers @ California Golden Bears",
+   "move_pts": null,
+   "n_books": 7,
+   "offshore_best": null,
+   "rank": 5,
+   "raw_overround_pts": 4.945,
+   "relative_price_discount": -0.0277191501,
+   "restated": false,
+   "selection_eligible": true,
+   "selection_reason": "eligible",
+   "selection_version": "fp-v0.4",
+   "side": "Clemson Tigers",
+   "sport": "ncaaf",
+   "t24_capture": "ncaaf_20260924T203725Z.json",
+   "t24_hours_before_kickoff": 29.88,
+   "tier": "slate"
+  },
+  {
+   "away": "Navy Midshipmen",
+   "best_book": "fanduel",
+   "best_price": -260,
+   "books_at_best": 2,
+   "clv_pts": null,
+   "commitment_sha": "79c3fe953283024b8ab79a1589ea8a9a9488189edaa4d6981695d8dabf298914",
+   "committed_utc": "2026-09-24T17:37:26Z",
+   "eff_overround_pts": 3.968,
+   "fair_away": 0.69466,
+   "fair_home": 0.30534,
+   "fair_side": 0.69466,
+   "home": "UAB Blazers",
+   "kickoff_utc": "2026-09-25T23:00:00Z",
+   "league": "NCAA FBS",
+   "matchup": "Navy Midshipmen @ UAB Blazers",
+   "move_pts": null,
+   "n_books": 9,
+   "offshore_best": null,
+   "rank": 6,
+   "raw_overround_pts": 3.968,
+   "relative_price_discount": -0.0396825397,
+   "restated": false,
+   "selection_eligible": true,
+   "selection_reason": "eligible",
+   "selection_version": "fp-v0.4",
+   "side": "Navy Midshipmen",
+   "sport": "ncaaf",
+   "t24_capture": "ncaaf_20260924T173722Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "tier": "slate"
+  }
+ ],
+ "generated_utc": "2026-09-26T18:38:02Z",
+ "n_covered": 6,
+ "n_eligible_at_decision": 0,
+ "n_excluded": 89,
+ "n_newly_committed": 0,
+ "no_market": [
+  {
+   "matchup": "LAC @ BUF",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "CAR @ CLE",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "CIN @ PIT",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "NYJ @ DET",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "HOU @ IND",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "NE @ JAX",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "KC @ MIA",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "TEN @ NYG",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "SEA @ WAS",
+   "reason": "no T-24 capture yet (nearest is 70.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "ARI @ SF",
+   "reason": "no T-24 capture yet (nearest is 73.5h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "MIN @ TB",
+   "reason": "no T-24 capture yet (nearest is 73.5h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "BAL @ DAL",
+   "reason": "no T-24 capture yet (nearest is 73.8h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "LV @ NO",
+   "reason": "no T-24 capture yet (nearest is 73.8h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "LA @ DEN",
+   "reason": "no T-24 capture yet (nearest is 77.7h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "Liberty Flames @ Coastal Carolina Chanticleers",
+   "reason": "corroboration guard (1 book at best price)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Howard Bison @ Rutgers Scarlet Knights",
+   "reason": "NO MARKET (0 eligible books, need 5)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Oklahoma Sooners @ Georgia Bulldogs",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Texas A&M Aggies @ LSU Tigers",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Texas Longhorns @ Tennessee Volunteers",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Boise State Broncos @ Western Michigan Broncos",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Illinois Fighting Illini @ Ohio State Buckeyes",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Iowa Hawkeyes @ Michigan Wolverines",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Wisconsin Badgers @ Penn State Nittany Lions",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "UNLV Rebels @ Akron Zips",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Ball State Cardinals @ Kent State Golden Flashes",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Colorado Buffaloes @ Baylor Bears",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Virginia Tech Hokies @ Boston College Eagles",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Bucknell Bison @ Pittsburgh Panthers",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Colorado State Rams @ UTSA Roadrunners",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Wake Forest Demon Deacons @ Louisville Cardinals",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Sam Houston State Bearkats @ Texas Tech Red Raiders",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "San Diego State Aztecs @ Toledo Rockets",
+   "reason": "no T-24 capture yet (nearest is 43.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "South Alabama Jaguars @ Kentucky Wildcats",
+   "reason": "no T-24 capture yet (nearest is 44.1h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Lindenwood Lions @ Eastern Michigan Eagles",
+   "reason": "no T-24 capture yet (nearest is 44.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "UCLA Bruins @ Maryland Terrapins",
+   "reason": "no T-24 capture yet (nearest is 44.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Northern Illinois Huskies @ Georgia State Panthers",
+   "reason": "no T-24 capture yet (nearest is 45.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Notre Dame Fighting Irish @ Purdue Boilermakers",
+   "reason": "no T-24 capture yet (nearest is 45.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Central Arkansas Bears @ Florida State Seminoles",
+   "reason": "no T-24 capture yet (nearest is 46.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Hawaii Rainbow Warriors @ Wyoming Cowboys",
+   "reason": "no T-24 capture yet (nearest is 46.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Ole Miss Rebels @ Florida Gators",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Oklahoma Sooners @ Georgia Bulldogs",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Iowa Hawkeyes @ Michigan Wolverines",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Minnesota Golden Gophers @ Washington Huskies",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Boise State Broncos @ Western Michigan Broncos",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Robert Morris Colonials @ Buffalo Bulls",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "William and Mary Tribe @ Duke Blue Devils",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Gardner-Webb Runnin Bulldogs @ Marshall Thundering Herd",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Utah Utes @ Iowa State Cyclones",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "UConn Huskies @ Miami (OH) RedHawks",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "New Mexico Lobos @ New Mexico State Aggies",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Stonehill Skyhawks @ Ohio Bobcats",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "TCU Horned Frogs @ UCF Knights",
+   "reason": "no T-24 capture yet (nearest is 46.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "North Carolina Central Eagles @ East Carolina Pirates",
+   "reason": "no T-24 capture yet (nearest is 47.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Houston Cougars @ Georgia Southern Eagles",
+   "reason": "no T-24 capture yet (nearest is 47.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Vanderbilt Commodores @ Auburn Tigers",
+   "reason": "no T-24 capture yet (nearest is 47.6h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Nebraska Cornhuskers @ Michigan State Spartans",
+   "reason": "no T-24 capture yet (nearest is 48.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Wisconsin Badgers @ Penn State Nittany Lions",
+   "reason": "no T-24 capture yet (nearest is 48.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "South Florida Bulls @ Bowling Green Falcons",
+   "reason": "no T-24 capture yet (nearest is 48.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Delaware Blue Hens @ Virginia Cavaliers",
+   "reason": "no T-24 capture yet (nearest is 49.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "LIU Sharks @ Florida International Panthers",
+   "reason": "no T-24 capture yet (nearest is 49.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Incarnate Word Cardinals @ Texas State Bobcats",
+   "reason": "no T-24 capture yet (nearest is 49.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "James Madison Dukes @ Old Dominion Monarchs",
+   "reason": "no T-24 capture yet (nearest is 49.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Central Michigan Chippewas @ Miami Hurricanes",
+   "reason": "no T-24 capture yet (nearest is 49.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Louisiana Ragin Cajuns @ Charlotte 49ers",
+   "reason": "no T-24 capture yet (nearest is 49.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Oregon Ducks @ USC Trojans",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "South Carolina Gamecocks @ Alabama Crimson Tide",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Oklahoma State Cowboys @ West Virginia Mountaineers",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Kennesaw State Owls @ Arkansas State Red Wolves",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Kansas State Wildcats @ Cincinnati Bearcats",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Middle Tennessee Blue Raiders @ Jacksonville State Gamecocks",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Mercyhurst Lakers @ Western Kentucky Hilltoppers",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Southern Mississippi Golden Eagles @ Tulane Green Wave",
+   "reason": "no T-24 capture yet (nearest is 50.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Texas A&M Aggies @ LSU Tigers",
+   "reason": "no T-24 capture yet (nearest is 50.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Missouri Tigers @ Mississippi State Bulldogs",
+   "reason": "no T-24 capture yet (nearest is 50.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Appalachian State Mountaineers @ NC State Wolfpack",
+   "reason": "no T-24 capture yet (nearest is 50.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Arizona Wildcats @ Washington State Cougars",
+   "reason": "no T-24 capture yet (nearest is 50.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Houston Baptist Huskies @ North Texas Mean Green",
+   "reason": "no T-24 capture yet (nearest is 50.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Oregon Ducks @ USC Trojans",
+   "reason": "no T-24 capture yet (nearest is 50.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Troy Trojans @ Utah State Aggies",
+   "reason": "no T-24 capture yet (nearest is 50.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Missouri Tigers @ Mississippi State Bulldogs",
+   "reason": "no T-24 capture yet (nearest is 51.1h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Tulsa Golden Hurricane @ Arkansas Razorbacks",
+   "reason": "no T-24 capture yet (nearest is 51.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Florida Atlantic Owls @ UL Monroe Warhawks",
+   "reason": "no T-24 capture yet (nearest is 51.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Missouri State Bears @ SMU Mustangs",
+   "reason": "no T-24 capture yet (nearest is 52.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Oregon State Beavers @ UTEP Miners",
+   "reason": "no T-24 capture yet (nearest is 52.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "UMass Minutemen @ Sacramento State Hornets",
+   "reason": "no T-24 capture yet (nearest is 52.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Rice Owls @ Fresno State Bulldogs",
+   "reason": "no T-24 capture yet (nearest is 53.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Air Force Falcons @ Nevada Wolf Pack",
+   "reason": "no T-24 capture yet (nearest is 53.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Georgia Tech Yellow Jackets @ Stanford Cardinal",
+   "reason": "no T-24 capture yet (nearest is 53.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Minnesota Golden Gophers @ Washington Huskies",
+   "reason": "no T-24 capture yet (nearest is 54.4h before kickoff)",
+   "sport": "ncaaf"
+  }
+ ],
+ "premium": null,
+ "record_cohort": "fp-v0.4-market-observation-v1",
+ "research_authority": "research_only_no_selection_delivery_or_holdout",
+ "research_prereg_frozen_date": "2026-09-17",
+ "research_selection_rule": "fp-v0.4",
+ "research_version_id": "fp-v0.4-market-observation-v1",
+ "selection_version": "fp-v0.4",
+ "slate_week": "2026-09-22",
+ "sports": [
+  "nfl",
+  "ncaaf"
+ ],
+ "tier": "research",
+ "units": 0
+}

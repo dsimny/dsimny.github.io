@@ -1,0 +1,123 @@
+name: Mercer Live digest commit
+# Commits ONE file: data/mercer_live/digest/<ET date>.json, the public proof of
+# one closed day of Mercer Live ML-1 raw observations. Design and reasoning:
+# docs/MERCER_LIVE_OPERATIONAL_PATH.md section 3.
+#
+# WHO BUILDS IT AND WHO COMMITS IT. The capture host holds the raw bytes and
+# builds the digest (scripts/mercer_live/archive.py build); it publishes that
+# ONE file to a private digest bucket. This job holds the repository write and
+# nothing else: it downloads the candidate with a READ-ONLY credential scoped to
+# the digest bucket, validates it (scripts/mercer_live/digest_commit.py), and
+# commits it. So the host never holds a credential that could push index.html,
+# a ledger or a commitment store, and this job never sees a raw observation.
+#
+# APPEND-ONLY. A committed digest is replaced only by one that keeps every
+# committed entry byte-for-byte and only adds entries; anything else is
+# REFUSED-DIFFERS and the run goes red. git history keeps every version.
+#
+# TRIGGER. workflow_dispatch only, fired daily by cron-job.org after the host's
+# 06:30 ET publish - the repository's trusted trigger. No GitHub `schedule:`
+# (measured 15-23 minutes late here). A missing digest is a red run, which is
+# the alert: MISSING means the host did not publish.
+#
+# LOGS. Only the date, the action, counts and hashes are printed.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "ET date to commit (YYYY-MM-DD); blank = yesterday ET"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mercer-live-digest
+  cancel-in-progress: false
+
+jobs:
+  commit:
+    name: Commit one digest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve the date
+        id: d
+        env:
+          IN_DATE: ${{ inputs.date }}
+        run: |
+          set -eu
+          if [ -n "$IN_DATE" ]; then D="$IN_DATE"; else D=$(TZ=America/New_York date -d yesterday +%F); fi
+          case "$D" in
+            [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+            *) echo "::error::date must be YYYY-MM-DD"; exit 1 ;;
+          esac
+          echo "date=$D" >> "$GITHUB_OUTPUT"
+      - name: Fetch the published candidate (read-only)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ML1_DIGEST_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ML1_DIGEST_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ vars.ML1_R2_ENDPOINT }}
+          BUCKET: ${{ vars.ML1_DIGEST_BUCKET }}
+          D: ${{ steps.d.outputs.date }}
+        run: |
+          set -eu
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$R2_ENDPOINT" ] || [ -z "$BUCKET" ]; then
+            echo "::error::digest bucket not configured (ML1_DIGEST_R2_* secrets, ML1_R2_ENDPOINT, ML1_DIGEST_BUCKET)"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/ml1"
+          if aws s3 cp "s3://$BUCKET/digests/$D.json" "$RUNNER_TEMP/ml1/candidate.json" \
+               --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
+            echo "fetched candidate for $D"
+          else
+            echo "no candidate fetched for $D"
+          fi
+      - name: Validate and place the digest
+        env:
+          PYTHONIOENCODING: utf-8
+          D: ${{ steps.d.outputs.date }}
+        run: python scripts/mercer_live/digest_commit.py --candidate "$RUNNER_TEMP/ml1/candidate.json" --date "$D"
+      - name: Commit the digest
+        run: |
+          set -e
+          D="${{ steps.d.outputs.date }}"
+          git config user.name "openledger-bot"
+          git config user.email "actions@users.noreply.github.com"
+          # EXACTLY ONE PATH, named literally. A literal path that is missing
+          # exits 128 and turns the run red, which is loud and therefore fine.
+          git add "data/mercer_live/digest/$D.json"
+          # Belt and braces: the index must hold that one path and nothing else
+          # before anything is committed. index.html and feed.xml are never
+          # this workflow's to touch.
+          staged="$(git diff --cached --name-only)"
+          if [ -n "$staged" ] && [ "$staged" != "data/mercer_live/digest/$D.json" ]; then
+            echo "::error::staged set is not exactly the one digest path - refusing to commit"
+            exit 1
+          fi
+          git diff --cached --quiet || git commit -m "Mercer Live digest ${D}"
+          PUSH_WHAT="Mercer Live digest"
+          # ---- PUSH EPILOGUE ----------------------------------------
+          # Byte-identical at every retrying push point in the repository;
+          # selftest_workflows.py asserts it. See capture-closing.yml for the
+          # reasoning behind every line.
+          pushed=""
+          for i in 1 2 3; do
+            if git push; then pushed=yes; break; fi
+            git fetch origin main || exit 1
+            if ! git rebase origin/main; then
+              git rebase --abort 2>/dev/null || true
+              echo "::error::rebase conflict during the $PUSH_WHAT push - stopping, not auto-resolving"
+              exit 1
+            fi
+          done
+          if [ -z "$pushed" ]; then
+            echo "::error::$PUSH_WHAT push still rejected after 3 rebase attempts - nothing was pushed"
+            exit 1
+          fi

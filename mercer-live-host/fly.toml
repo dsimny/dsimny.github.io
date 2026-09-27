@@ -1,0 +1,40 @@
+# Mercer Live ML-1 capture host on Fly.io - ONE always-on machine, NO public
+# service. It makes outbound HTTPS calls (ESPN; R2) and accepts no inbound
+# traffic, so there is no endpoint to attack and no bearer token to leak.
+#
+# NOT DEPLOYED. Deploying it is Daniel's decision (MERCER_LIVE_ESCALATION.md
+# section 3). Exact steps: docs/MERCER_LIVE_OPERATIONAL_PATH.md section 8.
+#
+# Secrets are NEVER in this file. Set them with `fly secrets set` from a
+# terminal, never in chat and never in a file in this repository:
+#   RCLONE_CONFIG_ML1R2_ACCESS_KEY_ID       R2 token: Object Read & Write, raw + digest buckets only
+#   RCLONE_CONFIG_ML1R2_SECRET_ACCESS_KEY
+#   RCLONE_CONFIG_ML1R2_ENDPOINT            https://<account id>.r2.cloudflarestorage.com
+# ODDS_API_KEY is deliberately NOT listed. The host spends nothing without it,
+# and even with it, host.py passes --no-odds unless /data/odds-authorization.json
+# exists and is unexpired.
+
+app = 'ol-mercer-live-ml1'
+primary_region = 'iad'
+
+[build]
+
+[env]
+  ML1_REMOTE_RAW = 'ml1r2:ol-mercer-live-raw'
+  ML1_REMOTE_DIGESTS = 'ml1r2:ol-mercer-live-digests'
+  RCLONE_CONFIG_ML1R2_TYPE = 's3'
+  RCLONE_CONFIG_ML1R2_PROVIDER = 'Cloudflare'
+  RCLONE_CONFIG_ML1R2_ACL = 'private'
+  RCLONE_CONFIG_ML1R2_NO_CHECK_BUCKET = 'true'
+
+[mounts]
+  source = 'ml1_data'
+  destination = '/data'
+  # Fly takes daily snapshots of the volume; keep the maximum. R2 is the
+  # off-host copy, the snapshots are a third line.
+  snapshot_retention = 60
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'
+  count = 1

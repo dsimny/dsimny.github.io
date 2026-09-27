@@ -561,7 +561,12 @@ shutil.rmtree(tmp, ignore_errors=True)
 print("\n[20] no Discord side effects")
 SRC = {}
 for fn in sorted(os.listdir(HERE)):
-    if fn.endswith(".py") and fn != os.path.basename(__file__):
+    # Package code only. A self-test names the banned tokens in order to ban
+    # them, so scanning one is a false alarm by construction (the 2026-09-12
+    # rule: scope a contract test to the code it protects). Before 2026-09-27
+    # this suite was the only test file here and excluded itself by name;
+    # selftest_mercer_live_ops.py now sits beside it.
+    if fn.endswith(".py") and not fn.startswith("selftest_"):
         SRC[fn] = io.open(os.path.join(HERE, fn), encoding="utf-8").read()
 
 

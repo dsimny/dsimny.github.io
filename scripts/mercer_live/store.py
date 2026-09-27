@@ -226,6 +226,24 @@ class Store:
                                "sha256": h.hexdigest(), "bytes": os.path.getsize(p),
                                "lines": n_lines, "parsed": n_parsed,
                                "first_observed_at": first, "last_observed_at": last})
+        # AMENDMENT 2026-09-27 (architecture section 20): the run records are
+        # raw evidence too - they carry the error counts, the credit readings
+        # and the retry proof - but the digest counted them without
+        # fingerprinting them, so a run record could change after its digest
+        # was committed and nothing would show it. Additive: every existing
+        # key is unchanged; this list is new.
+        run_records = []
+        rdir = os.path.join(self.raw_dir, "runs", et_date)
+        if os.path.isdir(rdir):
+            for fn in sorted(os.listdir(rdir)):
+                if not fn.endswith(".json"):
+                    continue                    # a *.json.tmp is not a record yet
+                p = os.path.join(rdir, fn)
+                with io.open(p, "rb") as f:
+                    body = f.read()
+                run_records.append({"path": os.path.relpath(p, self.data_dir).replace(os.sep, "/"),
+                                    "sha256": hashlib.sha256(body).hexdigest(),
+                                    "bytes": len(body)})
         runs = self.runs_for_date(et_date)
         odds_calls = [c for r in runs for c in (r.get("odds_calls") or [])]
         credits = [c.get("credits", {}).get("last_call_cost") for c in odds_calls]
@@ -242,6 +260,7 @@ class Store:
             "et_date": et_date,
             "generated_at": common.iso(common.now_utc()),
             "shards": shards,
+            "run_records": run_records,
             "runs": len(runs),
             "runs_with_errors": sum(1 for r in runs if r.get("errors")),
             "odds_calls": len(odds_calls),

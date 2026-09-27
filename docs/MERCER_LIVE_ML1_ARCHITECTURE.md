@@ -455,3 +455,49 @@ package, not an edit here.
 **What this freeze does NOT authorise.** No model, no candidate, no signal, no
 unit, no ledger, no Discord mode, no site surface, and no public claim of any
 kind. ML-1 observes. Everything downstream still has to earn its place.
+
+
+## 20. AMENDMENT 2026-09-27: the operational path (durable digests, raw retention, log hygiene)
+
+Recorded as a dated amendment, per section 19, rather than by editing the freeze
+record above. Full design: `docs/MERCER_LIVE_OPERATIONAL_PATH.md`.
+
+**The one contract change, and why it was unavoidable.** The digest described
+in section 10 fingerprinted every shard but only COUNTED the run records. The
+run records are raw evidence too — the error lists, the credit readings and the
+retry proof live there — so a run record could change after its digest was
+committed and nothing would show it. The digest now carries one additional key,
+`run_records: [{path, sha256, bytes}]`, for every run record of that ET date.
+It is ADDITIVE: every existing key keeps its name, meaning and value;
+`schema_version` stays `ml1-v1` because the three record kinds are untouched.
+No consumer of the digest existed before this change.
+
+**Nothing else in the frozen contract moved.** Not the record schema, the
+canonical id, the join rules, the timestamp semantics, the phase label, the
+credit floor, cap or throttle, or any non-goal. `capture.py` is unchanged.
+
+**What was added around it (operations, not contract):**
+- `archive.py ingest` merges evidence from separate capture stores at the
+  record level through the frozen `Store.append`, because two stores that saw
+  the same ET hour hold different files at the same shard path (the 2026-09-21
+  ET evidence came from three runners). Nothing is lost, nothing rewritten.
+- A digest is built only for a CLOSED ET day, verified against the bytes, and
+  a committed digest may only be superseded by one that keeps every committed
+  entry and adds entries.
+- The capture host builds the digest; `.github/workflows/mercer-live-digest.yml`
+  commits exactly one path per run. This replaces section 11's "nightly
+  `--digest` push" from the host, so the host never holds a repository write
+  credential.
+- Raw retention: persistent volume → private R2 bucket with a bucket lock,
+  copy-only and `--immutable`; restore is verified against the committed digest.
+- The capture host runs with `--no-odds` and without `ODDS_API_KEY` unless a
+  separate, expiring authorisation file exists on the host.
+- **Section 12 is superseded for the log.** The smoke job no longer prints
+  observations: job logs and artifacts of this public repository are readable
+  by any signed-in GitHub account (verified 2026-09-27). It prints value-free
+  evidence (`evidence.py`) and uploads the raw store only age-encrypted.
+
+The mercer_live suite's source-scan now covers package modules only, not test
+files (a self-test names banned tokens in order to ban them). Its count rises
+from 229 to 245 because the four new modules are scanned; the operational layer
+has its own suite, `selftest_mercer_live_ops.py`.

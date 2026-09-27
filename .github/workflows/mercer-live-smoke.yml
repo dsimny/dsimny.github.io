@@ -9,7 +9,11 @@ name: Mercer Live smoke capture (read-only)
 # one-minute cadence needs a host that can keep time. This workflow has no
 # `schedule:`, runs only on manual dispatch, holds `contents: read`, commits
 # nothing, pushes nothing, posts nothing, and writes only to a temporary
-# directory that is uploaded as a short-lived artifact for inspection.
+# directory. Its log carries counts only (scripts/mercer_live/evidence.py); the
+# raw store is uploaded only as an age-encrypted artifact, never in plaintext,
+# because a public repository's logs and artifacts are readable by any
+# signed-in GitHub account (verified 2026-09-27, see
+# docs/MERCER_LIVE_OPERATIONAL_PATH.md section 5).
 #
 # CREDITS. By default the tick runs with --no-odds and spends NOTHING (ESPN is
 # free). Set spend_credits=true to make ONE Odds API call per sport that has a
@@ -78,60 +82,44 @@ jobs:
           python scripts/mercer_live/capture.py --sport nfl --no-odds --data-dir "$STORE" --run-id "$FIRST"
           sha256sum "$STORE"/raw/*/*/*.jsonl > /tmp/after.sha
           diff /tmp/before.sha /tmp/after.sha && echo "retry changed no shard byte"
-          # EVERYTHING INTO THE LOG, so the observations can be read without
-          # downloading the artifact. Game state only is small; quotes are
-          # summarised by the run records rather than dumped.
-          for f in "$STORE"/raw/*/*/game_state_*.jsonl; do echo "=== $f"; cat "$f"; echo; done
-          for f in "$STORE"/raw/*/*/market_event_*.jsonl; do [ -f "$f" ] && { echo "=== $f"; cat "$f"; echo; }; done
-          for f in "$STORE"/raw/runs/*/*.json; do echo "=== $f"; cat "$f"; echo; done
-          for f in "$STORE"/digest/*.json; do echo "=== $f"; cat "$f"; echo; done
+          # COMPACT, VALUE-FREE EVIDENCE ONLY (T3, 2026-09-27). This step used to
+          # `cat` every shard, run record and digest into the job log and print
+          # every observed field value. Job logs and step summaries of this
+          # PUBLIC repository are readable by any signed-in GitHub account, so
+          # raw observations may not appear here. evidence.py prints field
+          # PRESENCE counts, change counts between consecutive observations,
+          # run ids, error and duplicate counts and the digest's shape - enough
+          # to prove fields exist, observations progress and the retry wrote
+          # nothing - and never a value. The raw bytes leave this runner only
+          # encrypted (next step), or not at all.
+          echo "===== COMPACT EVIDENCE (no observed values) ====="
+          python scripts/mercer_live/evidence.py "$STORE"
           echo "## Mercer Live smoke ($TICKS tick(s))" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          find "$STORE" -type f | sed "s#$RUNNER_TEMP/##" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "Nothing was committed or posted. The observations are in the job log and in the run artifact for 7 days." >> "$GITHUB_STEP_SUMMARY"
-          # THE FIELD EVIDENCE, PRINTED LAST AND COMPACT. The raw dumps above are
-          # thousands of lines and a log reader that truncates to a tail window
-          # cannot reach them, which is exactly what happened on 2026-09-22.
-          # This block is the answer to "what does ESPN actually send while a
-          # game is in progress", so it goes where it cannot be cut off.
-          echo "===== LIVE FIELD EVIDENCE ====="
-          python - "$STORE" <<'PY'
-          import glob, json, sys
-          rows = []
-          for f in sorted(glob.glob(sys.argv[1] + "/raw/*/*/game_state_*.jsonl")):
-              for line in open(f, encoding="utf-8"):
-                  if line.strip():
-                      rows.append(json.loads(line))
-          rows.sort(key=lambda r: r["observed_at"])
-          print(f"{len(rows)} game_state observations")
-          keys = ["observed_at", "status_state", "status_name", "period", "display_clock",
-                  "clock_seconds", "away_score", "home_score", "possession", "down",
-                  "distance", "yard_line", "is_red_zone", "home_timeouts", "away_timeouts",
-                  "down_distance_text", "possession_text", "espn_win_probability_home"]
-          for r in rows:
-              print("OBS " + " | ".join(f"{k}={r.get(k)!r}" for k in keys))
-          for r in rows:
-              print("MISS", r["observed_at"], "required=", r.get("missing_required"),
-                    "optional=", r.get("missing_optional"))
-          for r in rows:
-              print("LASTPLAY", r["observed_at"], json.dumps(r.get("last_play")))
-          if rows:
-              r = rows[-1]
-              print("IDENTITY", r.get("canonical_event_id"), r.get("away"), "@", r.get("home"),
-                    "kickoff", r.get("scheduled_start"), "season_type", r.get("season_type"),
-                    "provider_event_id", r.get("provider_event_id"), "league", r.get("league"),
-                    "sport", r.get("sport"), "source", r.get("source"),
-                    "provider_timestamp", r.get("provider_timestamp"))
-          print("DISTINCT observation_ids", len({r["observation_id"] for r in rows}), "of", len(rows))
-          print("DISTINCT run_ids", len({r["run_id"] for r in rows}), "of", len(rows))
-          print("DISTINCT observed_at", len({r["observed_at"] for r in rows}), "of", len(rows))
-          PY
+          echo "Counts only; no observed values are published here. Nothing was committed or posted." >> "$GITHUB_STEP_SUMMARY"
+          echo "Raw files: $(find "$STORE" -type f | wc -l)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Encrypt the raw store for the artifact
+        # Artifacts of a public repository are downloadable by any signed-in
+        # GitHub account, so the raw store is uploaded ONLY as an age-encrypted
+        # tarball to Daniel's public key (repository VARIABLE, not a secret -
+        # it is a public key). Without the variable, nothing raw is uploaded
+        # at all, and the run says so loudly rather than falling back to plain.
+        env:
+          AGE_RECIPIENT: ${{ vars.ML1_ARTIFACT_AGE_RECIPIENT }}
+        run: |
+          set -eu
+          if [ -z "$AGE_RECIPIENT" ]; then
+            echo "::warning::ML1_ARTIFACT_AGE_RECIPIENT is not set - the raw store is NOT uploaded (never in plaintext)"
+            exit 0
+          fi
+          sudo apt-get update -qq >/dev/null && sudo apt-get install -y -qq age >/dev/null
+          mkdir -p "$RUNNER_TEMP/ml1_out"
+          tar -C "$RUNNER_TEMP" -cf - mercer_live | age -r "$AGE_RECIPIENT" -o "$RUNNER_TEMP/ml1_out/mercer_live.tar.age"
+          echo "encrypted raw store: $(stat -c %s "$RUNNER_TEMP/ml1_out/mercer_live.tar.age") bytes"
       - name: Upload the tick for inspection
         uses: actions/upload-artifact@v4
         with:
           name: mercer-live-smoke-${{ github.run_id }}
-          path: ${{ runner.temp }}/mercer_live
+          path: ${{ runner.temp }}/ml1_out/mercer_live.tar.age
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: ignore

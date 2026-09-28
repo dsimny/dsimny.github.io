@@ -8,7 +8,8 @@ frozen in `docs/MERCER_LIVE_V0.1_PREREGISTRATION.md`.
 |---|---|---|
 | `raw/<sport>/<ET date>/<kind>_<ET hour>.jsonl` | **no** (gitignored) | one JSON record per line: `game_state`, `market_event`, `market_quote`; never rewritten |
 | `raw/runs/<ET date>/<run_id>.json` | **no** | one record per capture execution: what was fetched, decided, stored, spent, and every error |
-| `digest/<ET date>.json` | yes | SHA-256, bytes, lines and observed_at span of every raw shard for that day, SHA-256 and bytes of every run record, plus run and credit counts. Committed only by `.github/workflows/mercer-live-digest.yml`, only for a closed ET day, and only ever GROWN, never changed |
+| `digest/<ET date>.json` | yes | SHA-256, bytes, lines and observed_at span of every raw shard for that day, plus run and credit counts |
+| `manifest/<ET date>.json` | yes | **ML-1-OPS**, not ML-1 (`ml1-ops-manifest-v1`): SHA-256, bytes and counts of every shard AND every run record, plus the SHA-256 of that day's digest. Committed in the same commit as the digest. See `docs/MERCER_LIVE_ML1_OPS.md` |
 
 Written only by `scripts/mercer_live/capture.py`. Read by nothing in
 `scripts/football/` or the MLB pipeline. Schema: `docs/MERCER_LIVE_ML1_ARCHITECTURE.md`.
@@ -16,6 +17,3 @@ Written only by `scripts/mercer_live/capture.py`. Read by nothing in
 The raw stream must be kept on persistent storage by whoever runs the capture;
 the digest is what lets anyone holding those bytes prove they are the bytes
 that were observed.
-
-Where the raw bytes live, how they reach the private bucket, and how a restore
-is verified against these digests: `docs/MERCER_LIVE_OPERATIONAL_PATH.md`.

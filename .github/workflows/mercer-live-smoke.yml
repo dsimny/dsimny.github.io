@@ -9,11 +9,11 @@ name: Mercer Live smoke capture (read-only)
 # one-minute cadence needs a host that can keep time. This workflow has no
 # `schedule:`, runs only on manual dispatch, holds `contents: read`, commits
 # nothing, pushes nothing, posts nothing, and writes only to a temporary
-# directory. Its log carries counts only (scripts/mercer_live/evidence.py); the
+# directory. Its log carries counts only (scripts/mercer_live_ops/evidence.py, package ML-1-OPS); the
 # raw store is uploaded only as an age-encrypted artifact, never in plaintext,
 # because a public repository's logs and artifacts are readable by any
 # signed-in GitHub account (verified 2026-09-27, see
-# docs/MERCER_LIVE_OPERATIONAL_PATH.md section 5).
+# docs/MERCER_LIVE_ML1_OPS.md section 5).
 #
 # CREDITS. By default the tick runs with --no-odds and spends NOTHING (ESPN is
 # free). Set spend_credits=true to make ONE Odds API call per sport that has a
@@ -93,7 +93,7 @@ jobs:
           # nothing - and never a value. The raw bytes leave this runner only
           # encrypted (next step), or not at all.
           echo "===== COMPACT EVIDENCE (no observed values) ====="
-          python scripts/mercer_live/evidence.py "$STORE"
+          python scripts/mercer_live_ops/evidence.py "$STORE"
           echo "## Mercer Live smoke ($TICKS tick(s))" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Counts only; no observed values are published here. Nothing was committed or posted." >> "$GITHUB_STEP_SUMMARY"

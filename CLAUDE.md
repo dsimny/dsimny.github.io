@@ -1397,14 +1397,19 @@ Ledger Play already runs (architecture doc section 11). Nothing is deployed.
 default, and exists to verify the ESPN live-state fields the audit could not
 reach from its build environment.
 
-OPERATIONAL PATH (2026-09-27, `docs/MERCER_LIVE_OPERATIONAL_PATH.md`): the
-capture host builds each CLOSED ET day's digest and keeps raw on a volume plus
-a bucket-locked private R2 bucket; `mercer-live-digest.yml` commits exactly
-ONE path, `data/mercer_live/digest/<date>.json`, and refuses any digest that
-changes a committed entry. Never print observations into an Actions log or
-upload them unencrypted: this repository is public and its logs/artifacts are
-readable by any signed-in GitHub account. The host spends nothing unless a
-separate expiring authorisation file exists on it. Not deployed yet.
+ML-1-OPS (`mercer-live-ml1-ops-v1.0`, `docs/MERCER_LIVE_ML1_OPS.md`) is a
+SEPARATE operational package - ML-1 stays frozen and unchanged. Code in
+`scripts/mercer_live_ops/`. It keeps raw evidence on a host volume plus a
+bucket-locked private R2 bucket, and `mercer-live-digest.yml` commits exactly
+TWO files per closed ET day in ONE commit: the frozen ml1-v1 digest and the
+`ml1-ops-manifest-v1` manifest (`data/mercer_live/manifest/<date>.json`), which
+fingerprints shards AND run records and names the digest's SHA-256 (one-way;
+the digest never names the manifest). Grow-only: a committed entry never
+changes. Never print observations into an Actions log or upload them
+unencrypted: this repository is public and its logs/artifacts are readable by
+any signed-in GitHub account. The host spends nothing unless a separate
+expiring authorisation file exists on it. Not deployed yet. Never add a field
+to an ML-1 artifact to serve ops - that is a new package, per the freeze.
 
 NEXT PACKAGE IS ML-2 (game-state features + feed-cadence statistics), NOT
 STARTED. Three preregistration items are deferred to ML-1 evidence (freshness

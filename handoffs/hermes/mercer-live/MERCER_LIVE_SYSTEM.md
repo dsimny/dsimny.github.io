@@ -235,11 +235,6 @@ date: **zero**.
 |---|---|---|---|
 | `.github/workflows/mercer-live-selftest.yml` | push / PR on Mercer Live paths | `contents: read` | nothing |
 | `.github/workflows/mercer-live-smoke.yml` | `workflow_dispatch` only | `contents: read` | nothing by default |
-| `.github/workflows/mercer-live-digest.yml` | `workflow_dispatch` only (cron-job.org) | `contents: write`, ONE path | nothing |
-
-Since 2026-09-27 the smoke job prints value-free evidence only and uploads the
-raw store only age-encrypted; the digest workflow commits one closed day's
-digest built by the capture host. See `docs/MERCER_LIVE_OPERATIONAL_PATH.md`.
 
 The self-test workflow is a **hermetic code gate**: a red X there means Mercer
 Live code regressed and nothing else. It is its own workflow precisely so that

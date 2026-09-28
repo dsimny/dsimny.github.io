@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
 """
-Open Ledger Sports - Mercer Live ML-1: the capture host's supervisor.
+Open Ledger Sports - ML-1-OPS (mercer-live-ml1-ops-v1.0): the capture host's
+supervisor.
 
-    python scripts/mercer_live/host.py serve            # the long-running process
-    python scripts/mercer_live/host.py status           # what it WOULD do now, no writes
-    python scripts/mercer_live/host.py backup           # one off-host copy pass
-    python scripts/mercer_live/host.py publish --date YYYY-MM-DD
+    python scripts/mercer_live_ops/host.py serve        # the long-running process
+    python scripts/mercer_live_ops/host.py status       # what it WOULD do now, no writes
+    python scripts/mercer_live_ops/host.py backup       # one off-host copy pass
+    python scripts/mercer_live_ops/host.py publish --date YYYY-MM-DD
 
-OPERATIONS, NOT CONTRACT. This runs the frozen capture (capture.main) on a
-schedule and moves its bytes to safety. It adds no field, no record kind and no
-provider, and it changes no guard in credits.py. The capture cadence, windows
-and host are operational settings (architecture section 19: "What is NOT
-frozen"). Design: docs/MERCER_LIVE_OPERATIONAL_PATH.md.
+A SEPARATE PACKAGE FROM FROZEN ML-1. This runs the frozen capture
+(scripts/mercer_live/capture.py, unchanged) on a schedule and moves its bytes to
+safety. It adds no field, no record kind and no provider, and it changes no
+guard in credits.py. The capture cadence, windows and host are operational
+settings (ML-1 architecture section 19: "What is NOT frozen"). Design:
+docs/MERCER_LIVE_ML1_OPS.md.
 
     capture.py --no-odds          -> /data/mercer_live  (persistent volume, append-only)
     backup  every 10 min          -> rclone copy --immutable of SEALED files only
                                      -> private bucket  raw/...   (bucket lock: no delete, no overwrite)
-    publish daily, D+1 06:30 ET   -> archive.build -> private bucket  digests/D.json
-    (GitHub Actions)              -> mercer-live-digest.yml commits data/mercer_live/digest/D.json
+    publish daily, D+1 06:30 ET   -> archive.build -> private bucket  digests/D.json + manifests/D.json
+    (GitHub Actions)              -> mercer-live-digest.yml commits the frozen digest AND the
+                                     ML-1-OPS manifest for D in one commit
 
 ODDS ARE OFF UNLESS SEPARATELY AUTHORISED. The capture always runs with
 --no-odds and ODDS_API_KEY is removed from its environment, UNLESS an
@@ -32,7 +35,7 @@ NOTE FOR THE DAY ODDS ARE AUTHORISED: capture books credit readings through
 scripts/odds_credits.py into data/odds_credits.json RELATIVE TO THE CODE, i.e.
 inside the container. That file is not the repository's ledger and is never
 pushed from here, so the floor would read a stale balance. Every reading is
-still in the run records (and so in the digest's credits_spent), but wiring
+still in the run records (fingerprinted by the manifest), but wiring
 the shared ledger is a prerequisite of authorisation, not of this deployment.
 """
 import argparse
@@ -46,9 +49,12 @@ import time
 from datetime import datetime, timedelta
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+ML1 = os.path.abspath(os.path.join(HERE, "..", "mercer_live"))
+for _p in (ML1, HERE):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 import archive                                                    # noqa: E402
-import common                                                     # noqa: E402
+import common                                                     # noqa: E402  frozen ML-1, read-only
 
 DATA_DIR = os.environ.get("ML1_DATA_DIR", "/data/mercer_live")
 PUBLISHED_DIR = os.environ.get("ML1_PUBLISHED_DIR", "/data/published")   # last digest pushed per date
@@ -87,7 +93,7 @@ def odds_authorisation(path=AUTH_FILE, now=None):
 
 def capture_command(data_dir, allowed, sports=("nfl", "ncaaf")):
     """argv for ONE capture tick. --no-odds unless allowed."""
-    argv = [sys.executable, os.path.join(HERE, "capture.py"), "--data-dir", data_dir]
+    argv = [sys.executable, os.path.join(ML1, "capture.py"), "--data-dir", data_dir]
     for s in sports:
         argv += ["--sport", s]
     if not allowed:
@@ -158,38 +164,52 @@ def backup(data_dir=DATA_DIR, remote=REMOTE_RAW, runner=subprocess.run, now=None
 # ---------------------------------------------------------------- publish
 def publish(et_date, data_dir=DATA_DIR, published_dir=PUBLISHED_DIR, remote=REMOTE_DIGESTS,
             runner=subprocess.run, now=None):
-    """Build the closed day's digest, check it against what was last
-    published, and copy it to the digest bucket. Returns (rc, message)."""
+    """Build the closed day's frozen digest + ML-1-OPS manifest, check them
+    against the pair last published, and copy BOTH to the digest bucket
+    (digests/D.json, manifests/D.json). Returns (rc, message)."""
     if not remote:
         return 1, "ML1_REMOTE_DIGESTS is not configured"
-    os.makedirs(published_dir, exist_ok=True)
-    prev_path = os.path.join(published_dir, f"{et_date}.json")
+    pd, pm = (os.path.join(published_dir, "digest", f"{et_date}.json"),
+              os.path.join(published_dir, "manifest", f"{et_date}.json"))
     prev = None
-    if os.path.exists(prev_path):
-        with io.open(prev_path, encoding="utf-8") as f:
-            prev = json.load(f)
+    if os.path.exists(pd) and os.path.exists(pm):
+        with io.open(pd, "rb") as f:
+            prev_d = f.read()
+        with io.open(pm, "rb") as f:
+            prev = (prev_d, json.loads(f.read().decode("utf-8")))
+    elif os.path.exists(pd) or os.path.exists(pm):
+        return 1, f"REFUSED {et_date}: the local published record is incomplete (one file without the other)"
     try:
-        dig, action = archive.build(data_dir, et_date, previous=prev, now=now)
+        digest_bytes, man, action = archive.build(data_dir, et_date, previous=prev, now=now)
     except archive.ArchiveError as e:
         return 1, f"REFUSED {et_date}: {e}"
     if action == "unchanged":
         return 0, f"{et_date}: unchanged"
-    if not dig["shards"] and not dig["run_records"]:
-        return 0, f"{et_date}: nothing captured that day; no digest published"
-    tmp = prev_path + ".tmp"
-    with io.open(tmp, "w", encoding="utf-8", newline="\n") as f:
-        f.write(archive.serialise(dig))
-    # Upload FIRST, record locally only on success, so a failed upload is
-    # simply retried by the next pass. The digest bucket is not locked
-    # against overwrite: a grown digest must be able to replace its
-    # predecessor, and mercer-live-digest.yml refuses anything but growth.
-    rc = runner(["rclone", "copyto", tmp, f"{remote}/digests/{et_date}.json",
-                 "--checksum", "--s3-no-check-bucket", "--log-level", "NOTICE"]).returncode
-    if rc != 0:
-        os.remove(tmp)
-        return rc, f"{et_date}: upload failed (rc={rc}); will retry"
-    os.replace(tmp, prev_path)
-    return 0, f"{et_date}: {action} digest published"
+    if not man["shards"] and not man["run_records"]:
+        return 0, f"{et_date}: nothing captured that day; nothing published"
+    os.makedirs(os.path.dirname(pd), exist_ok=True)
+    os.makedirs(os.path.dirname(pm), exist_ok=True)
+    staged = []
+    for path, body in ((pd, digest_bytes), (pm, archive.serialise(man))):
+        with io.open(path + ".tmp", "wb") as f:
+            f.write(body)
+        staged.append(path)
+    # Upload BOTH first (digest, then manifest), record locally only when both
+    # succeeded, so a failed upload is simply retried by the next pass. A half
+    # upload is safe: the Actions job refuses a manifest that is not bound to
+    # the digest beside it. The digest bucket is not locked against overwrite
+    # because a grown pair must replace its predecessor; the Actions job
+    # refuses anything but growth.
+    for path, key in ((pd, f"digests/{et_date}.json"), (pm, f"manifests/{et_date}.json")):
+        rc = runner(["rclone", "copyto", path + ".tmp", f"{remote}/{key}",
+                     "--checksum", "--s3-no-check-bucket", "--log-level", "NOTICE"]).returncode
+        if rc != 0:
+            for p in staged:
+                os.remove(p + ".tmp")
+            return rc, f"{et_date}: upload of {key} failed (rc={rc}); will retry"
+    for p in staged:
+        os.replace(p + ".tmp", p)
+    return 0, f"{et_date}: {action} digest+manifest published"
 
 
 def pending_dates(data_dir=DATA_DIR, published_dir=PUBLISHED_DIR, now=None, lookback=7):

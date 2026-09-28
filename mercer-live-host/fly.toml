@@ -1,9 +1,9 @@
-# Mercer Live ML-1 capture host on Fly.io - ONE always-on machine, NO public
+# ML-1-OPS (mercer-live-ml1-ops-v1.0) capture host on Fly.io - ONE always-on machine, NO public
 # service. It makes outbound HTTPS calls (ESPN; R2) and accepts no inbound
 # traffic, so there is no endpoint to attack and no bearer token to leak.
 #
 # NOT DEPLOYED. Deploying it is Daniel's decision (MERCER_LIVE_ESCALATION.md
-# section 3). Exact steps: docs/MERCER_LIVE_OPERATIONAL_PATH.md section 8.
+# section 3). Exact steps: docs/MERCER_LIVE_ML1_OPS.md section 8.
 #
 # Secrets are NEVER in this file. Set them with `fly secrets set` from a
 # terminal, never in chat and never in a file in this repository:
@@ -11,7 +11,7 @@
 #   RCLONE_CONFIG_ML1R2_SECRET_ACCESS_KEY
 #   RCLONE_CONFIG_ML1R2_ENDPOINT            https://<account id>.r2.cloudflarestorage.com
 # ODDS_API_KEY is deliberately NOT listed. The host spends nothing without it,
-# and even with it, host.py passes --no-odds unless /data/odds-authorization.json
+# and even with it, scripts/mercer_live_ops/host.py passes --no-odds unless /data/odds-authorization.json
 # exists and is unexpired.
 
 app = 'ol-mercer-live-ml1'

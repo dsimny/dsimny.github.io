@@ -1,24 +1,29 @@
-name: Mercer Live digest commit
-# Commits ONE file: data/mercer_live/digest/<ET date>.json, the public proof of
-# one closed day of Mercer Live ML-1 raw observations. Design and reasoning:
-# docs/MERCER_LIVE_OPERATIONAL_PATH.md section 3.
+name: Mercer Live digest + manifest commit (ML-1-OPS)
+# Package ML-1-OPS, mercer-live-ml1-ops-v1.0 (docs/MERCER_LIVE_ML1_OPS.md).
+# mercer-live-ml1-v1.0 is FROZEN and unchanged; this workflow only publishes
+# its output.
 #
-# WHO BUILDS IT AND WHO COMMITS IT. The capture host holds the raw bytes and
-# builds the digest (scripts/mercer_live/archive.py build); it publishes that
-# ONE file to a private digest bucket. This job holds the repository write and
-# nothing else: it downloads the candidate with a READ-ONLY credential scoped to
-# the digest bucket, validates it (scripts/mercer_live/digest_commit.py), and
-# commits it. So the host never holds a credential that could push index.html,
+# Commits exactly TWO files for one closed ET date, in ONE commit:
+#   data/mercer_live/digest/<date>.json    the frozen ml1-v1 digest, as the host built it
+#   data/mercer_live/manifest/<date>.json  the ML-1-OPS manifest (ml1-ops-manifest-v1),
+#                                          bound one-way to that digest by its SHA-256
+# The shared commit IS the pairing; the frozen digest never names the manifest.
+#
+# WHO BUILDS AND WHO COMMITS. The capture host holds the raw bytes and builds
+# both files (scripts/mercer_live_ops/archive.py build); it publishes them to a
+# private digest bucket. This job holds the repository write and nothing else:
+# it downloads the two candidates with a READ-ONLY credential scoped to that
+# bucket, validates them (scripts/mercer_live_ops/digest_commit.py) and
+# commits them. The host never holds a credential that could push index.html,
 # a ledger or a commitment store, and this job never sees a raw observation.
 #
-# APPEND-ONLY. A committed digest is replaced only by one that keeps every
-# committed entry byte-for-byte and only adds entries; anything else is
+# GROW, NEVER CHANGE. A committed pair is replaced only by a pair that keeps
+# every committed entry byte-for-byte and adds evidence; anything else is
 # REFUSED-DIFFERS and the run goes red. git history keeps every version.
 #
 # TRIGGER. workflow_dispatch only, fired daily by cron-job.org after the host's
-# 06:30 ET publish - the repository's trusted trigger. No GitHub `schedule:`
-# (measured 15-23 minutes late here). A missing digest is a red run, which is
-# the alert: MISSING means the host did not publish.
+# 06:30 ET publish. No GitHub `schedule:` (measured 15-23 minutes late here).
+# A missing candidate is a red run, which is the alert.
 #
 # LOGS. Only the date, the action, counts and hashes are printed.
 on:
@@ -38,7 +43,7 @@ concurrency:
 
 jobs:
   commit:
-    name: Commit one digest
+    name: Commit one digest + manifest pair
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -58,7 +63,7 @@ jobs:
             *) echo "::error::date must be YYYY-MM-DD"; exit 1 ;;
           esac
           echo "date=$D" >> "$GITHUB_OUTPUT"
-      - name: Fetch the published candidate (read-only)
+      - name: Fetch the published candidates (read-only)
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.ML1_DIGEST_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ML1_DIGEST_R2_SECRET_ACCESS_KEY }}
@@ -73,35 +78,43 @@ jobs:
             exit 1
           fi
           mkdir -p "$RUNNER_TEMP/ml1"
-          if aws s3 cp "s3://$BUCKET/digests/$D.json" "$RUNNER_TEMP/ml1/candidate.json" \
-               --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
-            echo "fetched candidate for $D"
-          else
-            echo "no candidate fetched for $D"
-          fi
-      - name: Validate and place the digest
+          for k in digests manifests; do
+            if aws s3 cp "s3://$BUCKET/$k/$D.json" "$RUNNER_TEMP/ml1/$k.json" \
+                 --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
+              echo "fetched $k candidate for $D"
+            else
+              echo "no $k candidate fetched for $D"
+            fi
+          done
+      - name: Validate and place the pair
         env:
           PYTHONIOENCODING: utf-8
           D: ${{ steps.d.outputs.date }}
-        run: python scripts/mercer_live/digest_commit.py --candidate "$RUNNER_TEMP/ml1/candidate.json" --date "$D"
-      - name: Commit the digest
+        run: >-
+          python scripts/mercer_live_ops/digest_commit.py --date "$D"
+          --candidate-digest "$RUNNER_TEMP/ml1/digests.json"
+          --candidate-manifest "$RUNNER_TEMP/ml1/manifests.json"
+      - name: Commit the digest and manifest
         run: |
           set -e
           D="${{ steps.d.outputs.date }}"
           git config user.name "openledger-bot"
           git config user.email "actions@users.noreply.github.com"
-          # EXACTLY ONE PATH, named literally. A literal path that is missing
-          # exits 128 and turns the run red, which is loud and therefore fine.
+          # EXACTLY TWO PATHS, named literally, in ONE commit - that commit is
+          # the digest/manifest pairing. A literal path that is missing exits
+          # 128 and turns the run red, which is loud and therefore fine.
           git add "data/mercer_live/digest/$D.json"
-          # Belt and braces: the index must hold that one path and nothing else
-          # before anything is committed. index.html and feed.xml are never
-          # this workflow's to touch.
-          staged="$(git diff --cached --name-only)"
-          if [ -n "$staged" ] && [ "$staged" != "data/mercer_live/digest/$D.json" ]; then
-            echo "::error::staged set is not exactly the one digest path - refusing to commit"
+          git add "data/mercer_live/manifest/$D.json"
+          # The index must hold both paths or neither, and nothing else, before
+          # anything is committed. index.html, feed.xml and every ledger are
+          # never this workflow's to touch.
+          staged="$(git diff --cached --name-only | sort | tr '\n' ' ')"
+          want="$(printf '%s\n' "data/mercer_live/digest/$D.json" "data/mercer_live/manifest/$D.json" | sort | tr '\n' ' ')"
+          if [ -n "$staged" ] && [ "$staged" != "$want" ]; then
+            echo "::error::staged set is not exactly the digest+manifest pair - refusing to commit"
             exit 1
           fi
-          git diff --cached --quiet || git commit -m "Mercer Live digest ${D}"
+          git diff --cached --quiet || git commit -m "Mercer Live digest + ML-1-OPS manifest ${D}"
           PUSH_WHAT="Mercer Live digest"
           # ---- PUSH EPILOGUE ----------------------------------------
           # Byte-identical at every retrying push point in the repository;

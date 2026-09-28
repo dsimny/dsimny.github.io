@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Open Ledger Sports - Mercer Live ML-1: compact, value-free smoke evidence.
+Open Ledger Sports - ML-1-OPS (mercer-live-ml1-ops-v1.0): compact, value-free
+smoke evidence.
 
-    python scripts/mercer_live/evidence.py <store dir>
+    python scripts/mercer_live_ops/evidence.py <store dir>
 
 WHY. The smoke workflow used to `cat` every shard, run record and digest into
 the job log and print every observed field value. Workflow logs of a public
@@ -32,8 +33,10 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
-import common                                                     # noqa: E402
+ML1 = os.path.abspath(os.path.join(HERE, "..", "mercer_live"))
+if ML1 not in sys.path:
+    sys.path.insert(0, ML1)
+import common                                                     # noqa: E402  frozen ML-1, read-only
 
 # Fields whose PRESENCE and MOVEMENT the smoke run exists to evidence. Names
 # only; the values stay in the private artifact.
@@ -144,7 +147,7 @@ def summarise(store):
             continue
         sh = d.get("shards") or []
         L.append(f"DIGEST {d.get('et_date')} schema={d.get('schema_version')} shards={len(sh)} "
-                 f"run_records={len(d.get('run_records') or [])} runs={d.get('runs')} "
+                 f"runs={d.get('runs')} "
                  f"lines_equal_parsed={'yes' if all(s.get('lines') == s.get('parsed') for s in sh) else 'NO'} "
                  f"kinds={sorted({s.get('kind') for s in sh})}")
     return L

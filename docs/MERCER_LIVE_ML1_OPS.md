@@ -1,35 +1,51 @@
-# Mercer Live ML-1 — the operational path (T1 · T2 · T3)
+# ML-1-OPS — Mercer Live operational evidence package
 
-Written 2026-09-27. Scope: how ML-1 evidence is kept, proven and published day
-to day. **No change to the `ml1-v1` record schema, the providers, the join
-rules, the credit guards or any non-goal.** ML-2 is not started. Nothing here
-generates, implies or posts a play.
+| | |
+|---|---|
+| Package | **ML-1-OPS**, `mercer-live-ml1-ops-v1.0` |
+| Manifest schema | `ml1-ops-manifest-v1` |
+| Code | `scripts/mercer_live_ops/` |
+| Suite | `scripts/mercer_live_ops/selftest_mercer_live_ops.py` |
+| Status | built, tested, **not deployed**; approved by Daniel 2026-09-28 as a separate package |
 
-One amendment to a frozen artefact was unavoidable and is recorded as a dated
-amendment in `MERCER_LIVE_ML1_ARCHITECTURE.md` section 20: the daily digest now
-also fingerprints the run records (additive; every existing key unchanged).
+**`mercer-live-ml1-v1.0` remains frozen and unchanged.** ML-1-OPS does not
+touch its record schema, record kinds, canonical ids, join rules, timestamp or
+phase semantics, credit rules, store, or the `ml1-v1` digest. It *reads* frozen
+ML-1 output and adds operational plumbing around it: durable storage,
+archival, restore, evidence, the capture host, and digest publication.
 
-A useful picture for the whole thing: the capture host is the notary's desk,
-the private bucket is the vault, and the committed digest is the public
-register. The register lists every sealed envelope by its fingerprint without
-opening any of them; anyone later handed an envelope can check it against the
-register, and the vault only accepts new envelopes — it never lets one be
-swapped.
+**ML-1-OPS is not ML-2.** It contains no model, pick, probability, edge, unit,
+signal or recommendation logic (its suite asserts this by name), posts nothing
+to Discord, and spends no Odds API credit unless a separate, expiring
+authorisation file exists on the capture host.
+
+**Why a separate package.** A first version (commit `82edc05`, kept in history
+as the rejected approach) added a `run_records` field to the frozen digest and
+called it a dated amendment. The freeze allows amendments only for a live
+defect in the capture path; adding a field is a new package. That change was
+reverted, and the integrity it provided now lives in the companion manifest.
+
+A useful picture: the capture host is the notary's desk, the private bucket is
+the vault, and the committed digest + manifest are the public register. The
+register lists every sealed envelope by fingerprint without opening any; the
+vault only accepts new envelopes and never lets one be swapped.
 
 ```
   ESPN (free) ─▶ capture host (Fly machine, always on, no inbound service)
-                 host.py serve ─ one capture.py tick/min inside ET windows, --no-odds
-                 │   /data/mercer_live  (Fly volume: append-only raw store)
+                 scripts/mercer_live_ops/host.py serve
+                 │   runs the FROZEN scripts/mercer_live/capture.py, --no-odds, inside ET windows
+                 │   /data/mercer_live  (Fly volume: the frozen append-only raw store)
                  │
                  ├─ every 10 min: rclone copy --immutable of SEALED files
                  │        ─▶ R2 bucket ol-mercer-live-raw   (private, bucket lock)
                  │
-                 └─ daily ≥06:30 ET: archive.py build (closed day only, append-only
-                          check) ─▶ R2 bucket ol-mercer-live-digests/digests/D.json
+                 └─ daily ≥06:30 ET, closed day only: archive.py build
+                          ─▶ R2 ol-mercer-live-digests/  digests/D.json + manifests/D.json
                                                        │ read-only token
   cron-job.org ─▶ mercer-live-digest.yml (GitHub Actions) ◀┘
-                   digest_commit.py validates ─▶ commits ONE path:
-                   data/mercer_live/digest/D.json   (public)
+                   digest_commit.py validates the PAIR ─▶ ONE commit, TWO paths:
+                   data/mercer_live/digest/D.json    (frozen ml1-v1, unchanged bytes)
+                   data/mercer_live/manifest/D.json  (ml1-ops-manifest-v1)
 ```
 
 ---
@@ -40,56 +56,95 @@ swapped.
 |---|---|---|
 | F1 | No digest has ever been committed: `git ls-files data/mercer_live` lists only `README.md`. | repository |
 | F2 | The smoke workflow writes `--digest` into `$RUNNER_TEMP`, commits nothing, and uploads the whole store as a 7-day artifact. | `mercer-live-smoke.yml` |
-| F3 | **Same-hour collision.** Shards are named `<kind>_<ET hour>.jsonl`, so two capture stores that saw the same ET hour hold *different* files at the *same* path. The 2026-09-21 ET evidence came from three separate runners (35644644064, 35673309148, 35682762374 — the last two are 00:46Z and 03:20Z on 09-22 UTC, i.e. 20:46 and 23:20 ET on 09-21). Copying stores over each other, or digesting each and committing the last, silently loses the earlier observations. Reproduced as a negative control in `selftest_mercer_live_ops.py` [1]. | test |
-| F4 | **The digest did not cover the run records.** It counted runs, errors, calls and credits *from* the run records but fingerprinted only the shards, so a run record (credit readings, error list, retry evidence) could change after its digest was committed with nothing to show it. This is the one amendment (section 20 of the architecture doc). | `store.py` |
-| F5 | The digest carries a wall-clock `generated_at`, so two builds of unchanged evidence differ in bytes. Handled by comparing digests without that one key; the field is kept (schema). | `store.py` |
+| F3 | **Same-hour collision.** Shards are named `<kind>_<ET hour>.jsonl`, so two capture stores that saw the same ET hour hold *different* files at the *same* path. The 2026-09-21 ET evidence came from three separate runners (35644644064, 35673309148, 35682762374). Copying stores over each other, or digesting each and committing the last, silently loses the earlier observations. Reproduced as a negative control in the suite, group [1]. | test |
+| F4 | **The frozen digest does not fingerprint the run records.** It counts runs, errors, calls and credits *from* them, but a run record could change after its digest was committed with nothing to show it. The suite proves this as a negative control ([3]). Covered by the ML-1-OPS manifest, not by changing the digest. | `store.py` |
+| F5 | The frozen digest carries a wall-clock `generated_at`, so two builds of unchanged evidence differ in bytes. ML-1-OPS therefore reuses the published digest bytes when the evidence is unchanged. | `store.py` |
 | F6 | The smoke job `cat`s every shard, run record and digest into the job log and prints every observed field value. | `mercer-live-smoke.yml` |
-| F7 | On the capture host, credit bookings would land in the container's copy of `data/odds_credits.json`, never the repository's, so the frozen 5,000 floor would read a stale balance. Irrelevant while odds are off; a **prerequisite before any spend is authorised** (section 9). | `credits.py` + host layout |
+| F7 | On the capture host, credit bookings would land in the container's copy of `data/odds_credits.json`, never the repository's, so the frozen 5,000 floor would read a stale balance. Irrelevant while odds are off; a **prerequisite before any spend is authorised**. | `credits.py` + host layout |
 
-## 2. T1 — durable digest path
+## 2. T1 — the digest + manifest pair
 
-**Choice: the capture host builds the digest; a separate GitHub Actions job
-commits it.** Neither alternative is as safe:
+### 2.1 The companion manifest, `ml1-ops-manifest-v1`
+
+`data/mercer_live/manifest/<ET date>.json`, keys exactly:
+
+| key | content |
+|---|---|
+| `schema_version` | `"ml1-ops-manifest-v1"` |
+| `package` | `"mercer-live-ml1-ops-v1.0"` |
+| `et_date` | the ET date |
+| `generated_at` | UTC build time |
+| `ml1_digest` | `{path: "data/mercer_live/digest/<date>.json", sha256, bytes, schema_version: "ml1-v1"}` — the SHA-256 of the **exact bytes** of that day's frozen digest |
+| `shards` | every observation shard: `{path, sport, kind, sha256, bytes, lines, parsed}` |
+| `run_records` | every run record: `{path, sha256, bytes}` |
+| `counts` | shards, run_records, shard_bytes, shard_lines, shard_records, run_record_bytes (must equal the entries) |
+| `_note` | a fixed description |
+
+It holds paths, sizes, counts, hashes, dates and version labels only — no
+observed value, provider payload, event id, book, price or secret. The suite
+checks every string in a built manifest against that allowlist and plants a
+canary in every observed value to prove none leaks ([12]).
+
+### 2.2 Evidence binding (one-way, no circle)
+
+```
+manifest.ml1_digest.sha256  ──▶  SHA-256(frozen digest file bytes)
+frozen digest               ──▶  (nothing; it is unchanged ml1-v1 and never names the manifest)
+git commit                  ──▶  both files, together — the durable pairing
+```
+
+Cross-checks on every pair (`archive.check_pair`): the manifest's digest
+hash/bytes match the digest bytes; both name the same date; both list the same
+shard set with identical sha256/bytes/lines/records; the manifest lists at
+least as many run records as the digest counted.
+
+### 2.3 Who builds and who commits
+
+**The capture host builds the pair; a separate GitHub Actions job commits it.**
 
 | option | why not |
 |---|---|
-| host commits (git push / Contents API with a PAT) | the host would hold a credential that can write *any* path — `index.html`, the ledger, the commitment stores. A compromised capture box must not be able to touch the public record. GitHub PATs cannot be scoped to one path. |
-| Actions builds the digest | Actions would need read access to the raw bucket, putting raw bytes on public-repo runners — exactly what T3 removes. |
-| **host builds, Actions commits (chosen)** | the host holds raw and no repo write; Actions holds repo write and a *read-only* token for the digest bucket only. Each side has one power. |
+| host commits (git push / Contents API with a PAT) | the host would hold a credential that can write *any* path — `index.html`, the ledger, the commitment stores. GitHub PATs cannot be scoped to one path. |
+| Actions builds the pair | Actions would need read access to the raw bucket, putting raw bytes on public-repo runners — exactly what T3 removes. |
+| **host builds, Actions commits (chosen)** | the host holds raw and no repo write; Actions holds repo write and a *read-only* token for the digest bucket only. |
 
-Rules, all enforced in code and tested:
+### 2.4 Rules (all enforced in code and tested)
 
-- **Closed days only.** A digest is built only after the ET day has ended plus
-  10 minutes (`archive.closed`), so a committed digest never needs to grow
-  because the day was still being written. The DST-end day is 25 hours and is
-  handled (tested).
-- **Multiple runs per day.** On the host every run writes into the one durable
-  store, so the frozen append-only writer handles it natively. Evidence from
-  any *other* store (ephemeral runners, the rescued artifacts) enters through
-  `archive.py ingest`, which merges at the record level through `Store.append`:
-  observation ids kept, duplicates refused and counted, nothing rewritten, a
-  run-record conflict or an unparseable source line refused before any write.
-- **Accurate proof.** `archive.verify` re-hashes every shard and run record,
-  checks line counts, and reports any file for that date that the digest does
-  *not* list. The host refuses to publish a digest that does not verify.
-- **Append-only succession.** A committed digest may be replaced only by one
-  that keeps every committed entry byte-for-byte and only adds entries
-  (`archive.supersedes`). Anything else is `REFUSED-DIFFERS`, the run goes red,
-  and it needs a human. Git history keeps every version. On the host,
-  `verify_prefix` also tells an *appended* shard from a *rewritten* one so the
-  refusal says which.
-- **Exactly one path.** `digest_commit.py` computes the target
-  (`data/mercer_live/digest/<date>.json`) from the validated date, never from
-  the candidate; validates schema, keys, the date, the closed day, every shard
-  and run path against an allowlist regex (no traversal), and canonical
-  formatting. The workflow stages that one literal path, then asserts
-  `git diff --cached --name-only` is exactly that path before committing, and
-  uses the repository's standard push epilogue (byte-identical, asserted by
-  `selftest_workflows.py` / `selftest_push_pattern.py`). No `git add -A`, no
-  `index.html`/`feed.xml`, no `git pull`, no force.
-- **Repeat execution.** Re-running the host publish with unchanged evidence
-  uploads nothing; re-running the workflow commits nothing (`UNCHANGED`).
-- **Missing digest is loud.** `MISSING` exits 1; the red run is the alert.
+- **Closed days only** (`archive.closed`): ET day ended + 10 minutes; the
+  25-hour DST-end day is handled.
+- **Multiple runs per day**: on the host every run writes into the one durable
+  frozen store. Evidence from other stores (ephemeral runners, the rescued
+  artifacts) enters through `archive.py ingest`, record-level through the frozen
+  `Store.append`: ids kept, duplicates refused and counted, nothing rewritten,
+  a run-record conflict or unparseable source line refused before any write.
+- **Grow, never change.** A committed pair is superseded only by a pair that
+  keeps every committed shard and run-record entry byte-for-byte and adds new
+  evidence. Refused: deletion, replacement, hash change, shrinking, a count
+  going down, rewriting a committed fingerprint, and a manifest bound to a
+  different digest. On the host, `verify_prefix` also names an *appended* vs a
+  *rewritten* shard; both still need a human.
+- **Idempotent.** Unchanged evidence reuses the published digest bytes and
+  manifest, so re-running publication uploads nothing and the workflow commits
+  nothing (`UNCHANGED`).
+- **Exactly two paths, one commit.** `digest_commit.py` computes both targets
+  from the validated date, never from the candidates, validates both, checks
+  the pairing, and writes both or neither. The workflow stages those two
+  literal paths, asserts the index holds exactly that pair, commits once, and
+  uses the repository's standard push epilogue. No `git add -A`, no
+  `index.html`/`feed.xml`/ledger, no `git pull`, no force.
+- **Missing is loud**: either candidate absent → `MISSING`, exit 1.
+
+### 2.5 Restore verification
+
+`archive.py restore-verify --data-dir DIR --digest F --manifest F` succeeds only if:
+
+1. the manifest is bound to exactly these digest bytes;
+2. the frozen digest independently verifies every shard it covers;
+3. every shard **and every run record** matches the manifest;
+4. no shard or run record for that date exists that neither lists.
+
+A modified run record fails restore even though the frozen digest alone cannot
+detect it (proven by negative control).
 
 ## 3. T2 — durable raw retention
 
@@ -138,14 +193,14 @@ exact bytes, and a compressed copy would need a second proof.
   off-host copy.
 - **Third line:** Fly's daily volume snapshots, `snapshot_retention = 60` days.
 - **Restore:** copy the day's prefix out of R2 into an empty directory and run
-  `archive.py verify --data-dir <dir> --digest data/mercer_live/digest/<date>.json`.
-  It passes only if every byte matches the committed digest and nothing
-  unlisted is present (drill tested in [8], including the one-flipped-byte
-  negative control).
+  `scripts/mercer_live_ops/archive.py restore-verify --data-dir <dir>
+  --digest data/mercer_live/digest/<date>.json --manifest data/mercer_live/manifest/<date>.json`
+  (section 2.5; drill tested in [8], including the one-flipped-byte negative
+  control on a run record).
 
 ### 3.4 The spend boundary
 
-`host.py` always runs the capture with `--no-odds` and **removes
+`scripts/mercer_live_ops/host.py` always runs the capture with `--no-odds` and **removes
 `ODDS_API_KEY` from the tick's environment**, unless `/data/odds-authorization.json`
 exists, parses, names `authorized_by`, `authorized_on`, `expires_on` and
 `reason`, and has not expired (ET). No code writes that file; `fly.toml`
@@ -161,17 +216,22 @@ buckets exist):
 
 ```
 # on a trusted machine holding the rescued artifacts, each unzipped to its own dir
-python scripts/mercer_live/archive.py ingest \
+python scripts/mercer_live_ops/archive.py ingest \
    --src rescued/35644644064 --src rescued/35673309148 --src rescued/35682762374 \
    --src rescued/36080139388 --src rescued/36080802566 --data-dir durable/
-python scripts/mercer_live/archive.py build --data-dir durable/ --date 2026-09-21 --out 2026-09-21.json
-python scripts/mercer_live/archive.py build --data-dir durable/ --date 2026-09-24 --out 2026-09-24.json
+for D in 2026-09-21 2026-09-24; do
+  python scripts/mercer_live_ops/archive.py build --data-dir durable/ --date $D \
+      --out-digest digest/$D.json --out-manifest manifest/$D.json
+  python scripts/mercer_live_ops/archive.py restore-verify --data-dir durable/ \
+      --digest digest/$D.json --manifest manifest/$D.json
+done
 ```
 
 The first command should report `records_written` summing to 23 and
 `run_records_copied` summing to 23 (per section 19's table; the in-run retry
-adds none). Then copy `durable/raw/…` to the raw bucket and the two digests to
-`digests/`, and dispatch the digest workflow for each date. The original
+adds none). Then copy `durable/raw/…` to the raw bucket, the digests to
+`digests/` and the manifests to `manifests/`, and dispatch the digest workflow
+for each date. The original
 artifact bytes stay exactly where Hermes put them, with their rescue manifest.
 
 ## 5. T3 — what a public repository's Actions output exposes
@@ -203,7 +263,7 @@ far is ESPN game state only (no Odds API call was ever made), in the logs of
 the five runs above and in their artifacts until they expire (2026-09-28 to
 2026-10-02).
 
-**Remediation (shipped):** the smoke log now prints only `evidence.py` output —
+**Remediation (in ML-1-OPS):** the smoke log now prints only `scripts/mercer_live_ops/evidence.py` output —
 field-presence counts, per-field change counts between consecutive
 observations, distinct ids/run ids/observed_at, state histogram, error and
 duplicate counts, digest shape — and no value (a canary placed in every value
@@ -215,7 +275,7 @@ at all and the run says so. The retry proof is unchanged.
 
 **Not done, needs Daniel:** deleting the five existing runs' logs (and the
 artifacts before they expire). They are cited as freeze evidence in
-architecture section 19, and the raw content is preserved in the rescue, so
+ML-1 architecture section 19, and the raw content is preserved in the rescue, so
 deletion is a judgement between "evidence trail" and "exposure"; it is
 irreversible and is Daniel's call (section 9).
 
@@ -223,15 +283,17 @@ irreversible and is Daniel's call (section 9).
 
 | file | role |
 |---|---|
-| `scripts/mercer_live/store.py` | digest adds `run_records` (amendment, §20) |
-| `scripts/mercer_live/archive.py` | ingest, verify, verify_prefix, supersedes, sealed, closed, build |
-| `scripts/mercer_live/digest_commit.py` | the one repository write, run in Actions |
-| `scripts/mercer_live/evidence.py` | value-free smoke evidence |
-| `scripts/mercer_live/host.py`, `host_windows.json` | capture-host supervisor, spend boundary, backup, publish |
+| `scripts/mercer_live_ops/archive.py` | ingest, manifest build, pairing, supersede, verify_prefix, restore-verify, sealed, closed |
+| `scripts/mercer_live_ops/digest_commit.py` | the one two-file repository write, run in Actions |
+| `scripts/mercer_live_ops/evidence.py` | value-free smoke evidence |
+| `scripts/mercer_live_ops/host.py`, `host_windows.json` | capture-host supervisor, spend boundary, backup, publish |
+| `scripts/mercer_live_ops/selftest_mercer_live_ops.py` | the ML-1-OPS suite |
 | `mercer-live-host/Dockerfile`, `mercer-live-host/fly.toml` | host image and machine definition (not deployed) |
-| `.github/workflows/mercer-live-digest.yml` | commits one digest per dispatch |
+| `.github/workflows/mercer-live-digest.yml` | commits one digest + manifest pair per dispatch |
 | `.github/workflows/mercer-live-smoke.yml` | T3 log/artifact hygiene |
-| `scripts/mercer_live/selftest_mercer_live_ops.py` | the operational-path suite (182 checks) |
+| `.github/workflows/mercer-live-selftest.yml` | the gate also runs the ML-1-OPS suite |
+
+Nothing under `scripts/mercer_live/` is modified.
 
 ## 7. Operating cost
 
@@ -269,7 +331,7 @@ into a file in this repository.
        RCLONE_CONFIG_ML1R2_ENDPOINT=https://<account id>.r2.cloudflarestorage.com
    fly deploy --config mercer-live-host/fly.toml --dockerfile mercer-live-host/Dockerfile \
        --build-arg DEPLOYMENT_COMMIT=$(git rev-parse --short HEAD)
-   fly ssh console --app ol-mercer-live-ml1 -C "python scripts/mercer_live/host.py status"
+   fly ssh console --app ol-mercer-live-ml1 -C "python scripts/mercer_live_ops/host.py status"
    ```
    `status` must read `odds=off (no authorisation file…)`, `remote_raw=set`,
    `remote_digests=set`. Do **not** set `ODDS_API_KEY`.
@@ -296,9 +358,9 @@ into a file in this repository.
 1. Approve the hosting choice (Fly + R2, ≈$3.50/mo) or pick the VPS + B2 fallback.
 2. The research window → the R2 bucket-lock retention date.
 3. Whether to delete the five public smoke runs' logs and artifacts (irreversible).
-4. Whether committed digests (public: per-shard hashes, counts, observed_at
-   spans, credit totals) are acceptable to publish — they carry no observed
-   value.
+4. Whether the committed digests (frozen ML-1: per-shard hashes, counts,
+   observed_at spans, credit totals) and manifests (hashes, sizes, counts) are
+   acceptable to publish — neither carries an observed value.
 5. **Before any Odds API spend:** how the host's credit readings reach
    `data/odds_credits.json` (F7) — and then the authorisation file itself
    (who, until when, why).

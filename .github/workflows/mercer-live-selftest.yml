@@ -23,6 +23,9 @@ on:
       - "requirements.txt"
       - ".github/workflows/mercer-live-selftest.yml"
       - ".github/workflows/mercer-live-smoke.yml"
+      - ".github/workflows/mercer-live-digest.yml"
+      - "scripts/mercer_live_ops/**"
+      - "mercer-live-host/**"
       # Read-only football dependencies the suite imports or compares against.
       - "scripts/football/teams.py"
       - "scripts/football/espn_ncaaf.py"
@@ -40,6 +43,9 @@ on:
       - "requirements.txt"
       - ".github/workflows/mercer-live-selftest.yml"
       - ".github/workflows/mercer-live-smoke.yml"
+      - ".github/workflows/mercer-live-digest.yml"
+      - "scripts/mercer_live_ops/**"
+      - "mercer-live-host/**"
       - "scripts/football/teams.py"
       - "scripts/football/espn_ncaaf.py"
       - "scripts/football/fetch_odds.py"
@@ -67,3 +73,10 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
         run: python scripts/mercer_live/selftest_mercer_live.py
+      # ML-1-OPS (mercer-live-ml1-ops-v1.0) is a separate package with its own
+      # suite, so the frozen ML-1 suite above keeps meaning exactly the frozen
+      # contract. Same gate, same meaning of a red X: Mercer Live code.
+      - name: Run selftest_mercer_live_ops.py (ML-1-OPS)
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/mercer_live_ops/selftest_mercer_live_ops.py

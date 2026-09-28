@@ -1,0 +1,12 @@
+{
+  "_note": "Mercer Live capture windows, US/Eastern wall clock. OPERATIONAL, not contract (architecture section 19). weekday: Mon=0 .. Sun=6. A window may run past midnight. Outside every window the host captures nothing and calls nobody. ESPN is free; odds stay off unless the host holds a separate, unexpired authorisation file.",
+  "windows": [
+    {"weekday": 0, "start": "19:00", "minutes": 330, "label": "Monday night"},
+    {"weekday": 1, "start": "19:00", "minutes": 270, "label": "Tuesday college"},
+    {"weekday": 2, "start": "19:00", "minutes": 270, "label": "Wednesday college"},
+    {"weekday": 3, "start": "19:00", "minutes": 330, "label": "Thursday night"},
+    {"weekday": 4, "start": "18:30", "minutes": 360, "label": "Friday college"},
+    {"weekday": 5, "start": "11:30", "minutes": 810, "label": "Saturday college"},
+    {"weekday": 6, "start": "09:00", "minutes": 900, "label": "Sunday incl. international"}
+  ]
+}

@@ -898,20 +898,20 @@
    "away": "PHI",
    "away_abbr": "PHI",
    "away_name": "Philadelphia Eagles",
-   "away_score": null,
+   "away_score": 7,
    "espn_event_id": "401872963",
-   "final": false,
+   "final": true,
    "home": "CHI",
    "home_abbr": "CHI",
    "home_name": "Chicago Bears",
-   "home_score": null,
+   "home_score": 27,
    "kickoff_utc": "2026-09-29T00:15:00Z",
-   "margin": null,
+   "margin": 20,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 34
   },
   "401873272": {
    "away": "DET",
@@ -1826,5 +1826,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-09-28T18:22:58Z"
+ "updated_utc": "2026-09-29T16:45:39Z"
 }

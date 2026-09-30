@@ -4599,6 +4599,25 @@
    "status": "STATUS_FINAL",
    "total": 20
   },
+  "401862786": {
+   "away": "North Texas Mean Green",
+   "away_abbr": "UNT",
+   "away_key": "northtexasmeangreen",
+   "away_score": null,
+   "espn_event_id": "401862786",
+   "final": false,
+   "home": "Tulsa Golden Hurricane",
+   "home_abbr": "TLSA",
+   "home_key": "tulsagoldenhurricane",
+   "home_score": null,
+   "kickoff_utc": "2026-10-02T01:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401864424": {
    "away": "Merrimack Warriors",
    "away_abbr": "MRMK",
@@ -6289,7 +6308,26 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 36
+  },
+  "401871049": {
+   "away": "Western Kentucky Hilltoppers",
+   "away_abbr": "WKU",
+   "away_key": "westernkentuckyhilltoppers",
+   "away_score": null,
+   "espn_event_id": "401871049",
+   "final": false,
+   "home": "New Mexico State Aggies",
+   "home_abbr": "NMSU",
+   "home_key": "newmexicostateaggies",
+   "home_score": null,
+   "kickoff_utc": "2026-10-02T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   }
  },
- "updated_utc": "2026-09-29T16:45:38Z"
+ "updated_utc": "2026-09-30T16:38:11Z"
 }

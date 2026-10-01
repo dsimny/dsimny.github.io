@@ -2623,6 +2623,25 @@
    "status": "STATUS_FINAL",
    "total": 69
   },
+  "401858245": {
+   "away": "Pittsburgh Panthers",
+   "away_abbr": "PITT",
+   "away_key": "pittsburghpanthers",
+   "away_score": null,
+   "espn_event_id": "401858245",
+   "final": false,
+   "home": "Virginia Tech Hokies",
+   "home_abbr": "VT",
+   "home_key": "virginiatechhokies",
+   "home_score": null,
+   "kickoff_utc": "2026-10-02T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401858422": {
    "away": "Eastern Illinois Panthers",
    "away_abbr": "EIU",
@@ -3572,6 +3591,25 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 55
+  },
+  "401858476": {
+   "away": "Penn State Nittany Lions",
+   "away_abbr": "PSU",
+   "away_key": "pennstatenittanylions",
+   "away_score": null,
+   "espn_event_id": "401858476",
+   "final": false,
+   "home": "Northwestern Wildcats",
+   "home_abbr": "NU",
+   "home_key": "northwesternwildcats",
+   "home_score": null,
+   "kickoff_utc": "2026-10-03T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   },
   "401859184": {
    "away": "Rice Owls",
@@ -6327,7 +6365,26 @@
    "season_year": 2026,
    "status": "STATUS_SCHEDULED",
    "total": null
+  },
+  "401871050": {
+   "away": "Liberty Flames",
+   "away_abbr": "LIB",
+   "away_key": "libertyflames",
+   "away_score": null,
+   "espn_event_id": "401871050",
+   "final": false,
+   "home": "Delaware Blue Hens",
+   "home_abbr": "DEL",
+   "home_key": "delawarebluehens",
+   "home_score": null,
+   "kickoff_utc": "2026-10-02T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   }
  },
- "updated_utc": "2026-09-30T16:38:11Z"
+ "updated_utc": "2026-10-01T17:14:15Z"
 }

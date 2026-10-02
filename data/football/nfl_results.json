@@ -917,20 +917,20 @@
    "away": "PIT",
    "away_abbr": "PIT",
    "away_name": "Pittsburgh Steelers",
-   "away_score": null,
+   "away_score": 24,
    "espn_event_id": "401872964",
-   "final": false,
+   "final": true,
    "home": "CLE",
    "home_abbr": "CLE",
    "home_name": "Cleveland Browns",
-   "home_score": null,
+   "home_score": 27,
    "kickoff_utc": "2026-10-02T00:15:00Z",
-   "margin": null,
+   "margin": 3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 51
   },
   "401873272": {
    "away": "DET",
@@ -1845,5 +1845,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-01T17:14:16Z"
+ "updated_utc": "2026-10-02T16:27:59Z"
 }

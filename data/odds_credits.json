@@ -7,16 +7,6 @@
    "markets": "h2h",
    "regions": "us",
    "http_status": 401,
-   "source": "football_fetch_odds:ncaaf",
-   "read_utc": "2026-10-01T05:37:25Z"
-  },
-  {
-   "remaining": null,
-   "used": null,
-   "last_call_cost": null,
-   "markets": "h2h",
-   "regions": "us",
-   "http_status": 401,
    "source": "football_fetch_odds:nfl",
    "read_utc": "2026-10-01T05:37:28Z"
   },
@@ -599,6 +589,16 @@
    "http_status": 401,
    "source": "football_fetch_odds:ncaaf",
    "read_utc": "2026-10-02T15:37:22Z"
+  },
+  {
+   "remaining": null,
+   "used": null,
+   "last_call_cost": null,
+   "markets": "h2h",
+   "regions": "us",
+   "http_status": 401,
+   "source": "football_fetch_odds:ncaaf",
+   "read_utc": "2026-10-02T15:42:56Z"
   }
  ],
  "note": "The Odds API bills one credit per market per region per call. Free tier: 500/month. See CLAUDE.md for the budget and the decision rule for upgrading."

@@ -2893,20 +2893,20 @@
    "away": "Pittsburgh Panthers",
    "away_abbr": "PITT",
    "away_key": "pittsburghpanthers",
-   "away_score": null,
+   "away_score": 35,
    "espn_event_id": "401858245",
-   "final": false,
+   "final": true,
    "home": "Virginia Tech Hokies",
    "home_abbr": "VT",
    "home_key": "virginiatechhokies",
-   "home_score": null,
+   "home_score": 33,
    "kickoff_utc": "2026-10-02T23:00:00Z",
-   "margin": null,
+   "margin": -2,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 68
   },
   "401858246": {
    "away": "Boston College Eagles",
@@ -4090,20 +4090,20 @@
    "away": "Penn State Nittany Lions",
    "away_abbr": "PSU",
    "away_key": "pennstatenittanylions",
-   "away_score": null,
+   "away_score": 13,
    "espn_event_id": "401858476",
-   "final": false,
+   "final": true,
    "home": "Northwestern Wildcats",
    "home_abbr": "NU",
    "home_key": "northwesternwildcats",
-   "home_score": null,
+   "home_score": 34,
    "kickoff_utc": "2026-10-03T00:00:00Z",
-   "margin": null,
+   "margin": 21,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 47
   },
   "401858477": {
    "away": "Indiana Hoosiers",
@@ -7377,20 +7377,20 @@
    "away": "Liberty Flames",
    "away_abbr": "LIB",
    "away_key": "libertyflames",
-   "away_score": null,
+   "away_score": 30,
    "espn_event_id": "401871050",
-   "final": false,
+   "final": true,
    "home": "Delaware Blue Hens",
    "home_abbr": "DEL",
    "home_key": "delawarebluehens",
-   "home_score": null,
+   "home_score": 14,
    "kickoff_utc": "2026-10-02T23:00:00Z",
-   "margin": null,
+   "margin": -16,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 44
   },
   "401871089": {
    "away": "UL Monroe Warhawks",
@@ -7412,5 +7412,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-10-02T16:27:57Z"
+ "updated_utc": "2026-10-03T15:02:12Z"
 }

@@ -1,0 +1,182 @@
+{
+ "_note": "Layer 1 only. Every number here is measured from captured prices; none is modelled and none is predicted. Makes NO expectation claim - see docs/FOOTBALL_PIPELINE.md section 1. Zero units: football does not stake.",
+ "_research_note": "This is a research observation produced under 'fp-v0.4-market-observation-v1' (frozen 2026-09-17). It is not a recommendation, not part of the official football record, and may not be retroactively promoted into the official record. All observations are 0 units. See docs/FOOTBALL_RESEARCH_FP_V04_OBSERVATION.md for the full authority statement.",
+ "asof_utc": "2026-10-03T18:37:23Z",
+ "coverage_status": "manual review",
+ "decision_made": true,
+ "decision_moment_utc": "2026-10-03T18:00:00Z",
+ "excluded_share": 1.0,
+ "free": null,
+ "games": [],
+ "generated_utc": "2026-10-03T18:37:24Z",
+ "n_covered": 0,
+ "n_eligible_at_decision": 0,
+ "n_excluded": 30,
+ "n_newly_committed": 0,
+ "no_market": [
+  {
+   "matchup": "PHI @ CHI",
+   "reason": "no T-24 capture yet (nearest is 101.6h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "PIT @ CLE",
+   "reason": "no T-24 capture yet (nearest is 173.6h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "IND @ WAS",
+   "reason": "no T-24 capture yet (nearest is 234.9h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "ARI @ NYG",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "TEN @ BAL",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "NE @ BUF",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "NYJ @ CHI",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "JAX @ CIN",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "DAL @ HOU",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "GB @ TB",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "LA @ PHI",
+   "reason": "no T-24 capture yet (nearest is 238.4h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "MIA @ MIN",
+   "reason": "no T-24 capture yet (nearest is 241.5h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "DEN @ SF",
+   "reason": "no T-24 capture yet (nearest is 241.8h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "KC @ LV",
+   "reason": "no T-24 capture yet (nearest is 241.8h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "LAC @ SEA",
+   "reason": "no T-24 capture yet (nearest is 241.8h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "DET @ CAR",
+   "reason": "no T-24 capture yet (nearest is 245.7h before kickoff)",
+   "sport": "nfl"
+  },
+  {
+   "matchup": "Pittsburgh Panthers @ Virginia Tech Hokies",
+   "reason": "no T-24 capture yet (nearest is 194.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Penn State Nittany Lions @ Northwestern Wildcats",
+   "reason": "no T-24 capture yet (nearest is 195.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Miami Hurricanes @ Clemson Tigers",
+   "reason": "no T-24 capture yet (nearest is 211.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Alabama Crimson Tide @ Mississippi State Bulldogs",
+   "reason": "no T-24 capture yet (nearest is 211.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Vanderbilt Commodores @ Georgia Bulldogs",
+   "reason": "no T-24 capture yet (nearest is 211.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Louisville Cardinals @ NC State Wolfpack",
+   "reason": "no T-24 capture yet (nearest is 211.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Michigan Wolverines @ Minnesota Golden Gophers",
+   "reason": "no T-24 capture yet (nearest is 211.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Notre Dame Fighting Irish @ North Carolina Tar Heels",
+   "reason": "no T-24 capture yet (nearest is 211.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Auburn Tigers @ Tennessee Volunteers",
+   "reason": "no T-24 capture yet (nearest is 214.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Florida Gators @ Missouri Tigers",
+   "reason": "no T-24 capture yet (nearest is 214.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Ohio State Buckeyes @ Iowa Hawkeyes",
+   "reason": "no T-24 capture yet (nearest is 214.9h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Kentucky Wildcats @ South Carolina Gamecocks",
+   "reason": "no T-24 capture yet (nearest is 215.6h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "BYU Cougars @ TCU Horned Frogs",
+   "reason": "no T-24 capture yet (nearest is 218.4h before kickoff)",
+   "sport": "ncaaf"
+  },
+  {
+   "matchup": "Washington Huskies @ USC Trojans",
+   "reason": "no T-24 capture yet (nearest is 218.9h before kickoff)",
+   "sport": "ncaaf"
+  }
+ ],
+ "premium": null,
+ "record_cohort": "fp-v0.4-market-observation-v1",
+ "research_authority": "research_only_no_selection_delivery_or_holdout",
+ "research_prereg_frozen_date": "2026-09-17",
+ "research_selection_rule": "fp-v0.4",
+ "research_version_id": "fp-v0.4-market-observation-v1",
+ "selection_version": "fp-v0.4",
+ "slate_week": "2026-09-29",
+ "sports": [
+  "nfl",
+  "ncaaf"
+ ],
+ "tier": "research",
+ "units": 0
+}

@@ -7410,7 +7410,26 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 87
+  },
+  "401871090": {
+   "away": "Southern Miss Golden Eagles",
+   "away_abbr": "USM",
+   "away_key": "southernmissgoldeneagles",
+   "away_score": null,
+   "espn_event_id": "401871090",
+   "final": false,
+   "home": "Troy Trojans",
+   "home_abbr": "TROY",
+   "home_key": "troytrojans",
+   "home_score": null,
+   "kickoff_utc": "2026-10-07T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   }
  },
- "updated_utc": "2026-10-04T15:37:53Z"
+ "updated_utc": "2026-10-05T19:34:11Z"
 }

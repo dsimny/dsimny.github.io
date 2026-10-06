@@ -1307,6 +1307,9 @@
    },
    "committed_utc": "2026-10-06T17:37:33Z",
    "kickoff_utc": "2026-10-07T23:00:00Z",
+   "later_disagreements": [
+    "c7edcef32a2ee548e913591a31f767dc3cb07836a1d491485acb4fe3d1a17af9"
+   ],
    "matchup": "Jacksonville State Gamecocks @ Kennesaw State Owls",
    "sha256": "0ae4fb9b5fdc44bda4518be52a5847bef093484e4cf2709ea1b74d9a34f54daf",
    "sport": "ncaaf"
@@ -2170,6 +2173,9 @@
    },
    "committed_utc": "2026-10-06T17:37:33Z",
    "kickoff_utc": "2026-10-07T23:30:00Z",
+   "later_disagreements": [
+    "43f82bb4ef39ec882d7cdf2d37651974ec83d01859fdcaa70ce9dfb5ffb5a004"
+   ],
    "matchup": "New Mexico State Aggies @ Florida International Panthers",
    "sha256": "ac61f15d743068f3683fa3e4efb25a82b7f7df71d4d8a3639a8d0f30255845bf",
    "sport": "ncaaf"

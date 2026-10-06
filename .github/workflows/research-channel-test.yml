@@ -1,0 +1,103 @@
+name: Research Discord Channel Test
+# Diagnostic only: not a research observation, board delivery, or flag change.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test_channel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Check the research diagnostic contract offline
+        run: python scripts/selftest_research_channel_test.py
+      - name: Send one fixed research-channel diagnostic
+        env:
+          DISCORD_RESEARCH_WEBHOOK: ${{ secrets.DISCORD_RESEARCH_WEBHOOK }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          python - <<'PY'
+          import contextlib
+          import io
+          import os
+          import sys
+          from urllib.parse import urlparse
+
+          message = (
+              "CONTROLLED RESEARCH CHANNEL TEST — Open Ledger research Discord "
+              "destination verification. This is not a research observation, "
+              "recommendation, graded play, or official release."
+          )
+          def fail(reason):
+              print(f"::error::Research channel test failed: {reason}. Raw diagnostics withheld.")
+              sys.exit(1)
+
+          webhook = os.environ.get("DISCORD_RESEARCH_WEBHOOK", "")
+          if not webhook:
+              fail("missing research webhook")
+          # Buffer all shared diagnostics; never print URLs, bodies or exceptions.
+          try:
+              with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                  sys.path.insert(0, "scripts/football")
+                  import discord as transport
+                  allowed = (transport.webhook_host_ok(webhook)
+                             and urlparse(webhook).scheme == "https")
+          except Exception:
+              fail("transport setup/host validation exception")
+          if not allowed:
+              fail("refused webhook host or scheme")
+          # Scope a one-request guard to this diagnostic process. Keep the shared
+          # HTTP implementation and production retry semantics unchanged.
+          native_post = transport.requests.post
+          attempts, first_status = 0, None
+          def single_post(*args, **kwargs):
+              global attempts, first_status
+              if attempts:
+                  raise RuntimeError("single-attempt limit")
+              attempts += 1
+              # Reject redirects rather than following a different destination.
+              kwargs["allow_redirects"] = False
+              response = native_post(*args, **kwargs)
+              first_status = response.status_code
+              return response
+
+          try:
+              with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                  transport.requests.post = single_post
+                  result = transport.send(webhook, [
+                      {"username": "Open Ledger Sports", "content": message}
+                  ], dry=False)
+          except Exception:
+              if type(first_status) is int and not 200 <= first_status < 300:
+                  fail(f"HTTP delivery failure ({first_status})")
+              fail("network/send exception")
+          finally:
+              transport.requests.post = native_post
+          if attempts != 1:
+              fail("ambiguous attempt count")
+          if type(first_status) is int and not 200 <= first_status < 300:
+              fail(f"HTTP delivery failure ({first_status})")
+          if type(result) is not tuple or len(result) != 3:
+              fail("ambiguous transport result")
+          ok, status, detail = result
+          if ok is False and status is None:
+              fail("network/send exception")
+          if type(status) is int and not 200 <= status < 300:
+              fail(f"HTTP delivery failure ({status})")
+          if (ok is True and type(status) is int and 200 <= status < 300
+                  and status == first_status and detail == "1 messages"):
+              print(f"Research channel test confirmed (HTTP {status}).")
+          else:
+              fail("no unambiguous success result")
+          PY

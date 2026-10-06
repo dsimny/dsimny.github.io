@@ -27,8 +27,10 @@ The status modes are `fb_free` and `fb_slate`, distinct from `pick`/`board`/
 double-post. Keyed by SLATE WEEK rather than date, because football's unit is a
 week.
 
-DEGRADE, NEVER DIE. Missing webhook, missing board, HTTP failure: log it, record
-it, exit 0. A delivery problem must never fail the run that produced the board.
+OFFICIAL MODES DEGRADE, NEVER DIE. Missing webhook, missing board, HTTP failure:
+log it, record it, exit 0. Research delivery is separate: disabled delivery and
+missing boards are clean skips, but enabled configuration or send failures exit
+non-zero so the capture workflow cannot silently swallow them.
 
 Run:
   python scripts/football/discord.py free  --week 2026-09-01 --dry-run
@@ -572,14 +574,14 @@ def main():
 
         if not args.dry_run:
             if not webhook:
-                print(f"{varname} is not set; skipping (this never fails a run).")
+                print(f"ERROR: {varname} is not set; research delivery failed.")
                 record(idem_key, status_mode, "no_config")
-                return 0
+                return 1
             if not webhook_host_ok(webhook):
                 print(f"WARNING: {varname} is not a discord.com URL — refusing.")
                 record(idem_key, status_mode, "refused",
                        detail="webhook host not discord")
-                return 0
+                return 1
 
         ok, status, detail = send(webhook, messages, dry=args.dry_run)
         if args.dry_run:
@@ -587,7 +589,7 @@ def main():
             return 0
         record(idem_key, status_mode, "posted" if ok else "failed", status, detail)
         print(("posted " if ok else "FAILED ") + str(detail))
-        return 0
+        return 0 if ok else 1
 
     # ---- OFFICIAL BRANCH ------------------------------------------------
     if not delivery_policy.OFFICIAL_DELIVERY_ENABLED and not args.dry_run:

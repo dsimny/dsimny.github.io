@@ -599,6 +599,29 @@ check(grade_research_i is not None and repage_i is not None and grade_research_i
 check("discord.py research_board" in cap_raw,
       "[12.6] research Discord command uses 'research_board' mode in capture workflow")
 
+# Execute only the delivery invocation, never the generation/push bodies.
+# A shell function replaces Python, so no network or repository write occurs.
+research_step = steps(cap_doc, "capture")[rg_gen_i] if rg_gen_i is not None else {}
+research_calls = [line.strip() for line in shell(research_step.get("run", "")).splitlines()
+                  if "discord.py research_board" in line]
+check(research_calls == ['python scripts/football/discord.py research_board --week "$SLATE_WEEK"'],
+      "[12.6a] research delivery is a direct command with no failure swallowing")
+check(not research_step.get("continue-on-error", False),
+      "[12.6b] research step does not continue-on-error")
+if len(research_calls) == 1:
+    import subprocess
+    for delivery_rc in (0, 1):
+        result = subprocess.run(
+            ["bash", "-e", "-c",
+             f'python() {{ return {delivery_rc}; }}; ' + research_calls[0]],
+            env={**os.environ, "SLATE_WEEK": "2026-09-22"},
+            capture_output=True, text=True)
+        check(result.returncode == delivery_rc,
+              f"[12.6c] research delivery shell preserves exit {delivery_rc}")
+check(rg_commit_i is not None and
+      steps(cap_doc, "capture")[rg_commit_i].get("if") == "${{ !cancelled() }}",
+      "[12.6d] research commit still runs after delivery failure to persist status")
+
 # [12.7] delivery flags — delivery_policy.py still has both False
 dp_src = open(os.path.join(ROOT, "scripts", "football", "delivery_policy.py"),
               encoding="utf-8").read()

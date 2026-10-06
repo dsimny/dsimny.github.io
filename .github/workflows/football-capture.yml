@@ -422,10 +422,10 @@ jobs:
         # is a guaranteed no-send until that flag is changed in delivery_policy.py.
         env:
           SITE_URL: ${{ vars.SITE_URL }}
-          # DISCORD_RESEARCH_WEBHOOK is mapped so activation requires only a
-          # delivery_policy.py flag flip, not a workflow edit. The secret does not
-          # exist yet; the variable resolves to an empty string, and
-          # RESEARCH_DELIVERY_ENABLED=False means discord.py exits 0 without sending.
+          # Dedicated research channel only. Activation separately requires
+          # verified research and ops-alert webhooks plus explicit authorization;
+          # mapping this secret does not enable delivery. While the policy flag
+          # is False, discord.py exits 0 without sending even if this is unset.
           DISCORD_RESEARCH_WEBHOOK: ${{ secrets.DISCORD_RESEARCH_WEBHOOK }}
         run: |
           # Board-exists guard: check before calling Python so repeated hourly
@@ -441,10 +441,10 @@ jobs:
           # Regenerate the research page unconditionally — it must also refresh
           # when grading adds new results. Idempotent; safe to run every hour.
           python scripts/football/research_page.py
-          # Attempt research Discord delivery. RESEARCH_DELIVERY_ENABLED=False
-          # means this exits 0 without sending or recording anything. When
-          # activation is desired, flip that flag in delivery_policy.py.
-          python scripts/football/discord.py research_board --week "$SLATE_WEEK" || true
+          # Disabled research delivery exits 0 without sending or recording.
+          # Enabled delivery failures must fail this step; the !cancelled()
+          # commit step below still persists the board, page and retry status.
+          python scripts/football/discord.py research_board --week "$SLATE_WEEK"
 
       - name: Commit research board and page
         if: ${{ !cancelled() }}

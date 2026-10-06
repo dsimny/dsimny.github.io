@@ -254,25 +254,64 @@ class ResearchDiscordTests(unittest.TestCase):
             fbd.RESEARCH_STATUS_KEY, fake_url, "DISCORD_RESEARCH_WEBHOOK",
             fbd.research_board_messages)}
         with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True),              patch.object(fbd, "RESEARCH_MODES", patched_modes),              patch.object(fbd, "send", fake_fail):
-            self.run_main("discord.py", "research_board", "--week", "2026-09-22")
+            rc, out = self.run_main("discord.py", "research_board", "--week", "2026-09-22")
+        self.assertEqual(rc, 1, "a genuine delivery failure must fail the command")
+        self.assertIn("FAILED", out)
         idem_key = f"{fbd.RESEARCH_VERSION_ID}|2026-09-22"
         self.assertFalse(fbd.already_posted(idem_key, fbd.RESEARCH_STATUS_KEY))
         posts = [p for p in self.get_status()["posts"]
                  if p["mode"] == fbd.RESEARCH_STATUS_KEY and p["date"] == idem_key]
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0]["result"], "failed")
+        # A failed attempt must not block recovery; success must block repeats.
+        with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True), \
+                patch.object(fbd, "RESEARCH_MODES", patched_modes), \
+                patch.object(fbd, "send", return_value=(True, 200, "ok")) as retry_send:
+            retry_rc, _ = self.run_main("discord.py", "research_board", "--week", "2026-09-22")
+            repeat_rc, repeat_out = self.run_main("discord.py", "research_board", "--week", "2026-09-22")
+        self.assertEqual(retry_rc, 0)
+        self.assertEqual(repeat_rc, 0)
+        retry_send.assert_called_once()
+        self.assertIn("already posted", repeat_out)
+        self.assertTrue(fbd.already_posted(idem_key, fbd.RESEARCH_STATUS_KEY))
 
     # --- 8. Missing webhook remains retryable ---
     def test_8_missing_webhook_retryable(self):
         board = make_research_board()
         self.write_board("2026-09-22", board)
-        with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True),              patch.object(fbd, "RESEARCH_WEBHOOK", ""):  # empty = not set
-            self.run_main("discord.py", "research_board", "--week", "2026-09-22")
-        self.assertFalse(fbd.already_posted("2026-09-22", fbd.RESEARCH_STATUS_KEY))
+        patched_modes = {"research_board": (
+            fbd.RESEARCH_STATUS_KEY, "", "DISCORD_RESEARCH_WEBHOOK",
+            fbd.research_board_messages)}
+        with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True), \
+                patch.object(fbd, "RESEARCH_MODES", patched_modes), \
+                patch.object(fbd, "send") as mock_send:
+            rc, out = self.run_main("discord.py", "research_board", "--week", "2026-09-22")
+        self.assertEqual(rc, 1, "enabled delivery without a webhook must fail")
+        mock_send.assert_not_called()
+        idem_key = f"{fbd.RESEARCH_VERSION_ID}|2026-09-22"
+        self.assertFalse(fbd.already_posted(idem_key, fbd.RESEARCH_STATUS_KEY))
         posts = [p for p in self.get_status()["posts"]
                  if p["mode"] == fbd.RESEARCH_STATUS_KEY]
         self.assertEqual(len(posts), 1)
         self.assertEqual(posts[0]["result"], "no_config")
+
+    def test_refused_webhook_fails_without_send(self):
+        self.write_board("2026-09-22", make_research_board())
+        patched_modes = {"research_board": (
+            fbd.RESEARCH_STATUS_KEY, "https://example.com/not-discord",
+            "DISCORD_RESEARCH_WEBHOOK", fbd.research_board_messages)}
+        with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True), \
+                patch.object(fbd, "RESEARCH_MODES", patched_modes), \
+                patch.object(fbd, "send") as mock_send:
+            rc, out = self.run_main("discord.py", "research_board", "--week", "2026-09-22")
+        self.assertEqual(rc, 1)
+        mock_send.assert_not_called()
+        self.assertIn("refusing", out)
+        idem_key = f"{fbd.RESEARCH_VERSION_ID}|2026-09-22"
+        self.assertFalse(fbd.already_posted(idem_key, fbd.RESEARCH_STATUS_KEY))
+        posts = [p for p in self.get_status()["posts"]
+                 if p["mode"] == fbd.RESEARCH_STATUS_KEY and p["date"] == idem_key]
+        self.assertEqual([p["result"] for p in posts], ["refused"])
 
     # --- 9. --dry-run does not mutate status ---
     def test_9_dry_run_no_mutation(self):
@@ -553,6 +592,15 @@ class ResearchDiscordTests(unittest.TestCase):
         results = [p["result"] for p in self.get_status()["posts"]
                    if p["mode"] == fbd.RESEARCH_STATUS_KEY]
         self.assertEqual(results, ["posted"])
+        sent.clear()
+        with patch.object(delivery_policy, "RESEARCH_DELIVERY_ENABLED", True), \
+                patch.object(fbd, "RESEARCH_MODES", patched_modes), \
+                patch.object(fbd, "send", capture_send):
+            repeat_rc, repeat_out = self.run_main("discord.py", "research_board",
+                                                 "--week", week)
+        self.assertEqual(repeat_rc, 0)
+        self.assertEqual(sent, [], "an empty board is not delivered twice")
+        self.assertIn("already posted", repeat_out)
 
         # --- the missing-board path stays a SEPARATE behaviour ---
         # No board file at all is not an empty board: it must still skip with

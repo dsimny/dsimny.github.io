@@ -2857,6 +2857,43 @@
    "sha256": "485cf08a3194227b3962faee57fa9e57f2544f347a9de06609da9ef7fe774d5a",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Southern Mississippi Golden Eagles @ Troy Trojans|2026-10-07T00:00:00Z": {
+   "block": {
+    "away": "Southern Mississippi Golden Eagles",
+    "best_book": "betrivers",
+    "best_price": 330,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.256,
+    "fair_away": 0.2256,
+    "fair_home": 0.7744,
+    "fair_side": 0.2256,
+    "home": "Troy Trojans",
+    "kickoff_utc": "2026-10-07T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Southern Mississippi Golden Eagles @ Troy Trojans",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 350
+    },
+    "raw_overround_pts": 4.299,
+    "relative_price_discount": -0.0308586762,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Southern Mississippi Golden Eagles",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261005T223214Z.json",
+    "t24_hours_before_kickoff": 25.46
+   },
+   "committed_utc": "2026-10-06T00:37:25Z",
+   "kickoff_utc": "2026-10-07T00:00:00Z",
+   "matchup": "Southern Mississippi Golden Eagles @ Troy Trojans",
+   "sha256": "62d703b7eb48253f3be12bb74282ac20fce520fc7e1668d16878f339981677ac",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Southern Utah Thunderbirds @ Colorado State Rams|2026-09-12T23:00:00Z": {
    "block": {
     "away": "Southern Utah Thunderbirds",

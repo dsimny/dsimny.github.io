@@ -1,0 +1,68 @@
+name: Open Ledger Ops Alert Test
+# One explicit operator dispatch, one fixed ops-only message. No schedule,
+# production pipeline, repository write, delivery flag, or webhook fallback.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test_alert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The existing CLI imports crypto_box/cryptography even in alert mode;
+      # requests is the transport, and PyYAML supports the offline contract test.
+      - run: pip install -r requirements.txt
+      - name: Check the alert-only contract offline
+        run: python scripts/selftest_ops_alert_test.py
+      - name: Send one controlled operations alert
+        env:
+          DISCORD_WEBHOOK_URL_ALERTS: ${{ secrets.DISCORD_WEBHOOK_URL_ALERTS }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          python - <<'PY'
+          import re
+          import subprocess
+          import sys
+
+          message = (
+              "CONTROLLED OPS ALERT TEST — Open Ledger operations alert channel "
+              "verification. No production failure occurred."
+          )
+          # Invoke the shared CLI once. Never echo raw diagnostics: network
+          # exceptions and response bodies can contain webhook credentials.
+          result = subprocess.run(
+              [sys.executable, "scripts/post_discord.py", "alert", message],
+              capture_output=True, text=True, timeout=45,
+          )
+          output = result.stdout.strip()
+          if result.returncode == 0 and output == "Alert posted to Discord.":
+              print("Alert posted to Discord.")
+              sys.exit(0)
+
+          reason = "no exact success confirmation"
+          if result.returncode != 0:
+              reason = f"sender exit {result.returncode}"
+          elif output.startswith("NOTE: DISCORD_WEBHOOK_URL_ALERTS is not configured"):
+              reason = "missing ops webhook"
+          elif output.startswith("WARNING: alert webhook is not a discord.com URL"):
+              reason = "refused webhook host"
+          elif re.match(r"WARNING: alert post failed \((\d{3})\):", output):
+              status = re.match(r"WARNING: alert post failed \((\d{3})\):", output).group(1)
+              reason = f"HTTP delivery failure ({status})"
+          elif output.startswith("NOTE: alert could not be posted:"):
+              reason = "network/send exception"
+          print(f"::error::Controlled ops alert test failed: {reason}. "
+                "Raw sender diagnostics withheld to protect webhook credentials.")
+          sys.exit(1)
+          PY

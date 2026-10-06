@@ -1202,20 +1202,20 @@
    "away": "ATL",
    "away_abbr": "ATL",
    "away_name": "Atlanta Falcons",
-   "away_score": null,
+   "away_score": 45,
    "espn_event_id": "401872979",
-   "final": false,
+   "final": true,
    "home": "NO",
    "home_abbr": "NO",
    "home_name": "New Orleans Saints",
-   "home_score": null,
+   "home_score": 24,
    "kickoff_utc": "2026-10-06T00:15:00Z",
-   "margin": null,
+   "margin": -21,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 69
   },
   "401873272": {
    "away": "DET",
@@ -2130,5 +2130,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-05T19:34:12Z"
+ "updated_utc": "2026-10-06T17:01:58Z"
 }

@@ -7392,6 +7392,44 @@
    "status": "STATUS_FINAL",
    "total": 44
   },
+  "401871051": {
+   "away": "Jacksonville State Gamecocks",
+   "away_abbr": "JXST",
+   "away_key": "jacksonvillestategamecocks",
+   "away_score": null,
+   "espn_event_id": "401871051",
+   "final": false,
+   "home": "Kennesaw State Owls",
+   "home_abbr": "KENN",
+   "home_key": "kennesawstateowls",
+   "home_score": null,
+   "kickoff_utc": "2026-10-07T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401871066": {
+   "away": "New Mexico State Aggies",
+   "away_abbr": "NMSU",
+   "away_key": "newmexicostateaggies",
+   "away_score": null,
+   "espn_event_id": "401871066",
+   "final": false,
+   "home": "Florida International Panthers",
+   "home_abbr": "FIU",
+   "home_key": "floridainternationalpanthers",
+   "home_score": null,
+   "kickoff_utc": "2026-10-07T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401871089": {
    "away": "UL Monroe Warhawks",
    "away_abbr": "ULM",
@@ -7431,5 +7469,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-10-05T19:34:11Z"
+ "updated_utc": "2026-10-06T17:01:56Z"
 }

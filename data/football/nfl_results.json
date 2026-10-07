@@ -1217,6 +1217,25 @@
    "status": "STATUS_FINAL",
    "total": 69
   },
+  "401872980": {
+   "away": "TB",
+   "away_abbr": "TB",
+   "away_name": "Tampa Bay Buccaneers",
+   "away_score": null,
+   "espn_event_id": "401872980",
+   "final": false,
+   "home": "DAL",
+   "home_abbr": "DAL",
+   "home_name": "Dallas Cowboys",
+   "home_score": null,
+   "kickoff_utc": "2026-10-09T00:15:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873272": {
    "away": "DET",
    "away_abbr": "DET",
@@ -2130,5 +2149,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-06T17:01:58Z"
+ "updated_utc": "2026-10-07T17:39:08Z"
 }

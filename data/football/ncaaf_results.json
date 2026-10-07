@@ -5397,6 +5397,25 @@
    "status": "STATUS_FINAL",
    "total": 47
   },
+  "401862794": {
+   "away": "South Florida Bulls",
+   "away_abbr": "USF",
+   "away_key": "southfloridabulls",
+   "away_score": null,
+   "espn_event_id": "401862794",
+   "final": false,
+   "home": "UTSA Roadrunners",
+   "home_abbr": "UTSA",
+   "home_key": "utsaroadrunners",
+   "home_score": null,
+   "kickoff_utc": "2026-10-08T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401864424": {
    "away": "Merrimack Warriors",
    "away_abbr": "MRMK",
@@ -7031,6 +7050,25 @@
    "status": "STATUS_FINAL",
    "total": 43
   },
+  "401869933": {
+   "away": "South Alabama Jaguars",
+   "away_abbr": "USA",
+   "away_key": "southalabamajaguars",
+   "away_score": null,
+   "espn_event_id": "401869933",
+   "final": false,
+   "home": "Arkansas State Red Wolves",
+   "home_abbr": "ARST",
+   "home_key": "arkansasstateredwolves",
+   "home_score": null,
+   "kickoff_utc": "2026-10-08T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401869940": {
    "away": "Coastal Carolina Chanticleers",
    "away_abbr": "CCU",
@@ -7259,6 +7297,25 @@
    "status": "STATUS_FINAL",
    "total": 59
   },
+  "401870766": {
+   "away": "Sam Houston Bearkats",
+   "away_abbr": "SHSU",
+   "away_key": "samhoustonbearkats",
+   "away_score": null,
+   "espn_event_id": "401870766",
+   "final": false,
+   "home": "Liberty Flames",
+   "home_abbr": "LIB",
+   "home_key": "libertyflames",
+   "home_score": null,
+   "kickoff_utc": "2026-10-08T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401870790": {
    "away": "Mercyhurst Lakers",
    "away_abbr": "MERC",
@@ -7411,6 +7468,25 @@
    "status": "STATUS_SCHEDULED",
    "total": null
   },
+  "401871052": {
+   "away": "Missouri State Bears",
+   "away_abbr": "MOST",
+   "away_key": "missouristatebears",
+   "away_score": null,
+   "espn_event_id": "401871052",
+   "final": false,
+   "home": "Western Kentucky Hilltoppers",
+   "home_abbr": "WKU",
+   "home_key": "westernkentuckyhilltoppers",
+   "home_score": null,
+   "kickoff_utc": "2026-10-08T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401871066": {
    "away": "New Mexico State Aggies",
    "away_abbr": "NMSU",
@@ -7453,21 +7529,21 @@
    "away": "Southern Miss Golden Eagles",
    "away_abbr": "USM",
    "away_key": "southernmissgoldeneagles",
-   "away_score": null,
+   "away_score": 34,
    "espn_event_id": "401871090",
-   "final": false,
+   "final": true,
    "home": "Troy Trojans",
    "home_abbr": "TROY",
    "home_key": "troytrojans",
-   "home_score": null,
+   "home_score": 55,
    "kickoff_utc": "2026-10-07T00:00:00Z",
-   "margin": null,
+   "margin": 21,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 89
   }
  },
- "updated_utc": "2026-10-06T17:01:56Z"
+ "updated_utc": "2026-10-07T17:39:05Z"
 }

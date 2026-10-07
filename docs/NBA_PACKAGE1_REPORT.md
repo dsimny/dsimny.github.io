@@ -1,5 +1,11 @@
 # NBA Package 1 implementation and baseline report
 
+**Latest update:** The database blocker is resolved on the development branch:
+214/214 existing database tests, 20/20 NBA tests, and complete market-output
+equivalence checks pass in disposable PostgreSQL. See [NBA_DATABASE_VALIDATION.md](NBA_DATABASE_VALIDATION.md).
+Migration 059 is tested and pushed, but not deployed. The initial report below
+is retained as historical evidence; its blocked/not-yet-pushed statuses are superseded.
+
 Date: October 6, 2026. Branch: codex/nba-contracts-v01.
 Base commit: c50c4a4c306ea3fa7bc492d532e6901884f72913.
 Revised source: NBA Model V1.docx, SHA-256

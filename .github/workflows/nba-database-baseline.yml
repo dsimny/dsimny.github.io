@@ -57,6 +57,17 @@ jobs:
               assert conn.execute("SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public', 'auth') AND c.relkind IN ('r','p')").fetchone()[0] == 0
           print('Fresh disposable target confirmed; guard overrides absent.')
           PY
+      - name: Initialize test-only auth shim on disposable container
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import psycopg
+          with psycopg.connect(os.environ['OLP_DATABASE_URL'], autocommit=True) as conn:
+              conn.execute(Path('open-ledger-play/db/testkit/000_local_auth_shim.sql').read_text())
+          print('Existing test-only auth shim applied to empty CI database.')
+          PY
       - name: Run existing database baseline
         working-directory: open-ledger-play
         shell: bash

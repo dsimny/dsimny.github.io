@@ -1947,6 +1947,9 @@
    },
    "committed_utc": "2026-10-07T17:37:28Z",
    "kickoff_utc": "2026-10-08T23:00:00Z",
+   "later_disagreements": [
+    "69087024a2df5180e85db820fa6c429843b10f8d9521edcd5319147cab4c883e"
+   ],
    "matchup": "Missouri State Bears @ Western Kentucky Hilltoppers",
    "sha256": "bf3dd55caf2e194dfec8f57a8f6ee0763ec2b7be451f33d504d3b1cf0bc3e7a6",
    "sport": "ncaaf"
@@ -2212,6 +2215,40 @@
    ],
    "matchup": "New Mexico State Aggies @ Florida International Panthers",
    "sha256": "ac61f15d743068f3683fa3e4efb25a82b7f7df71d4d8a3639a8d0f30255845bf",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|New Mexico State Aggies @ Florida International Panthers|2026-10-08T00:10:00Z": {
+   "block": {
+    "away": "New Mexico State Aggies",
+    "best_book": "fanduel",
+    "best_price": -225,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.564,
+    "fair_away": 0.32443,
+    "fair_home": 0.67557,
+    "fair_side": 0.67557,
+    "home": "Florida International Panthers",
+    "kickoff_utc": "2026-10-08T00:10:00Z",
+    "league": "NCAA FBS",
+    "matchup": "New Mexico State Aggies @ Florida International Panthers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.487,
+    "relative_price_discount": -0.0247718383,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Florida International Panthers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261006T183722Z.json",
+    "t24_hours_before_kickoff": 29.54
+   },
+   "committed_utc": "2026-10-07T23:37:26Z",
+   "kickoff_utc": "2026-10-08T00:10:00Z",
+   "matchup": "New Mexico State Aggies @ Florida International Panthers",
+   "sha256": "53334db8f078807aa1e25d368e5ef37a41a7c798913677783eed684870276090",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|New Mexico State Aggies @ Hawaii Rainbow Warriors|2026-09-13T04:00:00Z": {
@@ -2822,6 +2859,9 @@
    },
    "committed_utc": "2026-10-07T17:37:28Z",
    "kickoff_utc": "2026-10-08T23:00:00Z",
+   "later_disagreements": [
+    "ce01bc2211dce0d4a1a6502414d7dffb47f1c326028481082f4fcea9622d1891"
+   ],
    "matchup": "Sam Houston State Bearkats @ Liberty Flames",
    "sha256": "edf6eb2769869a64cdcf6ec0ad51f1524b3ab6b3bc9a3d4460eda8cab269519d",
    "sport": "ncaaf"
@@ -2890,6 +2930,9 @@
    },
    "committed_utc": "2026-10-07T17:37:28Z",
    "kickoff_utc": "2026-10-08T23:30:00Z",
+   "later_disagreements": [
+    "1f45c353e73f6af65cffe692a11cba3d4097afee3f144c815da4727d4b89db45"
+   ],
    "matchup": "South Alabama Jaguars @ Arkansas State Red Wolves",
    "sha256": "62d62583e7cd27b2ecb09b3abbc566a43f6f0e7e9fcb7b442b87a74b0c1413c5",
    "sport": "ncaaf"
@@ -2997,6 +3040,40 @@
    "kickoff_utc": "2026-09-12T16:00:00Z",
    "matchup": "South Florida Bulls @ Army Black Knights",
    "sha256": "fab5acf1bf0f96d433d78fb117a53a28d82edddc8d0c7e130454096d836a3a92",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|South Florida Bulls @ UTSA Roadrunners|2026-10-08T23:30:00Z": {
+   "block": {
+    "away": "South Florida Bulls",
+    "best_book": "fanduel",
+    "best_price": 225,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.742,
+    "fair_away": 0.29685,
+    "fair_home": 0.70315,
+    "fair_side": 0.29685,
+    "home": "UTSA Roadrunners",
+    "kickoff_utc": "2026-10-08T23:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "South Florida Bulls @ UTSA Roadrunners",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.293,
+    "relative_price_discount": -0.0365128205,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "South Florida Bulls",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261007T233720Z.json",
+    "t24_hours_before_kickoff": 23.88
+   },
+   "committed_utc": "2026-10-07T23:37:26Z",
+   "kickoff_utc": "2026-10-08T23:30:00Z",
+   "matchup": "South Florida Bulls @ UTSA Roadrunners",
+   "sha256": "5305f80837b794ccb704e737bb646d506042aed3def03a9adec2da074b9d434f",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Southern Mississippi Golden Eagles @ Auburn Tigers|2026-09-12T23:45:00Z": {

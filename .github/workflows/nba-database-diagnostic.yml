@@ -29,6 +29,7 @@ jobs:
     env:
       OLP_DATABASE_URL: postgresql://nba_baseline:disposable_ci_only@127.0.0.1:5432/nba_disposable_baseline
       PYTHONUNBUFFERED: '1'
+      NBA_SEQUENCE_DIAGNOSTICS: '1'
     steps:
       - uses: actions/checkout@v4
         with:

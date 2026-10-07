@@ -1,0 +1,19 @@
+{
+  "provenance": "SYNTHETIC — hand-authored; not provider evidence",
+  "repeat_matchups": [
+    {"league_game_id": "SYN-001", "away_id": "A", "home_id": "B", "start": "2026-10-06T23:00:00Z"},
+    {"league_game_id": "SYN-002", "away_id": "A", "home_id": "B", "start": "2026-10-08T23:00:00Z"}
+  ],
+  "phases": [
+    {"phase": "PRESEASON", "counts_regular": false, "neutral_site": true},
+    {"phase": "REGULAR_SEASON", "counts_regular": true},
+    {"phase": "CUP", "cup_round": "GROUP", "counts_regular": true},
+    {"phase": "CUP", "cup_round": "QUARTERFINAL", "counts_regular": true},
+    {"phase": "CUP", "cup_round": "SEMIFINAL", "counts_regular": true},
+    {"phase": "CUP", "cup_round": "CHAMPIONSHIP", "counts_regular": false},
+    {"phase": "PLAY_IN", "counts_regular": false},
+    {"phase": "POSTSEASON", "counts_regular": false}
+  ],
+  "quote": {"observed_at": "2026-10-06T23:00:00Z", "provider_updated_at": "2026-10-06T22:55:00Z", "odds": -110},
+  "dst": ["2026-11-01T01:30:00-04:00", "2026-11-01T01:30:00-05:00"]
+}

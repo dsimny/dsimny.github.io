@@ -1,0 +1,81 @@
+name: NBA disposable database baseline
+on:
+  push:
+    branches: ['codex/nba-contracts-v01']
+    paths:
+      - '.github/workflows/nba-database-baseline.yml'
+      - 'open-ledger-play/**'
+      - 'scripts/nba/**'
+      - 'tests/nba/**'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  database-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: nba_baseline
+          POSTGRES_PASSWORD: disposable_ci_only
+          POSTGRES_DB: nba_disposable_baseline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nba_baseline -d nba_disposable_baseline"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      OLP_DATABASE_URL: postgresql://nba_baseline:disposable_ci_only@127.0.0.1:5432/nba_disposable_baseline
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install -r open-ledger-play/requirements.txt cryptography tzdata
+      - name: Verify fresh target and intact guards
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import psycopg
+          from urllib.parse import urlparse
+          uri = os.environ['OLP_DATABASE_URL']
+          target = urlparse(uri)
+          assert target.hostname == '127.0.0.1'
+          assert target.path == '/nba_disposable_baseline'
+          assert not os.environ.get('OLP_ALLOW_REMOTE')
+          assert not os.environ.get('OLP_ALLOW_WIPE_LIVE')
+          with psycopg.connect(uri) as conn:
+              assert conn.execute("SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public', 'auth') AND c.relkind IN ('r','p')").fetchone()[0] == 0
+          print('Fresh disposable target confirmed; guard overrides absent.')
+          PY
+      - name: Run existing database baseline
+        working-directory: open-ledger-play
+        shell: bash
+        run: |
+          set -o pipefail
+          python -B tests/run_all.py --traceback 2>&1 | tee ../database-baseline.log
+      - name: Run NBA offline contracts
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -o pipefail
+          python -B -m unittest discover -s tests/nba -v 2>&1 | tee nba-contracts.log
+      - name: Retain complete validation logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nba-database-baseline-${{ github.run_id }}
+          path: |
+            database-baseline.log
+            nba-contracts.log
+          if-no-files-found: warn
+          retention-days: 30

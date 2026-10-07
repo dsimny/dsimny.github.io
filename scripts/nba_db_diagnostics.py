@@ -71,15 +71,13 @@ mi = re.sub(r'\b(?:public\.)?executable_market x\b', 'executable x', mi)
 mi = re.sub(r'\b(?:public\.)?market_movement m\b', 'movement m', mi)
 mi_fenced = 'CREATE OR REPLACE VIEW public.market_intelligence WITH (security_invoker=true) AS WITH canonical AS MATERIALIZED (SELECT * FROM public.canonical_market), executable AS MATERIALIZED (SELECT * FROM public.executable_market), movement AS MATERIALIZED (SELECT * FROM public.market_movement) ' + mi
 sequence = os.environ.get('NBA_SEQUENCE_DIAGNOSTICS') == '1'
-variants = [('original', None), ('statistics_refresh', None)] if sequence else [('original', None), ('single_execution_relation_and_consumer_fences', combined)]
+variants = [('original', None), ('single_execution_relation_and_consumer_fences', combined)]
 for shape, seed in [('dense', p4._seed_dense), ('single_event', p4._seed_single)]:
     p4._benchmark_board(admin, seed)
     stats = h.rows(admin, "SELECT relname, reltuples, relpages FROM pg_class WHERE oid IN ('public.system_settings'::regclass,'public.events'::regclass,'public.market_snapshots'::regclass)")
     print('RELATION_STATISTICS ' + json.dumps(stats, default=str), flush=True)
     expected = None
     for label, candidate in variants:
-        if label == 'statistics_refresh':
-            admin.execute('VACUUM ANALYZE public.system_settings')
         admin.execute('BEGIN')
         admin.execute('CREATE OR REPLACE VIEW public.executable_market WITH (security_invoker=true) AS ' + definitions['executable_market'])
         admin.execute('CREATE OR REPLACE VIEW public.market_intelligence WITH (security_invoker=true) AS ' + definitions['market_intelligence'])

@@ -7,6 +7,7 @@ on:
       - 'open-ledger-play/**'
       - 'scripts/nba/**'
       - 'tests/nba/**'
+      - 'scripts/nba_db_market_regression.py'
   workflow_dispatch: {}
 permissions:
   contents: read
@@ -81,6 +82,11 @@ jobs:
         run: |
           set -o pipefail
           python -B -m unittest discover -s tests/nba -v 2>&1 | tee nba-contracts.log
+      - name: Verify market semantics and dense model reads
+        shell: bash
+        run: |
+          set -o pipefail
+          python -B scripts/nba_db_market_regression.py 2>&1 | tee market-regression.log
       - name: Retain complete validation logs
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -89,5 +95,6 @@ jobs:
           path: |
             database-baseline.log
             nba-contracts.log
+            market-regression.log
           if-no-files-found: warn
           retention-days: 30

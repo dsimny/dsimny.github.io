@@ -4918,6 +4918,40 @@
    "sha256": "624d333ccfadf62aebb1295ac43ff23377ecd4d35b04507e9c014e9454c4ea9b",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|TB @ DAL|2026-10-09T00:15:00Z": {
+   "block": {
+    "away": "Tampa Bay Buccaneers",
+    "best_book": "betrivers",
+    "best_price": 380,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.652,
+    "fair_away": 0.21481,
+    "fair_home": 0.78519,
+    "fair_side": 0.21481,
+    "home": "Dallas Cowboys",
+    "kickoff_utc": "2026-10-09T00:15:00Z",
+    "league": "NFL",
+    "matchup": "TB @ DAL",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.615,
+    "relative_price_discount": 0.0301339286,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Tampa Bay Buccaneers",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261007T183722Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-10-07T18:37:26Z",
+   "kickoff_utc": "2026-10-09T00:15:00Z",
+   "matchup": "TB @ DAL",
+   "sha256": "36f7c5e04c90dc17d09a47063abf496d69f2dfd63cc1970527ab96de225714f6",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|WAS @ DAL|2026-09-20T20:25:00Z": {
    "block": {
     "away": "Washington Commanders",

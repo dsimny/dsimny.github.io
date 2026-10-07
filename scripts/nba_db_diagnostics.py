@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import sys
 import time
+import re
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,16 +23,25 @@ report = {'server_version': h.scalar(admin, 'SHOW server_version'), 'cases': []}
 out = ROOT / 'database-diagnostics'
 out.mkdir(exist_ok=True)
 
-def measure(label, view):
-    item = {'label': label, 'view': view}
+def measure(label, view, query='count'):
+    item = {'label': label, 'view': view, 'query': query}
     admin.execute("SET statement_timeout = '15s'")
     started = time.monotonic()
+    admin.execute('SAVEPOINT diagnostic_query')
     try:
-        plan = h.scalar(admin, f'EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) SELECT count(*) FROM public.{view}')
+        table = view if '.' in view else 'public.' + view
+        if view.startswith('model_input.'):
+            admin.execute('SET ROLE olp_model')
+        read = f'SELECT count(*) FROM {table}' if query == 'count' else f'SELECT * FROM {table} LIMIT 1'
+        plan = h.scalar(admin, 'EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ' + read)
         item['plan'] = plan
         item['completed'] = True
     except Exception as exc:
+        admin.execute('ROLLBACK TO SAVEPOINT diagnostic_query')
         item.update(completed=False, error=str(exc))
+    finally:
+        admin.execute('RESET ROLE')
+        admin.execute('RELEASE SAVEPOINT diagnostic_query')
     item['elapsed_seconds'] = round(time.monotonic()-started, 3)
     report['cases'].append(item)
     (out / 'plans.json').write_text(json.dumps(report, indent=2, default=str))
@@ -47,15 +57,32 @@ combined = combined.replace('x.executable_book_count', 'b.executable_book_count'
 start = combined.index('JOIN exec_counts x')
 end = combined.index('WHERE c.market_quality', start)
 combined = combined[:start] + combined[end:]
-variants = [('original', None), ('canonical_fence', fenced), ('canonical_fence_and_single_execution_relation', combined)]
+mi = definitions['market_intelligence']
+mi = re.sub(r'\b(?:public\.)?canonical_market c\b', 'canonical c', mi)
+mi = re.sub(r'\b(?:public\.)?executable_market x\b', 'executable x', mi)
+mi = re.sub(r'\b(?:public\.)?market_movement m\b', 'movement m', mi)
+mi_fenced = 'CREATE OR REPLACE VIEW public.market_intelligence WITH (security_invoker=true) AS WITH canonical AS MATERIALIZED (SELECT * FROM public.canonical_market), executable AS MATERIALIZED (SELECT * FROM public.executable_market), movement AS MATERIALIZED (SELECT * FROM public.market_movement) ' + mi
+variants = [('original', None), ('single_execution_relation_and_consumer_fences', combined)]
 for shape, seed in [('dense', p4._seed_dense), ('single_event', p4._seed_single)]:
     p4._benchmark_board(admin, seed)
+    admin.execute('BEGIN')  # freeze NOW() and eligibility throughout comparisons
+    expected = None
     for label, candidate in variants:
         admin.execute('CREATE OR REPLACE VIEW public.executable_market WITH (security_invoker=true) AS ' + definitions['executable_market'])
+        admin.execute('CREATE OR REPLACE VIEW public.market_intelligence WITH (security_invoker=true) AS ' + definitions['market_intelligence'])
         if candidate:
             admin.execute(candidate)
-        for view in ('canonical_market', 'executable_market', 'market_movement', 'market_intelligence'):
+            admin.execute(mi_fenced)
+        actual = h.rows(admin, 'SELECT row_to_json(t)::text FROM public.executable_market t ORDER BY row_to_json(t)::text')
+        if expected is None:
+            expected = actual
+        else:
+            assert actual == expected, 'Executable output changed'
+        print(f'{shape}/{label}: all {len(actual)} executable rows equal', flush=True)
+        for view in ('canonical_market', 'executable_market', 'market_movement', 'market_intelligence', 'model_input.market_intelligence'):
             measure(shape + '/' + label, view)
+            measure(shape + '/' + label, view, 'first_row')
+    admin.execute('COMMIT')
 admin.execute('CREATE OR REPLACE VIEW public.executable_market WITH (security_invoker=true) AS ' + definitions['executable_market'])
 admin.close()
 print('Diagnostic variants restored; production migrations unchanged.', flush=True)

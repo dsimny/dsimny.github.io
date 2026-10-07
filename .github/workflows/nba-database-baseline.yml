@@ -31,6 +31,7 @@ jobs:
     env:
       OLP_DATABASE_URL: postgresql://nba_baseline:disposable_ci_only@127.0.0.1:5432/nba_disposable_baseline
       PYTHONUNBUFFERED: '1'
+      PGOPTIONS: '-c statement_timeout=30000'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -73,7 +74,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python -B tests/run_all.py --traceback 2>&1 | tee ../database-baseline.log
+          python -B ../scripts/nba_db_trace.py 2>&1 | tee ../database-baseline.log
       - name: Run NBA offline contracts
         if: ${{ !cancelled() }}
         shell: bash

@@ -29,11 +29,16 @@ for shape, seed in [('dense', p4._seed_dense), ('single_event', p4._seed_single)
     admin.execute(legacy_exec)
     admin.execute(legacy_mi)
     expected = {}
+    event_ids = [r[0] for r in h.rows(admin, 'SELECT id FROM public.events ORDER BY id')]
     for view in ('executable_market', 'market_intelligence'):
-        expected[view] = h.rows(admin, f'SELECT row_to_json(t)::text FROM public.{view} t ORDER BY row_to_json(t)::text')
+        rows = []
+        for event_id in event_ids:
+            rows.extend(h.rows(admin, f'SELECT * FROM public.{view} WHERE event_id=%s', (event_id,)))
+        expected[view] = sorted(json.dumps(row, default=str) for row in rows)
+        print(f'{shape}/{view}: collected {len(rows)} legacy rows across all {len(event_ids)} events', flush=True)
     admin.execute(candidate)
     for view, rows in expected.items():
-        actual = h.rows(admin, f'SELECT row_to_json(t)::text FROM public.{view} t ORDER BY row_to_json(t)::text')
+        actual = sorted(json.dumps(row, default=str) for row in h.rows(admin, f'SELECT * FROM public.{view}'))
         assert actual == rows, (shape, view, 'public values changed')
         count = h.scalar(admin, f'SELECT count(*) FROM public.{view}')
         assert count == len(rows) and count > 0

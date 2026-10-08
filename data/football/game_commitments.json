@@ -924,6 +924,9 @@
    },
    "committed_utc": "2026-10-08T17:37:31Z",
    "kickoff_utc": "2026-10-09T23:00:00Z",
+   "later_disagreements": [
+    "e0047c34e3068528af3ab4da08bad44c29293f5b6a32e3adbeaa0ff3410efc4f"
+   ],
    "matchup": "Florida State Seminoles @ Louisville Cardinals",
    "sha256": "a2ccc5fcfa023e2320e0cf73d794394eb7feb24e03d478db227999bee8b54961",
    "sport": "ncaaf"
@@ -1272,6 +1275,40 @@
    "kickoff_utc": "2026-09-12T23:00:00Z",
    "matchup": "Illinois State Redbirds @ Northern Illinois Huskies",
    "sha256": "0ac9b25bdeda512f8d7da4e09af1664094dc2d729241d169d287ccf4f1c1c302",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Iowa Hawkeyes @ Washington Huskies|2026-10-10T01:00:00Z": {
+   "block": {
+    "away": "Iowa Hawkeyes",
+    "best_book": "fanduel",
+    "best_price": -154,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.183,
+    "fair_away": 0.41042,
+    "fair_home": 0.58958,
+    "fair_side": 0.58958,
+    "home": "Washington Huskies",
+    "kickoff_utc": "2026-10-10T01:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Iowa Hawkeyes @ Washington Huskies",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.125,
+    "relative_price_discount": -0.0283588161,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Washington Huskies",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261008T193757Z.json",
+    "t24_hours_before_kickoff": 29.37
+   },
+   "committed_utc": "2026-10-08T19:38:01Z",
+   "kickoff_utc": "2026-10-10T01:00:00Z",
+   "matchup": "Iowa Hawkeyes @ Washington Huskies",
+   "sha256": "3a63f0f792863164ba91a44db0e1b18f38788491ebba1a86f99eab4b5c3cb300",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Iowa State Cyclones @ Iowa Hawkeyes|2026-09-12T23:30:00Z": {

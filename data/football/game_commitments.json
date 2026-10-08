@@ -894,6 +894,40 @@
    "sha256": "1bc77dc232ab06f0873ee455e02e05e555602fa7186e137054e8d96f8cb9656c",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Florida State Seminoles @ Louisville Cardinals|2026-10-09T23:00:00Z": {
+   "block": {
+    "away": "Florida State Seminoles",
+    "best_book": "williamhill_us",
+    "best_price": 154,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.333,
+    "fair_away": 0.38692,
+    "fair_home": 0.61308,
+    "fair_side": 0.38692,
+    "home": "Louisville Cardinals",
+    "kickoff_utc": "2026-10-09T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida State Seminoles @ Louisville Cardinals",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.797,
+    "relative_price_discount": -0.0175375805,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Florida State Seminoles",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261008T173726Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-08T17:37:31Z",
+   "kickoff_utc": "2026-10-09T23:00:00Z",
+   "matchup": "Florida State Seminoles @ Louisville Cardinals",
+   "sha256": "a2ccc5fcfa023e2320e0cf73d794394eb7feb24e03d478db227999bee8b54961",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Georgia Bulldogs @ Arkansas Razorbacks|2026-09-19T15:59:00Z": {
    "block": {
     "away": "Georgia Bulldogs",

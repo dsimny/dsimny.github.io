@@ -925,7 +925,8 @@
    "committed_utc": "2026-10-08T17:37:31Z",
    "kickoff_utc": "2026-10-09T23:00:00Z",
    "later_disagreements": [
-    "e0047c34e3068528af3ab4da08bad44c29293f5b6a32e3adbeaa0ff3410efc4f"
+    "e0047c34e3068528af3ab4da08bad44c29293f5b6a32e3adbeaa0ff3410efc4f",
+    "45e73a073cbaa36d7dee37f6e290952e7276779df0d82295cfd640d382bc76d1"
    ],
    "matchup": "Florida State Seminoles @ Louisville Cardinals",
    "sha256": "a2ccc5fcfa023e2320e0cf73d794394eb7feb24e03d478db227999bee8b54961",
@@ -1307,8 +1308,45 @@
    },
    "committed_utc": "2026-10-08T19:38:01Z",
    "kickoff_utc": "2026-10-10T01:00:00Z",
+   "later_disagreements": [
+    "0e75bcbb1254f86c12cef0c1f6c6e4cf505c6aa71740bf95815bec255cc01fa4"
+   ],
    "matchup": "Iowa Hawkeyes @ Washington Huskies",
    "sha256": "3a63f0f792863164ba91a44db0e1b18f38788491ebba1a86f99eab4b5c3cb300",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Iowa State Cyclones @ BYU Cougars|2026-10-10T02:15:00Z": {
+   "block": {
+    "away": "Iowa State Cyclones",
+    "best_book": "fanduel",
+    "best_price": -385,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.637,
+    "fair_away": 0.2256,
+    "fair_home": 0.7744,
+    "fair_side": 0.7744,
+    "home": "BYU Cougars",
+    "kickoff_utc": "2026-10-10T02:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Iowa State Cyclones @ BYU Cougars",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.299,
+    "relative_price_discount": -0.0250656964,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "BYU Cougars",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261008T203722Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-10-08T20:37:26Z",
+   "kickoff_utc": "2026-10-10T02:15:00Z",
+   "matchup": "Iowa State Cyclones @ BYU Cougars",
+   "sha256": "480fd1de868903b79ae04b919fdca0a495d454d5c0efe566e9059a2bf83e918a",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Iowa State Cyclones @ Iowa Hawkeyes|2026-09-12T23:30:00Z": {

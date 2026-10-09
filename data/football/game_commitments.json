@@ -245,7 +245,8 @@
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
     "61ec24cf216e296cf97c1ba7f8b257c37a2ad19b90f224f393a01fed9a447ae6",
-    "14fa04705390818fc94e68938441634aee4edd9592ee77585df963700dc3db53"
+    "14fa04705390818fc94e68938441634aee4edd9592ee77585df963700dc3db53",
+    "da0feb2c474164e05673792d9f893b9cdcf04ac957c6fd418e86b1d15a6b4f6e"
    ],
    "matchup": "Arizona Wildcats @ West Virginia Mountaineers",
    "sha256": "223ab7c840f5246cf512a88adbe43a707b9199a112a115c84ac51a53797cc826",
@@ -1351,7 +1352,8 @@
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
     "7ce77999cf1b10750c5f5e4b7ce9874a08e562b70ac64af59c26241e0502bc35",
-    "83788cdc54a866b6efb670f5368013e6ceb19c2155f0d5889eb45375c471e2de"
+    "83788cdc54a866b6efb670f5368013e6ceb19c2155f0d5889eb45375c471e2de",
+    "6c8f79b5d1403debc6f1b824bd986d6f9377efbbc0474227394e15ccf055ec46"
    ],
    "matchup": "Indiana Hoosiers @ Nebraska Cornhuskers",
    "sha256": "d9d969a00cc17095e0f8568d50c66d6cb83dbf2b64e642d80a0a1922d188dcae",
@@ -1913,6 +1915,40 @@
    ],
    "matchup": "Miami (OH) RedHawks @ Cincinnati Bearcats",
    "sha256": "c6cfdf1c1bead3096c731b86e766cfd70b0cfbb48968d22fff06e99bc0e42986",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Miami (OH) RedHawks @ UMass Minutemen|2026-10-10T18:00:00Z": {
+   "block": {
+    "away": "Miami (OH) RedHawks",
+    "best_book": "fanduel",
+    "best_price": -122,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 1.903,
+    "fair_away": 0.54274,
+    "fair_home": 0.45726,
+    "fair_side": 0.54274,
+    "home": "UMass Minutemen",
+    "kickoff_utc": "2026-10-10T18:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Miami (OH) RedHawks @ UMass Minutemen",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.141,
+    "relative_price_discount": -0.0125400125,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Miami (OH) RedHawks",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261009T123722Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-09T12:37:26Z",
+   "kickoff_utc": "2026-10-10T18:00:00Z",
+   "matchup": "Miami (OH) RedHawks @ UMass Minutemen",
+   "sha256": "58191336b9b135420e49a836c20701cd4b958b1002795072cd260b613d3af292",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Miami Hurricanes @ Wake Forest Demon Deacons|2026-09-18T23:30:00Z": {
@@ -2545,6 +2581,9 @@
    },
    "committed_utc": "2026-10-09T11:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
+   "later_disagreements": [
+    "6b87278787d0215c7ead8cc9e5f4a35085630b7f816d6fc7557965f362f83ba0"
+   ],
    "matchup": "North Carolina Tar Heels @ Pittsburgh Panthers",
    "sha256": "59b1c695e6db8f327e0b37c3157f331bd18a6a963b17fb3b34485207a33638e3",
    "sport": "ncaaf"
@@ -2835,6 +2874,9 @@
    },
    "committed_utc": "2026-10-09T11:37:25Z",
    "kickoff_utc": "2026-10-10T17:00:00Z",
+   "later_disagreements": [
+    "eb23daa3717d75435c7a2bc34e463ef71140e6ed9184c4e0d65b1ee9c1e65282"
+   ],
    "matchup": "Old Dominion Monarchs @ Appalachian State Mountaineers",
    "sha256": "09c12abc094796c71a6dac9a6cb74720b4b6d59094970ccc34edafcb434a6fda",
    "sport": "ncaaf"
@@ -3261,7 +3303,8 @@
    "committed_utc": "2026-10-09T10:47:30Z",
    "kickoff_utc": "2026-10-10T16:45:00Z",
    "later_disagreements": [
-    "45ef22d8103055f6aa069292bc46129a21c4d6f208d7417b46d06d7fc5f91fd4"
+    "45ef22d8103055f6aa069292bc46129a21c4d6f208d7417b46d06d7fc5f91fd4",
+    "7f22a8806b10236c5e025bb2659cac9024bedf39476e5abdc47e02e6e792ca91"
    ],
    "matchup": "South Carolina Gamecocks @ Florida Gators",
    "sha256": "472d98d388607c4133f400307dc334d0c08c9a93995c80e5a8f0cc00b8ef5786",
@@ -3657,6 +3700,9 @@
    },
    "committed_utc": "2026-10-09T11:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
+   "later_disagreements": [
+    "1a16689577c66d4a2018e602a92cffb21e744e38746211b02f8ffbf0c3f5ffbd"
+   ],
    "matchup": "Texas A&M Aggies @ Missouri Tigers",
    "sha256": "6a9f14c3658c55e76239ace99902b0b5f8fcfb81ab310b0243c8de66ca7a21c9",
    "sport": "ncaaf"
@@ -3693,7 +3739,8 @@
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
     "dd79e9dd24fc5c20428bda4d3dc32f777ae9d6dc952261239a2f65079a7f5c65",
-    "84d7adefdfd5632a5e6fd4276fe41e0798cd0b232ff0082f0f615dc3748e3df3"
+    "84d7adefdfd5632a5e6fd4276fe41e0798cd0b232ff0082f0f615dc3748e3df3",
+    "9683b05a5aef51482df85dd08e081abbaaca540a66e7493bd70e6072345024a5"
    ],
    "matchup": "Texas Longhorns @ Oklahoma Sooners",
    "sha256": "2ba105db8eee333b8466c239bb4c81aebf9bf5fbe160b34c88ac534ecaac716d",
@@ -3839,7 +3886,8 @@
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
     "d47c6d00033d47b27056707d9d4453d85e0c654379c52e02583a52423cacdef6",
-    "d61d8ba2dbbde2715e361596d9263b15aad1ddf7cccac0229a014f0182946c29"
+    "d61d8ba2dbbde2715e361596d9263b15aad1ddf7cccac0229a014f0182946c29",
+    "fa4d9b6ec7ec637c359815f5da176fa2f90089c6e0fe2d57e18a427c94848d2b"
    ],
    "matchup": "Tulane Green Wave @ Army Black Knights",
    "sha256": "6f75ef7bee5761b3f1915c1855164b28957963393bbf2132ff6158349422f840",
@@ -3991,7 +4039,8 @@
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
     "528686680dd118292709cf49559cbbcdf5577fa72db18e70905d96913800f97c",
-    "a7015b7956303cad32be3a0a801c416429dd3266f829d55ac9bee3b7d06f8dd5"
+    "a7015b7956303cad32be3a0a801c416429dd3266f829d55ac9bee3b7d06f8dd5",
+    "e7240687d72934d195fe6bbbfecd4cd836002eb5a00214d5d582357fd70a0381"
    ],
    "matchup": "UCF Knights @ Oklahoma State Cowboys",
    "sha256": "c5f4559a65f028553d457662f4102a13ea906d56d47d33208434a8efbcfc58cc",

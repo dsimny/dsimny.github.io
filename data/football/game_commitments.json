@@ -243,6 +243,9 @@
    },
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
+   "later_disagreements": [
+    "61ec24cf216e296cf97c1ba7f8b257c37a2ad19b90f224f393a01fed9a447ae6"
+   ],
    "matchup": "Arizona Wildcats @ West Virginia Mountaineers",
    "sha256": "223ab7c840f5246cf512a88adbe43a707b9199a112a115c84ac51a53797cc826",
    "sport": "ncaaf"
@@ -1345,6 +1348,9 @@
    },
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
+   "later_disagreements": [
+    "7ce77999cf1b10750c5f5e4b7ce9874a08e562b70ac64af59c26241e0502bc35"
+   ],
    "matchup": "Indiana Hoosiers @ Nebraska Cornhuskers",
    "sha256": "d9d969a00cc17095e0f8568d50c66d6cb83dbf2b64e642d80a0a1922d188dcae",
    "sport": "ncaaf"
@@ -3151,6 +3157,43 @@
    "sha256": "d9807b35cbee8179f417fe842c23bae1c14937caa5e4fcab68f5b5a8d7270c2b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|South Carolina Gamecocks @ Florida Gators|2026-10-10T16:45:00Z": {
+   "block": {
+    "away": "South Carolina Gamecocks",
+    "best_book": "williamhill_us",
+    "best_price": 370,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.585,
+    "fair_away": 0.20833,
+    "fair_home": 0.79167,
+    "fair_side": 0.20833,
+    "home": "Florida Gators",
+    "kickoff_utc": "2026-10-10T16:45:00Z",
+    "league": "NCAA FBS",
+    "matchup": "South Carolina Gamecocks @ Florida Gators",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betus",
+     "price": 375
+    },
+    "raw_overround_pts": 4.348,
+    "relative_price_discount": -0.0212765957,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "South Carolina Gamecocks",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261009T104723Z.json",
+    "t24_hours_before_kickoff": 29.96
+   },
+   "committed_utc": "2026-10-09T10:47:30Z",
+   "kickoff_utc": "2026-10-10T16:45:00Z",
+   "matchup": "South Carolina Gamecocks @ Florida Gators",
+   "sha256": "472d98d388607c4133f400307dc334d0c08c9a93995c80e5a8f0cc00b8ef5786",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|South Dakota Coyotes @ Boise State Broncos|2026-09-20T02:00:00Z": {
    "block": {
     "away": "South Dakota Coyotes",
@@ -3541,6 +3584,9 @@
    },
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
+   "later_disagreements": [
+    "dd79e9dd24fc5c20428bda4d3dc32f777ae9d6dc952261239a2f65079a7f5c65"
+   ],
    "matchup": "Texas Longhorns @ Oklahoma Sooners",
    "sha256": "2ba105db8eee333b8466c239bb4c81aebf9bf5fbe160b34c88ac534ecaac716d",
    "sport": "ncaaf"
@@ -3683,6 +3729,9 @@
    },
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
+   "later_disagreements": [
+    "d47c6d00033d47b27056707d9d4453d85e0c654379c52e02583a52423cacdef6"
+   ],
    "matchup": "Tulane Green Wave @ Army Black Knights",
    "sha256": "6f75ef7bee5761b3f1915c1855164b28957963393bbf2132ff6158349422f840",
    "sport": "ncaaf"
@@ -3831,6 +3880,9 @@
    },
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
+   "later_disagreements": [
+    "528686680dd118292709cf49559cbbcdf5577fa72db18e70905d96913800f97c"
+   ],
    "matchup": "UCF Knights @ Oklahoma State Cowboys",
    "sha256": "c5f4559a65f028553d457662f4102a13ea906d56d47d33208434a8efbcfc58cc",
    "sport": "ncaaf"

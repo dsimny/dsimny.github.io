@@ -244,7 +244,8 @@
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
-    "61ec24cf216e296cf97c1ba7f8b257c37a2ad19b90f224f393a01fed9a447ae6"
+    "61ec24cf216e296cf97c1ba7f8b257c37a2ad19b90f224f393a01fed9a447ae6",
+    "14fa04705390818fc94e68938441634aee4edd9592ee77585df963700dc3db53"
    ],
    "matchup": "Arizona Wildcats @ West Virginia Mountaineers",
    "sha256": "223ab7c840f5246cf512a88adbe43a707b9199a112a115c84ac51a53797cc826",
@@ -1349,7 +1350,8 @@
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
-    "7ce77999cf1b10750c5f5e4b7ce9874a08e562b70ac64af59c26241e0502bc35"
+    "7ce77999cf1b10750c5f5e4b7ce9874a08e562b70ac64af59c26241e0502bc35",
+    "83788cdc54a866b6efb670f5368013e6ceb19c2155f0d5889eb45375c471e2de"
    ],
    "matchup": "Indiana Hoosiers @ Nebraska Cornhuskers",
    "sha256": "d9d969a00cc17095e0f8568d50c66d6cb83dbf2b64e642d80a0a1922d188dcae",
@@ -2513,6 +2515,40 @@
    "sha256": "c56dc01bd9eec02fd2e629af44d0f238b3eee0d3df36dae2cc9defd04c6b72b8",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|North Carolina Tar Heels @ Pittsburgh Panthers|2026-10-10T16:00:00Z": {
+   "block": {
+    "away": "North Carolina Tar Heels",
+    "best_book": "fanduel",
+    "best_price": -170,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.333,
+    "fair_away": 0.38309,
+    "fair_home": 0.61691,
+    "fair_side": 0.61691,
+    "home": "Pittsburgh Panthers",
+    "kickoff_utc": "2026-10-10T16:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "North Carolina Tar Heels @ Pittsburgh Panthers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.998,
+    "relative_price_discount": -0.020616891,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Pittsburgh Panthers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261009T113721Z.json",
+    "t24_hours_before_kickoff": 28.38
+   },
+   "committed_utc": "2026-10-09T11:37:25Z",
+   "kickoff_utc": "2026-10-10T16:00:00Z",
+   "matchup": "North Carolina Tar Heels @ Pittsburgh Panthers",
+   "sha256": "59b1c695e6db8f327e0b37c3157f331bd18a6a963b17fb3b34485207a33638e3",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|North Dakota Fighting Hawks @ Nebraska Cornhuskers|2026-09-19T23:15:00Z": {
    "block": {
     "away": "North Dakota Fighting Hawks",
@@ -2767,6 +2803,40 @@
    "kickoff_utc": "2026-09-12T16:00:00Z",
    "matchup": "Oklahoma Sooners @ Michigan Wolverines",
    "sha256": "329bd1f5d0b1873504d6557b1906514b8b8d81827afa6f6abdab7f4867254efc",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Old Dominion Monarchs @ Appalachian State Mountaineers|2026-10-10T17:00:00Z": {
+   "block": {
+    "away": "Old Dominion Monarchs",
+    "best_book": "fanduel",
+    "best_price": 315,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.044,
+    "fair_away": 0.24281,
+    "fair_home": 0.75719,
+    "fair_side": 0.24281,
+    "home": "Appalachian State Mountaineers",
+    "kickoff_utc": "2026-10-10T17:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Old Dominion Monarchs @ Appalachian State Mountaineers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.264,
+    "relative_price_discount": 0.0076093849,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Old Dominion Monarchs",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261009T113721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-09T11:37:25Z",
+   "kickoff_utc": "2026-10-10T17:00:00Z",
+   "matchup": "Old Dominion Monarchs @ Appalachian State Mountaineers",
+   "sha256": "09c12abc094796c71a6dac9a6cb74720b4b6d59094970ccc34edafcb434a6fda",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Old Dominion Monarchs @ Virginia Tech Hokies|2026-09-12T16:00:00Z": {
@@ -3190,6 +3260,9 @@
    },
    "committed_utc": "2026-10-09T10:47:30Z",
    "kickoff_utc": "2026-10-10T16:45:00Z",
+   "later_disagreements": [
+    "45ef22d8103055f6aa069292bc46129a21c4d6f208d7417b46d06d7fc5f91fd4"
+   ],
    "matchup": "South Carolina Gamecocks @ Florida Gators",
    "sha256": "472d98d388607c4133f400307dc334d0c08c9a93995c80e5a8f0cc00b8ef5786",
    "sport": "ncaaf"
@@ -3554,6 +3627,40 @@
    "sha256": "b10dede16539ffddab1532c38fa8436b2c10cf5c60233a4efeb6e14252757a5f",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Texas A&M Aggies @ Missouri Tigers|2026-10-10T16:00:00Z": {
+   "block": {
+    "away": "Texas A&M Aggies",
+    "best_book": "fanduel",
+    "best_price": -164,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.938,
+    "fair_away": 0.3933,
+    "fair_home": 0.6067,
+    "fair_side": 0.6067,
+    "home": "Missouri Tigers",
+    "kickoff_utc": "2026-10-10T16:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Texas A&M Aggies @ Missouri Tigers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.779,
+    "relative_price_discount": -0.0239186584,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Missouri Tigers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261009T113721Z.json",
+    "t24_hours_before_kickoff": 28.38
+   },
+   "committed_utc": "2026-10-09T11:37:25Z",
+   "kickoff_utc": "2026-10-10T16:00:00Z",
+   "matchup": "Texas A&M Aggies @ Missouri Tigers",
+   "sha256": "6a9f14c3658c55e76239ace99902b0b5f8fcfb81ab310b0243c8de66ca7a21c9",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Texas Longhorns @ Oklahoma Sooners|2026-10-10T16:00:00Z": {
    "block": {
     "away": "Texas Longhorns",
@@ -3585,7 +3692,8 @@
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
-    "dd79e9dd24fc5c20428bda4d3dc32f777ae9d6dc952261239a2f65079a7f5c65"
+    "dd79e9dd24fc5c20428bda4d3dc32f777ae9d6dc952261239a2f65079a7f5c65",
+    "84d7adefdfd5632a5e6fd4276fe41e0798cd0b232ff0082f0f615dc3748e3df3"
    ],
    "matchup": "Texas Longhorns @ Oklahoma Sooners",
    "sha256": "2ba105db8eee333b8466c239bb4c81aebf9bf5fbe160b34c88ac534ecaac716d",
@@ -3730,7 +3838,8 @@
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
-    "d47c6d00033d47b27056707d9d4453d85e0c654379c52e02583a52423cacdef6"
+    "d47c6d00033d47b27056707d9d4453d85e0c654379c52e02583a52423cacdef6",
+    "d61d8ba2dbbde2715e361596d9263b15aad1ddf7cccac0229a014f0182946c29"
    ],
    "matchup": "Tulane Green Wave @ Army Black Knights",
    "sha256": "6f75ef7bee5761b3f1915c1855164b28957963393bbf2132ff6158349422f840",
@@ -3881,7 +3990,8 @@
    "committed_utc": "2026-10-09T10:37:25Z",
    "kickoff_utc": "2026-10-10T16:00:00Z",
    "later_disagreements": [
-    "528686680dd118292709cf49559cbbcdf5577fa72db18e70905d96913800f97c"
+    "528686680dd118292709cf49559cbbcdf5577fa72db18e70905d96913800f97c",
+    "a7015b7956303cad32be3a0a801c416429dd3266f829d55ac9bee3b7d06f8dd5"
    ],
    "matchup": "UCF Knights @ Oklahoma State Cowboys",
    "sha256": "c5f4559a65f028553d457662f4102a13ea906d56d47d33208434a8efbcfc58cc",

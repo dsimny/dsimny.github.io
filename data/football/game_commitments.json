@@ -6202,8 +6202,48 @@
    },
    "committed_utc": "2026-10-10T11:37:24Z",
    "kickoff_utc": "2026-10-11T17:00:00Z",
+   "later_disagreements": [
+    "2056fe0f0e9e4f0631b1ce7b087123384611c126aff515c3fe3884048b3bfdf0"
+   ],
    "matchup": "CHI @ GB",
    "sha256": "9d0ecf87a38cc040dd7931d846578edb72d266fe06414f2ad4e8868ed101257f",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|CHI @ GB|2026-10-11T20:25:00Z": {
+   "block": {
+    "away": "Chicago Bears",
+    "best_book": "betmgm",
+    "best_price": -120,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 3.089,
+    "fair_away": 0.52975,
+    "fair_home": 0.47025,
+    "fair_side": 0.52975,
+    "home": "Green Bay Packers",
+    "kickoff_utc": "2026-10-11T20:25:00Z",
+    "league": "NFL",
+    "matchup": "CHI @ GB",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": {
+     "book": "betonlineag",
+     "price": -119
+    },
+    "raw_overround_pts": 4.497,
+    "relative_price_discount": -0.0296497511,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Chicago Bears",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261010T143723Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-10-10T14:37:26Z",
+   "kickoff_utc": "2026-10-11T20:25:00Z",
+   "matchup": "CHI @ GB",
+   "sha256": "0ad649e45b34cae48325a19ac63df0f3312b38ca6b431dc7cf937532914223f5",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|CIN @ HOU|2026-09-20T17:00:00Z": {
@@ -6274,6 +6314,9 @@
    },
    "committed_utc": "2026-10-10T11:37:24Z",
    "kickoff_utc": "2026-10-11T17:00:00Z",
+   "later_disagreements": [
+    "cdfd0bcc113ed88303b1957d345d51f8510b0f88b5bc91f74da24e6111304c16"
+   ],
    "matchup": "CIN @ MIA",
    "sha256": "ba9c8a7a2d4bce3964897230690cbd92a95404c90f79382e7439cdd55911cb77",
    "sport": "nfl"
@@ -6351,6 +6394,74 @@
    ],
    "matchup": "CLE @ TB",
    "sha256": "d7c094aab9c68caf0da70276bb1971f275e4d5b32c131930debb753d8850f2f2",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|DEN @ LAC|2026-10-11T20:05:00Z": {
+   "block": {
+    "away": "Denver Broncos",
+    "best_book": "draftkings",
+    "best_price": 160,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.001,
+    "fair_away": 0.62517,
+    "fair_home": 0.37483,
+    "fair_side": 0.37483,
+    "home": "Los Angeles Chargers",
+    "kickoff_utc": "2026-10-11T20:05:00Z",
+    "league": "NFL",
+    "matchup": "DEN @ LAC",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.417,
+    "relative_price_discount": -0.0260950855,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Los Angeles Chargers",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261010T143723Z.json",
+    "t24_hours_before_kickoff": 29.46
+   },
+   "committed_utc": "2026-10-10T14:37:26Z",
+   "kickoff_utc": "2026-10-11T20:05:00Z",
+   "matchup": "DEN @ LAC",
+   "sha256": "739afd1c2307950c2c429ea89d2660b7328066799d7c059bd3d123e11635ed3e",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|DET @ ARI|2026-10-11T20:25:00Z": {
+   "block": {
+    "away": "Detroit Lions",
+    "best_book": "betrivers",
+    "best_price": -235,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.936,
+    "fair_away": 0.68299,
+    "fair_home": 0.31701,
+    "fair_side": 0.68299,
+    "home": "Arizona Cardinals",
+    "kickoff_utc": "2026-10-11T20:25:00Z",
+    "league": "NFL",
+    "matchup": "DET @ ARI",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.281,
+    "relative_price_discount": -0.0270872036,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Detroit Lions",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261010T143723Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-10-10T14:37:26Z",
+   "kickoff_utc": "2026-10-11T20:25:00Z",
+   "matchup": "DET @ ARI",
+   "sha256": "9f41c94af9ce249dfc930f8fe1a64d9dd225d83ac06b4b9343004dea926e9a5a",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|DET @ BUF|2026-09-18T00:15:00Z": {
@@ -6488,6 +6599,9 @@
    },
    "committed_utc": "2026-10-10T11:37:24Z",
    "kickoff_utc": "2026-10-11T17:00:00Z",
+   "later_disagreements": [
+    "f2d4240d74abf239c39b1d63baf1d6c51aefcef9cf3f6d0032e45c660832f726"
+   ],
    "matchup": "HOU @ TEN",
    "sha256": "13de6c0004294ec7bcfea3fc2ef9ae3591aa1d886b3384bd575ca6d9a5a44230",
    "sport": "nfl"
@@ -6522,6 +6636,9 @@
    },
    "committed_utc": "2026-10-10T11:37:24Z",
    "kickoff_utc": "2026-10-11T17:00:00Z",
+   "later_disagreements": [
+    "080feee85ea264151bf7c94a6f4f843f374be922ccdaef6aad39da064540713e"
+   ],
    "matchup": "IND @ PIT",
    "sha256": "8891b752815f9690fb063977aab14c5358569c57bef6b42f19a292294a1a12b6",
    "sport": "nfl"
@@ -6633,6 +6750,9 @@
    },
    "committed_utc": "2026-10-10T11:37:24Z",
    "kickoff_utc": "2026-10-11T17:00:00Z",
+   "later_disagreements": [
+    "0b3955496874f34097838805096145fcd155a5a454a6c374fbf25cddf534603f"
+   ],
    "matchup": "LV @ NE",
    "sha256": "c17afe21753cfde486007a0ed7bb7e94528e0659f6e2a5b581722c375859aa49",
    "sport": "nfl"
@@ -6773,6 +6893,9 @@
    },
    "committed_utc": "2026-10-10T11:37:24Z",
    "kickoff_utc": "2026-10-11T17:00:00Z",
+   "later_disagreements": [
+    "f5f0ce164f0d20efe820a18dcbd9dc2d85595f02cf5694165605c4b5670e13a7"
+   ],
    "matchup": "MIN @ NO",
    "sha256": "f43c5e4c4e0b6a89c6f47c96ad22105540081cce8bebbe9a916d10308ab05ac6",
    "sport": "nfl"
@@ -6920,7 +7043,8 @@
    "committed_utc": "2026-10-10T07:37:22Z",
    "kickoff_utc": "2026-10-11T13:30:00Z",
    "later_disagreements": [
-    "ed6c446c28802f374162c7f687c6563541507c0712213a82d7338c53776b47e7"
+    "ed6c446c28802f374162c7f687c6563541507c0712213a82d7338c53776b47e7",
+    "088ca3597235e1e5ae45e93c1781db51c1dd18c3803cfff2c3d0ac4762e26384"
    ],
    "matchup": "PHI @ JAX",
    "sha256": "265e239865b1127dd6d1b3fafae1074f0dc2d952054bb0432800b9c21d1a8dda",
@@ -7034,6 +7158,40 @@
    "kickoff_utc": "2026-09-20T20:25:00Z",
    "matchup": "SEA @ ARI",
    "sha256": "ffb9e484642c03bce05d1cdeacb5add29b56b5820faa661c0c4ff11be7528cdf",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|SF @ SEA|2026-10-11T20:25:00Z": {
+   "block": {
+    "away": "San Francisco 49ers",
+    "best_book": "draftkings",
+    "best_price": -162,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.155,
+    "fair_away": 0.39204,
+    "fair_home": 0.60796,
+    "fair_side": 0.60796,
+    "home": "Seattle Seahawks",
+    "kickoff_utc": "2026-10-11T20:25:00Z",
+    "league": "NFL",
+    "matchup": "SF @ SEA",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 3.901,
+    "relative_price_discount": -0.0170405333,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Seattle Seahawks",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261010T143723Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-10-10T14:37:26Z",
+   "kickoff_utc": "2026-10-11T20:25:00Z",
+   "matchup": "SF @ SEA",
+   "sha256": "33c90007bae5f669eeab4bca7c6b46b77f5a1148f477e1bf496032aa6b2e4094",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|TB @ CIN|2026-09-13T17:00:00Z": {

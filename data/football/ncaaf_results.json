@@ -2259,7 +2259,7 @@
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
+   "status": "STATUS_IN_PROGRESS",
    "total": null
   },
   "401856824": {
@@ -2278,7 +2278,7 @@
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
+   "status": "STATUS_IN_PROGRESS",
    "total": null
   },
   "401856825": {
@@ -2304,20 +2304,20 @@
    "away": "Iowa State Cyclones",
    "away_abbr": "ISU",
    "away_key": "iowastatecyclones",
-   "away_score": null,
+   "away_score": 10,
    "espn_event_id": "401856826",
-   "final": false,
+   "final": true,
    "home": "BYU Cougars",
    "home_abbr": "BYU",
    "home_key": "byucougars",
-   "home_score": null,
-   "kickoff_utc": "2026-10-10T02:15:00Z",
-   "margin": null,
+   "home_score": 24,
+   "kickoff_utc": "2026-10-10T02:30:00Z",
+   "margin": 14,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 34
   },
   "401856827": {
    "away": "Kansas Jayhawks",
@@ -2330,7 +2330,7 @@
    "home_abbr": "UTAH",
    "home_key": "utahutes",
    "home_score": null,
-   "kickoff_utc": "2026-10-11T02:15:00Z",
+   "kickoff_utc": "2026-10-11T00:00:00Z",
    "margin": null,
    "season_slug": "regular-season",
    "season_type": 2,
@@ -3311,20 +3311,20 @@
    "away": "Florida State Seminoles",
    "away_abbr": "FSU",
    "away_key": "floridastateseminoles",
-   "away_score": null,
+   "away_score": 20,
    "espn_event_id": "401858254",
-   "final": false,
+   "final": true,
    "home": "Louisville Cardinals",
    "home_abbr": "LOU",
    "home_key": "louisvillecardinals",
-   "home_score": null,
+   "home_score": 44,
    "kickoff_utc": "2026-10-09T23:00:00Z",
-   "margin": null,
+   "margin": 24,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 64
   },
   "401858255": {
    "away": "Duke Blue Devils",
@@ -4679,20 +4679,20 @@
    "away": "Iowa Hawkeyes",
    "away_abbr": "IOWA",
    "away_key": "iowahawkeyes",
-   "away_score": null,
+   "away_score": 41,
    "espn_event_id": "401858487",
-   "final": false,
+   "final": true,
    "home": "Washington Huskies",
    "home_abbr": "WASH",
    "home_key": "washingtonhuskies",
-   "home_score": null,
+   "home_score": 24,
    "kickoff_utc": "2026-10-10T01:00:00Z",
-   "margin": null,
+   "margin": -17,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 65
   },
   "401859184": {
    "away": "Rice Owls",
@@ -5211,20 +5211,20 @@
    "away": "Washington State Cougars",
    "away_abbr": "WSU",
    "away_key": "washingtonstatecougars",
-   "away_score": null,
+   "away_score": 16,
    "espn_event_id": "401860922",
-   "final": false,
+   "final": true,
    "home": "Utah State Aggies",
    "home_abbr": "USU",
    "home_key": "utahstateaggies",
-   "home_score": null,
+   "home_score": 17,
    "kickoff_utc": "2026-10-10T01:00:00Z",
-   "margin": null,
+   "margin": 1,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 33
   },
   "401861962": {
    "away": "Lafayette Leopards",
@@ -6040,7 +6040,7 @@
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
+   "status": "STATUS_IN_PROGRESS",
    "total": null
   },
   "401862796": {
@@ -6655,20 +6655,20 @@
    "away": "Wyoming Cowboys",
    "away_abbr": "WYO",
    "away_key": "wyomingcowboys",
-   "away_score": null,
+   "away_score": 16,
    "espn_event_id": "401864519",
-   "final": false,
+   "final": true,
    "home": "San Jos\u00e9 State Spartans",
    "home_abbr": "SJSU",
    "home_key": "sanjosestatespartans",
-   "home_score": null,
+   "home_score": 13,
    "kickoff_utc": "2026-10-10T01:00:00Z",
-   "margin": null,
+   "margin": -3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 29
   },
   "401864570": {
    "away": "New Mexico State Aggies",
@@ -7408,7 +7408,7 @@
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
+   "status": "STATUS_IN_PROGRESS",
    "total": null
   },
   "401866437": {
@@ -8514,5 +8514,5 @@
    "total": 89
   }
  },
- "updated_utc": "2026-10-09T17:16:47Z"
+ "updated_utc": "2026-10-10T16:05:28Z"
 }

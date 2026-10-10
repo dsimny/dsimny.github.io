@@ -8,26 +8,6 @@
    "regions": "us",
    "http_status": 401,
    "source": "football_fetch_odds:nfl",
-   "read_utc": "2026-10-04T20:37:22Z"
-  },
-  {
-   "remaining": null,
-   "used": null,
-   "last_call_cost": null,
-   "markets": "h2h",
-   "regions": "us",
-   "http_status": 401,
-   "source": "football_fetch_odds:nfl",
-   "read_utc": "2026-10-04T20:47:33Z"
-  },
-  {
-   "remaining": null,
-   "used": null,
-   "last_call_cost": null,
-   "markets": "h2h",
-   "regions": "us",
-   "http_status": 401,
-   "source": "football_fetch_odds:nfl",
    "read_utc": "2026-10-04T21:15:30Z"
   },
   {
@@ -599,6 +579,26 @@
    "http_status": 200,
    "source": "football_fetch_odds:ncaaf",
    "read_utc": "2026-10-10T10:47:18Z"
+  },
+  {
+   "remaining": 19972,
+   "used": 28,
+   "last_call_cost": 1,
+   "markets": "h2h",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_fetch_odds:ncaaf",
+   "read_utc": "2026-10-10T11:37:20Z"
+  },
+  {
+   "remaining": 19971,
+   "used": 29,
+   "last_call_cost": 1,
+   "markets": "h2h",
+   "regions": "us",
+   "http_status": 200,
+   "source": "football_fetch_odds:nfl",
+   "read_utc": "2026-10-10T11:37:22Z"
   }
  ],
  "note": "The Odds API bills one credit per market per region per call. Free tier: 500/month. See CLAUDE.md for the budget and the decision rule for upgrading."

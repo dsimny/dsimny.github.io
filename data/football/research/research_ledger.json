@@ -63,7 +63,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-09-21T16:45:22Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-09-15|nfl|GB @ NYJ|2026-09-20T17:00:00Z|research_free"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_premium",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "ncaaf",
+   "slate_week": "2026-10-06",
+   "matchup": "Tulsa Golden Hurricane @ Navy Midshipmen",
+   "kickoff_utc": "2026-10-10T19:30:00Z",
+   "side": "Tulsa Golden Hurricane",
+   "best_price": 112,
+   "best_book": "fanduel",
+   "books_at_best": 2,
+   "eff_overround_pts": 1.298,
+   "fair_side": 0.46753,
+   "t24_capture": "ncaaf_20261009T133752Z.json",
+   "t24_hours_before_kickoff": 29.87,
+   "observed_utc": "2026-10-10T18:27:40Z",
+   "espn_event_id": "401862799",
+   "final": "26-34",
+   "result": "loss",
+   "units": 0,
+   "pnl_per_unit": -1.0,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": -4.376,
+   "close_capture": "ncaaf_20261010T182734Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-10-11T16:30:06Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-10-06|ncaaf|Tulsa Golden Hurricane @ Navy Midshipmen|2026-10-10T19:30:00Z|research_premium"
   }
  ],
- "updated_utc": "2026-09-21T16:45:22Z"
+ "updated_utc": "2026-10-11T16:30:06Z"
 }

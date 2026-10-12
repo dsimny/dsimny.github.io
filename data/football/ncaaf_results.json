@@ -8456,6 +8456,25 @@
    "status": "STATUS_FINAL",
    "total": 47
   },
+  "401871053": {
+   "away": "Florida International Panthers",
+   "away_abbr": "FIU",
+   "away_key": "floridainternationalpanthers",
+   "away_score": null,
+   "espn_event_id": "401871053",
+   "final": false,
+   "home": "Jacksonville State Gamecocks",
+   "home_abbr": "JXST",
+   "home_key": "jacksonvillestategamecocks",
+   "home_score": null,
+   "kickoff_utc": "2026-10-14T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401871066": {
    "away": "New Mexico State Aggies",
    "away_abbr": "NMSU",
@@ -8474,6 +8493,25 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 25
+  },
+  "401871067": {
+   "away": "Delaware Blue Hens",
+   "away_abbr": "DEL",
+   "away_key": "delawarebluehens",
+   "away_score": null,
+   "espn_event_id": "401871067",
+   "final": false,
+   "home": "Middle Tennessee Blue Raiders",
+   "home_abbr": "MTSU",
+   "home_key": "middletennesseeblueraiders",
+   "home_score": null,
+   "kickoff_utc": "2026-10-13T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   },
   "401871089": {
    "away": "UL Monroe Warhawks",
@@ -8514,5 +8552,5 @@
    "total": 89
   }
  },
- "updated_utc": "2026-10-11T16:30:03Z"
+ "updated_utc": "2026-10-12T20:05:32Z"
 }

@@ -908,6 +908,40 @@
    "sha256": "66a56a33e40ae5ac07419f6ae16761cae4f31bac2f5954b05745ee7eaddb324b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Delaware Blue Hens @ Middle Tennessee Blue Raiders|2026-10-13T23:00:00Z": {
+   "block": {
+    "away": "Delaware Blue Hens",
+    "best_book": "williamhill_us",
+    "best_price": 104,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.565,
+    "fair_away": 0.52268,
+    "fair_home": 0.47732,
+    "fair_side": 0.47732,
+    "home": "Middle Tennessee Blue Raiders",
+    "kickoff_utc": "2026-10-13T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Delaware Blue Hens @ Middle Tennessee Blue Raiders",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.751,
+    "relative_price_discount": -0.0269718747,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Middle Tennessee Blue Raiders",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261012T183721Z.json",
+    "t24_hours_before_kickoff": 28.38
+   },
+   "committed_utc": "2026-10-13T00:32:24Z",
+   "kickoff_utc": "2026-10-13T23:00:00Z",
+   "matchup": "Delaware Blue Hens @ Middle Tennessee Blue Raiders",
+   "sha256": "0b2792eb4e3e2cf197ec3ddfc3bebacf8a4612afac1acfc1ca0d13ade20e10fb",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Delaware Blue Hens @ Vanderbilt Commodores|2026-09-12T20:15:00Z": {
    "block": {
     "away": "Delaware Blue Hens",
@@ -1208,6 +1242,43 @@
    ],
    "matchup": "Florida International Panthers @ Florida Atlantic Owls",
    "sha256": "c79f8119743c5bf5a80a8e44f7bb54de737083f6f05da060f27cdf3be6926b9a",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Florida International Panthers @ Jacksonville State Gamecocks|2026-10-14T00:00:00Z": {
+   "block": {
+    "away": "Florida International Panthers",
+    "best_book": "fanduel",
+    "best_price": 122,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.723,
+    "fair_away": 0.4344,
+    "fair_home": 0.5656,
+    "fair_side": 0.4344,
+    "home": "Jacksonville State Gamecocks",
+    "kickoff_utc": "2026-10-14T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida International Panthers @ Jacksonville State Gamecocks",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 125
+    },
+    "raw_overround_pts": 4.638,
+    "relative_price_discount": -0.0369553227,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Florida International Panthers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261012T183721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-13T00:32:24Z",
+   "kickoff_utc": "2026-10-14T00:00:00Z",
+   "matchup": "Florida International Panthers @ Jacksonville State Gamecocks",
+   "sha256": "ba39bcecc55ecab4b109b6f9400fdd2044f99c0cc8f5614e13331e6c3927dd77",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Florida State Seminoles @ Alabama Crimson Tide|2026-09-19T19:30:00Z": {

@@ -171,6 +171,32 @@ def _scalar(conn, sql, params=()):
         return row[0] if row else None
 
 
+def do_discover(conn, provider=None) -> int:
+    """Refresh the NFL slate independently of formation and scheduling."""
+    try:
+        provider = provider or TheOddsApiProvider(
+            sport="americanfootball_nfl", markets=MARKET)
+        poll = run_poll_cycle(conn, provider, retry=RetryPolicy(),
+                              limiter=RateLimiter(), quota=QuotaGuard())
+        errors = list(poll.parse_errors)
+        for part in (poll.schedule, poll.odds):
+            if part is not None:
+                errors.extend(part.errors or [])
+        status = "SKIPPED" if poll.skipped else ("FAILED" if errors else "OK")
+        print(json.dumps({"job": "v01.discover", "status": status,
+                          "skip_reason": poll.skip_reason,
+                          "provider_attempts": poll.attempts,
+                          "quota_remaining": poll.quota_remaining,
+                          "events_created": getattr(poll.schedule, "events_created", 0),
+                          "snapshots_written": getattr(poll.odds, "snapshots_written", 0),
+                          "errors": [redact(str(e)) for e in errors]}, default=str))
+        return 0 if status == "OK" else 1
+    except Exception as exc:
+        print(json.dumps({"job": "v01.discover", "status": "FAILED",
+                          "error": redact(str(exc)).splitlines()[0]}))
+        return 1
+
+
 def do_schedule(conn) -> int:
     """Create T-24h opportunities for events entering the horizon.
 

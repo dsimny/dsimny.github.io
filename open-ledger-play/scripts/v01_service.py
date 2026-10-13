@@ -110,7 +110,12 @@ class Handler(BaseHTTPRequestHandler):
             self.rfile.read(n)
 
         if self.path.rstrip("/") == "/jobs/v01/schedule":
-            return self._reply(*_run(runner.do_schedule))
+            def schedule(conn):
+                runner.do_schedule(conn)
+                return 0
+            return self._reply(*_run(schedule))
+        if self.path.rstrip("/") == "/jobs/v01/discover":
+            return self._reply(*_run(runner.do_discover))
         if self.path.rstrip("/") == "/jobs/v01/resolve":
             return self._reply(*_run(runner.do_resolve))
         return self._reply(404, {"status": "NOT_FOUND", "path": self.path})

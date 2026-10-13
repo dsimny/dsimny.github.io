@@ -1,31 +1,6 @@
 {
  "posts": [
   {
-   "date": "2026-10-02",
-   "mode": "recap",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "channel_id": "",
-   "detail": "",
-   "at_utc": "2026-10-03T08:10:19Z"
-  },
-  {
-   "date": "2026-10-02",
-   "mode": "x",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-10-03T08:10:19Z"
-  },
-  {
-   "date": "2026-10-02",
-   "mode": "facebook",
-   "result": "nothing_to_post",
-   "http_status": null,
-   "detail": "",
-   "at_utc": "2026-10-03T08:10:19Z"
-  },
-  {
    "date": "2026-10-03",
    "mode": "recap",
    "result": "nothing_to_post",
@@ -249,6 +224,31 @@
    "http_status": null,
    "detail": "",
    "at_utc": "2026-10-12T08:10:18Z"
+  },
+  {
+   "date": "2026-10-12",
+   "mode": "recap",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "channel_id": "",
+   "detail": "",
+   "at_utc": "2026-10-13T08:10:22Z"
+  },
+  {
+   "date": "2026-10-12",
+   "mode": "x",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-10-13T08:10:22Z"
+  },
+  {
+   "date": "2026-10-12",
+   "mode": "facebook",
+   "result": "nothing_to_post",
+   "http_status": null,
+   "detail": "",
+   "at_utc": "2026-10-13T08:10:22Z"
   }
  ]
 }

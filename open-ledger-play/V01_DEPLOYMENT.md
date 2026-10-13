@@ -550,3 +550,13 @@ Discovery failures and partial ingestion errors return HTTP 409 for attention.
 Commissioning also corrected the schedule endpoint: do_schedule returns the
 number of opportunities created, not a failure exit code. Positive creation
 counts now return HTTP 200, while actual exceptions still return HTTP 500.
+
+## Migration metadata permissions
+
+`public.schema_migrations` is owned by the production migrator. Its setup
+revokes every table privilege from PUBLIC, anon, authenticated, and service_role,
+and enables RLS without client policies. The administrative database owner
+continues to read and write migration records. Every migrator run reapplies
+these protections, including when no application migrations are pending.
+The production verifier checks both RLS and effective API-role privileges.
+Existing migration files and their checksums are unchanged by this protection.

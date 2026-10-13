@@ -52,6 +52,11 @@ COMMENT ON TABLE public.schema_migrations IS
     'What has actually been applied to THIS database, with a checksum of the '
     'file as applied. An edited-after-the-fact migration is refused rather '
     'than silently skipped.';
+-- This table belongs to the migrator, not the client API. Supabase's
+-- defaults otherwise grant API roles the ability to rewrite checksums.
+REVOKE ALL ON TABLE public.schema_migrations
+    FROM PUBLIC, anon, authenticated, service_role;
+ALTER TABLE public.schema_migrations ENABLE ROW LEVEL SECURITY;
 """
 
 

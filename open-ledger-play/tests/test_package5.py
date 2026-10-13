@@ -2428,6 +2428,30 @@ def t68_the_production_migration_path_installs_no_test_machinery():
             # the commissioning check from drifting apart.
             sys.path.insert(0, str(h.ROOT / "scripts"))
             import verify_production_schema as vps
+            import migrate as migrator
+
+            # Reproduce hosted defaults, then prove the migrator repairs them
+            # without losing its records or preventing administrative writes.
+            conn.execute(migrator.LEDGER)
+            for name in manifest:
+                conn.execute("INSERT INTO public.schema_migrations(filename, checksum) "
+                             "VALUES (%s, %s)",
+                             (name, migrator.checksum(h.MIGRATIONS / name)))
+            conn.execute("ALTER TABLE public.schema_migrations DISABLE ROW LEVEL SECURITY")
+            conn.execute("GRANT ALL ON public.schema_migrations TO PUBLIC, anon, authenticated, service_role")
+            assert vps.check_manifest_applied(conn), "unsafe hosted grants went unnoticed"
+            conn.execute(migrator.LEDGER)
+            assert vps.check_manifest_applied(conn) == []
+            assert conn.execute("SELECT count(*) FROM public.schema_migrations").fetchone()[0] == len(manifest)
+            for role in ("anon", "authenticated", "service_role"):
+                conn.execute(f"SET ROLE {role}")
+                try:
+                    h.expect_error(lambda: conn.execute("SELECT * FROM public.schema_migrations"),
+                                   "permission denied", f"{role} metadata access")
+                finally:
+                    conn.execute("RESET ROLE")
+            conn.execute("UPDATE public.schema_migrations SET checksum = checksum")
+            assert vps.check_manifest_applied(conn) == []
 
             problems = vps.check(conn)
             assert problems == [], (

@@ -117,6 +117,14 @@ def check_manifest_applied(conn) -> list:
     missing = [n for n in names if n not in applied]
     extra = sorted(applied - set(names))
     problems = []
+    if not _scalar(conn, "SELECT relrowsecurity FROM pg_class WHERE oid = "
+                         "'public.schema_migrations'::regclass"):
+        problems.append("public.schema_migrations has RLS disabled")
+    for role in ("anon", "authenticated", "service_role"):
+        if _scalar(conn, """SELECT has_table_privilege(%s,
+                'public.schema_migrations',
+                'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')""", (role,)):
+            problems.append(f"{role} has privileges on public.schema_migrations")
     if missing:
         problems.append(f"manifest entries never applied: {', '.join(missing)}")
     if extra:

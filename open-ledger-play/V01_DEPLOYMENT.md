@@ -540,8 +540,8 @@ track needs its own polling.
 The two formation jobs require events to already exist. A fresh database has
 none, and the resolver intentionally does not poll when no formation is due.
 Run `POST /jobs/v01/discover` once during DRAFT commissioning, then daily at
-10:05 America/New_York. Authenticate with the same OLP_JOB_TOKEN. Disable
-external retries and use a 120-second timeout. This independent collector uses
+10:05 America/New_York. Scheduling runs hourly at :02 and resolution every five minutes. Authenticate with the same OLP_JOB_TOKEN. Disable
+external retries. The current cron-job.org account supports a 30-second timeout; a cold-start resolver request was verified in 5.96 seconds. This independent collector uses
 NFL, US, h2h only; each successful provider fetch costs one credit. It does not
 create opportunities, form beliefs, activate experiments, or change the model.
 Hourly scheduling remains free; resolution still polls only for due work.
@@ -550,3 +550,4 @@ Discovery failures and partial ingestion errors return HTTP 409 for attention.
 Commissioning also corrected the schedule endpoint: do_schedule returns the
 number of opportunities created, not a failure exit code. Positive creation
 counts now return HTTP 200, while actual exceptions still return HTTP 500.
+

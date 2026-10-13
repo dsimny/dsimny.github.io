@@ -1487,20 +1487,20 @@
    "away": "BUF",
    "away_abbr": "BUF",
    "away_name": "Buffalo Bills",
-   "away_score": null,
+   "away_score": 37,
    "espn_event_id": "401872994",
-   "final": false,
+   "final": true,
    "home": "LA",
    "home_abbr": "LAR",
    "home_name": "Los Angeles Rams",
-   "home_score": null,
+   "home_score": 34,
    "kickoff_utc": "2026-10-13T00:15:00Z",
-   "margin": null,
+   "margin": -3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 71
   },
   "401873272": {
    "away": "DET",
@@ -2415,5 +2415,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-12T20:05:34Z"
+ "updated_utc": "2026-10-13T17:54:59Z"
 }

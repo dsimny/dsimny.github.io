@@ -8475,6 +8475,25 @@
    "status": "STATUS_SCHEDULED",
    "total": null
   },
+  "401871054": {
+   "away": "Kennesaw State Owls",
+   "away_abbr": "KENN",
+   "away_key": "kennesawstateowls",
+   "away_score": null,
+   "espn_event_id": "401871054",
+   "final": false,
+   "home": "Missouri State Bears",
+   "home_abbr": "MOST",
+   "home_key": "missouristatebears",
+   "home_score": null,
+   "kickoff_utc": "2026-10-14T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401871066": {
    "away": "New Mexico State Aggies",
    "away_abbr": "NMSU",
@@ -8506,6 +8525,25 @@
    "home_key": "middletennesseeblueraiders",
    "home_score": null,
    "kickoff_utc": "2026-10-13T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401871068": {
+   "away": "Western Kentucky Hilltoppers",
+   "away_abbr": "WKU",
+   "away_key": "westernkentuckyhilltoppers",
+   "away_score": null,
+   "espn_event_id": "401871068",
+   "final": false,
+   "home": "Sam Houston Bearkats",
+   "home_abbr": "SHSU",
+   "home_key": "samhoustonbearkats",
+   "home_score": null,
+   "kickoff_utc": "2026-10-15T00:00:00Z",
    "margin": null,
    "season_slug": "regular-season",
    "season_type": 2,
@@ -8552,5 +8590,5 @@
    "total": 89
   }
  },
- "updated_utc": "2026-10-12T20:05:32Z"
+ "updated_utc": "2026-10-13T17:54:58Z"
 }

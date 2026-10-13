@@ -2434,6 +2434,20 @@ def t68_the_production_migration_path_installs_no_test_machinery():
                 "a clean production install failed its own checks:\n  "
                 + "\n  ".join(problems))
 
+            # Hosted Supabase ships Storage maintenance functions. Their
+            # bodies must not trip our application-only fixture boundary.
+            conn.execute("CREATE SCHEMA storage")
+            conn.execute("""CREATE FUNCTION storage.maintenance_probe()
+                RETURNS void LANGUAGE plpgsql AS $$ BEGIN
+                TRUNCATE storage.platform_table; END $$""")
+            assert vps.check(conn) == [], "platform maintenance was flagged"
+            for schema in ("public", "model", "grading"):
+                conn.execute(f"""CREATE FUNCTION {schema}.unsafe_probe()
+                    RETURNS void LANGUAGE plpgsql AS $$ BEGIN
+                    TRUNCATE public.events; END $$""")
+                assert f"function {schema}.unsafe_probe can TRUNCATE" in vps.check(conn)
+                conn.execute(f"DROP FUNCTION {schema}.unsafe_probe()")
+
             # the runner's provenance prerequisites resolve on this database
             n_manifest = len(manifest)
             n_checks = (len(vps.REQUIRED_RELATIONS) + len(vps.REQUIRED_FUNCTIONS)

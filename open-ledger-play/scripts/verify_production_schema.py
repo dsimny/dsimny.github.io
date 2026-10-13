@@ -79,7 +79,10 @@ def check(conn) -> list:
         found = _rows(conn, """
             SELECT n.nspname || '.' || p.proname FROM pg_proc p
             JOIN pg_namespace n ON n.oid = p.pronamespace
-            WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
+            -- These are the schemas shipped by Open Ledger. Supabase owns
+            -- auth/storage and may legitimately ship maintenance functions
+            -- that truncate its own tables; those are not our test fixtures.
+            WHERE n.nspname IN ('public', 'model', 'grading')
               AND p.prosrc ILIKE %s""", (pattern,))
         for (name,) in found:
             problems.append(f"function {name} {what}")
@@ -157,7 +160,7 @@ def main() -> int:
         return 1
 
     print("\nPRODUCTION SCHEMA CHECK: PASS")
-    print("  no olp_test schema; no function can TRUNCATE or reach the test "
+    print("  no olp_test schema; no application function can TRUNCATE or reach the test "
           "schema; every Package #5 object present; k = 1.10")
     return 0
 

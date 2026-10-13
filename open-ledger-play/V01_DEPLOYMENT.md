@@ -550,4 +550,3 @@ Discovery failures and partial ingestion errors return HTTP 409 for attention.
 Commissioning also corrected the schedule endpoint: do_schedule returns the
 number of opportunities created, not a failure exit code. Positive creation
 counts now return HTTP 200, while actual exceptions still return HTTP 500.
-

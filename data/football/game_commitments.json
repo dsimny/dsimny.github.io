@@ -1618,6 +1618,9 @@
    },
    "committed_utc": "2026-10-14T17:37:29Z",
    "kickoff_utc": "2026-10-15T23:30:00Z",
+   "later_disagreements": [
+    "31e80569185e38b88e4f2315e41088e95d3d8e6649962b1078092639a24ecb79"
+   ],
    "matchup": "Georgia Southern Eagles @ Old Dominion Monarchs",
    "sha256": "ab575404bd18880921f8958aa3be992036da1f0be68fe9596df13b429f756382",
    "sport": "ncaaf"
@@ -7331,6 +7334,40 @@
    "kickoff_utc": "2026-09-20T20:25:00Z",
    "matchup": "SEA @ ARI",
    "sha256": "ffb9e484642c03bce05d1cdeacb5add29b56b5820faa661c0c4ff11be7528cdf",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|SEA @ DEN|2026-10-16T00:15:00Z": {
+   "block": {
+    "away": "Seattle Seahawks",
+    "best_book": "fanduel",
+    "best_price": 126,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.925,
+    "fair_away": 0.5656,
+    "fair_home": 0.4344,
+    "fair_side": 0.4344,
+    "home": "Denver Broncos",
+    "kickoff_utc": "2026-10-16T00:15:00Z",
+    "league": "NFL",
+    "matchup": "SEA @ DEN",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.638,
+    "relative_price_discount": -0.0186021311,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Denver Broncos",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261014T183722Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-10-14T18:37:24Z",
+   "kickoff_utc": "2026-10-16T00:15:00Z",
+   "matchup": "SEA @ DEN",
+   "sha256": "b868e9802553e5e8a9b82fcfabc8f41242c5683e9a7dab904d9de7fa6f517717",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|SF @ SEA|2026-10-11T20:25:00Z": {

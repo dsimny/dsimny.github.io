@@ -1502,6 +1502,25 @@
    "status": "STATUS_FINAL",
    "total": 71
   },
+  "401872995": {
+   "away": "SEA",
+   "away_abbr": "SEA",
+   "away_name": "Seattle Seahawks",
+   "away_score": null,
+   "espn_event_id": "401872995",
+   "final": false,
+   "home": "DEN",
+   "home_abbr": "DEN",
+   "home_name": "Denver Broncos",
+   "home_score": null,
+   "kickoff_utc": "2026-10-16T00:15:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873272": {
    "away": "DET",
    "away_abbr": "DET",
@@ -2415,5 +2434,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-13T17:54:59Z"
+ "updated_utc": "2026-10-14T15:40:43Z"
 }

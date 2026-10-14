@@ -5226,6 +5226,25 @@
    "status": "STATUS_FINAL",
    "total": 33
   },
+  "401860923": {
+   "away": "Colorado State Rams",
+   "away_abbr": "CSU",
+   "away_key": "coloradostaterams",
+   "away_score": null,
+   "espn_event_id": "401860923",
+   "final": false,
+   "home": "Texas State Bobcats",
+   "home_abbr": "TXST",
+   "home_key": "texasstatebobcats",
+   "home_score": null,
+   "kickoff_utc": "2026-10-16T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401861962": {
    "away": "Lafayette Leopards",
    "away_abbr": "LAF",
@@ -6118,6 +6137,25 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 60
+  },
+  "401862800": {
+   "away": "East Carolina Pirates",
+   "away_abbr": "ECU",
+   "away_key": "eastcarolinapirates",
+   "away_score": null,
+   "espn_event_id": "401862800",
+   "final": false,
+   "home": "UAB Blazers",
+   "home_abbr": "UAB",
+   "home_key": "uabblazers",
+   "home_score": null,
+   "kickoff_utc": "2026-10-15T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   },
   "401864424": {
    "away": "Merrimack Warriors",
@@ -8095,6 +8133,25 @@
    "status": "STATUS_FINAL",
    "total": 51
   },
+  "401869950": {
+   "away": "Georgia Southern Eagles",
+   "away_abbr": "GASO",
+   "away_key": "georgiasoutherneagles",
+   "away_score": null,
+   "espn_event_id": "401869950",
+   "final": false,
+   "home": "Old Dominion Monarchs",
+   "home_abbr": "ODU",
+   "home_key": "olddominionmonarchs",
+   "home_score": null,
+   "kickoff_utc": "2026-10-15T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401869955": {
    "away": "Georgia State Panthers",
    "away_abbr": "GAST",
@@ -8460,20 +8517,20 @@
    "away": "Florida International Panthers",
    "away_abbr": "FIU",
    "away_key": "floridainternationalpanthers",
-   "away_score": null,
+   "away_score": 24,
    "espn_event_id": "401871053",
-   "final": false,
+   "final": true,
    "home": "Jacksonville State Gamecocks",
    "home_abbr": "JXST",
    "home_key": "jacksonvillestategamecocks",
-   "home_score": null,
+   "home_score": 27,
    "kickoff_utc": "2026-10-14T00:00:00Z",
-   "margin": null,
+   "margin": 3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 51
   },
   "401871054": {
    "away": "Kennesaw State Owls",
@@ -8517,20 +8574,20 @@
    "away": "Delaware Blue Hens",
    "away_abbr": "DEL",
    "away_key": "delawarebluehens",
-   "away_score": null,
+   "away_score": 30,
    "espn_event_id": "401871067",
-   "final": false,
+   "final": true,
    "home": "Middle Tennessee Blue Raiders",
    "home_abbr": "MTSU",
    "home_key": "middletennesseeblueraiders",
-   "home_score": null,
+   "home_score": 33,
    "kickoff_utc": "2026-10-13T23:00:00Z",
-   "margin": null,
+   "margin": 3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 63
   },
   "401871068": {
    "away": "Western Kentucky Hilltoppers",
@@ -8590,5 +8647,5 @@
    "total": 89
   }
  },
- "updated_utc": "2026-10-13T17:54:58Z"
+ "updated_utc": "2026-10-14T15:40:42Z"
 }

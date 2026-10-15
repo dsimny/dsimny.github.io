@@ -2698,6 +2698,40 @@
    "sha256": "e33d5e5ac0af8ae2690063ab3793ee9fa8baea9cea8915a31e6ab657121bfe69",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Memphis Tigers @ Tulane Green Wave|2026-10-16T23:30:00Z": {
+   "block": {
+    "away": "Memphis Tigers",
+    "best_book": "betmgm",
+    "best_price": -250,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.679,
+    "fair_away": 0.69611,
+    "fair_home": 0.30389,
+    "fair_side": 0.69611,
+    "home": "Tulane Green Wave",
+    "kickoff_utc": "2026-10-16T23:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Memphis Tigers @ Tulane Green Wave",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.298,
+    "relative_price_discount": -0.0261169324,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Memphis Tigers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261015T173729Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-10-15T17:37:35Z",
+   "kickoff_utc": "2026-10-16T23:30:00Z",
+   "matchup": "Memphis Tigers @ Tulane Green Wave",
+   "sha256": "9133fc7ec562feeae9a6cfb24a90b8af9665d7485c5317d5b4e330d60d2dc917",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Miami (OH) RedHawks @ Cincinnati Bearcats|2026-09-19T19:30:00Z": {
    "block": {
     "away": "Miami (OH) RedHawks",

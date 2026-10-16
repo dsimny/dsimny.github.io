@@ -535,7 +535,8 @@
     "e5ea22244fc3af8f4c52063872b0a13234679e686d36cf151ff108ab61035bc0",
     "bd7aa7330c89a317e9ae9605e160e703b4e9d4c29b2010b93d93a69b5f54cf7a",
     "f3845168909de12469f03ff33b31842e6cafea211220f64ffeb427c6a4fb4298",
-    "a3531014c4d7eee415a043d095f348404ef9e0f842feb1b27ff5198337ede4b4"
+    "a3531014c4d7eee415a043d095f348404ef9e0f842feb1b27ff5198337ede4b4",
+    "f5b06c13e17dde7e54301b8a6a1009211b535e97160da91d6e9916787b6fe05d"
    ],
    "matchup": "Arkansas Razorbacks @ Vanderbilt Commodores",
    "sha256": "2a0f83e7478521ca377e3f8e54e1ee2625e997e504f4e42e7eaa3ecb245b137a",
@@ -575,7 +576,8 @@
     "fc2ba849d6d7dd4bf69b203456118df7bcbeccfa52312c9aedde5f4b13c1234a",
     "265983697e862adea8075cec8c31474e8d6ea2edbd7b59d5cce7bdb9cdf2e4fd",
     "6ec6193f143bb48e9ae2e25cf6c43ec975735e78c1ade1172f4fb0ca581cfdec",
-    "d7b76f38b89937351fe1416fbd5fa041452350ec0b1ec56e57eea5fe046aa9c4"
+    "d7b76f38b89937351fe1416fbd5fa041452350ec0b1ec56e57eea5fe046aa9c4",
+    "0b4663db81c6cdb3319020a6cde0b053a021cf18e46ef9b6ff3146f6841fccf1"
    ],
    "matchup": "Arkansas State Red Wolves @ Southern Mississippi Golden Eagles",
    "sha256": "c42e66ebd694b37f97a1d38b541b0296832e5827ba6842e4e6dfebaf778f3319",
@@ -1954,7 +1956,8 @@
     "f92a8a86710e0afafaddd42bda486fd636fe091b1a36bb6af495f7e3afe53ac5",
     "17d2c69be79dacff23fcaf1a37132c1b8ea862db1ae1199bdf6ebe99d560f5df",
     "91364760747256ac5d01492c9483ae78f623017480ae20593db203b5ac87b3eb",
-    "e56b6f7fbf9d64244a8a5025814466fe3779b52f8c208963da482dc679699beb"
+    "e56b6f7fbf9d64244a8a5025814466fe3779b52f8c208963da482dc679699beb",
+    "5ce8720658b7f512a7d56010f883dee7377c9b71733daf66c877be382161f4fe"
    ],
    "matchup": "Florida State Seminoles @ Miami Hurricanes",
    "sha256": "64088f53f215a3fdb48d08087f44be56221de44898bc8c984fb5f5717a6663a2",
@@ -3026,7 +3029,8 @@
     "37a798fbcf7fb286d2dd280b7b22f186ef21abbb9ba889a9d962f62da713831c",
     "5ffe8375fdf9d273252e021fdf99bf8b3e11a42f47ff002a5d7ff4ca0460d6ae",
     "590ea28ff29abcdad9e3dd414b9413a5bbc938387f2284203709f3eb2437f0f6",
-    "c00c1fad9e7496cb999e39ee21375ecc8a5c841e0aa8ec8374c53e15d24b43a7"
+    "c00c1fad9e7496cb999e39ee21375ecc8a5c841e0aa8ec8374c53e15d24b43a7",
+    "b656fabd092532f6d8c17f50c3924b4552d9e7745a866cb70fe7987a5640ab11"
    ],
    "matchup": "Kent State Golden Flashes @ South Florida Bulls",
    "sha256": "28c78763a3acd31cb329d4c509052badf20a86ed76ea62d777918c555f3e203c",
@@ -3105,7 +3109,8 @@
    "later_disagreements": [
     "7cad0749c68abe8cc3f21035deb6e5c77fd9fac928efe3a70374056c25059580",
     "52bd87ffee5e9e6a13c1dfa27a2749d90e9b07d571ad73957f10a7e9eaecc5a7",
-    "7a3b56431b6b8391e19c9c804dafe092f29f32959666b8079a03ef06ec9a6c60"
+    "7a3b56431b6b8391e19c9c804dafe092f29f32959666b8079a03ef06ec9a6c60",
+    "2ede22274b6789d51b3439e92ab2a614b872cdb16617c7284099ec88e2da0544"
    ],
    "matchup": "Kentucky Wildcats @ Oklahoma Sooners",
    "sha256": "a303cc3041f61066f00df9da7dbc8d520218cb4e2520271fbb05691968080a48",
@@ -3456,7 +3461,8 @@
    "later_disagreements": [
     "ae5c4af2e67a69ba61fb02c6cd872d47e72d80181be407eccf6aec210e0ff470",
     "d844c806f5d83de9e8bfdeb116d6cac740dcbc0462408bb7dacec5f3965557c3",
-    "aab4be574176fc48d4e843253b4a78cafbe99e4ca28aa28dd672c6bc01e69848"
+    "aab4be574176fc48d4e843253b4a78cafbe99e4ca28aa28dd672c6bc01e69848",
+    "19893ba539c7f9a06dce51110abbc62beac78d9cacf1e22fc7f0d6fcae356cee"
    ],
    "matchup": "Louisville Cardinals @ Syracuse Orange",
    "sha256": "6c44dc3dd237071bf114b7913f713b9520670d9cda6b3d707865af712bf9571c",
@@ -4330,6 +4336,9 @@
    },
    "committed_utc": "2026-10-16T20:37:23Z",
    "kickoff_utc": "2026-10-18T02:30:00Z",
+   "later_disagreements": [
+    "c63cbc8e17c74dfc7bb29a03463701c868ff5699721d12d602029a977d90018f"
+   ],
    "matchup": "New Mexico Lobos @ Hawaii Rainbow Warriors",
    "sha256": "18da8218ea1c7779b500f013f4e7401b4313d58995bfaa23c87de64992463366",
    "sport": "ncaaf"
@@ -4945,7 +4954,8 @@
    "later_disagreements": [
     "f2369eaf9703d5e8c598ad236f001bf117f6c7280e36fa615ae6b3bb7b5ddc51",
     "3965d1126f52e2db84c75bd471022db7b42edaef6266d2e6c6a7ec7454c7c521",
-    "fe044ad834bda3485183edd78650ee70a0993237a0751de15a3bf360a07400ef"
+    "fe044ad834bda3485183edd78650ee70a0993237a0751de15a3bf360a07400ef",
+    "dfa569b9e843f97b5ce64f024fa5e530054e37ee381ab1720b57913e2f200241"
    ],
    "matchup": "Notre Dame Fighting Irish @ BYU Cougars",
    "sha256": "7b472c38cf058f0d7b8b059b0973fdcb4d071de7a0c4c525ba4b45f768e12cd6",
@@ -5135,7 +5145,8 @@
    "later_disagreements": [
     "95abbf503af857957bd4d2de3ba64457a4ab7c353de130a3f0e0818eb8fc2abb",
     "db4d915abad156ed217e837fbcf720462457455abf1b526c9ba497f2c04ada77",
-    "3170dc92e7be49be4b99a03b598bd3964a3618765b5611c299ed005cef97cd61"
+    "3170dc92e7be49be4b99a03b598bd3964a3618765b5611c299ed005cef97cd61",
+    "8ce6be9ae0f828614103777048e14a76e00f17edda2c376b18bb8d66484d55fc"
    ],
    "matchup": "Oklahoma State Cowboys @ Houston Cougars",
    "sha256": "f74b59f05f4ed45414f9fe04809b3b72a619cf214c4a92353b4fab2f55db95d8",
@@ -5752,7 +5763,8 @@
    "committed_utc": "2026-10-16T19:37:25Z",
    "kickoff_utc": "2026-10-18T01:00:00Z",
    "later_disagreements": [
-    "df6235e0b337f7672a779bdce01e24af5d8464d45db8c973065dfa9ad8500b35"
+    "df6235e0b337f7672a779bdce01e24af5d8464d45db8c973065dfa9ad8500b35",
+    "e9479589b69e71f7068c462012e92b4dedb10ac12e113dfa21589d0863466822"
    ],
    "matchup": "San Jose State Spartans @ UTEP Miners",
    "sha256": "ec17a89ae4b8a7c9d7be65a5f781b8840a3eb93619c59f13c05cd00766984737",
@@ -7447,6 +7459,9 @@
    },
    "committed_utc": "2026-10-16T20:37:23Z",
    "kickoff_utc": "2026-10-18T02:15:00Z",
+   "later_disagreements": [
+    "3f14107437524447f871bb1e3abdd0a3566b6fbc4bb371b10cc10371f8cc0dce"
+   ],
    "matchup": "Utah Utes @ Colorado Buffaloes",
    "sha256": "062899c22fa5e71a215a4757fdbace91dad8dd197fd0983b75c94d7edba03390",
    "sport": "ncaaf"
@@ -7759,7 +7774,8 @@
     "e9c19a2ea78233db19bf8f61ae55bd125eedcb487f61ea78424c3475948545a6",
     "e312eaab6ad4aa039013c2ebc0f73e2f4b89034f7c56c9ab304b4e866566c598",
     "e5a8b153bedd229f794aaa7ec177b1980f4a102f7c16b6d2ec4701633fc55200",
-    "de31f3589866439883164c50a27575694b86e825d8e0c4d901ec2a31cba55b91"
+    "de31f3589866439883164c50a27575694b86e825d8e0c4d901ec2a31cba55b91",
+    "f2978d45d19a37a537a4bcf1a69e7664ae140c89e7b09a8f8d83dce2b6093a26"
    ],
    "matchup": "Washington State Cougars @ Oregon State Beavers",
    "sha256": "85858beecbc98cc5d43fc0286c54331d89039fc0081981c447b88214713d75a1",
@@ -7920,7 +7936,8 @@
    "later_disagreements": [
     "50655f37524217f1c2f80229a6bd8e6256e8bff3a7466f28bb4473df61ff7374",
     "9a54bda49fac4928d9809ea0aaf2f2c98a644b7323a4ed414203cb7b4826560a",
-    "fa08fc1a89171c4986248ff4ccdf6108458f088c64cf6f60d8e55043a19748c6"
+    "fa08fc1a89171c4986248ff4ccdf6108458f088c64cf6f60d8e55043a19748c6",
+    "4e685ec5c4bcf6209fe8a7e3f86fb266b5302a4ea8d235c49dff2a083a0c7b77"
    ],
    "matchup": "Wisconsin Badgers @ UCLA Bruins",
    "sha256": "f95087241a2014cc942c74507f844c7f6f9cbc2eb176480732e74beea5422f35",

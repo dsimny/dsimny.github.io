@@ -8014,6 +8014,40 @@
    "sha256": "fd9b0525c32a7c69361f47b07e53089d57bcf05a2d1cf6a18a5af7a15e799bd7",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|ARI @ LA|2026-10-18T20:05:00Z": {
+   "block": {
+    "away": "Arizona Cardinals",
+    "best_book": "williamhill_us",
+    "best_price": 600,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.175,
+    "fair_away": 0.14206,
+    "fair_home": 0.85794,
+    "fair_side": 0.14206,
+    "home": "Los Angeles Rams",
+    "kickoff_utc": "2026-10-18T20:05:00Z",
+    "league": "NFL",
+    "matchup": "ARI @ LA",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.288,
+    "relative_price_discount": -0.0056390977,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Arizona Cardinals",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261017T143724Z.json",
+    "t24_hours_before_kickoff": 29.46
+   },
+   "committed_utc": "2026-10-17T14:37:27Z",
+   "kickoff_utc": "2026-10-18T20:05:00Z",
+   "matchup": "ARI @ LA",
+   "sha256": "19bbe62b0e53d1efb70c02ced06d913aa370d2347eb771bc58fc74516fe9b3be",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|ATL @ GB|2026-09-25T00:15:00Z": {
    "block": {
     "away": "Atlanta Falcons",
@@ -8118,6 +8152,9 @@
    },
    "committed_utc": "2026-10-17T11:37:27Z",
    "kickoff_utc": "2026-10-18T17:00:00Z",
+   "later_disagreements": [
+    "61e1e6dd4b5117c7091d2a33eebba9b0f9b9f841a3f4014a3614ebbb59d28637"
+   ],
    "matchup": "BAL @ CLE",
    "sha256": "29b86133f5a1ba0a81edb29b23f4574e1613921e09ecb1c5df1bffffe40f5469",
    "sport": "nfl"
@@ -8196,6 +8233,40 @@
    "sha256": "14f5d1ce44c2a7cfc7b35d1c0085d48aa07a93b16afcb8e9dc3be2bb953dc083",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|BUF @ LV|2026-10-18T20:25:00Z": {
+   "block": {
+    "away": "Buffalo Bills",
+    "best_book": "fanduel",
+    "best_price": 200,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.564,
+    "fair_away": 0.67195,
+    "fair_home": 0.32805,
+    "fair_side": 0.32805,
+    "home": "Las Vegas Raiders",
+    "kickoff_utc": "2026-10-18T20:25:00Z",
+    "league": "NFL",
+    "matchup": "BUF @ LV",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.396,
+    "relative_price_discount": -0.016119403,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Las Vegas Raiders",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261017T143724Z.json",
+    "t24_hours_before_kickoff": 29.79
+   },
+   "committed_utc": "2026-10-17T14:37:27Z",
+   "kickoff_utc": "2026-10-18T20:25:00Z",
+   "matchup": "BUF @ LV",
+   "sha256": "5cb761db1a4a8ab6fc180a5313db8d90310e054f8b20161458114e8e4e44ca8a",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|CAR @ ATL|2026-09-20T17:00:00Z": {
    "block": {
     "away": "Carolina Panthers",
@@ -8264,6 +8335,9 @@
    },
    "committed_utc": "2026-10-17T11:37:27Z",
    "kickoff_utc": "2026-10-18T17:00:00Z",
+   "later_disagreements": [
+    "0070e8ec4e30dc98a8b6615a2d9741a355005e4fa36a9955731dad22dbbed9a4"
+   ],
    "matchup": "CAR @ PHI",
    "sha256": "e528fb602545f1553c049c2381f48baa2265350503aec5601e2ec7f8a6d3bd67",
    "sport": "nfl"
@@ -8298,6 +8372,9 @@
    },
    "committed_utc": "2026-10-17T11:37:27Z",
    "kickoff_utc": "2026-10-18T17:00:00Z",
+   "later_disagreements": [
+    "f5ab756332e2e8c1cf328e92dfeff55e7f349ff9f8d0bca39421698d16b516cc"
+   ],
    "matchup": "CHI @ ATL",
    "sha256": "42ad8032bf35b50c323878dfd0a6d24b3d70eed9c733a9ac7c0f5fc3a57b7451",
    "sport": "nfl"
@@ -8770,7 +8847,8 @@
    "committed_utc": "2026-10-17T07:37:28Z",
    "kickoff_utc": "2026-10-18T13:30:00Z",
    "later_disagreements": [
-    "9215612c61c52b8c6b9ebddd4c10e534279a0d15fd80b920d30b8ebeee866043"
+    "9215612c61c52b8c6b9ebddd4c10e534279a0d15fd80b920d30b8ebeee866043",
+    "704d5bd6f7c2831a225ea9723303bcfb400e0d52cb01dfe1fec3afb67a500f9e"
    ],
    "matchup": "HOU @ JAX",
    "sha256": "47c95c5b60419871a4778cdd673a570ef0eaa4e63f7942e223b6d5ab6cb38078",
@@ -9212,6 +9290,9 @@
    },
    "committed_utc": "2026-10-17T11:37:27Z",
    "kickoff_utc": "2026-10-18T17:00:00Z",
+   "later_disagreements": [
+    "fe3a25fdc4d33d9ffa8d80feb14a94c90bb03743347cbbb1a96bd44c92e3eb37"
+   ],
    "matchup": "NO @ NYG",
    "sha256": "5894f3895d9fbcec4f974b89b2651fe398561f2ee3f49a4c6836bd7f3df60c7e",
    "sport": "nfl"
@@ -9246,6 +9327,9 @@
    },
    "committed_utc": "2026-10-17T11:37:27Z",
    "kickoff_utc": "2026-10-18T17:00:00Z",
+   "later_disagreements": [
+    "993571b6acb462da7787b5c2b63e1ff74baa7020ecfd197f35e3e4826668b0c9"
+   ],
    "matchup": "NYJ @ NE",
    "sha256": "a891dc77410762ba54b15be31065cbcf5761122fa724f18ffce9e5d7c93a812e",
    "sport": "nfl"
@@ -9431,6 +9515,9 @@
    },
    "committed_utc": "2026-10-17T11:37:27Z",
    "kickoff_utc": "2026-10-18T17:00:00Z",
+   "later_disagreements": [
+    "bdcd45a437b13735ace2fb702b4b690cdfbed10a8de91f011a11bbfb0e7ae398"
+   ],
    "matchup": "PIT @ TB",
    "sha256": "f46c3dbaea688f0804bc75bf07a34b6d59b9aa674ba87516415146426c0f54d2",
    "sport": "nfl"
@@ -9641,6 +9728,9 @@
    },
    "committed_utc": "2026-10-17T11:37:27Z",
    "kickoff_utc": "2026-10-18T17:00:00Z",
+   "later_disagreements": [
+    "e7b40af0c1545132f799a8783f727b9693f815897e93133a25cd856f566123a5"
+   ],
    "matchup": "TEN @ IND",
    "sha256": "e8413a356411efcb070aba8f4b2c2f633c69f830270692f5ce8a85614e8c7562",
    "sport": "nfl"

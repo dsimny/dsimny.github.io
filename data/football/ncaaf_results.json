@@ -5249,20 +5249,20 @@
    "away": "Washington Huskies",
    "away_abbr": "WASH",
    "away_key": "washingtonhuskies",
-   "away_score": null,
+   "away_score": 38,
    "espn_event_id": "401858493",
-   "final": false,
+   "final": true,
    "home": "Purdue Boilermakers",
    "home_abbr": "PUR",
    "home_key": "purdueboilermakers",
-   "home_score": null,
+   "home_score": 26,
    "kickoff_utc": "2026-10-17T00:00:00Z",
-   "margin": null,
+   "margin": -12,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 64
   },
   "401858494": {
    "away": "Wisconsin Badgers",
@@ -6788,20 +6788,20 @@
    "away": "Memphis Tigers",
    "away_abbr": "MEM",
    "away_key": "memphistigers",
-   "away_score": null,
+   "away_score": 17,
    "espn_event_id": "401862801",
-   "final": false,
+   "final": true,
    "home": "Tulane Green Wave",
    "home_abbr": "TULN",
    "home_key": "tulanegreenwave",
-   "home_score": null,
+   "home_score": 31,
    "kickoff_utc": "2026-10-16T23:30:00Z",
-   "margin": null,
+   "margin": 14,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 48
   },
   "401862802": {
    "away": "Florida Atlantic Owls",
@@ -8916,20 +8916,20 @@
    "away": "App State Mountaineers",
    "away_abbr": "APP",
    "away_key": "appstatemountaineers",
-   "away_score": null,
+   "away_score": 35,
    "espn_event_id": "401869844",
-   "final": false,
+   "final": true,
    "home": "Coastal Carolina Chanticleers",
    "home_abbr": "CCU",
    "home_key": "coastalcarolinachanticleers",
-   "home_score": null,
+   "home_score": 32,
    "kickoff_utc": "2026-10-17T00:00:00Z",
-   "margin": null,
+   "margin": -3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 67
   },
   "401869931": {
    "away": "Kennesaw State Owls",
@@ -9692,5 +9692,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-10-16T15:08:59Z"
+ "updated_utc": "2026-10-17T14:01:48Z"
 }

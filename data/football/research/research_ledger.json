@@ -94,7 +94,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-10-11T16:30:06Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-10-06|ncaaf|Tulsa Golden Hurricane @ Navy Midshipmen|2026-10-10T19:30:00Z|research_premium"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_free",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "ncaaf",
+   "slate_week": "2026-10-13",
+   "matchup": "San Jose State Spartans @ UTEP Miners",
+   "kickoff_utc": "2026-10-18T01:00:00Z",
+   "side": "UTEP Miners",
+   "best_price": 230,
+   "best_book": "betrivers",
+   "books_at_best": 3,
+   "eff_overround_pts": 1.732,
+   "fair_side": 0.30558,
+   "t24_capture": "ncaaf_20261016T193721Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "observed_utc": "2026-10-17T18:37:29Z",
+   "espn_event_id": "401864523",
+   "final": "24-11",
+   "result": "loss",
+   "units": 0,
+   "pnl_per_unit": -1.0,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": -0.488,
+   "close_capture": "ncaaf_20261017T213720Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-10-18T14:15:36Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-10-13|ncaaf|San Jose State Spartans @ UTEP Miners|2026-10-18T01:00:00Z|research_free"
   }
  ],
- "updated_utc": "2026-10-11T16:30:06Z"
+ "updated_utc": "2026-10-18T14:15:36Z"
 }

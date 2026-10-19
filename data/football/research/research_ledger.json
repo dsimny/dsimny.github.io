@@ -125,7 +125,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-10-18T14:15:36Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-10-13|ncaaf|San Jose State Spartans @ UTEP Miners|2026-10-18T01:00:00Z|research_free"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_premium",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "nfl",
+   "slate_week": "2026-10-13",
+   "matchup": "CAR @ PHI",
+   "kickoff_utc": "2026-10-18T17:00:00Z",
+   "side": "Carolina Panthers",
+   "best_price": -164,
+   "best_book": "fanduel",
+   "books_at_best": 2,
+   "eff_overround_pts": 1.337,
+   "fair_side": 0.61404,
+   "t24_capture": "nfl_20261017T113725Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "observed_utc": "2026-10-17T18:37:29Z",
+   "espn_event_id": "401872998",
+   "final": "25-14",
+   "result": "win",
+   "units": 0,
+   "pnl_per_unit": 0.6098,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": -1.904,
+   "close_capture": "nfl_20261018T142925Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-10-19T17:18:34Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-10-13|nfl|CAR @ PHI|2026-10-18T17:00:00Z|research_premium"
   }
  ],
- "updated_utc": "2026-10-18T14:15:36Z"
+ "updated_utc": "2026-10-19T17:18:34Z"
 }

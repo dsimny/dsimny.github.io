@@ -9577,6 +9577,25 @@
    "status": "STATUS_FINAL",
    "total": 45
   },
+  "401871055": {
+   "away": "Middle Tennessee Blue Raiders",
+   "away_abbr": "MTSU",
+   "away_key": "middletennesseeblueraiders",
+   "away_score": null,
+   "espn_event_id": "401871055",
+   "final": false,
+   "home": "Florida International Panthers",
+   "home_abbr": "FIU",
+   "home_key": "floridainternationalpanthers",
+   "home_score": null,
+   "kickoff_utc": "2026-10-20T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401871066": {
    "away": "New Mexico State Aggies",
    "away_abbr": "NMSU",
@@ -9634,6 +9653,25 @@
    "status": "STATUS_FINAL",
    "total": 19
   },
+  "401871069": {
+   "away": "Missouri State Bears",
+   "away_abbr": "MOST",
+   "away_key": "missouristatebears",
+   "away_score": null,
+   "espn_event_id": "401871069",
+   "final": false,
+   "home": "Delaware Blue Hens",
+   "home_abbr": "DEL",
+   "home_key": "delawarebluehens",
+   "home_score": null,
+   "kickoff_utc": "2026-10-20T23:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401871089": {
    "away": "UL Monroe Warhawks",
    "away_abbr": "ULM",
@@ -9690,7 +9728,26 @@
    "season_year": 2026,
    "status": "STATUS_FINAL",
    "total": 24
+  },
+  "401871092": {
+   "away": "South Alabama Jaguars",
+   "away_abbr": "USA",
+   "away_key": "southalabamajaguars",
+   "away_score": null,
+   "espn_event_id": "401871092",
+   "final": false,
+   "home": "Marshall Thundering Herd",
+   "home_abbr": "MRSH",
+   "home_key": "marshallthunderingherd",
+   "home_score": null,
+   "kickoff_utc": "2026-10-20T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
   }
  },
- "updated_utc": "2026-10-18T14:15:33Z"
+ "updated_utc": "2026-10-19T17:18:31Z"
 }

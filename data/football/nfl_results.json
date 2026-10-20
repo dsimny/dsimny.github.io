@@ -1753,20 +1753,20 @@
    "away": "WAS",
    "away_abbr": "WSH",
    "away_name": "Washington Commanders",
-   "away_score": null,
+   "away_score": 17,
    "espn_event_id": "401873008",
-   "final": false,
+   "final": true,
    "home": "SF",
    "home_abbr": "SF",
    "home_name": "San Francisco 49ers",
-   "home_score": null,
+   "home_score": 23,
    "kickoff_utc": "2026-10-20T00:15:00Z",
-   "margin": null,
+   "margin": 6,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 40
   },
   "401873272": {
    "away": "DET",
@@ -2681,5 +2681,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-19T17:18:33Z"
+ "updated_utc": "2026-10-20T15:32:12Z"
 }

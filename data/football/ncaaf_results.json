@@ -9672,6 +9672,25 @@
    "status": "STATUS_SCHEDULED",
    "total": null
   },
+  "401871070": {
+   "away": "New Mexico State Aggies",
+   "away_abbr": "NMSU",
+   "away_key": "newmexicostateaggies",
+   "away_score": null,
+   "espn_event_id": "401871070",
+   "final": false,
+   "home": "Sam Houston Bearkats",
+   "home_abbr": "SHSU",
+   "home_key": "samhoustonbearkats",
+   "home_score": null,
+   "kickoff_utc": "2026-10-22T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401871089": {
    "away": "UL Monroe Warhawks",
    "away_abbr": "ULM",
@@ -9749,5 +9768,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-10-19T17:18:31Z"
+ "updated_utc": "2026-10-20T15:32:10Z"
 }

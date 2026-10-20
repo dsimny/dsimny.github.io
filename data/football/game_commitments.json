@@ -4556,6 +4556,40 @@
    "sha256": "ab40faabfc9dc59bf56b2e1164372f771f2a69a2660570271d89ef5d4dd251df",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|New Mexico State Aggies @ Sam Houston State Bearkats|2026-10-22T00:00:00Z": {
+   "block": {
+    "away": "New Mexico State Aggies",
+    "best_book": "betrivers",
+    "best_price": 130,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.156,
+    "fair_away": 0.57315,
+    "fair_home": 0.42685,
+    "fair_side": 0.42685,
+    "home": "Sam Houston State Bearkats",
+    "kickoff_utc": "2026-10-22T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "New Mexico State Aggies @ Sam Houston State Bearkats",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.122,
+    "relative_price_discount": -0.0185834502,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Sam Houston State Bearkats",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261020T183724Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-20T18:37:29Z",
+   "kickoff_utc": "2026-10-22T00:00:00Z",
+   "matchup": "New Mexico State Aggies @ Sam Houston State Bearkats",
+   "sha256": "29e97f3afe945e8278e468afb7a4dc2f262db6c0d8488e4a564a197d7e07c7c4",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|North Carolina Tar Heels @ Clemson Tigers|2026-09-19T16:00:00Z": {
    "block": {
     "away": "North Carolina Tar Heels",

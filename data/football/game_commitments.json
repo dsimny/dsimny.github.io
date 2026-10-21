@@ -1529,6 +1529,9 @@
    },
    "committed_utc": "2026-10-21T17:37:25Z",
    "kickoff_utc": "2026-10-22T23:30:00Z",
+   "later_disagreements": [
+    "9bf704a6dc5117a5ce1e3c4627461027b2059bb2f7e888d04c3beacc9a11e771"
+   ],
    "matchup": "East Carolina Pirates @ Memphis Tigers",
    "sha256": "51df92146109d58165664e96405d62864069551474303e66459a0517bc587a39",
    "sport": "ncaaf"
@@ -2904,6 +2907,9 @@
    },
    "committed_utc": "2026-10-21T17:37:25Z",
    "kickoff_utc": "2026-10-22T23:00:00Z",
+   "later_disagreements": [
+    "1b4987159a300e5c9e53837626598203fc6ad52722cc4048894da95ca5ed1010"
+   ],
    "matchup": "James Madison Dukes @ Appalachian State Mountaineers",
    "sha256": "cb5cc5178a96d6c7bdb41bdd40a6776b47c794713592f8e7b9bfaeacc36ca8a0",
    "sport": "ncaaf"
@@ -3338,6 +3344,9 @@
    },
    "committed_utc": "2026-10-21T17:37:25Z",
    "kickoff_utc": "2026-10-22T23:00:00Z",
+   "later_disagreements": [
+    "d7cd51785791e296b1857658da00823f2d1b08fceccafea219b87f60881c5004"
+   ],
    "matchup": "Liberty Flames @ Kennesaw State Owls",
    "sha256": "65ecb1c716bd693914400af45dd28f0ba82ba95df2216b8d6f8c8266ed4f8ca0",
    "sport": "ncaaf"
@@ -9427,6 +9436,43 @@
    ],
    "matchup": "MIN @ NO",
    "sha256": "f43c5e4c4e0b6a89c6f47c96ad22105540081cce8bebbe9a916d10308ab05ac6",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|NE @ CHI|2026-10-23T00:15:00Z": {
+   "block": {
+    "away": "New England Patriots",
+    "best_book": "williamhill_us",
+    "best_price": 136,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.157,
+    "fair_away": 0.41191,
+    "fair_home": 0.58809,
+    "fair_side": 0.41191,
+    "home": "Chicago Bears",
+    "kickoff_utc": "2026-10-23T00:15:00Z",
+    "league": "NFL",
+    "matchup": "NE @ CHI",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "lowvig",
+     "price": 141
+    },
+    "raw_overround_pts": 4.642,
+    "relative_price_discount": -0.0286831812,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "New England Patriots",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261021T183730Z.json",
+    "t24_hours_before_kickoff": 29.62
+   },
+   "committed_utc": "2026-10-21T18:37:33Z",
+   "kickoff_utc": "2026-10-23T00:15:00Z",
+   "matchup": "NE @ CHI",
+   "sha256": "93576197162bcc1d06e1c5ba14976f3c04b5b1b89d04b3d6a59695d04522f3f3",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|NO @ BAL|2026-09-20T17:00:00Z": {

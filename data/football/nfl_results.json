@@ -1768,6 +1768,25 @@
    "status": "STATUS_FINAL",
    "total": 40
   },
+  "401873010": {
+   "away": "NE",
+   "away_abbr": "NE",
+   "away_name": "New England Patriots",
+   "away_score": null,
+   "espn_event_id": "401873010",
+   "final": false,
+   "home": "CHI",
+   "home_abbr": "CHI",
+   "home_name": "Chicago Bears",
+   "home_score": null,
+   "kickoff_utc": "2026-10-23T00:15:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873272": {
    "away": "DET",
    "away_abbr": "DET",
@@ -2681,5 +2700,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-20T15:32:12Z"
+ "updated_utc": "2026-10-21T15:48:18Z"
 }

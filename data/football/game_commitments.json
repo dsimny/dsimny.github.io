@@ -1499,6 +1499,40 @@
    "sha256": "6d5b8a735352b4f11d8cc02e240c5c90198d4bc38d9cac092c8996186492fea6",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|East Carolina Pirates @ Memphis Tigers|2026-10-22T23:30:00Z": {
+   "block": {
+    "away": "East Carolina Pirates",
+    "best_book": "fanduel",
+    "best_price": -365,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.885,
+    "fair_away": 0.23456,
+    "fair_home": 0.76544,
+    "fair_side": 0.76544,
+    "home": "Memphis Tigers",
+    "kickoff_utc": "2026-10-22T23:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "East Carolina Pirates @ Memphis Tigers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.982,
+    "relative_price_discount": -0.0254863591,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Memphis Tigers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261021T173721Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-10-21T17:37:25Z",
+   "kickoff_utc": "2026-10-22T23:30:00Z",
+   "matchup": "East Carolina Pirates @ Memphis Tigers",
+   "sha256": "51df92146109d58165664e96405d62864069551474303e66459a0517bc587a39",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|East Carolina Pirates @ Old Dominion Monarchs|2026-09-19T22:00:00Z": {
    "block": {
     "away": "East Carolina Pirates",
@@ -2837,6 +2871,43 @@
    "sha256": "8dfa910da1d2abae7aa0dae4d3494b4aee8fc3e52e3934f4d134ef512f3f921d",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|James Madison Dukes @ Appalachian State Mountaineers|2026-10-22T23:00:00Z": {
+   "block": {
+    "away": "James Madison Dukes",
+    "best_book": "fanatics",
+    "best_price": 340,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.727,
+    "fair_away": 0.77796,
+    "fair_home": 0.22204,
+    "fair_side": 0.22204,
+    "home": "Appalachian State Mountaineers",
+    "kickoff_utc": "2026-10-22T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "James Madison Dukes @ Appalachian State Mountaineers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betus",
+     "price": 355
+    },
+    "raw_overround_pts": 4.737,
+    "relative_price_discount": -0.0235690236,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Appalachian State Mountaineers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261021T173721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-21T17:37:25Z",
+   "kickoff_utc": "2026-10-22T23:00:00Z",
+   "matchup": "James Madison Dukes @ Appalachian State Mountaineers",
+   "sha256": "cb5cc5178a96d6c7bdb41bdd40a6776b47c794713592f8e7b9bfaeacc36ca8a0",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|James Madison Dukes @ Georgia Southern Eagles|2026-10-10T23:30:00Z": {
    "block": {
     "away": "James Madison Dukes",
@@ -3235,6 +3306,40 @@
    ],
    "matchup": "LSU Tigers @ Ole Miss Rebels",
    "sha256": "6b4cc890d26ce82e48c3a914591375c4ed6dfabcbe68052bb575de4d6972a051",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Liberty Flames @ Kennesaw State Owls|2026-10-22T23:00:00Z": {
+   "block": {
+    "away": "Liberty Flames",
+    "best_book": "williamhill_us",
+    "best_price": 325,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.911,
+    "fair_away": 0.77108,
+    "fair_home": 0.22892,
+    "fair_side": 0.22892,
+    "home": "Kennesaw State Owls",
+    "kickoff_utc": "2026-10-22T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Liberty Flames @ Kennesaw State Owls",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.008,
+    "relative_price_discount": -0.0278392545,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Kennesaw State Owls",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261021T173721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-21T17:37:25Z",
+   "kickoff_utc": "2026-10-22T23:00:00Z",
+   "matchup": "Liberty Flames @ Kennesaw State Owls",
+   "sha256": "65ecb1c716bd693914400af45dd28f0ba82ba95df2216b8d6f8c8266ed4f8ca0",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Lindenwood Lions @ Missouri State Bears|2026-09-12T23:00:00Z": {

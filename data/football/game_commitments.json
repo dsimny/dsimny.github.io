@@ -73,6 +73,9 @@
    },
    "committed_utc": "2026-10-22T19:10:43Z",
    "kickoff_utc": "2026-10-24T01:00:00Z",
+   "later_disagreements": [
+    "af9b8cf21140928c4d69ebdc8cea895c7ececda0cc28e30f29914e13ddd367ed"
+   ],
    "matchup": "Air Force Falcons @ Wyoming Cowboys",
    "sha256": "2ff0e9f1e9e99266a6f3f6a1dce0ec31a15c98131161c1a597e7b6e504ed7dba",
    "sport": "ncaaf"
@@ -728,7 +731,8 @@
    "committed_utc": "2026-10-22T18:37:26Z",
    "kickoff_utc": "2026-10-24T00:30:00Z",
    "later_disagreements": [
-    "ca6f5c0fbd8921688d8222d00c4d01bdc8a7dc2a3895057199a63df4e9f78af7"
+    "ca6f5c0fbd8921688d8222d00c4d01bdc8a7dc2a3895057199a63df4e9f78af7",
+    "87b5548f9a82237fb01406ac3f4656cc5bde3346b16c0d0902aecdd80d093442"
    ],
    "matchup": "Army Black Knights @ Tulsa Golden Hurricane",
    "sha256": "c907ece7ead0af72a9c5fe5338123ea8544bc7323cfa4fe0f8b26133f8411fc2",
@@ -4331,6 +4335,40 @@
    "sha256": "e190a707cbc1515098473228b96e627d2d1a7dc55ba4026340eda0befefb281a",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|NC State Wolfpack @ Stanford Cardinal|2026-10-24T02:30:00Z": {
+   "block": {
+    "away": "NC State Wolfpack",
+    "best_book": "betrivers",
+    "best_price": -250,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.679,
+    "fair_away": 0.69577,
+    "fair_home": 0.30423,
+    "fair_side": 0.69577,
+    "home": "Stanford Cardinal",
+    "kickoff_utc": "2026-10-24T02:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "NC State Wolfpack @ Stanford Cardinal",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.349,
+    "relative_price_discount": -0.0266119026,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "NC State Wolfpack",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261022T203725Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-10-22T20:37:31Z",
+   "kickoff_utc": "2026-10-24T02:30:00Z",
+   "matchup": "NC State Wolfpack @ Stanford Cardinal",
+   "sha256": "5245057de01c002f0f8f27756a13262c4e57a1e4446af02818e148c62d211f9d",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|NC State Wolfpack @ Vanderbilt Commodores|2026-09-19T16:45:00Z": {
    "block": {
     "away": "NC State Wolfpack",
@@ -7552,7 +7590,8 @@
    "kickoff_utc": "2026-10-23T23:00:00Z",
    "later_disagreements": [
     "740d1fd8e8f74564c0d0030bcd5da57627d08232803942de441ace6e582c693d",
-    "9e431399904171889d739e56c5eb3a1780ceed35655c3f3841d4574e977baded"
+    "9e431399904171889d739e56c5eb3a1780ceed35655c3f3841d4574e977baded",
+    "e9627805a52baabc4714bf1090e5e31b74a9114eac4a3e621b666b2372ecef5c"
    ],
    "matchup": "UMass Minutemen @ UConn Huskies",
    "sha256": "cf232de07e026e7f0629ddd5e81702204da858ba04d3921df430b2c47a5ac646",

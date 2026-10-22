@@ -660,6 +660,40 @@
    "sha256": "222a076279c18cd85ccdda183b1f8e230a14582ba61596a7cbbea5706998f122",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Army Black Knights @ Tulsa Golden Hurricane|2026-10-24T00:30:00Z": {
+   "block": {
+    "away": "Army Black Knights",
+    "best_book": "betrivers",
+    "best_price": -118,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.909,
+    "fair_away": 0.46753,
+    "fair_home": 0.53247,
+    "fair_side": 0.53247,
+    "home": "Tulsa Golden Hurricane",
+    "kickoff_utc": "2026-10-24T00:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Army Black Knights @ Tulsa Golden Hurricane",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.336,
+    "relative_price_discount": -0.0165585142,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Tulsa Golden Hurricane",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261022T183720Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-10-22T18:37:26Z",
+   "kickoff_utc": "2026-10-24T00:30:00Z",
+   "matchup": "Army Black Knights @ Tulsa Golden Hurricane",
+   "sha256": "c907ece7ead0af72a9c5fe5338123ea8544bc7323cfa4fe0f8b26133f8411fc2",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Auburn Tigers @ Georgia Bulldogs|2026-10-17T16:00:00Z": {
    "block": {
     "away": "Auburn Tigers",
@@ -1529,6 +1563,9 @@
    },
    "committed_utc": "2026-10-22T17:37:25Z",
    "kickoff_utc": "2026-10-23T23:00:00Z",
+   "later_disagreements": [
+    "d2918e3077663d02d0b5baa7dbcb50037d260811e22c3701e0f20c761dd4c84e"
+   ],
    "matchup": "Duke Blue Devils @ Virginia Cavaliers",
    "sha256": "df6383eb3a8f612ca47e68b2d73c1681cea86e9b23b07e75f02ebbad636e40fe",
    "sport": "ncaaf"
@@ -7473,6 +7510,9 @@
    },
    "committed_utc": "2026-10-22T17:37:25Z",
    "kickoff_utc": "2026-10-23T23:00:00Z",
+   "later_disagreements": [
+    "740d1fd8e8f74564c0d0030bcd5da57627d08232803942de441ace6e582c693d"
+   ],
    "matchup": "UMass Minutemen @ UConn Huskies",
    "sha256": "cf232de07e026e7f0629ddd5e81702204da858ba04d3921df430b2c47a5ac646",
    "sport": "ncaaf"

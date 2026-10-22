@@ -40,6 +40,43 @@
    "sha256": "db67c4b0177fe5139df4b0d2ac478fa27f7b5437e95e537f9171113e872848aa",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Air Force Falcons @ Wyoming Cowboys|2026-10-24T01:00:00Z": {
+   "block": {
+    "away": "Air Force Falcons",
+    "best_book": "fanduel",
+    "best_price": 180,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.927,
+    "fair_away": 0.6507,
+    "fair_home": 0.3493,
+    "fair_side": 0.3493,
+    "home": "Wyoming Cowboys",
+    "kickoff_utc": "2026-10-24T01:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Air Force Falcons @ Wyoming Cowboys",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 189
+    },
+    "raw_overround_pts": 4.106,
+    "relative_price_discount": -0.0224654378,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Wyoming Cowboys",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261022T191036Z.json",
+    "t24_hours_before_kickoff": 29.82
+   },
+   "committed_utc": "2026-10-22T19:10:43Z",
+   "kickoff_utc": "2026-10-24T01:00:00Z",
+   "matchup": "Air Force Falcons @ Wyoming Cowboys",
+   "sha256": "2ff0e9f1e9e99266a6f3f6a1dce0ec31a15c98131161c1a597e7b6e504ed7dba",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Akron Zips @ Miami (OH) RedHawks|2026-10-17T19:30:00Z": {
    "block": {
     "away": "Akron Zips",
@@ -690,6 +727,9 @@
    },
    "committed_utc": "2026-10-22T18:37:26Z",
    "kickoff_utc": "2026-10-24T00:30:00Z",
+   "later_disagreements": [
+    "ca6f5c0fbd8921688d8222d00c4d01bdc8a7dc2a3895057199a63df4e9f78af7"
+   ],
    "matchup": "Army Black Knights @ Tulsa Golden Hurricane",
    "sha256": "c907ece7ead0af72a9c5fe5338123ea8544bc7323cfa4fe0f8b26133f8411fc2",
    "sport": "ncaaf"
@@ -7511,7 +7551,8 @@
    "committed_utc": "2026-10-22T17:37:25Z",
    "kickoff_utc": "2026-10-23T23:00:00Z",
    "later_disagreements": [
-    "740d1fd8e8f74564c0d0030bcd5da57627d08232803942de441ace6e582c693d"
+    "740d1fd8e8f74564c0d0030bcd5da57627d08232803942de441ace6e582c693d",
+    "9e431399904171889d739e56c5eb3a1780ceed35655c3f3841d4574e977baded"
    ],
    "matchup": "UMass Minutemen @ UConn Huskies",
    "sha256": "cf232de07e026e7f0629ddd5e81702204da858ba04d3921df430b2c47a5ac646",

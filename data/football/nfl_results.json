@@ -1768,6 +1768,25 @@
    "status": "STATUS_FINAL",
    "total": 40
   },
+  "401873009": {
+   "away": "DAL",
+   "away_abbr": "DAL",
+   "away_name": "Dallas Cowboys",
+   "away_score": null,
+   "espn_event_id": "401873009",
+   "final": false,
+   "home": "PHI",
+   "home_abbr": "PHI",
+   "home_name": "Philadelphia Eagles",
+   "home_score": null,
+   "kickoff_utc": "2026-10-27T00:15:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873010": {
    "away": "NE",
    "away_abbr": "NE",
@@ -1803,7 +1822,7 @@
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
+   "status": "STATUS_IN_PROGRESS",
    "total": null
   },
   "401873012": {
@@ -2928,5 +2947,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-24T14:12:52Z"
+ "updated_utc": "2026-10-25T14:45:02Z"
 }

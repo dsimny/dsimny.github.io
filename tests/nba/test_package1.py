@@ -175,6 +175,52 @@ class Capture(unittest.TestCase):
             raw.capture(root,key,self.source,lambda u:(200,{},b'x'*(raw.MAX_BYTES+1),u))
             self.assertEqual(raw.verify(root,key)['fetch_failures'],1)
 
+    def test_malformed_later_source_leaves_no_partial_run(self):
+        # A valid source followed by an invalid one must fail BEFORE any write:
+        # no key, no objects, no observations, no manifest, no partial run.
+        sources = [('fixture', 'schedule', 'https://www.nba.com/schedule'),
+                   ('bad-scheme', 'schedule', 'http://www.nba.com/insecure')]
+        with TemporaryDirectory() as d:
+            root, key = Path(d)/'evidence', Path(d)/'secret.key'
+            with self.assertRaises(ValueError):
+                raw.capture(root, key, sources, self.fake)
+            self.assertFalse(root.exists())
+            self.assertFalse(key.exists())
+            self.assertEqual(list(Path(d).iterdir()), [])
+
+    def test_structurally_invalid_source_rejected_before_writes(self):
+        for bad in [('only-two-elements', 'schedule'),
+                    ('id', 'kind', 'https://www.nba.com/a', 'extra'),
+                    'not-a-tuple',
+                    ('', 'schedule', 'https://www.nba.com/schedule'),
+                    ('id', '', 'https://www.nba.com/schedule')]:
+            with self.subTest(bad=bad), TemporaryDirectory() as d:
+                root, key = Path(d)/'evidence', Path(d)/'secret.key'
+                with self.assertRaises(ValueError):
+                    raw.capture(root, key, [bad], self.fake)
+                self.assertFalse(root.exists())
+                self.assertFalse(key.exists())
+                self.assertEqual(list(Path(d).iterdir()), [])
+
+    def test_key_inside_evidence_root_refused(self):
+        with TemporaryDirectory() as d:
+            root = Path(d)/'evidence'
+            key = root/'secret.key'          # inside the evidence root
+            with self.assertRaises(ValueError):
+                raw.capture(root, key, self.source, self.fake)
+            self.assertFalse(key.exists())
+            self.assertFalse(root.exists())
+            self.assertEqual(list(Path(d).iterdir()), [])
+
+    def test_verify_refuses_key_inside_evidence_root(self):
+        with TemporaryDirectory() as d:
+            root, key = Path(d)/'evidence', Path(d)/'secret.key'
+            raw.capture(root, key, self.source, self.fake)
+            inside = root/'secret.key'       # temp fixture copy, outside any real deployment
+            inside.write_bytes(key.read_bytes())
+            with self.assertRaises(ValueError):
+                raw.verify(root, inside)
+
 
 if __name__ == '__main__':
     unittest.main()

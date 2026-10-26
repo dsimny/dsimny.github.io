@@ -69,6 +69,43 @@ def outside_git(path):
     return path
 
 
+def key_outside_root(root, key_file):
+    """The encryption key must live outside the evidence root AND outside Git.
+
+    Keeping the key beside the evidence it protects would defeat the point:
+    anyone holding the evidence directory would also hold the key. Fail-closed.
+    """
+    root = Path(root).resolve()
+    key = outside_git(key_file)
+    if key == root or key.is_relative_to(root):
+        raise ValueError('Encryption key must remain outside the evidence root')
+    return key
+
+
+def validated_sources(sources):
+    """Validate the ENTIRE configured source list before anything is written.
+
+    A malformed entry appearing anywhere - including after valid entries - must
+    fail the run before the first object, observation or manifest is written, so
+    a rejected configuration can never leave a partially written run behind.
+    """
+    validated = []
+    for index, source in enumerate(sources):
+        if (isinstance(source, (str, bytes)) or not isinstance(source, (list, tuple))
+                or len(source) != 3):
+            raise ValueError('Invalid source entry at index %d: expected (id, kind, url)' % index)
+        source_id, kind, url = source
+        if not isinstance(source_id, str) or not source_id:
+            raise ValueError('Invalid source id at index %d' % index)
+        if not isinstance(kind, str) or not kind:
+            raise ValueError('Invalid source kind at index %d' % index)
+        if not isinstance(url, str):
+            raise ValueError('Invalid source url at index %d' % index)
+        safe_url(url)
+        validated.append((source_id, kind, url))
+    return validated
+
+
 def exclusive(path, content):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('xb') as f:
@@ -168,7 +205,7 @@ def observe(root, cipher, source, run_id, ordinal, transport=fetch):
 
 def verify(root, key_file):
     root = outside_git(root)
-    cipher = Fernet(outside_git(key_file).read_bytes())
+    cipher = Fernet(key_outside_root(root, key_file).read_bytes())
     manifests = sorted((root / 'runs').glob('*.json'))
     count = failures = 0
     records_seen, objects_seen = set(), set()
@@ -212,11 +249,16 @@ def verify(root, key_file):
 
 
 def capture(root, key_file, sources=SOURCES, transport=fetch, discovery_limit=12):
+    # Fail-closed ordering: validate the entire configured source list, then the
+    # key location, BEFORE anything is created on disk. A malformed later source
+    # must not leave a partially written run behind.
+    sources = validated_sources(sources)
     root = outside_git(root)
-    if (not Path(key_file).exists() and (root / 'objects').exists()
+    key_path = key_outside_root(root, key_file)
+    if (not key_path.exists() and (root / 'objects').exists()
             and any((root / 'objects').glob('*.fernet'))):
         raise ValueError('Encryption key missing for retained evidence; restore the original key')
-    cipher = key_for(key_file)
+    cipher = key_for(key_path)
     run_id = uuid.uuid4().hex
     manifest = {'schema': VERSION, 'run_id': run_id, 'started_at': now(),
                 'observations': {}, 'prediction_ledger': False}

@@ -1,10 +1,18 @@
 # Jekyll configuration for dsimny.github.io
 #
-# This file exists for one reason: to keep the open-ledger-play/ subtree out of
-# the published site. That subtree is application source -- database migrations,
-# RPCs, tests -- kept in this repository for provenance. It is not part of the
-# site, and without this exclusion Jekyll would render its markdown as pages and
-# serve its .sql and .py files as static assets.
+# This file exists to keep non-site source out of the published site. Two
+# subtrees are application source, kept in this repository for provenance and
+# not part of the site:
+#
+#   open-ledger-play/   database migrations, RPCs, tests
+#   scripts/nba/        NBA capture + contract source
+#   tests/nba/          NBA offline tests and fixtures
+#
+# It also excludes the five NBA scope documents under docs/, which are internal
+# engineering records rather than reader-facing pages.
+#
+# Without these exclusions Jekyll would render the markdown as pages and serve
+# the .sql and .py files as static assets.
 #
 # CAUTION for future edits: setting `exclude` REPLACES Jekyll's default exclude
 # list rather than extending it. The defaults are:
@@ -15,5 +23,15 @@
 # None of those paths exist in this repository today, so replacing the list
 # changes nothing. If any of them are ever added, restate them here or they will
 # be published.
+#
+# Note: paths beginning with `.` or `_` (such as .github/) are ignored by Jekyll
+# by default and do not need listing here.
 exclude:
   - open-ledger-play
+  - scripts/nba
+  - tests/nba
+  - docs/NBA_ARCHITECTURE.md
+  - docs/NBA_DATA_CONTRACT.md
+  - docs/NBA_FREE_CAPTURE_RUNBOOK.md
+  - docs/NBA_PACKAGE1_REPORT.md
+  - docs/NBA_PREREG_V01.md

@@ -3721,6 +3721,43 @@
    "sha256": "0ae4fb9b5fdc44bda4518be52a5847bef093484e4cf2709ea1b74d9a34f54daf",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Jacksonville State Gamecocks @ New Mexico State Aggies|2026-10-29T00:00:00Z": {
+   "block": {
+    "away": "Jacksonville State Gamecocks",
+    "best_book": "williamhill_us",
+    "best_price": -157,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.462,
+    "fair_away": 0.59119,
+    "fair_home": 0.40881,
+    "fair_side": 0.59119,
+    "home": "New Mexico State Aggies",
+    "kickoff_utc": "2026-10-29T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Jacksonville State Gamecocks @ New Mexico State Aggies",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betus",
+     "price": -155
+    },
+    "raw_overround_pts": 4.092,
+    "relative_price_discount": -0.0333222949,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Jacksonville State Gamecocks",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261027T183721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-27T18:37:24Z",
+   "kickoff_utc": "2026-10-29T00:00:00Z",
+   "matchup": "Jacksonville State Gamecocks @ New Mexico State Aggies",
+   "sha256": "2c84769edd07ac0fa1486c7000eba2eafb614fb60fc8b2c6567c77c68862ef08",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Jacksonville State Gamecocks @ Ohio Bobcats|2026-09-12T22:00:00Z": {
    "block": {
     "away": "Jacksonville State Gamecocks",
@@ -4023,6 +4060,9 @@
    },
    "committed_utc": "2026-10-27T17:37:35Z",
    "kickoff_utc": "2026-10-28T23:00:00Z",
+   "later_disagreements": [
+    "013d93c1151850a9bd811d6fdb76413e52671688a29589152a01577d5431c40e"
+   ],
    "matchup": "Kennesaw State Owls @ Middle Tennessee Blue Raiders",
    "sha256": "ccdde25f7cb66a322ead7b78726225d0d6bdeed8e82f95402109b7d92979f33b",
    "sport": "ncaaf"

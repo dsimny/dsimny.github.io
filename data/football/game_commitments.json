@@ -3993,6 +3993,40 @@
    "sha256": "dd081258ac5c4cf892028ae26054cb46837f5d8b989b262a3456dcb87375543f",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Kennesaw State Owls @ Middle Tennessee Blue Raiders|2026-10-28T23:00:00Z": {
+   "block": {
+    "away": "Kennesaw State Owls",
+    "best_book": "williamhill_us",
+    "best_price": 122,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.028,
+    "fair_away": 0.44134,
+    "fair_home": 0.55866,
+    "fair_side": 0.44134,
+    "home": "Middle Tennessee Blue Raiders",
+    "kickoff_utc": "2026-10-28T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Kennesaw State Owls @ Middle Tennessee Blue Raiders",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.416,
+    "relative_price_discount": -0.0206456456,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Kennesaw State Owls",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261027T173729Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-27T17:37:35Z",
+   "kickoff_utc": "2026-10-28T23:00:00Z",
+   "matchup": "Kennesaw State Owls @ Middle Tennessee Blue Raiders",
+   "sha256": "ccdde25f7cb66a322ead7b78726225d0d6bdeed8e82f95402109b7d92979f33b",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Kent State Golden Flashes @ South Florida Bulls|2026-10-17T23:00:00Z": {
    "block": {
     "away": "Kent State Golden Flashes",

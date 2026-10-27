@@ -1772,20 +1772,20 @@
    "away": "DAL",
    "away_abbr": "DAL",
    "away_name": "Dallas Cowboys",
-   "away_score": null,
+   "away_score": 38,
    "espn_event_id": "401873009",
-   "final": false,
+   "final": true,
    "home": "PHI",
    "home_abbr": "PHI",
    "home_name": "Philadelphia Eagles",
-   "home_score": null,
+   "home_score": 21,
    "kickoff_utc": "2026-10-27T00:15:00Z",
-   "margin": null,
+   "margin": -17,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 59
   },
   "401873010": {
    "away": "NE",
@@ -2947,5 +2947,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-26T17:06:26Z"
+ "updated_utc": "2026-10-27T16:09:58Z"
 }

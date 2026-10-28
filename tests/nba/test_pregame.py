@@ -151,6 +151,22 @@ class ChainAwarePregame(unittest.TestCase):
             available_at='2026-12-09T00:10:00Z', ingested_at='2026-12-09T00:11:00Z')
         self.assertFalse(eligible)
 
+    def test_pregame_refuses_when_revision_availability_is_absent(self):
+        # An undatable revision supports no pregame verdict at all, so the guard
+        # reports ineligible with a reason rather than asserting one.
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, TIPOFF))
+        eligible, reasons = sch.pregame_eligible(chain, '2026-12-08T00:00:00Z')
+        self.assertFalse(eligible)
+        self.assertIn(ident.REVISION_TIME_UNKNOWN, reasons)
+
+    def test_chain_start_refuses_when_revision_availability_is_absent(self):
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, TIPOFF))
+        with self.assertRaises(ident.Quarantine) as ctx:
+            sch.chain_pregame_start(chain, cutoff='2026-12-08T00:00:00Z')
+        self.assertEqual(ctx.exception.reason, ident.REVISION_TIME_UNKNOWN)
+
 
 if __name__ == '__main__':
     unittest.main()

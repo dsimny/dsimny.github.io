@@ -71,6 +71,14 @@ A postponement, reschedule or cancellation **appends** a revision. Prior revisio
 preserved verbatim and their digests still verify. `RevisionChain.as_of(cutoff)` answers "what
 did we believe then?" — impossible if revisions were overwritten.
 
+A revision is placed in time **only by its own `source_updated_at`**. `event_time` is a fact
+about the game, not about when the revision became knowable, so it is never used as a
+substitute: if any revision records no `source_updated_at`, the chain's in-force state is
+undeterminable and `as_of` raises `REVISION_TIME_UNKNOWN` rather than answering.
+`schedule.pregame_eligible()` reports that as ineligible. Venue facts (`actual_venue` and
+`neutral_site`) carry forward across a revision unless the caller states a new value, and an
+explicit `neutral_site=False` clears the flag.
+
 ## 8. Not claimed
 
 Package 2A establishes **no** provider coverage, licensing, model accuracy or production

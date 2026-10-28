@@ -132,12 +132,29 @@ class RevisionChain:
         return self._revisions[-1] if self._revisions else None
 
     def as_of(self, cutoff):
-        """The revision in force at a cutoff. This is why revisions append."""
+        """The revision in force at a cutoff. This is why revisions append.
+
+        FAIL CLOSED ON MISSING AVAILABILITY PROVENANCE. A revision is placed in time
+        only by its OWN `source_updated_at` -- when the source says the revision became
+        true. `event_time` (the scheduled start) is NOT a substitute for it: that is a
+        fact about the GAME, not about when we could have known the revision. Using it
+        lets a historical cutoff be answered with a revision that did not yet exist,
+        and the answer would carry no evidence that the revision was ever knowable --
+        which makes a later leakage or CLV audit meaningless. Whenever any revision
+        lacks `source_updated_at`, no revision's in-force-ness can be established, so
+        this raises rather than returning an unsupported answer.
+        """
         cutoff_utc = identity.utc(cutoff) if isinstance(cutoff, str) else cutoff
+        for record in self._revisions:
+            if record.get('source_updated_at') is None:
+                raise identity.Quarantine(identity.REVISION_TIME_UNKNOWN, {
+                    'league_game_id': self.league_game_id,
+                    'revision': record['revision'],
+                    'detail': 'revision has no source_updated_at; event_time is not '
+                              'evidence of when the revision became available'})
         in_force = None
         for record in self._revisions:
-            stamp = record.get('source_updated_at') or record.get('event_time')
-            if stamp is not None and stamp <= cutoff_utc:
+            if record['source_updated_at'] <= cutoff_utc:
                 in_force = record
         return in_force
 
@@ -164,8 +181,17 @@ class RevisionChain:
 
 
 def reschedule(chain, game, phase, cup_round, event_time, status=RESCHEDULED,
-               actual_venue=None, neutral_site=False, source_updated_at=None):
-    """Append a reschedule/postponement revision to a chain."""
+               actual_venue=None, neutral_site=None, source_updated_at=None):
+    """Append a reschedule/postponement revision to a chain.
+
+    VENUE FACTS CARRY FORWARD UNLESS EXPLICITLY OVERRIDDEN. Both `actual_venue` and
+    `neutral_site` default to None, meaning "unchanged". A `False` default for
+    neutral_site is indistinguishable from a caller saying "this game is no longer at
+    a neutral site", so with one, any revision that did not mention the venue would
+    silently clear a prior neutral_site=True -- a venue property lost by omission,
+    inside a chain that promises nothing is lost. Pass an explicit value (including
+    False) to change it.
+    """
     previous = chain.current()
     if previous is None:
         raise ValueError('Cannot revise a game with no prior revision')
@@ -199,8 +225,9 @@ def chain_pregame_start(chain, cutoff=None):
     rescheduled game would then be judged against its obsolete original time and a
     legitimately pregame decision would be rejected (defect-1 review requirement).
 
-    Raises identity.Quarantine when no revision is in force, or when the revision
-    in force carries no usable start time.
+    Raises identity.Quarantine when no revision is in force, when the revision in
+    force carries no usable start time, or when a revision carries no
+    source_updated_at at all (REVISION_TIME_UNKNOWN -- see RevisionChain.as_of).
     """
     record = chain.as_of(cutoff) if cutoff is not None else chain.current()
     if record is None:
@@ -223,7 +250,15 @@ def pregame_eligible(chain, cutoff, actual_start=None, available_at=None, ingest
     never a silent pass.
     """
     reasons = []
-    record = chain.as_of(cutoff) if cutoff is not None else chain.current()
+    if cutoff is None:
+        record = chain.current()
+    else:
+        try:
+            record = chain.as_of(cutoff)
+        except identity.Quarantine as blocked:
+            # An undatable revision supports no pregame claim at all, so fail closed
+            # with the reason instead of guessing which revision was in force.
+            return False, [blocked.reason]
     if record is None:
         return False, [identity.START_TIME_UNKNOWN]
     actual = actual_start if actual_start is not None else record.get('actual_start_time')

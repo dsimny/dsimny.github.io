@@ -67,6 +67,29 @@ class NeutralSite(unittest.TestCase):
         neutral = sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, T1, neutral_site=True)
         self.assertTrue(neutral['counts_regular'])
 
+    def test_reschedule_carries_a_neutral_site_forward(self):
+        # A revision that says nothing about the venue must not clear it. The
+        # neutral flag is a venue property, so losing it by omission would be a
+        # silent data change inside an append-only chain.
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, T1,
+                                         actual_venue='Paris, FR', neutral_site=True,
+                                         source_updated_at='2026-11-01T00:00:00Z'))
+        sch.reschedule(chain, GAME, 'REGULAR_SEASON', None, '2027-01-05T00:00:00Z',
+                       source_updated_at='2026-12-08T00:00:00Z')
+        self.assertTrue(chain.current()['neutral_site'])
+        self.assertEqual(chain.current()['actual_venue'], 'Paris, FR')
+
+    def test_reschedule_may_explicitly_clear_a_neutral_site(self):
+        # Carry-forward must not make the property unchangeable: an explicit
+        # False is a caller decision and must win.
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, T1,
+                                         neutral_site=True, source_updated_at='2026-11-01T00:00:00Z'))
+        sch.reschedule(chain, GAME, 'REGULAR_SEASON', None, '2027-01-05T00:00:00Z',
+                       neutral_site=False, source_updated_at='2026-12-08T00:00:00Z')
+        self.assertFalse(chain.current()['neutral_site'])
+
 
 class RevisionChains(unittest.TestCase):
     def _chain(self):
@@ -124,6 +147,36 @@ class RevisionChains(unittest.TestCase):
         self.assertEqual(in_force['revision'], 1)
         later = chain.as_of('2027-01-01T00:00:00Z')
         self.assertEqual(later['revision'], 2)
+
+    def test_as_of_refuses_when_a_revision_has_no_availability_time(self):
+        # The reschedule carries no source_updated_at. Its event_time is a fact
+        # about the GAME, not about when the revision could be known, so it cannot
+        # establish that this revision was in force at the cutoff.
+        chain = self._chain()                       # r1 recorded 2026-11-01
+        sch.reschedule(chain, GAME, 'REGULAR_SEASON', None, '2027-01-05T00:00:00Z')
+        with self.assertRaises(ident.Quarantine) as ctx:
+            chain.as_of('2027-02-01T00:00:00Z')
+        self.assertEqual(ctx.exception.reason, ident.REVISION_TIME_UNKNOWN)
+
+    def test_as_of_never_uses_scheduled_start_as_availability(self):
+        # Single undated revision whose scheduled start precedes the cutoff.
+        # Calling it "in force" would be an invented availability claim -- and a
+        # historical/CLV audit would be reasoning on evidence that never existed.
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, T1))
+        with self.assertRaises(ident.Quarantine) as ctx:
+            chain.as_of('2026-12-09T00:00:00Z')
+        self.assertEqual(ctx.exception.reason, ident.REVISION_TIME_UNKNOWN)
+
+    def test_as_of_ignores_a_revision_learned_after_the_cutoff(self):
+        # The fail-closed rule must not become "always refuse": where provenance IS
+        # recorded, a revision whose event_time precedes the cutoff but which was
+        # only learned afterwards is correctly NOT in force.
+        chain = self._chain()
+        sch.reschedule(chain, GAME, 'REGULAR_SEASON', None, '2026-11-02T00:00:00Z',
+                       source_updated_at='2026-12-08T00:00:00Z')
+        in_force = chain.as_of('2026-11-15T00:00:00Z')
+        self.assertEqual(in_force['revision'], 1)
 
     def test_cancelled_is_marked_and_retained(self):
         chain = self._chain()

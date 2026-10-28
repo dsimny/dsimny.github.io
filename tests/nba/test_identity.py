@@ -58,6 +58,13 @@ class Timestamps(unittest.TestCase):
         self.assertNotEqual(block['source_updated_at'], block['source_published_at'])
         self.assertNotEqual(block['response_received_at'], block['request_started_at'])
 
+    def test_timestamp_field_count_is_eight(self):
+        # The identity contract documents eight fields. A ninth is a contract
+        # amendment (a new version), not an implementation detail, and a duplicate
+        # would silently collapse two distinct pieces of evidence.
+        self.assertEqual(len(ident.TIMESTAMP_FIELDS), 8)
+        self.assertEqual(len(set(ident.TIMESTAMP_FIELDS)), 8)
+
     def test_missing_timestamp_is_absent_not_filled_from_neighbour(self):
         block = ident.timestamp_block({'event_time': '2026-10-22T23:30:00Z',
                                        'ingested_at': '2026-10-21T09:00:02Z'})

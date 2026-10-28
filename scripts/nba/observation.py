@@ -57,7 +57,11 @@ INVALID_PAYLOAD_HASH = 'INVALID_PAYLOAD_HASH'
 INVALID_PAYLOAD = 'INVALID_PAYLOAD'
 DIGEST_MISMATCH = 'DIGEST_MISMATCH'
 # Retention (policy is source-specific; permanent retention is never assumed).
+# Three different facts about a payload, three different reasons: it was never stored, it was
+# deleted under a named policy, or it is present but no longer matches its recorded hash.
+PAYLOAD_NOT_STORED = 'PAYLOAD_NOT_STORED'
 PAYLOAD_UNAVAILABLE = 'PAYLOAD_UNAVAILABLE'
+PAYLOAD_CORRUPT = 'PAYLOAD_CORRUPT'
 ALREADY_DELETED = 'ALREADY_DELETED'
 
 # Retention states, derived from appended tombstones -- never written onto a record.
@@ -68,7 +72,7 @@ OBSERVATION_REASONS = frozenset({
     MISSING_FIELD, CLOCK_MISSING, CLOCK_INVALID, CLOCK_OUT_OF_ORDER, AFTER_CUTOFF,
     UNKNOWN_OBSERVATION, UNKNOWN_PAYLOAD, DUPLICATE_OBSERVATION_ID, WRITER_MISMATCH,
     PAYLOAD_HASH_MISMATCH, INVALID_PAYLOAD_HASH, INVALID_PAYLOAD, DIGEST_MISMATCH,
-    PAYLOAD_UNAVAILABLE, ALREADY_DELETED,
+    PAYLOAD_NOT_STORED, PAYLOAD_UNAVAILABLE, PAYLOAD_CORRUPT, ALREADY_DELETED,
 })
 
 # Clock taxonomy. `request_started_at` is optional (ordering is still enforced when it is
@@ -147,6 +151,20 @@ def _require_hash(value, field='payload_sha256'):
     return value
 
 
+def _instant(stamp):
+    """A stored clock as an AWARE datetime, for ordering.
+
+    String comparison is not chronological: '2026-11-01T12:00:00.500Z' sorts BEFORE
+    '2026-11-01T12:00:00Z' because '.' precedes 'Z'. Ordering must therefore parse.
+    A stored clock that cannot be parsed is ordered last rather than crashing a replay --
+    refusing a tampered record is verify_digests()'s job, not the replayer's.
+    """
+    try:
+        return utc(stamp, 'clock')
+    except ObservationError:
+        return datetime.max.replace(tzinfo=timezone.utc)
+
+
 def observation_digest(record):
     """Stable content hash of an observation, excluding the digest field itself."""
     payload = {k: v for k, v in sorted(record.items()) if k != 'observation_digest'}
@@ -168,6 +186,9 @@ class ObservationLog:
         self._records = []
         self._tombstones = []
         self._payloads = {}
+        # Blob reference counts, keyed by content hash: which RETAINED observations still
+        # require these bytes. See delete_payload().
+        self._payload_refs = {}
         self._seq = 0
 
     # ------------------------------------------------------------------ writing
@@ -266,9 +287,12 @@ class ObservationLog:
         record['observation_digest'] = observation_digest(record)
         self._records.append(record)
         if body is not None:
-            # Content-addressed BLOB storage: identical bodies share one blob.
-            # Observations are still distinct (see module docstring rule 1).
+            # Content-addressed BLOB storage: identical bodies share one blob (see module
+            # docstring rule 1 -- observations are still distinct). The blob is
+            # reference-counted by the observations that require it, so deleting one
+            # observation's payload cannot remove bytes a retained peer still needs.
             self._payloads.setdefault(stored_hash, body)
+            self._payload_refs.setdefault(stored_hash, set()).add(observation_id)
         return copy.deepcopy(record)
 
     # ------------------------------------------------------------------ reading
@@ -283,20 +307,33 @@ class ObservationLog:
                 return copy.deepcopy(record)
         raise ObservationError(UNKNOWN_OBSERVATION, {'observation_id': observation_id})
 
-    def payload_for(self, observation_id):
+    def payload_availability(self, observation_id):
+        """(reproducible, reason) for the payload of an observation we hold.
+
+        'Retained' and 'reproducible' are different facts. A hash-only observation is
+        retained by policy yet was never stored, so it cannot be reproduced; a tombstoned one
+        stays logically inaccessible even while a peer keeps the shared blob alive. Every
+        failure mode is named, and none of them is silently reported as available.
+        """
         record = self.get(observation_id)
         if self.retention_state(observation_id) == DELETED:
-            # Deleted is a different fact from never-stored, and it is reported as such.
-            raise ObservationError(PAYLOAD_UNAVAILABLE, {
+            return False, PAYLOAD_UNAVAILABLE
+        digest = record['payload_sha256']
+        if digest is None or digest not in self._payloads:
+            return False, PAYLOAD_NOT_STORED
+        if content_hash(self._payloads[digest]) != digest:
+            return False, PAYLOAD_CORRUPT
+        return True, None
+
+    def payload_for(self, observation_id):
+        """The bytes for a retained observation, verified against the recorded hash."""
+        record = self.get(observation_id)
+        reproducible, reason = self.payload_availability(observation_id)
+        if not reproducible:
+            raise ObservationError(reason, {
                 'observation_id': observation_id,
-                'payload_sha256': record['payload_sha256'],
-                'detail': 'payload was deleted under a retention policy; not reproducible'})
-        body = self._payloads.get(record['payload_sha256'])
-        if body is None:
-            raise ObservationError(UNKNOWN_PAYLOAD,
-                                   {'observation_id': observation_id,
-                                    'payload_sha256': record['payload_sha256']})
-        return body
+                'payload_sha256': record['payload_sha256']})
+        return self._payloads[record['payload_sha256']]
 
     # -------------------------------------------------------------- retention
     @property
@@ -335,9 +372,28 @@ class ObservationLog:
             'reason': reason,
             'deleted_at': iso(utc(deleted_at, 'deleted_at')),
         }
-        self._payloads.pop(record['payload_sha256'], None)
+        # Remove the bytes only if this was the last retained observation needing them.
+        self._release_payload(record['payload_sha256'], observation_id)
         self._tombstones.append(tombstone)
         return copy.deepcopy(tombstone)
+
+    def _release_payload(self, digest, observation_id):
+        """Drop one observation's claim on a blob; return True if the bytes were removed.
+
+        A blob is removed only once NO retained observation still requires it. Deleting one
+        observation must never remove bytes a peer is still relying on.
+        """
+        if digest is None:
+            return False
+        holders = self._payload_refs.get(digest)
+        if holders is None:
+            return False
+        holders.discard(observation_id)
+        if holders:
+            return False
+        self._payloads.pop(digest, None)
+        self._payload_refs.pop(digest, None)
+        return True
 
     def verify_digests(self):
         for record in self._records:
@@ -365,24 +421,28 @@ class ObservationLog:
         current state to fill a gap -- backfilling later knowledge into a past cutoff is
         structurally impossible here.
 
-        `require_payloads=True` demands reproducible payloads, so a tombstoned observation
-        is excluded with PAYLOAD_UNAVAILABLE rather than silently counted. Either way the
-        report states whether payload-dependent replay is available: a deleted payload is
+        `require_payloads=True` demands reproducible payloads -- bytes actually retrievable
+        and matching their recorded hash -- so a tombstoned, never-stored or corrupted
+        observation is excluded with its own reason rather than silently counted. Either way
+        the report states whether payload-dependent replay is available: a deleted payload is
         never represented as reproducible evidence.
         """
         limit = utc(cutoff, 'cutoff')
         admitted, excluded = [], []
-        for record in sorted(self._records,
-                             key=lambda r: (r['response_received_at'], r['ingested_at'],
-                                            r['observation_id'])):
+        # Ordered by PARSED instants: receipt, then storage, then id. See _instant().
+        ordered = sorted(self._records,
+                         key=lambda r: (_instant(r['response_received_at']),
+                                        _instant(r['ingested_at']), r['observation_id']))
+        for record in ordered:
             eligible, reason = self.eligibility(record['observation_id'], cutoff)
             if not eligible:
                 excluded.append({'observation_id': record['observation_id'], 'reason': reason})
                 continue
             retained = self.retention_state(record['observation_id']) == RETAINED
-            if require_payloads and not retained:
+            reproducible, payload_reason = self.payload_availability(record['observation_id'])
+            if require_payloads and not reproducible:
                 excluded.append({'observation_id': record['observation_id'],
-                                 'reason': PAYLOAD_UNAVAILABLE})
+                                 'reason': payload_reason})
                 continue
             admitted.append({
                 'observation_id': record['observation_id'],
@@ -392,10 +452,12 @@ class ObservationLog:
                 'available_at': record['available_at'],
                 'payload_sha256': record['payload_sha256'],
                 'payload_retained': retained,
+                'payload_reproducible': reproducible,
                 'provider_claims': {'source_published_at': record['source_published_at'],
                                     'source_updated_at': record['source_updated_at']},
             })
-        unavailable = sorted(a['observation_id'] for a in admitted if not a['payload_retained'])
+        unavailable = sorted(a['observation_id'] for a in admitted
+                             if not a['payload_reproducible'])
         report = {
             'version': VERSION,
             'cutoff': iso(limit),

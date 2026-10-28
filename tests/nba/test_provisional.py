@@ -466,5 +466,214 @@ class FrozenSurfaces(unittest.TestCase):
         self.assertEqual(ctx.exception.reason, ident.REVISION_TIME_UNKNOWN)
 
 
+class CrossCompetitionDeclarations(unittest.TestCase):
+    """P1: each competition has its own denominator; supersession must not bridge them."""
+
+    CUP = prov.mint_slot_id('CUP_KNOCKOUT', 'QF/1')
+    REG = prov.mint_slot_id('REGULAR_ASSIGNMENT_WINDOW', '1', anchor='TEAM-BOS')
+
+    def setUp(self):
+        self.reg = prov.SlotRegistry()
+
+    def _declare(self, competition, slots, source, *, supersedes=None):
+        return self.reg.declare_expectation(competition=competition, declared_slots=list(slots),
+                                            source_ref=source, observation_id=OBS,
+                                            declared_at='2026-11-01T12:00:00Z',
+                                            supersedes_expectation_id=supersedes)
+
+    def test_supersession_across_competitions_refused(self):
+        cup = self._declare('CUP_KNOCKOUT', [self.CUP], 'https://synthetic.invalid/cup')
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._declare('REGULAR_ASSIGNMENT_WINDOW', [self.REG],
+                          'https://synthetic.invalid/reg', supersedes=cup['expectation_id'])
+        self.assertEqual(ctx.exception.reason, prov.COMPETITION_MISMATCH)
+
+    def test_slot_declared_in_the_wrong_competition_refused(self):
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._declare('CUP_KNOCKOUT', [self.REG], 'https://synthetic.invalid/mix')
+        self.assertEqual(ctx.exception.reason, prov.COMPETITION_MISMATCH)
+
+    def test_failed_cross_competition_supersession_changes_nothing(self):
+        cup = self._declare('CUP_KNOCKOUT', [self.CUP], 'https://synthetic.invalid/cup')
+        def snapshot():
+            return (len(self.reg.expectations), len(self.reg.slots), len(self.reg.resolutions),
+                    prov.reconcile_slots(self.reg, competition='CUP_KNOCKOUT')['declared_slots'])
+        before = snapshot()
+        with self.assertRaises(prov.ProvisionalError):
+            self._declare('REGULAR_ASSIGNMENT_WINDOW', [self.REG],
+                          'https://synthetic.invalid/reg', supersedes=cup['expectation_id'])
+        self.assertEqual(snapshot(), before)
+        # and the CUP denominator is intact, not silently released
+        self.assertEqual(prov.reconcile_slots(self.reg, competition='CUP_KNOCKOUT')['declared_slots'],
+                         [self.CUP])
+
+
+class SupersessionHistory(unittest.TestCase):
+    """P2: a predecessor must exist AND still be live; valid histories must survive."""
+
+    def setUp(self):
+        self.reg = prov.SlotRegistry()
+
+    def _declare(self, source, *, supersedes=None):
+        return self.reg.declare_expectation(competition='CUP_KNOCKOUT', declared_slots=[QF1],
+                                            source_ref=source, observation_id=OBS,
+                                            declared_at='2026-11-01T12:00:00Z',
+                                            supersedes_expectation_id=supersedes)
+
+    def test_unknown_predecessor_refused(self):
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._declare('https://synthetic.invalid/a', supersedes='EXP-nope')
+        self.assertEqual(ctx.exception.reason, prov.UNKNOWN_EXPECTATION)
+
+    def test_superseding_an_already_superseded_expectation_refused(self):
+        first = self._declare('https://synthetic.invalid/a')
+        self._declare('https://synthetic.invalid/b', supersedes=first['expectation_id'])
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._declare('https://synthetic.invalid/c', supersedes=first['expectation_id'])
+        self.assertEqual(ctx.exception.reason, prov.EXPECTATION_ALREADY_SUPERSEDED)
+
+    def test_refused_repeat_supersession_appends_nothing(self):
+        first = self._declare('https://synthetic.invalid/a')
+        second = self._declare('https://synthetic.invalid/b', supersedes=first['expectation_id'])
+        with self.assertRaises(prov.ProvisionalError):
+            self._declare('https://synthetic.invalid/c', supersedes=first['expectation_id'])
+        self.assertEqual([e['expectation_id'] for e in self.reg.expectations],
+                         [first['expectation_id'], second['expectation_id']])
+
+    def test_valid_supersession_history_is_preserved(self):
+        first = self._declare('https://synthetic.invalid/a')
+        second = self._declare('https://synthetic.invalid/b', supersedes=first['expectation_id'])
+        third = self._declare('https://synthetic.invalid/c', supersedes=second['expectation_id'])
+        self.assertEqual([e['expectation_id'] for e in self.reg.expectations],
+                         [first['expectation_id'], second['expectation_id'], third['expectation_id']])
+        self.assertEqual(prov.reconcile_slots(self.reg, competition='CUP_KNOCKOUT')['declared_slots'],
+                         [QF1])
+        self.assertEqual(self.reg.verify_digests(), True)
+
+
+class SlotSupersessionIntegrity(unittest.TestCase):
+    """P2: supersession chains stay acyclic, and cannot follow a game resolution."""
+
+    def setUp(self):
+        self.reg = prov.SlotRegistry()
+        self.a = self._slot('QF/1')
+        self.b = self._slot('SF/1')
+        self.c = self._slot('SF/2')
+
+    def _slot(self, position):
+        return self.reg.declare_slot(competition='CUP_KNOCKOUT', position=position,
+                                     provisional_reason='unassigned',
+                                     first_observed_observation_id=OBS)['slot_id']
+
+    def _supersede(self, source, target, observation_id=OBS):
+        return self.reg.resolve_to_slot(source, target_slot_id=target,
+                                        observation_id=observation_id, evidence=EVIDENCE)
+
+    def _game(self, slot_id, game=GAME, role=prov.ROLE_ORIGIN, observation_id=OBS):
+        return self.reg.resolve_to_game(slot_id, league_game_id=game['league_game_id'],
+                                        home_team_id=game['home_team_id'],
+                                        away_team_id=game['away_team_id'],
+                                        observation_id=observation_id, evidence=EVIDENCE, role=role)
+
+    def test_self_supersession_refused(self):
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._supersede(self.a, self.a)
+        self.assertEqual(ctx.exception.reason, prov.SLOT_SUPERSESSION_CYCLE)
+        self.assertEqual(self.reg.slot_state(self.a), prov.SLOT_PENDING)
+        self.assertEqual(len(self.reg.resolutions), 0)
+
+    def test_two_slot_cycle_refused(self):
+        self._supersede(self.a, self.b)
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._supersede(self.b, self.a)
+        self.assertEqual(ctx.exception.reason, prov.SLOT_SUPERSESSION_CYCLE)
+        self.assertEqual(len(self.reg.resolutions), 1)          # nothing partial was appended
+        self.assertEqual(self.reg.slot_state(self.b), prov.SLOT_PENDING)
+
+    def test_longer_cycle_refused(self):
+        self._supersede(self.a, self.b)
+        self._supersede(self.b, self.c)
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._supersede(self.c, self.a)
+        self.assertEqual(ctx.exception.reason, prov.SLOT_SUPERSESSION_CYCLE)
+
+    def test_valid_acyclic_chain_preserved(self):
+        self._supersede(self.a, self.b)
+        self._supersede(self.b, self.c)
+        self.assertEqual(self.reg.slot_state(self.a), prov.SLOT_SUPERSEDED)
+        self.assertEqual(self.reg.slot_state(self.b), prov.SLOT_SUPERSEDED)
+        self.assertEqual(self.reg.slot_state(self.c), prov.SLOT_PENDING)
+        self.assertEqual(len(self.reg.resolutions), 2)
+        self.assertTrue(self.reg.verify_digests())
+
+    def test_supersession_after_a_game_resolution_refused(self):
+        self._game(self.a)
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self._supersede(self.a, self.b)
+        self.assertEqual(ctx.exception.reason, prov.CONTRADICTORY_RESOLUTION)
+        self.assertEqual(self.reg.slot_state(self.a), prov.SLOT_RESOLVED)
+        self.assertEqual(len(self.reg.resolutions), 1)
+
+    def test_valid_multi_game_relationship_preserved(self):
+        self._game(self.a)
+        self._game(self.a, game=GAME2, role=prov.ROLE_SUCCESSOR, observation_id='obs.w1.00000002')
+        self.assertEqual(self.reg.slot_state(self.a), prov.SLOT_RESOLVED)
+        self.assertEqual(len(self.reg.resolutions_for(self.a)), 2)
+        self.assertEqual(self.reg.slot_state(self.b), prov.SLOT_PENDING)
+
+
+class ResolutionIntegrity(unittest.TestCase):
+    """P2: resolutions are part of the digest surface, and evidence is not aliased."""
+
+    def setUp(self):
+        self.reg = prov.SlotRegistry()
+        self.sid = self.reg.declare_slot(competition='CUP_KNOCKOUT', position='QF/1',
+                                         provisional_reason='unassigned',
+                                         first_observed_observation_id=OBS)['slot_id']
+
+    def _resolve(self, evidence=None):
+        return self.reg.resolve_to_game(self.sid, league_game_id=GAME['league_game_id'],
+                                        home_team_id=GAME['home_team_id'],
+                                        away_team_id=GAME['away_team_id'],
+                                        observation_id=OBS, evidence=evidence or EVIDENCE)
+
+    def test_verify_digests_covers_resolutions(self):
+        self._resolve()
+        self.reg._resolutions[0]['target_ref'] = '0022609999'
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self.reg.verify_digests()
+        self.assertEqual(ctx.exception.reason, prov.DIGEST_MISMATCH)
+
+    def test_untampered_resolutions_verify(self):
+        self._resolve()
+        self.assertTrue(self.reg.verify_digests())
+
+    def test_nested_evidence_is_deep_copied(self):
+        nested: dict = {'source': {'document': 'synthetic', 'page': 3}}
+        evidence: dict = {**EVIDENCE, 'provenance': nested}
+        self._resolve(evidence=evidence)
+        stored_before = self.reg.resolutions[0]['evidence']
+        nested['source']['page'] = 99
+        evidence['provenance']['source']['document'] = 'tampered'
+        stored_after = self.reg.resolutions[0]['evidence']
+        self.assertEqual(stored_before, stored_after)
+        self.assertEqual(stored_after['provenance']['source']['page'], 3)
+        self.assertEqual(stored_after['provenance']['source']['document'], 'synthetic')
+
+    def test_tampered_evidence_cannot_escape_detection(self):
+        self._resolve()
+        self.reg._resolutions[0]['evidence']['provenance'] = {'injected': True}
+        with self.assertRaises(prov.ProvisionalError) as ctx:
+            self.reg.verify_digests()
+        self.assertEqual(ctx.exception.reason, prov.DIGEST_MISMATCH)
+
+    def test_tampering_a_resolution_cannot_hide_behind_a_valid_slot(self):
+        self._resolve()
+        self.assertTrue(self.reg.verify_digests())
+        self.reg._resolutions[0]['role'] = 'successor'
+        with self.assertRaises(prov.ProvisionalError):
+            self.reg.verify_digests()
+
+
 if __name__ == '__main__':
     unittest.main()

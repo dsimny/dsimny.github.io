@@ -433,5 +433,186 @@ class Integrity(unittest.TestCase):
         self.assertEqual(sch.VERSION, 'nba-schedule-v0.1')
 
 
+class SharedPayloadRetention(unittest.TestCase):
+    """P1: identical bytes shared by two observations must survive deleting one of them.
+
+    Storage deduplicates the BLOB by content hash; observations are never deduplicated. The
+    two requirements collide the moment a retention policy deletes one observation's payload:
+    naively removing the blob would destroy bytes another RETAINED observation still needs.
+    """
+
+    def setUp(self):
+        self.log = obs.ObservationLog(writer_id='w1')
+
+    def _add(self, source):
+        return add(self.log, received=1, ingested=2, available=3, source=source)
+
+    def test_deleting_one_of_two_observations_sharing_bytes_keeps_the_bytes(self):
+        first, second = self._add('synthetic.alpha'), self._add('synthetic.beta')
+        self.assertEqual(first['payload_sha256'], second['payload_sha256'])
+        self.log.delete_payload(first['observation_id'], policy_ref='licence:A', deleted_at=at(100))
+        self.assertEqual(self.log.payload_for(second['observation_id']), SYNTHETIC)
+
+    def test_deleted_observation_stays_inaccessible_while_a_peer_retains_the_blob(self):
+        first, second = self._add('synthetic.alpha'), self._add('synthetic.beta')
+        self.log.delete_payload(first['observation_id'], policy_ref='licence:A', deleted_at=at(100))
+        with self.assertRaises(obs.ObservationError) as ctx:
+            self.log.payload_for(first['observation_id'])
+        self.assertEqual(ctx.exception.reason, obs.PAYLOAD_UNAVAILABLE)
+        self.assertEqual(self.log.retention_state(first['observation_id']), obs.DELETED)
+        # ...while the peer is unaffected.
+        self.assertEqual(self.log.retention_state(second['observation_id']), obs.RETAINED)
+        self.assertEqual(self.log.payload_for(second['observation_id']), SYNTHETIC)
+
+    def test_shared_blob_is_removed_only_after_the_last_reference_is_deleted(self):
+        first, second = self._add('synthetic.alpha'), self._add('synthetic.beta')
+        digest = first['payload_sha256']
+        self.log.delete_payload(first['observation_id'], policy_ref='p', deleted_at=at(100))
+        self.assertIn(digest, self.log._payloads)          # still required by the peer
+        self.log.delete_payload(second['observation_id'], policy_ref='p', deleted_at=at(101))
+        self.assertNotIn(digest, self.log._payloads)       # last reference gone
+
+    def test_shared_bytes_across_different_sources_are_refcounted_separately(self):
+        ids = [self._add(source)['observation_id']
+               for source in ('synthetic.alpha', 'synthetic.beta', 'synthetic.gamma')]
+        for observation_id in ids[:2]:
+            self.log.delete_payload(observation_id, policy_ref='p', deleted_at=at(100))
+        self.assertEqual(self.log.payload_for(ids[2]), SYNTHETIC)
+        self.log.delete_payload(ids[2], policy_ref='p', deleted_at=at(100))
+        with self.assertRaises(obs.ObservationError) as ctx:
+            self.log.payload_for(ids[2])
+        self.assertEqual(ctx.exception.reason, obs.PAYLOAD_UNAVAILABLE)
+
+    def test_per_observation_retention_policies_are_recorded_independently(self):
+        first, second = self._add('synthetic.alpha'), self._add('synthetic.beta')
+        self.log.delete_payload(first['observation_id'], policy_ref='licence:A', deleted_at=at(100))
+        self.log.delete_payload(second['observation_id'], policy_ref='licence:B', deleted_at=at(101))
+        self.assertEqual([t['policy_ref'] for t in self.log.tombstones], ['licence:A', 'licence:B'])
+        self.assertEqual([t['observation_id'] for t in self.log.tombstones],
+                         [first['observation_id'], second['observation_id']])
+
+
+class PayloadAvailability(unittest.TestCase):
+    """P1: 'retained' is not the same fact as 'reproducible'.
+
+    A hash-only observation was never stored, so it is retained by policy yet cannot be
+    reproduced. Reporting it as available would let a replay claim payload evidence it does
+    not have.
+    """
+
+    def setUp(self):
+        self.log = obs.ObservationLog(writer_id='w1')
+
+    def _hash_only(self):
+        return self.log.append(source_id='synthetic.alpha', request_started_at=at(0),
+                               response_received_at=at(1), ingested_at=at(2), available_at=at(3),
+                               payload_sha256=obs.content_hash(SYNTHETIC))
+
+    def test_hash_only_observation_is_not_reproducible(self):
+        self._hash_only()
+        report = self.log.replay(at(5))
+        self.assertTrue(report['admitted'][0]['payload_retained'])     # not deleted
+        self.assertFalse(report['admitted'][0]['payload_reproducible'])
+        self.assertFalse(report['payload_dependent_available'])
+        self.assertEqual(report['unavailable_payload_observation_ids'],
+                         [self.log.records[0]['observation_id']])
+
+    def test_require_payloads_excludes_a_never_stored_payload_with_its_own_reason(self):
+        self._hash_only()
+        report = self.log.replay(at(5), require_payloads=True)
+        self.assertEqual(report['cited_observation_ids'], [])
+        self.assertEqual([e['reason'] for e in report['excluded']], [obs.PAYLOAD_NOT_STORED])
+
+    def test_payload_for_refuses_a_never_stored_payload_with_an_explicit_reason(self):
+        record = self._hash_only()
+        with self.assertRaises(obs.ObservationError) as ctx:
+            self.log.payload_for(record['observation_id'])
+        self.assertEqual(ctx.exception.reason, obs.PAYLOAD_NOT_STORED)
+
+    def test_corrupted_payload_fails_closed(self):
+        record = add(self.log, received=1, ingested=2, available=3)
+        self.log._payloads[record['payload_sha256']] = b'tampered bytes'
+        with self.assertRaises(obs.ObservationError) as ctx:
+            self.log.payload_for(record['observation_id'])
+        self.assertEqual(ctx.exception.reason, obs.PAYLOAD_CORRUPT)
+
+    def test_corrupt_payload_is_excluded_when_payloads_are_required(self):
+        record = add(self.log, received=1, ingested=2, available=3)
+        self.log._payloads[record['payload_sha256']] = b'tampered bytes'
+        report = self.log.replay(at(5), require_payloads=True)
+        self.assertEqual([e['reason'] for e in report['excluded']], [obs.PAYLOAD_CORRUPT])
+
+    def test_reproducible_payload_is_reported_reproducible(self):
+        add(self.log, received=1, ingested=2, available=3)
+        report = self.log.replay(at(5), require_payloads=True)
+        self.assertTrue(report['admitted'][0]['payload_reproducible'])
+        self.assertTrue(report['payload_dependent_available'])
+        self.assertEqual(report['unavailable_payload_observation_ids'], [])
+
+
+class ChronologicalReplay(unittest.TestCase):
+    """P2: replay must order by parsed instants, not by ISO strings.
+
+    Stored timestamps are ISO-8601 UTC, but string order is not chronological order: a
+    fractional second sorts BEFORE the whole second it follows, because '.' precedes 'Z'.
+    """
+
+    def setUp(self):
+        self.log = obs.ObservationLog(writer_id='w1')
+
+    def _append_at(self, received):
+        return self.log.append(source_id='synthetic.alpha',
+                               request_started_at='2026-11-01T11:00:00Z',
+                               response_received_at=received,
+                               ingested_at='2026-11-01T13:00:00Z',
+                               available_at='2026-11-01T14:00:00Z', payload=SYNTHETIC)
+
+    def test_fractional_second_timestamps_order_chronologically(self):
+        whole = self._append_at('2026-11-01T12:00:00Z')
+        fractional = self._append_at('2026-11-01T12:00:00.500Z')
+        self.assertLess('2026-11-01T12:00:00.500Z', '2026-11-01T12:00:00Z')   # string order is wrong
+        report = self.log.replay(at(20))
+        self.assertEqual(report['cited_observation_ids'],
+                         [whole['observation_id'], fractional['observation_id']])
+
+    def test_replay_order_uses_parsed_instants_not_strings(self):
+        late_ms = self._append_at('2026-11-01T12:00:00.900Z')
+        early_s = self._append_at('2026-11-01T12:00:00Z')
+        report = self.log.replay(at(20))
+        self.assertEqual([a['observation_id'] for a in report['admitted']],
+                         [early_s['observation_id'], late_ms['observation_id']])
+
+    def test_equivalent_timezone_offsets_are_equivalent(self):
+        utc = self._append_at('2026-11-01T12:00:00Z')
+        offset = self._append_at('2026-11-01T13:00:00+01:00')
+        self.assertEqual(utc['response_received_at'], offset['response_received_at'])
+        report = self.log.replay(at(20))
+        self.assertEqual(report['cited_observation_ids'],
+                         [utc['observation_id'], offset['observation_id']])
+
+    def test_equal_times_tie_break_by_observation_id(self):
+        ids = [self._append_at('2026-11-01T12:00:00Z')['observation_id'] for _ in range(3)]
+        report = self.log.replay(at(20))
+        self.assertEqual(report['cited_observation_ids'], sorted(ids))
+
+    def test_cutoff_still_excludes_after_reordering(self):
+        self._append_at('2026-11-01T12:00:00.500Z')
+        self.log.append(source_id='synthetic.alpha',
+                        request_started_at='2026-11-01T15:00:00Z',
+                        response_received_at='2026-11-01T16:00:00Z',
+                        ingested_at='2026-11-01T17:00:00Z',
+                        available_at='2026-11-01T18:00:00Z', payload=SYNTHETIC)
+        report = self.log.replay('2026-11-01T15:00:00Z')
+        self.assertEqual(len(report['admitted']), 1)
+        self.assertEqual([e['reason'] for e in report['excluded']], [obs.AFTER_CUTOFF])
+
+    def test_reordering_preserves_determinism(self):
+        for stamp in ('2026-11-01T12:00:00.900Z', '2026-11-01T12:00:00Z',
+                      '2026-11-01T12:00:01Z', '2026-11-01T11:59:59.999Z'):
+            self._append_at(stamp)
+        self.assertEqual(self.log.replay(at(20))['replay_digest'],
+                         self.log.replay(at(20))['replay_digest'])
+
+
 if __name__ == '__main__':
     unittest.main()

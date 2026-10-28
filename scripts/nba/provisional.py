@@ -84,6 +84,9 @@ DUPLICATE_RESOLUTION = 'DUPLICATE_RESOLUTION'
 MULTIPLE_ORIGINS = 'MULTIPLE_ORIGINS'
 CONTRADICTORY_RESOLUTION = 'CONTRADICTORY_RESOLUTION'
 SLOT_ALREADY_SUPERSEDED = 'SLOT_ALREADY_SUPERSEDED'
+SLOT_SUPERSESSION_CYCLE = 'SLOT_SUPERSESSION_CYCLE'
+COMPETITION_MISMATCH = 'COMPETITION_MISMATCH'
+EXPECTATION_ALREADY_SUPERSEDED = 'EXPECTATION_ALREADY_SUPERSEDED'
 SLOT_ACCOUNTING_GAP = 'SLOT_ACCOUNTING_GAP'
 DECLARATION_WITHOUT_PROVENANCE = 'DECLARATION_WITHOUT_PROVENANCE'
 DERIVED_EXPECTATION_REFUSED = 'DERIVED_EXPECTATION_REFUSED'
@@ -94,9 +97,10 @@ PROVISIONAL_REASONS = frozenset({
     MISSING_FIELD, MISSING_POSITION, MISSING_EVIDENCE, INVALID_SLOT_ID,
     DATE_BEARING_POSITION, PLACEHOLDER_ANCHOR, SLOT_KEY_AS_IDENTITY, UNVERIFIED_IDENTITY,
     UNKNOWN_SLOT, UNKNOWN_EXPECTATION, DUPLICATE_IDENTIFIER, DUPLICATE_RESOLUTION,
-    MULTIPLE_ORIGINS, CONTRADICTORY_RESOLUTION, SLOT_ALREADY_SUPERSEDED, SLOT_ACCOUNTING_GAP,
-    DECLARATION_WITHOUT_PROVENANCE, DERIVED_EXPECTATION_REFUSED, INVALID_ROLE,
-    DIGEST_MISMATCH,
+    MULTIPLE_ORIGINS, CONTRADICTORY_RESOLUTION, SLOT_ALREADY_SUPERSEDED,
+    SLOT_SUPERSESSION_CYCLE, COMPETITION_MISMATCH, EXPECTATION_ALREADY_SUPERSEDED,
+    SLOT_ACCOUNTING_GAP, DECLARATION_WITHOUT_PROVENANCE, DERIVED_EXPECTATION_REFUSED,
+    INVALID_ROLE, DIGEST_MISMATCH,
 })
 
 # Structural positions are single uppercase tokens. Prose, venues, opponent phrases and
@@ -198,6 +202,11 @@ def expectation_digest(record):
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
 
 
+def resolution_digest(record):
+    payload = {k: v for k, v in sorted(record.items()) if k != 'resolution_digest'}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
+
+
 def expectation_from_observed_slots(*_args, **_kwargs):
     """REFUSED BY DESIGN. Declaring expectations from captures makes the denominator circular.
 
@@ -273,10 +282,31 @@ class SlotRegistry:
             raise ProvisionalError(MISSING_FIELD, {'field': 'declared_slots'})
         if len(set(slots)) != len(slots):
             raise ProvisionalError(DUPLICATE_IDENTIFIER, {'declared_slots': slots})
+        # Each competition has its own denominator, so a declaration may only cover slots
+        # belonging to the competition being declared. Otherwise the two reports would
+        # overlap and both would be wrong, silently.
+        foreign = sorted(s for s in slots if s.split(':', 1)[0] != competition)
+        if foreign:
+            raise ProvisionalError(COMPETITION_MISMATCH, {
+                'competition': competition, 'foreign_slots': foreign})
         if supersedes_expectation_id is not None:
-            if not any(e['expectation_id'] == supersedes_expectation_id for e in self._expectations):
+            predecessor = next((e for e in self._expectations
+                                if e['expectation_id'] == supersedes_expectation_id), None)
+            if predecessor is None:
                 raise ProvisionalError(UNKNOWN_EXPECTATION,
                                        {'expectation_id': supersedes_expectation_id})
+            if predecessor['competition'] != competition:
+                # A cross-competition supersession would release another competition's
+                # declared slots and corrupt a denominator this declaration is not about.
+                raise ProvisionalError(COMPETITION_MISMATCH, {
+                    'expectation_id': supersedes_expectation_id,
+                    'competition': competition,
+                    'predecessor_competition': predecessor['competition']})
+            if supersedes_expectation_id in self._superseded_expectations():
+                # A predecessor must still be LIVE. Superseding an already-superseded record
+                # would release slots that its replacement now owns, orphaning it.
+                raise ProvisionalError(EXPECTATION_ALREADY_SUPERSEDED, {
+                    'expectation_id': supersedes_expectation_id})
         live = self._live_declared(competition)
         if supersedes_expectation_id is not None:
             # A supersession RELEASES the slots its predecessor declared; otherwise a
@@ -347,11 +377,41 @@ class SlotRegistry:
                                        target_ref=canonical['league_game_id'],
                                        role=role, observation_id=observation_id, evidence=proven)
 
+    def _supersession_edges(self):
+        """Recorded slot -> slot retirement edges."""
+        return {r['slot_id']: r['target_ref'] for r in self._resolutions
+                if r['target_kind'] == TARGET_SLOT}
+
+    def _reaches(self, start, goal):
+        """Is `goal` reachable from `start` by following retirement edges?"""
+        edges = self._supersession_edges()
+        seen, frontier = set(), [start]
+        while frontier:
+            node = frontier.pop()
+            if node == goal:
+                return True
+            if node in seen:
+                continue
+            seen.add(node)
+            nxt = edges.get(node)
+            if nxt is not None:
+                frontier.append(nxt)
+        return False
+
     def resolve_to_slot(self, slot_id, *, target_slot_id, observation_id, evidence,
                         role=ROLE_ALTERNATE):
         """Retire a slot in favour of a re-issued one. Slot -> slot, not slot -> game."""
         self._guard_resolution(slot_id, role)
         self._slot(target_slot_id)
+        if target_slot_id == slot_id:
+            raise ProvisionalError(SLOT_SUPERSESSION_CYCLE, {
+                'slot_id': slot_id, 'detail': 'a slot cannot be retired in favour of itself'})
+        if self._reaches(target_slot_id, slot_id):
+            # Accepting this edge would close a loop, leaving every slot on it unorderable
+            # (each retired in favour of the next, forever).
+            raise ProvisionalError(SLOT_SUPERSESSION_CYCLE, {
+                'slot_id': slot_id, 'target_slot_id': target_slot_id,
+                'detail': 'this retirement would close a cycle'})
         proven = _require_evidence(evidence)
         if not isinstance(observation_id, str) or not observation_id.strip():
             raise ProvisionalError(MISSING_EVIDENCE, {'field': 'observation_id'})
@@ -386,13 +446,18 @@ class SlotRegistry:
         if any(r['target_kind'] == kind and r['target_ref'] == target_ref for r in existing):
             raise ProvisionalError(DUPLICATE_RESOLUTION, {
                 'slot_id': slot_id, 'target_ref': target_ref, 'role': role})
-        # A slot resolves to nothing, or to something -- not both.
-        contradictory = {TARGET_GAME: TARGET_EMPTY, TARGET_EMPTY: TARGET_GAME,
-                         TARGET_SLOT: TARGET_EMPTY}
-        against = contradictory.get(kind)
-        if against and any(r['target_kind'] == against for r in existing):
+        # A slot resolves to nothing, or to something -- not both. And once it has resolved
+        # to a canonical game it cannot be retired in favour of another slot: the game it
+        # points at already exists, so re-pointing the slot would orphan a canonical record.
+        conflicting = ((TARGET_GAME, TARGET_EMPTY), (TARGET_EMPTY, TARGET_GAME),
+                       (TARGET_SLOT, TARGET_EMPTY), (TARGET_SLOT, TARGET_GAME),
+                       (TARGET_EMPTY, TARGET_SLOT))
+        conflict = next((prior for wanted, prior in conflicting
+                         if wanted == kind
+                         and any(r['target_kind'] == prior for r in existing)), None)
+        if conflict is not None:
             raise ProvisionalError(CONTRADICTORY_RESOLUTION, {
-                'slot_id': slot_id, 'target_kind': kind, 'conflicts_with': against})
+                'slot_id': slot_id, 'target_kind': kind, 'conflicts_with': conflict})
         if kind == TARGET_GAME and role == ROLE_ORIGIN and \
                 any(r['target_kind'] == TARGET_GAME and r['role'] == ROLE_ORIGIN for r in existing):
             # n > 1 is legal (origin + successors); two origins is not -- it would leave
@@ -406,11 +471,11 @@ class SlotRegistry:
             'target_ref': target_ref,
             'role': role,
             'observation_id': observation_id.strip(),
-            'evidence': dict(evidence),
+            # Deep copy: caller-supplied evidence is nested in practice, and a shallow copy
+            # would leave stored evidence aliased to a dict the caller still holds.
+            'evidence': copy.deepcopy(evidence),
         }
-        record['resolution_digest'] = hashlib.sha256(
-            json.dumps({k: v for k, v in sorted(record.items()) if k != 'resolution_digest'},
-                       sort_keys=True, default=str).encode()).hexdigest()
+        record['resolution_digest'] = resolution_digest(record)
         self._resolutions.append(record)
         return copy.deepcopy(record)
 
@@ -428,6 +493,11 @@ class SlotRegistry:
         for record in self._expectations:
             if expectation_digest(record) != record['expectation_digest']:
                 raise ProvisionalError(DIGEST_MISMATCH, {'expectation_id': record['expectation_id']})
+        # Resolutions carry a digest too, and are part of the same integrity surface: a
+        # tampered target, role or evidence must not escape detection.
+        for record in self._resolutions:
+            if resolution_digest(record) != record['resolution_digest']:
+                raise ProvisionalError(DIGEST_MISMATCH, {'resolution_id': record['resolution_id']})
         return True
 
     # ------------------------------------------------------------------- state

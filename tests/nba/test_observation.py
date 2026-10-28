@@ -614,5 +614,201 @@ class ChronologicalReplay(unittest.TestCase):
                          self.log.replay(at(20))['replay_digest'])
 
 
+class PayloadProvenance(unittest.TestCase):
+    """Blob PRESENCE is not payload PROVENANCE.
+
+    Blobs are content-addressed, so bytes captured for observation B can match the hash of
+    an observation A that never stored a payload. A must stay PAYLOAD_NOT_STORED: presence of
+    matching bytes somewhere in the store says nothing about whether A's payload was ever
+    captured. Treating presence as provenance would also make an historical replay change
+    retroactively when an unrelated later observation happened to supply the same bytes.
+    """
+
+    def setUp(self):
+        self.log = obs.ObservationLog(writer_id='w1')
+
+    def _hash_only(self, source='synthetic.alpha', hours=(0, 1, 2, 3)):
+        request, received, ingested, available = hours
+        return self.log.append(source_id=source, request_started_at=at(request),
+                               response_received_at=at(received), ingested_at=at(ingested),
+                               available_at=at(available),
+                               payload_sha256=obs.content_hash(SYNTHETIC))
+
+    def _supplier(self, source='synthetic.beta', hours=(12, 13, 14, 15)):
+        request, received, ingested, available = hours
+        return self.log.append(source_id=source, request_started_at=at(request),
+                               response_received_at=at(received), ingested_at=at(ingested),
+                               available_at=at(available), payload=SYNTHETIC)
+
+    def test_hash_only_stays_not_stored_when_later_bytes_match_its_hash(self):
+        a = self._hash_only()
+        self.assertEqual(self.log.payload_availability(a['observation_id']),
+                         (False, obs.PAYLOAD_NOT_STORED))
+        b = self._supplier()                      # AFTER the cutoff T used below
+        self.assertEqual(b['payload_sha256'], a['payload_sha256'])
+        self.assertEqual(self.log.payload_availability(a['observation_id']),
+                         (False, obs.PAYLOAD_NOT_STORED))
+        report = self.log.replay(at(10), require_payloads=True)     # T = 22:00, after A
+        self.assertNotIn(a['observation_id'], report['cited_observation_ids'])
+        self.assertEqual([e['reason'] for e in report['excluded']
+                          if e['observation_id'] == a['observation_id']],
+                         [obs.PAYLOAD_NOT_STORED])
+
+    def test_later_bytes_do_not_retroactively_upgrade_an_earlier_replay(self):
+        a = self._hash_only()
+        before = self.log.replay(at(10), require_payloads=True)['cited_observation_ids']
+        self._supplier()
+        after = self.log.replay(at(10), require_payloads=True)['cited_observation_ids']
+        self.assertEqual(after, before)
+        self.assertEqual(after, [])
+
+    def test_deleting_the_supplier_leaves_the_hash_only_record_not_stored(self):
+        a = self._hash_only()
+        b = self._supplier()
+        before = self.log.replay(at(10), require_payloads=True)['cited_observation_ids']
+        self.log.delete_payload(b['observation_id'], policy_ref='licence:B', deleted_at=at(20))
+        self.assertEqual(self.log.payload_availability(a['observation_id']),
+                         (False, obs.PAYLOAD_NOT_STORED))
+        self.assertEqual(self.log.replay(at(10), require_payloads=True)['cited_observation_ids'],
+                         before)
+
+    def test_history_is_stable_across_supplier_appearance_and_deletion(self):
+        a = self._hash_only()
+        none_yet = self.log.replay(at(10))['cited_observation_ids']
+        b = self._supplier()
+        with_bytes = self.log.replay(at(10))['cited_observation_ids']
+        self.log.delete_payload(b['observation_id'], policy_ref='licence:B', deleted_at=at(20))
+        after_delete = self.log.replay(at(10))['cited_observation_ids']
+        self.assertEqual(none_yet, with_bytes)
+        self.assertEqual(with_bytes, after_delete)
+
+    def test_observations_that_supplied_bytes_are_reproducible_and_deduplicated(self):
+        a = self._supplier('synthetic.alpha', (0, 1, 2, 3))
+        b = self._supplier('synthetic.beta', (0, 1, 2, 3))
+        self.assertEqual(a['payload_sha256'], b['payload_sha256'])
+        self.assertEqual(len(self.log._payloads), 1)                # one shared blob
+        self.assertEqual(self.log.payload_availability(a['observation_id']), (True, None))
+        self.assertEqual(self.log.payload_availability(b['observation_id']), (True, None))
+        self.log.delete_payload(a['observation_id'], policy_ref='licence:A', deleted_at=at(9))
+        self.assertEqual(self.log.payload_availability(b['observation_id']), (True, None))
+
+    def test_a_hash_only_observation_is_never_registered_as_a_holder(self):
+        a = self._hash_only()
+        self._supplier()
+        digest = a['payload_sha256']
+        self.assertNotIn(a['observation_id'], self.log._payload_refs.get(digest, set()))
+
+    def test_last_holder_deletion_still_removes_the_blob(self):
+        self._hash_only()
+        b = self._supplier()
+        digest = b['payload_sha256']
+        self.log.delete_payload(b['observation_id'], policy_ref='licence:B', deleted_at=at(20))
+        self.assertNotIn(digest, self.log._payloads)
+        self.assertEqual(self.log.payload_availability(b['observation_id']),
+                         (False, obs.PAYLOAD_UNAVAILABLE))
+
+    def test_deleting_a_hash_only_record_does_not_release_the_suppliers_bytes(self):
+        a = self._hash_only()
+        b = self._supplier()
+        # A has its own tombstone, and no bytes of its own to release.
+        self.log.delete_payload(a['observation_id'], policy_ref='licence:A', deleted_at=at(20))
+        self.assertEqual([t['observation_id'] for t in self.log.tombstones],
+                         [a['observation_id']])
+        self.assertIn(b['payload_sha256'], self.log._payloads)
+        self.assertEqual(self.log.payload_availability(b['observation_id']), (True, None))
+        self.assertEqual(self.log.payload_availability(a['observation_id']),
+                         (False, obs.PAYLOAD_UNAVAILABLE))
+
+
+class ReplayIntegrityBoundary(unittest.TestCase):
+    """Replay verifies the store's own integrity INLINE -- no separate caller step.
+
+    Leaving this to a caller who must remember to call verify_digests() first means the
+    default path admits tampered evidence. A digest-invalid record is refused by replay
+    itself, with a reason, for every field the digest covers.
+    """
+
+    def setUp(self):
+        self.log = obs.ObservationLog(writer_id='w1')
+        self.records = [add(self.log, received=h, ingested=h + 1, available=h + 2)
+                        for h in (1, 3, 5)]
+        self.ids = [r['observation_id'] for r in self.records]
+
+    def _tamper(self, index, field, value):
+        self.log._records[index][field] = value
+
+    def _replay(self, cutoff=None, **kw):
+        return self.log.replay(cutoff or at(20), **kw)
+
+    def test_replay_rejects_a_record_with_a_tampered_source(self):
+        self._tamper(1, 'source_id', 'synthetic.injected')
+        report = self._replay()
+        self.assertNotIn(self.ids[1], report['cited_observation_ids'])
+        self.assertEqual([e['reason'] for e in report['excluded']
+                          if e['observation_id'] == self.ids[1]], [obs.DIGEST_MISMATCH])
+
+    def test_replay_rejects_a_record_with_a_tampered_clock(self):
+        self._tamper(1, 'available_at', at(2))      # move it earlier, inside the cutoff
+        report = self._replay()
+        self.assertNotIn(self.ids[1], report['cited_observation_ids'])
+        self.assertEqual([e['reason'] for e in report['excluded']
+                          if e['observation_id'] == self.ids[1]], [obs.DIGEST_MISMATCH])
+
+    def test_replay_rejects_a_record_with_a_tampered_payload_hash(self):
+        self._tamper(1, 'payload_sha256', 'a' * 64)
+        report = self._replay(require_payloads=True)
+        self.assertNotIn(self.ids[1], report['cited_observation_ids'])
+        self.assertEqual([e['reason'] for e in report['excluded']
+                          if e['observation_id'] == self.ids[1]], [obs.DIGEST_MISMATCH])
+
+    def test_replay_reports_its_integrity_state(self):
+        self._tamper(2, 'ingested_at', at(4))
+        report = self._replay()
+        self.assertEqual(report['digest_invalid_observation_ids'], [self.ids[2]])
+        self.assertFalse(report['integrity_ok'])
+        clean = obs.ObservationLog(writer_id='w2')
+        only = add(clean, received=1, ingested=2, available=3)['observation_id']
+        report = clean.replay(at(20))
+        self.assertEqual(report['digest_invalid_observation_ids'], [])
+        self.assertTrue(report['integrity_ok'])
+        self.assertEqual(report['cited_observation_ids'], [only])
+
+    def test_replay_needs_no_separate_verification_step(self):
+        self._tamper(1, 'source_id', 'synthetic.injected')
+        for require in (False, True):
+            report = self._replay(require_payloads=require)
+            self.assertNotIn(self.ids[1], report['cited_observation_ids'])
+            self.assertEqual(report['cited_observation_ids'],
+                             [self.ids[0], self.ids[2]])
+
+    def test_tampering_does_not_disturb_valid_ordering_or_cutoff(self):
+        self._tamper(1, 'source_id', 'synthetic.injected')
+        report = self._replay()
+        self.assertEqual(report['cited_observation_ids'], [self.ids[0], self.ids[2]])
+        # ordering of the survivors is still receipt order
+        self.assertEqual([a['response_received_at'] for a in report['admitted']],
+                         [self.records[0]['response_received_at'],
+                          self.records[2]['response_received_at']])
+        # and the cutoff still binds, independently of the integrity refusal
+        bounded = self._replay(at(4))
+        self.assertEqual(bounded['cited_observation_ids'], [self.ids[0]])
+        self.assertEqual({e['reason'] for e in bounded['excluded']},
+                         {obs.DIGEST_MISMATCH, obs.AFTER_CUTOFF})
+
+    def test_replay_stays_deterministic_with_a_tampered_record(self):
+        self._tamper(1, 'payload_sha256', 'b' * 64)
+        first, second = self._replay(), self._replay()
+        self.assertEqual(first['replay_digest'], second['replay_digest'])
+        self.assertEqual(first['cited_observation_ids'], second['cited_observation_ids'])
+
+    def test_verify_digests_agrees_with_the_replay_boundary(self):
+        self._tamper(1, 'ingested_at', at(6))       # genuinely different from the stored value
+        report = self._replay()
+        self.assertFalse(report['integrity_ok'])
+        with self.assertRaises(obs.ObservationError) as ctx:
+            self.log.verify_digests()
+        self.assertEqual(ctx.exception.reason, obs.DIGEST_MISMATCH)
+
+
 if __name__ == '__main__':
     unittest.main()

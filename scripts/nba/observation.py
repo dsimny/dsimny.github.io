@@ -314,14 +314,24 @@ class ObservationLog:
         retained by policy yet was never stored, so it cannot be reproduced; a tombstoned one
         stays logically inaccessible even while a peer keeps the shared blob alive. Every
         failure mode is named, and none of them is silently reported as available.
+
+        PROVENANCE, NOT PRESENCE. Blobs are content-addressed, so bytes captured for a
+        DIFFERENT observation can match this record's hash. Holding matching bytes says
+        nothing about whether THIS observation ever stored a payload, so reproducibility
+        requires that this observation itself supplied the bytes. Otherwise a later, unrelated
+        capture would silently upgrade a hash-only record -- and an historical replay would
+        change retroactively as the store grew.
         """
         record = self.get(observation_id)
         if self.retention_state(observation_id) == DELETED:
             return False, PAYLOAD_UNAVAILABLE
         digest = record['payload_sha256']
-        if digest is None or digest not in self._payloads:
+        if digest is None or observation_id not in self._payload_refs.get(digest, ()):
             return False, PAYLOAD_NOT_STORED
-        if content_hash(self._payloads[digest]) != digest:
+        body = self._payloads.get(digest)
+        if body is None:
+            return False, PAYLOAD_NOT_STORED
+        if content_hash(body) != digest:
             return False, PAYLOAD_CORRUPT
         return True, None
 
@@ -406,6 +416,11 @@ class ObservationLog:
         """(eligible, reason) for a decision at `cutoff`. Evidence is never discarded."""
         record = self.get(observation_id)
         limit = utc(cutoff, 'cutoff')
+        if observation_digest(record) != record['observation_digest']:
+            # Integrity first: a record whose digest does not verify is not evidence at any
+            # cutoff, whatever its clocks happen to say. Refusing it here closes the boundary
+            # for direct callers of eligibility(), not only for replay().
+            return False, DIGEST_MISMATCH
         for field in REQUIRED_CLOCKS:
             if record[field] is None:
                 return False, CLOCK_MISSING
@@ -421,20 +436,30 @@ class ObservationLog:
         current state to fill a gap -- backfilling later knowledge into a past cutoff is
         structurally impossible here.
 
-        `require_payloads=True` demands reproducible payloads -- bytes actually retrievable
-        and matching their recorded hash -- so a tombstoned, never-stored or corrupted
-        observation is excluded with its own reason rather than silently counted. Either way
-        the report states whether payload-dependent replay is available: a deleted payload is
-        never represented as reproducible evidence.
+        `require_payloads=True` demands reproducible payloads -- bytes this observation
+        actually supplied, retrievable and matching their recorded hash -- so a tombstoned,
+        never-stored or corrupted observation is excluded with its own reason rather than
+        silently counted. Either way the report states whether payload-dependent replay is
+        available: a deleted payload is never represented as reproducible evidence.
+
+        The store's own integrity is verified HERE, inline. Requiring a caller to remember to
+        call verify_digests() first would leave the default path admitting tampered evidence,
+        so a digest-invalid record is refused by replay itself, with a reason, and reported.
         """
         limit = utc(cutoff, 'cutoff')
-        admitted, excluded = [], []
+        admitted, excluded, digest_invalid = [], [], []
         # Ordered by PARSED instants: receipt, then storage, then id. See _instant().
         ordered = sorted(self._records,
-                         key=lambda r: (_instant(r['response_received_at']),
-                                        _instant(r['ingested_at']), r['observation_id']))
+                         key=lambda r: (_instant(r.get('response_received_at')),
+                                        _instant(r.get('ingested_at')),
+                                        r.get('observation_id') or ''))
         for record in ordered:
-            eligible, reason = self.eligibility(record['observation_id'], cutoff)
+            observation_id = record.get('observation_id')
+            if observation_digest(record) != record.get('observation_digest'):
+                digest_invalid.append(observation_id)
+                excluded.append({'observation_id': observation_id, 'reason': DIGEST_MISMATCH})
+                continue
+            eligible, reason = self.eligibility(observation_id, cutoff)
             if not eligible:
                 excluded.append({'observation_id': record['observation_id'], 'reason': reason})
                 continue
@@ -467,6 +492,8 @@ class ObservationLog:
             'cited_observation_ids': [a['observation_id'] for a in admitted],
             'payload_dependent_available': not unavailable,
             'unavailable_payload_observation_ids': unavailable,
+            'digest_invalid_observation_ids': digest_invalid,
+            'integrity_ok': not digest_invalid,
         }
         # The digest covers what the replay ASSERTS -- cutoff, order and the admitted
         # evidence -- not the excluded diagnostics. A record appended later, ineligible at

@@ -205,10 +205,24 @@ def reschedule(chain, game, phase, cup_round, event_time, status=RESCHEDULED,
 
 
 def cancelled(chain, game, phase, cup_round, event_time, source_updated_at=None):
-    """Mark a game cancelled. The game REMAINS in the chain and in any denominator."""
+    """Mark a game cancelled. The game REMAINS in the chain and in any denominator.
+
+    VENUE FACTS ARE INHERITED FROM THE LATEST REVISION, exactly as reschedule() does.
+    A cancellation states the game's STATUS, not where it would have been played, so
+    it must not clear venue it never mentioned: by taking schedule_record's defaults it
+    wrote neutral_site=False and actual_venue=None over whatever the chain already
+    held -- the same loss-by-omission as the reschedule default, inside a chain whose
+    contract is that nothing is lost.
+
+    A game with no prior revision has nothing to inherit and keeps the record defaults.
+    `source_updated_at` is passed through verbatim: when the caller supplies none, the
+    revision records none, so an availability time is never invented here.
+    """
     previous = chain.current()
     revision = (previous['revision'] + 1) if previous else 1
     record = schedule_record(game, phase, cup_round, CANCELLED, event_time,
+                             actual_venue=previous['actual_venue'] if previous else None,
+                             neutral_site=previous['neutral_site'] if previous else False,
                              revision=revision,
                              supersedes=previous['revision'] if previous else None,
                              source_updated_at=source_updated_at)

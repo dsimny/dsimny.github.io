@@ -184,6 +184,62 @@ class RevisionChains(unittest.TestCase):
         self.assertEqual(chain.current()['status'], sch.CANCELLED)
         self.assertEqual(len(chain.revisions), 2)
 
+    def test_cancelled_preserves_a_neutral_site_and_venue(self):
+        # A cancellation is a statement about the game's STATUS, not about where it
+        # would have been played. It must not clear venue facts it never mentioned.
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, T1,
+                                         actual_venue='Paris, FR', neutral_site=True,
+                                         source_updated_at='2026-11-01T00:00:00Z'))
+        sch.cancelled(chain, GAME, 'REGULAR_SEASON', None, T1)
+        self.assertTrue(chain.current()['neutral_site'])
+        self.assertEqual(chain.current()['actual_venue'], 'Paris, FR')
+        # No availability stamp was supplied, so none may be invented.
+        self.assertIsNone(chain.current()['source_updated_at'])
+
+    def test_cancelled_after_a_reschedule_inherits_the_latest_venue(self):
+        # Inheritance must come from the LATEST revision, not the original: this game
+        # was moved TO a neutral site and only then cancelled.
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, T1,
+                                         source_updated_at='2026-11-01T00:00:00Z'))
+        sch.reschedule(chain, GAME, 'REGULAR_SEASON', None, '2027-01-05T00:00:00Z',
+                       actual_venue='Paris, FR', neutral_site=True,
+                       source_updated_at='2026-12-08T00:00:00Z')
+        sch.cancelled(chain, GAME, 'REGULAR_SEASON', None, '2027-01-05T00:00:00Z')
+        self.assertEqual(chain.current()['revision'], 3)
+        self.assertTrue(chain.current()['neutral_site'])
+        self.assertEqual(chain.current()['actual_venue'], 'Paris, FR')
+
+    def test_cancelled_keeps_prior_revisions_byte_identical(self):
+        chain = sch.RevisionChain('0022600001')
+        chain.append(sch.schedule_record(GAME, 'REGULAR_SEASON', None, sch.SCHEDULED, T1,
+                                         actual_venue='Paris, FR', neutral_site=True,
+                                         source_updated_at='2026-11-01T00:00:00Z'))
+        original_digest = chain.revisions[0]['revision_digest']
+        sch.cancelled(chain, GAME, 'REGULAR_SEASON', None, T1)
+        self.assertEqual(chain.current()['status'], sch.CANCELLED)
+        self.assertEqual(chain.current()['revision'], 2)
+        self.assertEqual(chain.current()['supersedes'], 1)
+        self.assertEqual(chain.revisions[0]['revision_digest'], original_digest)
+        self.assertIsNone(chain.revisions[0]['superseded_by'])
+        self.assertTrue(chain.verify_digests())
+        self.assertFalse(chain.has_cycles())
+
+    def test_cancellation_of_an_unrevisioned_game_still_appends_revision_one(self):
+        # Preserved behaviour: a game with no prior revision can still be cancelled,
+        # and there are no venue facts to inherit.
+        chain = sch.RevisionChain('0022600001')
+        record = sch.cancelled(chain, GAME, 'REGULAR_SEASON', None, T1,
+                               source_updated_at='2026-12-08T00:00:00Z')
+        self.assertEqual(record['revision'], 1)
+        self.assertIsNone(record['supersedes'])
+        self.assertEqual(record['status'], sch.CANCELLED)
+        self.assertIsNone(record['actual_venue'])
+        self.assertFalse(record['neutral_site'])
+        # source_updated_at is recorded verbatim when given, never invented.
+        self.assertEqual(record['source_updated_at'], ident.utc('2026-12-08T00:00:00Z'))
+
     def test_unknown_status_refused(self):
         with self.assertRaises(ValueError):
             sch.schedule_record(GAME, 'REGULAR_SEASON', None, 'ABANDONED', T1)

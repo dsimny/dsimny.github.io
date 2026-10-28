@@ -36,7 +36,7 @@ anywhere.
 python -B -m unittest discover -s tests/nba -v
 ```
 
-**Ran 126 tests — OK — exit code 0** (Python 3.12.10, Windows 11 10.0.26300; 0 failures,
+**Ran 130 tests — OK — exit code 0** (Python 3.12.10, Windows 11 10.0.26300; 0 failures,
 0 errors, 0 skips; no database, no network, no credentials). The same command passes on the
 GitHub Actions runner (`NBA Package 1 offline contracts`, `pull_request`), which installs
 `cryptography tzdata` on Python 3.12.
@@ -47,7 +47,7 @@ GitHub Actions runner (`NBA Package 1 offline contracts`, `pull_request`), which
 | `test_package1_unchanged.py` (regression guard) | 5 |
 | `test_identity.py` | 15 |
 | `test_crosswalk.py` | 16 |
-| `test_schedule.py` | 25 |
+| `test_schedule.py` | 29 |
 | `test_completeness.py` (incl. 7 adversarial exclusivity) | 21 |
 | `test_pregame.py` (pregame cutoff integrity) | 20 |
 
@@ -93,8 +93,9 @@ overlapping categories.
 
 ## Review corrections before the merge decision
 
-Both were found by the focused pre-merge review, reproduced as failing tests first, and fixed
-only after the failure was observed.
+Each was found by the focused pre-merge review, reproduced as failing tests first, and fixed
+only after the failure was observed. Defect 5 surfaced while correcting defect 3, by asking
+whether the same carry-forward mistake existed elsewhere.
 
 ### Defect 3 — a reschedule could silently clear a prior neutral-site venue
 
@@ -145,6 +146,35 @@ propagates it.
 `test_pregame_refuses_when_revision_availability_is_absent` and
 `test_chain_start_refuses_when_revision_availability_is_absent` pin that the rule fails closed
 without hardening into "always refuse".
+
+### Defect 5 — a cancellation could silently clear venue facts
+
+`schedule.cancelled()` called `schedule_record()` without venue arguments, so it took the
+record defaults: every cancellation wrote `neutral_site=False` and `actual_venue=None` over
+whatever the chain already held.
+
+**Impact:** identical in kind to defect 3 — a venue property lost by omission, this time on
+the one transition that is meant to change nothing but status. Demonstrated before the fix: a
+revision holding `actual_venue='Paris, FR'`, `neutral_site=True` became `None`, `False` after
+`cancelled()`.
+
+**Fix.** `cancelled()` now inherits both facts from the latest revision, exactly as
+`reschedule()` does. A game with no prior revision has nothing to inherit and keeps the record
+defaults, and `source_updated_at` is still passed through verbatim — a cancellation records an
+availability time only when the caller supplies one, so none is invented here. Because a
+cancellation states the game's status rather than its venue, it gains no venue override
+parameters.
+
+**Evidence:** `test_cancelled_preserves_a_neutral_site_and_venue` and
+`test_cancelled_after_a_reschedule_inherits_the_latest_venue` — the second pins that
+inheritance comes from the LATEST revision, since that game was moved TO a neutral site and
+only then cancelled. Against the prior implementation: **2 failures** — `AssertionError: False
+is not true` each. `test_cancelled_keeps_prior_revisions_byte_identical` and
+`test_cancellation_of_an_unrevisioned_game_still_appends_revision_one` pin that prior
+revisions stay byte-identical with still-verifying digests and correct revision/`supersedes`
+links, and that empty-chain cancellation is unchanged. Counting is unaffected:
+`test_status_overlap_does_not_double_count_one_game` (which calls `cancelled()`) and
+`test_cancelled_games_still_occupy_their_slot` both pass.
 
 ### Description corrections
 

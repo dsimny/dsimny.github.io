@@ -1,0 +1,37 @@
+{
+  "provenance": "SYNTHETIC \u2014 hand-authored; not provider evidence.",
+  "entries": [
+    {
+      "provider": "espn",
+      "provider_id": "401810001",
+      "league_game_id": "0022600001",
+      "provenance": "synthetic"
+    },
+    {
+      "provider": "espn",
+      "provider_id": "401810002",
+      "league_game_id": "0022600002",
+      "provenance": "synthetic"
+    },
+    {
+      "provider": "nba",
+      "provider_id": "0022600001",
+      "league_game_id": "0022600001",
+      "provenance": "synthetic"
+    }
+  ],
+  "conflicting_entries": [
+    {
+      "provider": "espn",
+      "provider_id": "401819999",
+      "league_game_id": "0022600010",
+      "provenance": "synthetic"
+    },
+    {
+      "provider": "espn",
+      "provider_id": "401819999",
+      "league_game_id": "0022600011",
+      "provenance": "synthetic"
+    }
+  ]
+}

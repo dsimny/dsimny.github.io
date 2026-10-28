@@ -2034,6 +2034,25 @@
    "status": "STATUS_FINAL",
    "total": 23
   },
+  "401873023": {
+   "away": "CAR",
+   "away_abbr": "CAR",
+   "away_name": "Carolina Panthers",
+   "away_score": null,
+   "espn_event_id": "401873023",
+   "final": false,
+   "home": "GB",
+   "home_abbr": "GB",
+   "home_name": "Green Bay Packers",
+   "home_score": null,
+   "kickoff_utc": "2026-10-30T00:15:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873272": {
    "away": "DET",
    "away_abbr": "DET",
@@ -2947,5 +2966,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-10-27T16:09:58Z"
+ "updated_utc": "2026-10-28T16:56:54Z"
 }

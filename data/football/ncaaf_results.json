@@ -7582,6 +7582,25 @@
    "status": "STATUS_FINAL",
    "total": 61
   },
+  "401862812": {
+   "away": "Florida Atlantic Owls",
+   "away_abbr": "FAU",
+   "away_key": "floridaatlanticowls",
+   "away_score": null,
+   "espn_event_id": "401862812",
+   "final": false,
+   "home": "North Texas Mean Green",
+   "home_abbr": "UNT",
+   "home_key": "northtexasmeangreen",
+   "home_score": null,
+   "kickoff_utc": "2026-10-29T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401864424": {
    "away": "Merrimack Warriors",
    "away_abbr": "MRMK",
@@ -10166,6 +10185,25 @@
    "status": "STATUS_FINAL",
    "total": 62
   },
+  "401869963": {
+   "away": "Troy Trojans",
+   "away_abbr": "TROY",
+   "away_key": "troytrojans",
+   "away_score": null,
+   "espn_event_id": "401869963",
+   "final": false,
+   "home": "James Madison Dukes",
+   "home_abbr": "JMU",
+   "home_key": "jamesmadisondukes",
+   "home_score": null,
+   "kickoff_utc": "2026-10-29T23:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401869965": {
    "away": "Louisiana Ragin' Cajuns",
    "away_abbr": "UL",
@@ -10683,39 +10721,39 @@
    "away": "Delaware Blue Hens",
    "away_abbr": "DEL",
    "away_key": "delawarebluehens",
-   "away_score": null,
+   "away_score": 35,
    "espn_event_id": "401871071",
-   "final": false,
+   "final": true,
    "home": "Western Kentucky Hilltoppers",
    "home_abbr": "WKU",
    "home_key": "westernkentuckyhilltoppers",
-   "home_score": null,
+   "home_score": 21,
    "kickoff_utc": "2026-10-27T23:00:00Z",
-   "margin": null,
+   "margin": -14,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 56
   },
   "401871072": {
    "away": "Sam Houston Bearkats",
    "away_abbr": "SHSU",
    "away_key": "samhoustonbearkats",
-   "away_score": null,
+   "away_score": 3,
    "espn_event_id": "401871072",
-   "final": false,
+   "final": true,
    "home": "Missouri State Bears",
    "home_abbr": "MOST",
    "home_key": "missouristatebears",
-   "home_score": null,
+   "home_score": 24,
    "kickoff_utc": "2026-10-28T00:00:00Z",
-   "margin": null,
+   "margin": 21,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 27
   },
   "401871089": {
    "away": "UL Monroe Warhawks",
@@ -10832,5 +10870,5 @@
    "total": 35
   }
  },
- "updated_utc": "2026-10-27T16:09:56Z"
+ "updated_utc": "2026-10-28T16:56:53Z"
 }

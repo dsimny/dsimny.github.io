@@ -1,0 +1,46 @@
+{
+  "provenance": "SYNTHETIC \u2014 hand-authored; not provider evidence. No real NBA or ESPN identifiers.",
+  "valid_game": {
+    "league_game_id": "0022600001",
+    "home_team_id": "TEAM-BOS",
+    "away_team_id": "TEAM-NYK",
+    "provider_ids": {
+      "nba": "0022600001",
+      "espn": "401810001"
+    },
+    "provider_names_observed": {
+      "espn": "New York Knicks at Boston Celtics"
+    }
+  },
+  "missing_league_id": {
+    "home_team_id": "TEAM-BOS",
+    "away_team_id": "TEAM-NYK",
+    "provider_ids": {
+      "espn": "401810002"
+    },
+    "provider_names_observed": {
+      "espn": "New York Knicks at Boston Celtics"
+    }
+  },
+  "same_team_both_sides": {
+    "league_game_id": "0022600003",
+    "home_team_id": "TEAM-BOS",
+    "away_team_id": "TEAM-BOS"
+  },
+  "timestamps": {
+    "event_time": "2026-10-22T23:30:00Z",
+    "source_published_at": "2026-10-01T12:00:00Z",
+    "source_updated_at": "2026-10-20T18:15:00Z",
+    "request_started_at": "2026-10-21T09:00:00Z",
+    "response_received_at": "2026-10-21T09:00:01Z",
+    "available_at": "2026-10-01T12:00:00Z",
+    "ingested_at": "2026-10-21T09:00:02Z",
+    "decision_cutoff": "2026-10-21T12:00:00Z"
+  },
+  "future_dated": {
+    "event_time": "2026-10-22T23:30:00Z",
+    "available_at": "2026-10-23T00:30:00Z",
+    "ingested_at": "2026-10-21T09:00:02Z",
+    "decision_cutoff": "2026-10-21T12:00:00Z"
+  }
+}

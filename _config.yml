@@ -35,3 +35,5 @@ exclude:
   - docs/NBA_FREE_CAPTURE_RUNBOOK.md
   - docs/NBA_PACKAGE1_REPORT.md
   - docs/NBA_PREREG_V01.md
+  - docs/NBA_IDENTITY_CONTRACT.md
+  - docs/NBA_PACKAGE2_REPORT.md

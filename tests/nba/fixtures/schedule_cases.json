@@ -1,0 +1,50 @@
+{
+  "provenance": "SYNTHETIC \u2014 hand-authored; not provider evidence.",
+  "base_game": {
+    "league_game_id": "0022600001",
+    "home_team_id": "TEAM-BOS",
+    "away_team_id": "TEAM-NYK"
+  },
+  "phases": [
+    {
+      "phase": "PRESEASON",
+      "counts_regular": false
+    },
+    {
+      "phase": "REGULAR_SEASON",
+      "counts_regular": true
+    },
+    {
+      "phase": "CUP",
+      "cup_round": "GROUP",
+      "counts_regular": true
+    },
+    {
+      "phase": "CUP",
+      "cup_round": "QUARTERFINAL",
+      "counts_regular": true
+    },
+    {
+      "phase": "CUP",
+      "cup_round": "SEMIFINAL",
+      "counts_regular": true
+    },
+    {
+      "phase": "CUP",
+      "cup_round": "CHAMPIONSHIP",
+      "counts_regular": false
+    },
+    {
+      "phase": "PLAY_IN",
+      "counts_regular": false
+    },
+    {
+      "phase": "POSTSEASON",
+      "counts_regular": false
+    }
+  ],
+  "neutral_site": {
+    "phase": "REGULAR_SEASON",
+    "neutral_site": true
+  }
+}

@@ -1,0 +1,126 @@
+# NBA Package 2A — identity, crosswalks, schedules, completeness
+
+**Status:** offline foundation implemented and verified. **Not committed, not pushed, no PR.**
+**Branch:** `nba/package2a` (worktree `C:/Dev/ols-nba-package2a`), based on `origin/main` `95f5b19f`.
+**Scope:** Package 2 of 11 in `NBA_ARCHITECTURE.md` — *"Canonical identities and complete
+phase-aware schedules."* This is 2A: the offline identity/schedule layer only.
+
+## What was built
+
+| Module | Responsibility |
+|---|---|
+| `scripts/nba/identity.py` | League-ID authority, team IDs, quarantine reasons, ten timestamp fields |
+| `scripts/nba/crosswalk.py` | Immutable provider→league mappings, conflict detection, provenance labels |
+| `scripts/nba/schedule.py` | Phase classification, neutral site, append-only revision chains |
+| `scripts/nba/completeness.py` | Lossless accounting: nothing disappears, gaps raise |
+
+Package 1 (`contracts.py`, `free_capture.py`) is **read, never modified**. `test_package1_unchanged.py`
+pins the Package 1 surface Package 2A depends on so a future Package 1 edit cannot silently
+change Package 2A.
+
+### Local I/O — one read-only file access
+
+`identity.py`, `schedule.py` and `completeness.py` are pure: no I/O of any kind.
+**`crosswalk.py` is not entirely pure.** `crosswalk.load_crosswalk(path)` opens a local JSON
+file to build a `Crosswalk`. It is **read-only** — a single `open(path)` with no write, no
+`mkdir`, no temp file — and it touches no network, database, credential or environment
+variable. An earlier description of this package as having "no I/O" was wrong and is corrected
+here: the honest statement is one read-only local file load, and no network or database access
+anywhere.
+
+## Test evidence
+
+```
+python -B -m unittest discover -s tests/nba -v
+```
+
+**Ran 118 tests — OK — exit code 0** (Python 3.12.10, Windows 11 10.0.26300; 0 failures,
+0 errors, 0 skips; no database, no network, no credentials).
+
+| Suite | Tests |
+|---|---|
+| `test_package1.py` (untouched) | 24 |
+| `test_package1_unchanged.py` (regression guard) | 5 |
+| `test_identity.py` | 14 |
+| `test_crosswalk.py` | 16 |
+| `test_schedule.py` | 20 |
+| `test_completeness.py` (incl. 7 adversarial exclusivity) | 21 |
+| `test_pregame.py` (pregame cutoff integrity) | 18 |
+
+## Defects found in final review and fixed
+
+Both were found by the pre-PR review, reproduced before fixing, and are now covered by tests
+that fail against the prior implementation.
+
+### Defect 1 — a decision cutoff at or after tipoff qualified as pregame
+
+**Impact:** outcome leakage. A cutoff reaching tipoff can observe the game, so a decision made
+with it is not a pregame decision. Nothing compared the two, so such a cutoff was accepted.
+
+**Fix.** `identity.effective_start()` and `identity.require_pregame()` (plus the chain-aware
+`schedule.chain_pregame_start()` / `schedule.pregame_eligible()`), with new reasons
+`START_TIME_UNKNOWN`, `START_TIME_CONFLICT`, `PREGAME_AFTER_START`.
+
+- The **earliest known start wins**, so an early tipoff cannot leave an eligible window open.
+- The **revision in force** supplies the start — never the obsolete original — so a legitimate
+  reschedule is not rejected against its old date.
+- **Missing or conflicting evidence never establishes eligibility:** no start recorded raises
+  `START_TIME_UNKNOWN`; two starts more than 6 hours apart raise `START_TIME_CONFLICT`.
+- The availability/ingestion rule is **unchanged and separate**; a future tipoff is still not
+  an availability anomaly.
+
+**Evidence:** `test_pregame.py` (18 tests). Against the prior implementation: **16 errors**,
+`AttributeError: module 'nba.identity' has no attribute 'require_pregame'`.
+
+### Defect 2 — a game could be counted in two exclusive categories
+
+**Impact:** an absent game could be concealed. Listing one game as both canonical and missing
+summed to the expected total and reported success.
+
+**Fix.** `completeness.reconcile()` now audits exclusivity before counting: duplicate ids within
+`missing`, overlap between `chains` and `missing`, overlap of a *named* quarantined id with
+canonical/missing, and duplicate named ids within quarantined — each raising
+`CompletenessError`. A post-accounting check asserts the categories are pairwise disjoint.
+Descriptive **status history** (postponed then cancelled) is explicitly not treated as
+overlapping categories.
+
+**Evidence:** 7 adversarial tests in `test_completeness.py`. Against the prior implementation:
+**2 failures + 1 error** — `AssertionError: CompletenessError not raised`.
+
+### Defect found while fixing (and corrected)
+
+`identity.effective_start()` initially called `utc()`, which demands a string, while schedule
+revisions store parsed datetimes. A `_as_utc()` boundary now accepts either and still refuses a
+naive datetime. The first attempt at the completeness post-audit also assumed `detail['missing']`
+held bare ids when it holds dicts; corrected.
+
+## A defect this package found in itself
+
+The first draft of `identity.blocks_from_features` gated the event's own start time against the
+decision cutoff. Because a game tips off *after* a pre-game cutoff, that flagged **every game
+ever played** — the check would have been worthless while appearing to work. The Package 2A
+test suite caught it, the function was corrected to gate only availability and ingestion, and
+`test_game_start_after_cutoff_is_normal_not_an_anomaly` now guards the regression.
+
+This is recorded rather than smoothed over: it is precisely the class of error that produces
+confident, meaningless validation later.
+
+## Coverage handled
+
+Preseason, regular season, all four NBA Cup rounds, play-in, postseason, postponement,
+reschedule, cancellation, neutral/international venue, and unknown-phase refusal.
+
+## Explicitly NOT in this package
+
+- Migration `059_p4_consumer_plan_boundaries.sql` and the `production_manifest.txt` change.
+- Any real league or ESPN mapping — fixtures are synthetic and labelled as such.
+- Any change to Package 1 `SOURCES`; **no live data was fetched**.
+- A schedule parser. Architecture decision 4 prefers NBA's structured CDN schedule JSON over
+  HTML scraping, and that requires schema, access, coverage and usage-rights verification.
+  **This remains the blocking integration decision.**
+
+## Readiness — unchanged
+
+All **16 official-release gates remain FAIL**. `SHADOW_MODE=true`; official NBA picks and
+publication remain disabled. No picks, no predictions, no paid calls, no database migration,
+no deployment.

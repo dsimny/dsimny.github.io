@@ -2361,6 +2361,9 @@
    },
    "committed_utc": "2026-10-28T17:37:26Z",
    "kickoff_utc": "2026-10-29T23:30:00Z",
+   "later_disagreements": [
+    "5074f9063d18724454ad5262c4ab640f9f5f4957631dbe0b0a9bb9f2153ac43c"
+   ],
    "matchup": "Florida Atlantic Owls @ North Texas Mean Green",
    "sha256": "645efe059a32544712cc9303a61ec21716fd61bd5ac22ac3c1d424682f354a0b",
    "sport": "ncaaf"
@@ -8847,6 +8850,9 @@
    },
    "committed_utc": "2026-10-28T17:37:26Z",
    "kickoff_utc": "2026-10-29T23:30:00Z",
+   "later_disagreements": [
+    "b4a626095145a123d58e9a6450e64b9162e03af2dca95b270d1bfd8b7ad69f70"
+   ],
    "matchup": "Troy Trojans @ James Madison Dukes",
    "sha256": "b6466ca775e4b3a40683abb6ef6230bea8a9c18d8e36817691f11733f1588163",
    "sport": "ncaaf"
@@ -10919,6 +10925,43 @@
    ],
    "matchup": "CAR @ ATL",
    "sha256": "08cf4f3054578f6d80807d6f2280d4d3f4ba4efa66d2328247811082e3e1f006",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|CAR @ GB|2026-10-30T00:15:00Z": {
+   "block": {
+    "away": "Carolina Panthers",
+    "best_book": "betmgm",
+    "best_price": 170,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.554,
+    "fair_away": 0.36429,
+    "fair_home": 0.63571,
+    "fair_side": 0.36429,
+    "home": "Green Bay Packers",
+    "kickoff_utc": "2026-10-30T00:15:00Z",
+    "league": "NFL",
+    "matchup": "CAR @ GB",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "lowvig",
+     "price": 170
+    },
+    "raw_overround_pts": 3.98,
+    "relative_price_discount": -0.016698054,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Carolina Panthers",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261028T183724Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-10-28T18:37:26Z",
+   "kickoff_utc": "2026-10-30T00:15:00Z",
+   "matchup": "CAR @ GB",
+   "sha256": "b52a6d1b28515e70b644334247904b7e3f3be2555d125771f09aee9faf042dec",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|CAR @ PHI|2026-10-18T17:00:00Z": {

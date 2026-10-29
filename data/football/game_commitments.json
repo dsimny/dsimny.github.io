@@ -8940,6 +8940,40 @@
    "sha256": "6f75ef7bee5761b3f1915c1855164b28957963393bbf2132ff6158349422f840",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Tulane Green Wave @ Charlotte 49ers|2026-10-30T23:00:00Z": {
+   "block": {
+    "away": "Tulane Green Wave",
+    "best_book": "fanduel",
+    "best_price": 280,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.844,
+    "fair_away": 0.74468,
+    "fair_home": 0.25532,
+    "fair_side": 0.25532,
+    "home": "Charlotte 49ers",
+    "kickoff_utc": "2026-10-30T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Tulane Green Wave @ Charlotte 49ers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.444,
+    "relative_price_discount": -0.0307017544,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Charlotte 49ers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261029T173720Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-29T17:37:29Z",
+   "kickoff_utc": "2026-10-30T23:00:00Z",
+   "matchup": "Tulane Green Wave @ Charlotte 49ers",
+   "sha256": "7e0c8d9cc2b69b24446bb1573fcf86f96178a1dee02ad78f584802cf51bcf73b",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Tulane Green Wave @ Kansas State Wildcats|2026-09-19T16:00:00Z": {
    "block": {
     "away": "Tulane Green Wave",

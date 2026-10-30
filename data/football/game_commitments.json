@@ -462,7 +462,8 @@
     "0c217dd147c198f95e5b95b58c67d7480a259edfa3807790e7b24fad13350323",
     "5804dd08770ce0bb5614098597186f04a81b37893f28055adfcd06d16e209d80",
     "02871d0d7ce9145767909e8967693ee780dcc0234bed3ce8a81824c8f6d87f6f",
-    "9ab3ae6a210f0f0e3d2c1968b17c7d577e86aeb89540410e5c9d215a5c30b908"
+    "9ab3ae6a210f0f0e3d2c1968b17c7d577e86aeb89540410e5c9d215a5c30b908",
+    "13e64c3c0a37ec51a7389b46aa6e8775bfce0713ea6d904a523485f27b864bd9"
    ],
    "matchup": "Appalachian State Mountaineers @ Georgia Southern Eagles",
    "sha256": "5556cb3fd357fa156df0cee61e04b3237dd0604dfa5ed66b366b94c920267c0a",
@@ -864,7 +865,8 @@
    "committed_utc": "2026-10-30T18:31:41Z",
    "kickoff_utc": "2026-11-01T00:00:00Z",
    "later_disagreements": [
-    "5cfaa26bcda4cdafc8acabcbab075035ec9bfed3fd0ddaa55fb4c97d6217fe87"
+    "5cfaa26bcda4cdafc8acabcbab075035ec9bfed3fd0ddaa55fb4c97d6217fe87",
+    "dd92fc59b1bc5893c5207c1d2962d830cba983823db5873cbe469295f8b7e5cc"
    ],
    "matchup": "Army Black Knights @ Memphis Tigers",
    "sha256": "4ad1d4a892d266a7f07d74fc5e65782244df5c551e3b0f3446095045a135bd6f",
@@ -1992,7 +1994,8 @@
    "later_disagreements": [
     "f8b7f1ecbee66d3f160d3bc85f0233129ad9362d48e811632588771edba5c177",
     "79ebfd006419aae42c7dd25d8da0a2d406706d1dbd26434657bedc1275345baa",
-    "d461a24a1ee4620a6c02af82c3211ca74e7f4c4f03cab1ec2258ed4b2cb51c8e"
+    "d461a24a1ee4620a6c02af82c3211ca74e7f4c4f03cab1ec2258ed4b2cb51c8e",
+    "6991b4078bec0b89875f3c95261e5dd993c56d7bfd3f96f8d7d1602cfbf28005"
    ],
    "matchup": "Clemson Tigers @ Florida State Seminoles",
    "sha256": "2956b8b525dd2a720e6f8906b97394c97845293b2fb2a4e5263d0c37cfa9da76",
@@ -5742,7 +5745,8 @@
    "later_disagreements": [
     "3b478a9230643788373e035f3505e8777f3130a97539cf0688a7bb70c7401ba9",
     "e328a5a3d367264d9d6e27e69c81cd69df9400baced3ad52c0cc427ac0df3d8c",
-    "1070b9583c36ff129cae684f365dad7c0e9871f14212b2f910d70a1039cc1f08"
+    "1070b9583c36ff129cae684f365dad7c0e9871f14212b2f910d70a1039cc1f08",
+    "39720f34fe2d6683cd0bab32a2374255f80e47b35404e347c3bd7daca50df765"
    ],
    "matchup": "Miami Hurricanes @ North Carolina Tar Heels",
    "sha256": "592a1bafe4c9cad543ae43b9c3e2f2f663d81c4ab3f58709ba6cbbeb71be8e5a",
@@ -6169,7 +6173,8 @@
    "later_disagreements": [
     "f9298c383d10542085a4059bf2ef766a95a457c7bce36df0f07d0b678857e712",
     "e5dc7722695df79d5e3c4b1e17dbfb03a2737505955b4f1a13c3de282fb743e2",
-    "201e711c56e763902c34a721d0902e25ecf4079d2ee300ec434dc6d15ce95149"
+    "201e711c56e763902c34a721d0902e25ecf4079d2ee300ec434dc6d15ce95149",
+    "c412ad9f6d781fe44f7925104512468e25fba33cd40c304248bc79d4771cdd85"
    ],
    "matchup": "Mississippi State Bulldogs @ Texas Longhorns",
    "sha256": "1b96137353d94d6ea6697e51b536986b8ec12784cad3ed231b6427dd46b8c270",
@@ -6278,7 +6283,8 @@
    "kickoff_utc": "2026-10-31T23:45:00Z",
    "later_disagreements": [
     "da52665917da5285a6903ede60b0ea55c75c624a968963924f5b3eacc4b23784",
-    "ccee75bb5560a5b6f757efc6edee25ffb368d666cc081209805fe0be2c58bd24"
+    "ccee75bb5560a5b6f757efc6edee25ffb368d666cc081209805fe0be2c58bd24",
+    "ba4f4f01af87fd9c234b8abb7b5d7825e6b6b6c6a48891ad93adb4a275bc163b"
    ],
    "matchup": "Missouri Tigers @ Arkansas Razorbacks",
    "sha256": "3ba368bb4b61410b3c65741584057f51efd9105ea72cb945ddb7e7acca7b3375",
@@ -7309,6 +7315,9 @@
    },
    "committed_utc": "2026-10-30T20:37:27Z",
    "kickoff_utc": "2026-11-01T02:30:00Z",
+   "later_disagreements": [
+    "01252ecb8d9a86e0ea1af7aa1183f1b429ce38f8e698305f426127b77a61ad46"
+   ],
    "matchup": "Northern Illinois Huskies @ UNLV Rebels",
    "sha256": "38b1ef7b21108a00f409c1598d98202b240ed4aa7d86538807fa284d3fafcc09",
    "sport": "ncaaf"
@@ -8281,6 +8290,40 @@
    "kickoff_utc": "2026-09-12T17:30:00Z",
    "matchup": "Oregon Ducks @ Oklahoma State Cowboys",
    "sha256": "cd11d62bdbffc107c32a4e4b58cc699f85927911f5f21c2b24a57b4f4e3eccbb",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Oregon State Beavers @ Fresno State Bulldogs|2026-11-01T03:00:00Z": {
+   "block": {
+    "away": "Oregon State Beavers",
+    "best_book": "fanduel",
+    "best_price": -220,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.233,
+    "fair_away": 0.66824,
+    "fair_home": 0.33176,
+    "fair_side": 0.66824,
+    "home": "Fresno State Bulldogs",
+    "kickoff_utc": "2026-11-01T03:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Oregon State Beavers @ Fresno State Bulldogs",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.299,
+    "relative_price_discount": -0.0288193922,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Oregon State Beavers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T213721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-30T21:37:26Z",
+   "kickoff_utc": "2026-11-01T03:00:00Z",
+   "matchup": "Oregon State Beavers @ Fresno State Bulldogs",
+   "sha256": "eaffb05534e22c88fffa121f0d36655b2b9c93cb2c39f397c98280fe8182781d",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Penn State Nittany Lions @ Temple Owls|2026-09-12T16:00:00Z": {
@@ -10235,6 +10278,9 @@
    },
    "committed_utc": "2026-10-30T20:37:27Z",
    "kickoff_utc": "2026-11-01T02:00:00Z",
+   "later_disagreements": [
+    "a65bfe7407d961e20e3eb223b319305998759136b2e3b59b63384783140fc8e6"
+   ],
    "matchup": "Texas State Bobcats @ Boise State Broncos",
    "sha256": "66bbb4d4f69c19a63ea90126222574b65ac03f639d358cf9e2285042bc251110",
    "sport": "ncaaf"
@@ -12135,7 +12181,8 @@
    "later_disagreements": [
     "454285167fb2dfaf5acc23cfea67185864bfca7dc647ea885920f94c9b581bf3",
     "05e9926c91c657de2637fde5f337661fed7c78142edf54c1c88f2768813fd123",
-    "7656444f5eca15deab9072eaf96245045a6f952c61eeb6669b5758e7cd640a19"
+    "7656444f5eca15deab9072eaf96245045a6f952c61eeb6669b5758e7cd640a19",
+    "612b0ea2424beff2c14437f18d0883563645416a51a9ec59ef3c22f4020327f0"
    ],
    "matchup": "Washington State Cougars @ San Diego State Aztecs",
    "sha256": "8a6e3927849c2a01e0007adcfcb6e6ad7181e36c70f71734245ffea227fafa5a",

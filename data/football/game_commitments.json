@@ -459,7 +459,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:30:00Z",
    "later_disagreements": [
-    "418b7c3ec8d73b9f9c498ddcf9178dd12bdf805905e7fcca91f8c9661eb69f8c"
+    "418b7c3ec8d73b9f9c498ddcf9178dd12bdf805905e7fcca91f8c9661eb69f8c",
+    "429429e07272191e48fc10e0d639bd81c83ca662b4524bdd8f64477fe1700fc3"
    ],
    "matchup": "Arizona State Sun Devils @ BYU Cougars",
    "sha256": "1fb7168a284ea49232bd7f67a780940cd0a740a72c148f245850ade4104bffd5",
@@ -611,7 +612,8 @@
     "4e3c13bf9f268dbedabca4f45645dc3992e0da145ec224a376346d25515c3654",
     "b710f6281dd82cc51d704cc2545eebc1e28e2fda0f00e52ea055cf54bc205b1e",
     "4b0eafc8338958b32ae3631b312788103e525be17241c07fdd3161066696c9c2",
-    "47342bf1354ab65c06c94ea891abd994fbe1c93a5e11c7d8ca24f4562395631c"
+    "47342bf1354ab65c06c94ea891abd994fbe1c93a5e11c7d8ca24f4562395631c",
+    "29c48f737316d4eccf3f09238cd581d37efa371908a9e850b25daac00d2ae853"
    ],
    "matchup": "Arizona Wildcats @ Texas Tech Red Raiders",
    "sha256": "648f9f2dad571d19bb5fbe3db919debf0e2d9485fdc1e1d40456efb4cfe031b4",
@@ -975,7 +977,8 @@
     "6686ae7bd6e25c7b4ab9416dba8fee3c186280f45ed70bb66e5b6468c92ffa98",
     "8e060a545105b3fbcfc5b0b4863560110e48dd1ea002be027bf20fd839ce97f7",
     "34396e34d5507c29378b42c9d07787e78a2c97a88322e3670d72abcc33442cbc",
-    "a895da6b2904e1e278b666a6bea99d69397f191ed3766a1edf7960e09058ab37"
+    "a895da6b2904e1e278b666a6bea99d69397f191ed3766a1edf7960e09058ab37",
+    "f8436ea1b1e25f208ac8f675745479a2576e061fdeeb1295c64fc27075b2730e"
    ],
    "matchup": "Auburn Tigers @ Ole Miss Rebels",
    "sha256": "16e5c0f0eb1614061f382216b9a189c33a8b412da5a79441f2607033bc75ef06",
@@ -1342,7 +1345,8 @@
     "35f3f5bf182d879083f5c58777b3eb3bda94a189a2a929218805c18ed5927f22",
     "818725fc9f96cd74a8fb95e7b5d9f8e05d445b94ef15e991000a57f925a44269",
     "f8ea7eb78d57b9e34a3f343b6ecf08ab28d92dcc8a5844767db74010f6a5bb43",
-    "d0ef5cebe7423166792814ea34b54328944bef855eacb84e79e8f24b6274cd96"
+    "d0ef5cebe7423166792814ea34b54328944bef855eacb84e79e8f24b6274cd96",
+    "a0d2365b94f42a09ae28823add75da74e8150f7bc963646f309678af7c932c0f"
    ],
    "matchup": "Boston College Eagles @ Duke Blue Devils",
    "sha256": "84125c291719802495558c1169db4e9fe2edabd12323ac69ea3ee43a94f98981",
@@ -1507,7 +1511,8 @@
     "64c39c320344d3e979c13bdb3991e2dbbe472fc520e9f5195b6c574f28b2e226",
     "6acc96e1c279611abbebd3f3108989bd8183890f41122cb927483512661ad356",
     "2c66c8fa1e869af511c46367b33ea6a0f59685be47a2b05562b110de386b7257",
-    "c454b76a3a5be2d1cbc0c2ed81fe36e0874713594af147c7b4d3b790a2381fe3"
+    "c454b76a3a5be2d1cbc0c2ed81fe36e0874713594af147c7b4d3b790a2381fe3",
+    "d943f0b0fa5125272f11eb3a3ef8b350c7bd5c0d9084cd8c19156df5a3ca3898"
    ],
    "matchup": "Bowling Green Falcons @ Western Michigan Broncos",
    "sha256": "f81d6ebe8b374a9688ab5f35bebdc9bf13c83b001a42f4b2cddd762fb8b33a62",
@@ -1624,7 +1629,8 @@
     "499168f31287afb5affa01910553e7ce1cc0267af56aa3efa93d2fc27af1c59c",
     "e6eccef080ee2d23bdbacd30ba7963346fc7fad3879fc106613d8fc1572c0def",
     "b5dafd6363cfd97d94337503126f2ea1cb36fd52fae890c394c7fe00b35213cc",
-    "8b4f13537f696874df1d98bc99cf8c2b50618e4d42698ee001884c03caa0c0cf"
+    "8b4f13537f696874df1d98bc99cf8c2b50618e4d42698ee001884c03caa0c0cf",
+    "b4b07eac02e46fc7034336a4050e4f1ef7ffd6623c94c3d9a26d8a3d1a702309"
    ],
    "matchup": "California Golden Bears @ NC State Wolfpack",
    "sha256": "c96cb77d15487fe89d0dbeb05246fe18294b564c4c261ab9417280cdd9fc684e",
@@ -2082,7 +2088,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:30:00Z",
    "later_disagreements": [
-    "0548d5a07bc4a813ae72486db16cb4501c30944910db5b7daf9671d1e5809f3f"
+    "0548d5a07bc4a813ae72486db16cb4501c30944910db5b7daf9671d1e5809f3f",
+    "efe914c227595f3a84edf8d6ed8d27b23017f3ef46c9bf5935958f73d24b0f7e"
    ],
    "matchup": "Colorado State Rams @ Utah State Aggies",
    "sha256": "a13e2fe8f480676226a0ada75d675201294b0bf773492087cc3914b797f941a1",
@@ -2649,6 +2656,80 @@
    "sha256": "645efe059a32544712cc9303a61ec21716fd61bd5ac22ac3c1d424682f354a0b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Florida Gators @ Georgia Bulldogs|2026-10-31T16:00:00Z": {
+   "block": {
+    "away": "Florida Gators",
+    "best_book": "betrivers",
+    "best_price": 350,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.704,
+    "fair_away": 0.21586,
+    "fair_home": 0.78414,
+    "fair_side": 0.21586,
+    "home": "Georgia Bulldogs",
+    "kickoff_utc": "2026-10-31T16:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida Gators @ Georgia Bulldogs",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 360
+    },
+    "raw_overround_pts": 4.341,
+    "relative_price_discount": -0.0294949495,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Florida Gators",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T143721Z.json",
+    "t24_hours_before_kickoff": 25.38
+   },
+   "committed_utc": "2026-10-30T14:37:25Z",
+   "kickoff_utc": "2026-10-31T16:00:00Z",
+   "matchup": "Florida Gators @ Georgia Bulldogs",
+   "sha256": "f4c8a75784f70c59157ea49b5e869fc3b3e55536a9e19f83c85708163c335941",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Florida Gators @ Georgia Bulldogs|2026-10-31T19:30:00Z": {
+   "block": {
+    "away": "Florida Gators",
+    "best_book": "betrivers",
+    "best_price": 350,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.704,
+    "fair_away": 0.21586,
+    "fair_home": 0.78414,
+    "fair_side": 0.21586,
+    "home": "Georgia Bulldogs",
+    "kickoff_utc": "2026-10-31T19:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida Gators @ Georgia Bulldogs",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 360
+    },
+    "raw_overround_pts": 4.341,
+    "relative_price_discount": -0.0294949495,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Florida Gators",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T143721Z.json",
+    "t24_hours_before_kickoff": 28.88
+   },
+   "committed_utc": "2026-10-30T14:37:25Z",
+   "kickoff_utc": "2026-10-31T19:30:00Z",
+   "matchup": "Florida Gators @ Georgia Bulldogs",
+   "sha256": "f914009f5ba68a99e40cf278b4702d4ae85055e6ecdc5493d42ae7ddcbb5b842",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Florida Gators @ Texas Longhorns|2026-10-17T16:00:00Z": {
    "block": {
     "away": "Florida Gators",
@@ -2792,7 +2873,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:30:00Z",
    "later_disagreements": [
-    "e265d07c32d4dd8731f73accde8659d6463f9167ff2b0eefeab6c0f69012336c"
+    "e265d07c32d4dd8731f73accde8659d6463f9167ff2b0eefeab6c0f69012336c",
+    "cdd0026304fad52e1dbb374c47e1e30f83b84d4878c595b46d8483f002774660"
    ],
    "matchup": "Florida International Panthers @ Liberty Flames",
    "sha256": "7282f46a549d42e9b6d2f677756af62d71d3b970d588f98a9791370351ab902c",
@@ -3689,7 +3771,8 @@
     "66833d0693e95a3a89ba88198468a502dda4c8bbe510b024437c5db5fa9ec21c",
     "89afde1a0602f3701dbfe67789c2c4a3228112d3301de57b62fe31c8243486fa",
     "525078113e4b41e7f7e1c5a99385220e89550e112ef4fed85190ee85b9ccca43",
-    "b60ab35883a6d5c1c2b29a6b2bb8d0cb45c7498d2891076a5b60bb747caa5268"
+    "b60ab35883a6d5c1c2b29a6b2bb8d0cb45c7498d2891076a5b60bb747caa5268",
+    "2c1aa49b6ea28d6c8308eb9a3a8ee00900180e5e5adcb3b668be857f5db7c2f8"
    ],
    "matchup": "Illinois Fighting Illini @ Maryland Terrapins",
    "sha256": "54e3daa14422577fca222c5e0510f5e3fc6a3e9cf46e814999d17d0e6812a0bb",
@@ -4458,7 +4541,8 @@
    "kickoff_utc": "2026-10-31T18:00:00Z",
    "later_disagreements": [
     "4726b8b422425a9f143c7371edb24fac15389caca8ac1733d918d8b60065392d",
-    "ad706373d084f5acaea933a0e83c16da4a36e04b3bf427083628558df77ed3ea"
+    "ad706373d084f5acaea933a0e83c16da4a36e04b3bf427083628558df77ed3ea",
+    "6a8e7e9675d525edb19900b0f4a8fe7fb394c256fec7974ac7feb22ffe1c2676"
    ],
    "matchup": "Kansas State Wildcats @ Colorado Buffaloes",
    "sha256": "0373e72282742e6a74eb85b3dbb1acee67a16a72fa9827cdcb3d133bf82c2d76",
@@ -5201,7 +5285,8 @@
    "later_disagreements": [
     "6140d662f37a0d036328e28aa9ae953af782d5c2a25c1e13dd33695bc6a71c25",
     "09d899795aa1760fddc5ac9b6b64ec113333ac458f6737497267ef7485c97ceb",
-    "616b460cc18077f27cea5b0af65b545d0cb46fc0f4ec85b26445aae10d469516"
+    "616b460cc18077f27cea5b0af65b545d0cb46fc0f4ec85b26445aae10d469516",
+    "8a30b956854f940daa30f9d85032b08c8a9b2c48f62178b40c23a33461458063"
    ],
    "matchup": "Marshall Thundering Herd @ Old Dominion Monarchs",
    "sha256": "a2aaa75721a5d2d2ae3d092850807af7a1a93610783684465e3d27aaa700911a",
@@ -5551,7 +5636,8 @@
     "c7cc9466549a7371accbbbf90b662d1faaf9f87d7804f6bbf91fdd15403da8d2",
     "52c22cea972b55b8586bee146cd3acb56977ab923fe27b4e9a15d4c08703121c",
     "823f46d19f9a6bc57924791ea27fe4790a78247d141555913e77d397e8270320",
-    "35074de896ace26e87db1e2d1aaa44fd299d0b28960c08a1fd56bd2f279117c0"
+    "35074de896ace26e87db1e2d1aaa44fd299d0b28960c08a1fd56bd2f279117c0",
+    "edfb1fe73ad595c648fb594c45621c37cf698661edc98a8fe65e9f4a66a5f3e4"
    ],
    "matchup": "Michigan Wolverines @ Rutgers Scarlet Knights",
    "sha256": "d6e260e48c296aec6297ee83fbd015fd312f2448e2994479ee58bad39bfba5c8",
@@ -6189,6 +6275,40 @@
    "sha256": "a398417822d059a1f2e96e778446eef272389740aed4c1944af23636dab9245d",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Nevada Wolf Pack @ UCLA Bruins|2026-10-31T20:15:00Z": {
+   "block": {
+    "away": "Nevada Wolf Pack",
+    "best_book": "fanduel",
+    "best_price": 1280,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 1.983,
+    "fair_away": 0.08756,
+    "fair_home": 0.91244,
+    "fair_side": 0.08756,
+    "home": "UCLA Bruins",
+    "kickoff_utc": "2026-10-31T20:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Nevada Wolf Pack @ UCLA Bruins",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.828,
+    "relative_price_discount": 0.1723874905,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Nevada Wolf Pack",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T143721Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-10-30T14:37:25Z",
+   "kickoff_utc": "2026-10-31T20:15:00Z",
+   "matchup": "Nevada Wolf Pack @ UCLA Bruins",
+   "sha256": "532f3bbe83315e0d2cbcda765928997ccd7d49bc243f55e65157b5089034fca0",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Nevada Wolf Pack @ UTEP Miners|2026-10-10T23:00:00Z": {
    "block": {
     "away": "Nevada Wolf Pack",
@@ -6306,6 +6426,40 @@
    ],
    "matchup": "New Mexico Lobos @ Oklahoma Sooners",
    "sha256": "9883305b736686d0482580fb5b5ca9a9897edce579ce06ed5ba74426cf37d088",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|New Mexico Lobos @ San Jose State Spartans|2026-10-31T20:00:00Z": {
+   "block": {
+    "away": "New Mexico Lobos",
+    "best_book": "betrivers",
+    "best_price": 525,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.667,
+    "fair_away": 0.83733,
+    "fair_home": 0.16267,
+    "fair_side": 0.16267,
+    "home": "San Jose State Spartans",
+    "kickoff_utc": "2026-10-31T20:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "New Mexico Lobos @ San Jose State Spartans",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.017,
+    "relative_price_discount": 0.0164129032,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "San Jose State Spartans",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T143721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-10-30T14:37:25Z",
+   "kickoff_utc": "2026-10-31T20:00:00Z",
+   "matchup": "New Mexico Lobos @ San Jose State Spartans",
+   "sha256": "863cb1b7ef75de5aac58c25ba4c2ac38ef45198a643e8c1ddd0f5dc3641cfcea",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|New Mexico State Aggies @ Florida International Panthers|2026-10-07T23:30:00Z": {
@@ -6919,7 +7073,8 @@
     "e58142baac3ff70890f3136d159738327621d4fe931a59fb273024e7066756a6",
     "2860b4559a3087d37257cf424e5673b6d6d93652d74fa18144eff13581a70f7b",
     "e49b068e66d263432e645b9d5f26a7579e63f26e48ed1df4baf7a2d6bb0a4613",
-    "e282f7a0ff898111f41d99f971d1ac5ecbdd497584ca57a6edd556b508a2af44"
+    "e282f7a0ff898111f41d99f971d1ac5ecbdd497584ca57a6edd556b508a2af44",
+    "b7dcb869ed0265a8c895570d3e2ac2ba022e86f3da8e3b1a013e07e1e05d2afb"
    ],
    "matchup": "Northwestern Wildcats @ Oregon Ducks",
    "sha256": "45bcb3a447a5e98871822cc9768d7018675924be897e8699454dda765085b6d9",
@@ -6959,7 +7114,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:30:00Z",
    "later_disagreements": [
-    "f34976ec3fbcac211981ec242ccd93306ac95b812b8632b901d6132d85735eea"
+    "f34976ec3fbcac211981ec242ccd93306ac95b812b8632b901d6132d85735eea",
+    "c6ed820e227a49d3ef3759a118b217fadb459080c8e0fa559d5c0f61404be141"
    ],
    "matchup": "Northwestern Wildcats @ Oregon Ducks",
    "sha256": "1a15aeb8d17a49c2c4ae3aca55da3c4f9b04d7d1e577297efbd0cc79802ce14e",
@@ -7197,7 +7353,8 @@
     "25584bf3d18141d0c6f4491dc214406440df422f1c9fb8fce88f356b5405c6bf",
     "6d6b717a6b6e8dbd63b8c5bb250ae7dcb51e06d505a49ee3a86f9e1bcfa81c9b",
     "d6ed8b05b182d519dd01f31c9747e72d9391e75fb1d8283f2df7765170f3cd56",
-    "53dfb98d3d041be60e65ba033fd6f30d2a7077c6cd81600128c308b24d190a64"
+    "53dfb98d3d041be60e65ba033fd6f30d2a7077c6cd81600128c308b24d190a64",
+    "c3da60d44bb92227a2a3360ec87ba72880300336e301ded5e7b512cb0f6c9388"
    ],
    "matchup": "Ohio State Buckeyes @ USC Trojans",
    "sha256": "2f444f46d067a8ef962948865ae4a8b28125a25cf83a448bca501b3e520c87c8",
@@ -7732,6 +7889,40 @@
    "sha256": "f1127691d501c0cb1b55453e9f5c45a4a3fce0cfab032e2c0ed375d6a77e51d2",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Purdue Boilermakers @ Penn State Nittany Lions|2026-10-31T20:15:00Z": {
+   "block": {
+    "away": "Purdue Boilermakers",
+    "best_book": "fanduel",
+    "best_price": 330,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.203,
+    "fair_away": 0.23456,
+    "fair_home": 0.76544,
+    "fair_side": 0.23456,
+    "home": "Penn State Nittany Lions",
+    "kickoff_utc": "2026-10-31T20:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Purdue Boilermakers @ Penn State Nittany Lions",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.982,
+    "relative_price_discount": 0.0085429521,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Purdue Boilermakers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T143721Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-10-30T14:37:25Z",
+   "kickoff_utc": "2026-10-31T20:15:00Z",
+   "matchup": "Purdue Boilermakers @ Penn State Nittany Lions",
+   "sha256": "e2d3120405f44401bc401ea015eaff8d0cbf4300daa7e0afe08cdcc2a6af3a24",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Purdue Boilermakers @ UCLA Bruins|2026-09-20T03:00:00Z": {
    "block": {
     "away": "Purdue Boilermakers",
@@ -8039,7 +8230,8 @@
     "4c577e0fc327b850580b74e15bede2466af33173eacf29f05aa0be10716a109b",
     "5a5e948b52e0af477a5a26996a1d1d66df59abff901baf5fc9ef247ffb31d496",
     "75afba27d1d7e79c9b540e0b26b491fcd9be57cd7937f5d8dc31a20b70afd40a",
-    "2aea72836c4d67b73771efac2056e238937af3b99bb35ec3d239c243d05ab79d"
+    "2aea72836c4d67b73771efac2056e238937af3b99bb35ec3d239c243d05ab79d",
+    "f67b55da1666aeb33003947b0dc2411f20ea1b0fb69c329c23491aa6509db396"
    ],
    "matchup": "SMU Mustangs @ Syracuse Orange",
    "sha256": "a46ced50a98edff6743cacfed77cee81a859c116fe6ecaead1138ce5187e85e1",
@@ -8573,6 +8765,43 @@
    "sha256": "472d98d388607c4133f400307dc334d0c08c9a93995c80e5a8f0cc00b8ef5786",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|South Carolina Gamecocks @ Oklahoma Sooners|2026-10-31T20:15:00Z": {
+   "block": {
+    "away": "South Carolina Gamecocks",
+    "best_book": "williamhill_us",
+    "best_price": 145,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.355,
+    "fair_away": 0.40091,
+    "fair_home": 0.59909,
+    "fair_side": 0.40091,
+    "home": "Oklahoma Sooners",
+    "kickoff_utc": "2026-10-31T20:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "South Carolina Gamecocks @ Oklahoma Sooners",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betonlineag",
+     "price": 145
+    },
+    "raw_overround_pts": 3.931,
+    "relative_price_discount": -0.0180978052,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "South Carolina Gamecocks",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T143721Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-10-30T14:37:25Z",
+   "kickoff_utc": "2026-10-31T20:15:00Z",
+   "matchup": "South Carolina Gamecocks @ Oklahoma Sooners",
+   "sha256": "a41832dd9ebcee9e66aba0cce5a904000e7abceaf7baa38984c6c27e649758e1",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|South Dakota Coyotes @ Boise State Broncos|2026-09-20T02:00:00Z": {
    "block": {
     "away": "South Dakota Coyotes",
@@ -8780,7 +9009,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:30:00Z",
    "later_disagreements": [
-    "00d78a7647bb14c017978fd265e1b103cb16f5dcc886b346d1985c1676161e79"
+    "00d78a7647bb14c017978fd265e1b103cb16f5dcc886b346d1985c1676161e79",
+    "721a1552fa8b5285ba425aac4d33ebe8898307e70551fbc780b0e8a893a71416"
    ],
    "matchup": "Southern Mississippi Golden Eagles @ UL Monroe Warhawks",
    "sha256": "5b179cef7b8525686ea58824af5730eddf06860e861fd7879a4c743dc58c0399",
@@ -8892,7 +9122,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:15:00Z",
    "later_disagreements": [
-    "4dc2fecb8c92bd94852ed110a71f371daa647ddc2874a320112d8ee33bad71ba"
+    "4dc2fecb8c92bd94852ed110a71f371daa647ddc2874a320112d8ee33bad71ba",
+    "ecf0f36bae935f48ac9f43802b95f896536ea120a50862471a9082e0bb288c17"
    ],
    "matchup": "Stanford Cardinal @ Louisville Cardinals",
    "sha256": "40a05fb6838a8f121e492a55eb85a69b93de44adc192566451ec80645719ea31",
@@ -9996,7 +10227,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T16:00:00Z",
    "later_disagreements": [
-    "01128c037e53f919d5ee5a2d4a7ad8691f7559016e83a5b3959acac338637b8c"
+    "01128c037e53f919d5ee5a2d4a7ad8691f7559016e83a5b3959acac338637b8c",
+    "35e50a25c257e735795b138c1c359a9f8ac5db1cc36fd79cf512a2cce1d74fcd"
    ],
    "matchup": "UAB Blazers @ South Florida Bulls",
    "sha256": "65dedd941f482b70f974e53845f4b7744b297205c960d0401cdf1ef54d3564be",
@@ -10152,7 +10384,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:00:00Z",
    "later_disagreements": [
-    "84b5cc1aac1be6be4608b4f2845ac94b366823e9508abf26521a281ab54cd74f"
+    "84b5cc1aac1be6be4608b4f2845ac94b366823e9508abf26521a281ab54cd74f",
+    "56ae75c66cd05730f21e1bab1d5f15eaa3c128f754914b07af73d3d0a9e3c5bd"
    ],
    "matchup": "UConn Huskies @ Air Force Falcons",
    "sha256": "f6f81582ea08a7bd94dc4de3c60897c0390a8fd9ce443b31cfd2f7be740df35a",
@@ -10589,7 +10822,8 @@
    "committed_utc": "2026-10-30T13:37:29Z",
    "kickoff_utc": "2026-10-31T19:30:00Z",
    "later_disagreements": [
-    "ce2e64855f2d312022c09077f5483812945ffeb07b7aebd7dcc06fa188e14e26"
+    "ce2e64855f2d312022c09077f5483812945ffeb07b7aebd7dcc06fa188e14e26",
+    "0774b6d5e18183a9153f1090d7082b64b1f2b509d425ad3b2f79c37c71247ef5"
    ],
    "matchup": "UTEP Miners @ North Dakota State Bison",
    "sha256": "f6b317e68390f374f05e5e8b093d5278df3344abe8a01f80aecbdfd038c64046",
@@ -10777,6 +11011,9 @@
    },
    "committed_utc": "2026-10-30T13:47:26Z",
    "kickoff_utc": "2026-10-31T19:45:00Z",
+   "later_disagreements": [
+    "a42615d584e062b9a976bcfe763b20032e48623b384b7a6e8c1d9667d820289f"
+   ],
    "matchup": "Utah Utes @ Cincinnati Bearcats",
    "sha256": "1ede02a03881d347c4b49b584a9b219374c8fd5e3644008cf88684f2790581b4",
    "sport": "ncaaf"
@@ -10930,6 +11167,9 @@
    },
    "committed_utc": "2026-10-30T13:47:26Z",
    "kickoff_utc": "2026-10-31T19:45:00Z",
+   "later_disagreements": [
+    "114a398c2f9373d66c5da9df921732e29696a3f31291ba48f51f93a32acaf1ab"
+   ],
    "matchup": "Virginia Cavaliers @ Wake Forest Demon Deacons",
    "sha256": "0982f6ac97eff732125485440de368e7f89e17c54ee072daea92d107ad51d8da",
    "sport": "ncaaf"
@@ -11493,7 +11733,8 @@
     "29e2c316ecb196f5ab7336bbbe369d990f5b9c9c44c0bcd2f64c17e967ca044c",
     "ca21447c3b7e5ea3838c68bad378bcc131a48e60cba278e7dabeb3e5d4a31f3b",
     "1da89fa36c570555a2940f446310f9b19924905c2ac8f62829391d1ae2a6ecba",
-    "7e4e56d76d1f3f4e8e7235e2ef8635553b0109990d806a804b06d3691d9aa4b1"
+    "7e4e56d76d1f3f4e8e7235e2ef8635553b0109990d806a804b06d3691d9aa4b1",
+    "d91d028e481b352486970ce733e84da1704f772e568b35f6063a04521439bcba"
    ],
    "matchup": "Wisconsin Badgers @ Iowa Hawkeyes",
    "sha256": "62a9b8f3cf176cf80091e883a553848dd6b4d6145adbe5841e8f69a3721a2d00",

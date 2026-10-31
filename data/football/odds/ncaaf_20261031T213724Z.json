@@ -1,0 +1,6166 @@
+{
+ "_capture_role_note": "scheduled: written by the capture job into the model's evidence trail; grade_football.py may book the record against it. research: a deliberate ad-hoc pull (e.g. the D.J. Mercer Spotlight). No model reads it.",
+ "_identity_note": "canonical: away/home are teams.py franchise keys, verified, unresolvable names aborted the run. verbatim: away/home are the API's own strings and NO canonical key is claimed - sufficient for price capture and the selection rule, NOT sufficient for grading, which needs a results join.",
+ "_tier_note": "Tier A: first-party pull, stamped with the UTC moment WE received it. Eligible for CLV precisely because that timestamp exists.",
+ "capture_role": "scheduled",
+ "captured_utc": "2026-10-31T21:37:24Z",
+ "credits": {
+  "http_status": 200,
+  "last_call_cost": 1,
+  "markets": "h2h",
+  "read_utc": "2026-10-31T21:37:24Z",
+  "regions": "us",
+  "remaining": 19804,
+  "source": "football_fetch_odds:ncaaf",
+  "used": 196
+ },
+ "events": [
+  {
+   "away": "Kansas State Wildcats",
+   "away_raw": "Kansas State Wildcats",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:33:07Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:33:07Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Colorado Buffaloes",
+        "point": null,
+        "price": -200
+       },
+       {
+        "name": "Kansas State Wildcats",
+        "point": null,
+        "price": 158
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:33:53Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:33:53Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Colorado Buffaloes",
+        "point": null,
+        "price": -124
+       },
+       {
+        "name": "Kansas State Wildcats",
+        "point": null,
+        "price": -107
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:34:17Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:34:16Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Colorado Buffaloes",
+        "point": null,
+        "price": -165
+       },
+       {
+        "name": "Kansas State Wildcats",
+        "point": null,
+        "price": 125
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Colorado Buffaloes",
+        "point": null,
+        "price": -130
+       },
+       {
+        "name": "Kansas State Wildcats",
+        "point": null,
+        "price": 102
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:32:51Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:32:51Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Colorado Buffaloes",
+        "point": null,
+        "price": -425
+       },
+       {
+        "name": "Kansas State Wildcats",
+        "point": null,
+        "price": 285
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T18:02:17Z",
+   "home": "Colorado Buffaloes",
+   "home_raw": "Colorado Buffaloes",
+   "n_books": 5,
+   "odds_api_event_id": "d19dbab4071552441b056ccd2e23ca59"
+  },
+  {
+   "away": "Coastal Carolina Chanticleers",
+   "away_raw": "Coastal Carolina Chanticleers",
+   "books": [
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Coastal Carolina Chanticleers",
+        "point": null,
+        "price": -5000
+       },
+       {
+        "name": "Georgia State Panthers",
+        "point": null,
+        "price": 1200
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T18:02:35Z",
+   "home": "Georgia State Panthers",
+   "home_raw": "Georgia State Panthers",
+   "n_books": 1,
+   "odds_api_event_id": "47548a73e429985e77f81a4617b4fdfd"
+  },
+  {
+   "away": "Louisiana Tech Bulldogs",
+   "away_raw": "Louisiana Tech Bulldogs",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisiana Tech Bulldogs",
+        "point": null,
+        "price": -4500
+       },
+       {
+        "name": "South Alabama Jaguars",
+        "point": null,
+        "price": 1200
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisiana Tech Bulldogs",
+        "point": null,
+        "price": -5000
+       },
+       {
+        "name": "South Alabama Jaguars",
+        "point": null,
+        "price": 1600
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisiana Tech Bulldogs",
+        "point": null,
+        "price": -5000
+       },
+       {
+        "name": "South Alabama Jaguars",
+        "point": null,
+        "price": 2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisiana Tech Bulldogs",
+        "point": null,
+        "price": -6700
+       },
+       {
+        "name": "South Alabama Jaguars",
+        "point": null,
+        "price": 1400
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisiana Tech Bulldogs",
+        "point": null,
+        "price": -5000
+       },
+       {
+        "name": "South Alabama Jaguars",
+        "point": null,
+        "price": 950
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisiana Tech Bulldogs",
+        "point": null,
+        "price": -4000
+       },
+       {
+        "name": "South Alabama Jaguars",
+        "point": null,
+        "price": 1200
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:02:25Z",
+   "home": "South Alabama Jaguars",
+   "home_raw": "South Alabama Jaguars",
+   "n_books": 6,
+   "odds_api_event_id": "e5817afb8338b8f7272feff21d87d7f7"
+  },
+  {
+   "away": "Temple Owls",
+   "away_raw": "Temple Owls",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -2500
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 1000
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -2500
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 1050
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -3000
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 1040
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -2500
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 1150
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 700
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -2500
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 900
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:13Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "East Carolina Pirates",
+        "point": null,
+        "price": -2800
+       },
+       {
+        "name": "Temple Owls",
+        "point": null,
+        "price": 1100
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:02:27Z",
+   "home": "East Carolina Pirates",
+   "home_raw": "East Carolina Pirates",
+   "n_books": 7,
+   "odds_api_event_id": "fa9022be308ebe9ca39ecda8ea15bda4"
+  },
+  {
+   "away": "UConn Huskies",
+   "away_raw": "UConn Huskies",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Air Force Falcons",
+        "point": null,
+        "price": -410
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 290
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Air Force Falcons",
+        "point": null,
+        "price": -372
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 260
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Air Force Falcons",
+        "point": null,
+        "price": -400
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 290
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Air Force Falcons",
+        "point": null,
+        "price": -250
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 170
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Air Force Falcons",
+        "point": null,
+        "price": -420
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 295
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:13Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Air Force Falcons",
+        "point": null,
+        "price": -475
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 315
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Air Force Falcons",
+        "point": null,
+        "price": -350
+       },
+       {
+        "name": "UConn Huskies",
+        "point": null,
+        "price": 250
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:05:14Z",
+   "home": "Air Force Falcons",
+   "home_raw": "Air Force Falcons",
+   "n_books": 7,
+   "odds_api_event_id": "573eed720cdbfb7644835b8beb1bc89a"
+  },
+  {
+   "away": "Stanford Cardinal",
+   "away_raw": "Stanford Cardinal",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -950
+       },
+       {
+        "name": "Stanford Cardinal",
+        "point": null,
+        "price": 560
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -1000
+       },
+       {
+        "name": "Stanford Cardinal",
+        "point": null,
+        "price": 575
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -1000
+       },
+       {
+        "name": "Stanford Cardinal",
+        "point": null,
+        "price": 600
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -1020
+       },
+       {
+        "name": "Stanford Cardinal",
+        "point": null,
+        "price": 572
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -1000
+       },
+       {
+        "name": "Stanford Cardinal",
+        "point": null,
+        "price": 475
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -1700
+       },
+       {
+        "name": "Stanford Cardinal",
+        "point": null,
+        "price": 750
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:13Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Louisville Cardinals",
+        "point": null,
+        "price": -2500
+       },
+       {
+        "name": "Stanford Cardinal",
+        "point": null,
+        "price": 1000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:25:32Z",
+   "home": "Louisville Cardinals",
+   "home_raw": "Louisville Cardinals",
+   "n_books": 7,
+   "odds_api_event_id": "183676bbb63b1716e2248ec6c6d205a9"
+  },
+  {
+   "away": "Southern Mississippi Golden Eagles",
+   "away_raw": "Southern Mississippi Golden Eagles",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Southern Mississippi Golden Eagles",
+        "point": null,
+        "price": -590
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 400
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Southern Mississippi Golden Eagles",
+        "point": null,
+        "price": -710
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 436
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Southern Mississippi Golden Eagles",
+        "point": null,
+        "price": -475
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 340
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Southern Mississippi Golden Eagles",
+        "point": null,
+        "price": -286
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Southern Mississippi Golden Eagles",
+        "point": null,
+        "price": -675
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 425
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Southern Mississippi Golden Eagles",
+        "point": null,
+        "price": -750
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 460
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:13Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Southern Mississippi Golden Eagles",
+        "point": null,
+        "price": -700
+       },
+       {
+        "name": "UL Monroe Warhawks",
+        "point": null,
+        "price": 425
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:32:38Z",
+   "home": "UL Monroe Warhawks",
+   "home_raw": "UL Monroe Warhawks",
+   "n_books": 7,
+   "odds_api_event_id": "746742d4bb94424d9e63d00701eef4ec"
+  },
+  {
+   "away": "Florida International Panthers",
+   "away_raw": "Florida International Panthers",
+   "books": [],
+   "commence_time": "2026-10-31T19:33:17Z",
+   "home": "Liberty Flames",
+   "home_raw": "Liberty Flames",
+   "n_books": 0,
+   "odds_api_event_id": "e5ff4a85ab3b8341184a334a390f6ba2"
+  },
+  {
+   "away": "UTEP Miners",
+   "away_raw": "UTEP Miners",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Dakota State Bison",
+        "point": null,
+        "price": -2100
+       },
+       {
+        "name": "UTEP Miners",
+        "point": null,
+        "price": 880
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Dakota State Bison",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "UTEP Miners",
+        "point": null,
+        "price": 830
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Dakota State Bison",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "UTEP Miners",
+        "point": null,
+        "price": 950
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Dakota State Bison",
+        "point": null,
+        "price": -1250
+       },
+       {
+        "name": "UTEP Miners",
+        "point": null,
+        "price": 550
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Dakota State Bison",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "UTEP Miners",
+        "point": null,
+        "price": 800
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Dakota State Bison",
+        "point": null,
+        "price": -1500
+       },
+       {
+        "name": "UTEP Miners",
+        "point": null,
+        "price": 750
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:13Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "North Dakota State Bison",
+        "point": null,
+        "price": -2000
+       },
+       {
+        "name": "UTEP Miners",
+        "point": null,
+        "price": 900
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:35:12Z",
+   "home": "North Dakota State Bison",
+   "home_raw": "North Dakota State Bison",
+   "n_books": 7,
+   "odds_api_event_id": "c17c8f9e12ffe066cf601c96090fcb14"
+  },
+  {
+   "away": "Kansas Jayhawks",
+   "away_raw": "Kansas Jayhawks",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": -460
+       },
+       {
+        "name": "TCU Horned Frogs",
+        "point": null,
+        "price": 330
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": -425
+       },
+       {
+        "name": "TCU Horned Frogs",
+        "point": null,
+        "price": 300
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": -475
+       },
+       {
+        "name": "TCU Horned Frogs",
+        "point": null,
+        "price": 319
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": -450
+       },
+       {
+        "name": "TCU Horned Frogs",
+        "point": null,
+        "price": 310
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": -500
+       },
+       {
+        "name": "TCU Horned Frogs",
+        "point": null,
+        "price": 305
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": -450
+       },
+       {
+        "name": "TCU Horned Frogs",
+        "point": null,
+        "price": 300
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:13Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kansas Jayhawks",
+        "point": null,
+        "price": -525
+       },
+       {
+        "name": "TCU Horned Frogs",
+        "point": null,
+        "price": 340
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:35:19Z",
+   "home": "TCU Horned Frogs",
+   "home_raw": "TCU Horned Frogs",
+   "n_books": 7,
+   "odds_api_event_id": "7e3a5a0dcece26ded8c9d1a64dc6cee5"
+  },
+  {
+   "away": "Arizona State Sun Devils",
+   "away_raw": "Arizona State Sun Devils",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona State Sun Devils",
+        "point": null,
+        "price": 1840
+       },
+       {
+        "name": "BYU Cougars",
+        "point": null,
+        "price": -10000
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona State Sun Devils",
+        "point": null,
+        "price": 1900
+       },
+       {
+        "name": "BYU Cougars",
+        "point": null,
+        "price": -7000
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona State Sun Devils",
+        "point": null,
+        "price": 2200
+       },
+       {
+        "name": "BYU Cougars",
+        "point": null,
+        "price": -20000
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona State Sun Devils",
+        "point": null,
+        "price": 3300
+       },
+       {
+        "name": "BYU Cougars",
+        "point": null,
+        "price": -50000
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona State Sun Devils",
+        "point": null,
+        "price": 1300
+       },
+       {
+        "name": "BYU Cougars",
+        "point": null,
+        "price": -10000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:35:47Z",
+   "home": "BYU Cougars",
+   "home_raw": "BYU Cougars",
+   "n_books": 5,
+   "odds_api_event_id": "b0f68c9265402a825cbbf7954b726339"
+  },
+  {
+   "away": "Northwestern Wildcats",
+   "away_raw": "Northwestern Wildcats",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northwestern Wildcats",
+        "point": null,
+        "price": -313
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": 228
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northwestern Wildcats",
+        "point": null,
+        "price": -245
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": 190
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northwestern Wildcats",
+        "point": null,
+        "price": -270
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:29:58Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:29:58Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northwestern Wildcats",
+        "point": null,
+        "price": -222
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": 155
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northwestern Wildcats",
+        "point": null,
+        "price": -300
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:13Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northwestern Wildcats",
+        "point": null,
+        "price": -325
+       },
+       {
+        "name": "Oregon Ducks",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:37:18Z",
+   "home": "Oregon Ducks",
+   "home_raw": "Oregon Ducks",
+   "n_books": 6,
+   "odds_api_event_id": "7bac3aae16527dd33a224a2f81792033"
+  },
+  {
+   "away": "Minnesota Golden Gophers",
+   "away_raw": "Minnesota Golden Gophers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Indiana Hoosiers",
+        "point": null,
+        "price": -373
+       },
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 260
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Indiana Hoosiers",
+        "point": null,
+        "price": -375
+       },
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 265
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Indiana Hoosiers",
+        "point": null,
+        "price": -370
+       },
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 280
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Indiana Hoosiers",
+        "point": null,
+        "price": -350
+       },
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 290
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Indiana Hoosiers",
+        "point": null,
+        "price": -400
+       },
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 250
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Indiana Hoosiers",
+        "point": null,
+        "price": -345
+       },
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 250
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Indiana Hoosiers",
+        "point": null,
+        "price": -375
+       },
+       {
+        "name": "Minnesota Golden Gophers",
+        "point": null,
+        "price": 260
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:37:53Z",
+   "home": "Indiana Hoosiers",
+   "home_raw": "Indiana Hoosiers",
+   "n_books": 7,
+   "odds_api_event_id": "1e591733bae48534963359a9cff13701"
+  },
+  {
+   "away": "Colorado State Rams",
+   "away_raw": "Colorado State Rams",
+   "books": [
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Colorado State Rams",
+        "point": null,
+        "price": 1600
+       },
+       {
+        "name": "Utah State Aggies",
+        "point": null,
+        "price": -15000
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Colorado State Rams",
+        "point": null,
+        "price": 5000
+       },
+       {
+        "name": "Utah State Aggies",
+        "point": null,
+        "price": -50000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:44:46Z",
+   "home": "Utah State Aggies",
+   "home_raw": "Utah State Aggies",
+   "n_books": 2,
+   "odds_api_event_id": "9c33dd628312f89764392414cbc99c86"
+  },
+  {
+   "away": "Florida Gators",
+   "away_raw": "Florida Gators",
+   "books": [
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Florida Gators",
+        "point": null,
+        "price": 2700
+       },
+       {
+        "name": "Georgia Bulldogs",
+        "point": null,
+        "price": -10000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:45:26Z",
+   "home": "Georgia Bulldogs",
+   "home_raw": "Georgia Bulldogs",
+   "n_books": 1,
+   "odds_api_event_id": "581c12d11a86412432fe89645cbe80b2"
+  },
+  {
+   "away": "Virginia Cavaliers",
+   "away_raw": "Virginia Cavaliers",
+   "books": [
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Virginia Cavaliers",
+        "point": null,
+        "price": 5000
+       },
+       {
+        "name": "Wake Forest Demon Deacons",
+        "point": null,
+        "price": -50000
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Virginia Cavaliers",
+        "point": null,
+        "price": 1200
+       },
+       {
+        "name": "Wake Forest Demon Deacons",
+        "point": null,
+        "price": -10000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:50:22Z",
+   "home": "Wake Forest Demon Deacons",
+   "home_raw": "Wake Forest Demon Deacons",
+   "n_books": 2,
+   "odds_api_event_id": "09f66e3676ec3112e24cd6b9e97feb41"
+  },
+  {
+   "away": "Utah Utes",
+   "away_raw": "Utah Utes",
+   "books": [
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bearcats",
+        "point": null,
+        "price": 1400
+       },
+       {
+        "name": "Utah Utes",
+        "point": null,
+        "price": -10000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T19:50:28Z",
+   "home": "Cincinnati Bearcats",
+   "home_raw": "Cincinnati Bearcats",
+   "n_books": 1,
+   "odds_api_event_id": "8480c989381049fc30c8d714be95db35"
+  },
+  {
+   "away": "New Mexico Lobos",
+   "away_raw": "New Mexico Lobos",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "New Mexico Lobos",
+        "point": null,
+        "price": -1200
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": 630
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "New Mexico Lobos",
+        "point": null,
+        "price": -1300
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": 700
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "New Mexico Lobos",
+        "point": null,
+        "price": -1200
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": 675
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "New Mexico Lobos",
+        "point": null,
+        "price": -1480
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": 720
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "New Mexico Lobos",
+        "point": null,
+        "price": -1667
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": 650
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "New Mexico Lobos",
+        "point": null,
+        "price": -1450
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": 675
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "New Mexico Lobos",
+        "point": null,
+        "price": -1400
+       },
+       {
+        "name": "San Jose State Spartans",
+        "point": null,
+        "price": 700
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T20:05:25Z",
+   "home": "San Jose State Spartans",
+   "home_raw": "San Jose State Spartans",
+   "n_books": 7,
+   "odds_api_event_id": "1841dedea57dac1d1de462bb44f8a732"
+  },
+  {
+   "away": "Purdue Boilermakers",
+   "away_raw": "Purdue Boilermakers",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -1100
+       },
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 600
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -1000
+       },
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 575
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -900
+       },
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 523
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -800
+       },
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 625
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:29:58Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:29:58Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -714
+       },
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 450
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -1200
+       },
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 600
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Penn State Nittany Lions",
+        "point": null,
+        "price": -1200
+       },
+       {
+        "name": "Purdue Boilermakers",
+        "point": null,
+        "price": 650
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T20:16:38Z",
+   "home": "Penn State Nittany Lions",
+   "home_raw": "Penn State Nittany Lions",
+   "n_books": 7,
+   "odds_api_event_id": "7fd2d018fdc5930fd62188de968a901c"
+  },
+  {
+   "away": "Nevada Wolf Pack",
+   "away_raw": "Nevada Wolf Pack",
+   "books": [
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:34:39Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:34:38Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nevada Wolf Pack",
+        "point": null,
+        "price": 5000
+       },
+       {
+        "name": "UCLA Bruins",
+        "point": null,
+        "price": -50000
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nevada Wolf Pack",
+        "point": null,
+        "price": 1400
+       },
+       {
+        "name": "UCLA Bruins",
+        "point": null,
+        "price": -10000
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T20:17:09Z",
+   "home": "UCLA Bruins",
+   "home_raw": "UCLA Bruins",
+   "n_books": 2,
+   "odds_api_event_id": "630ed6c8993fda8943e528a465e55518"
+  },
+  {
+   "away": "South Carolina Gamecocks",
+   "away_raw": "South Carolina Gamecocks",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": 333
+       },
+       {
+        "name": "South Carolina Gamecocks",
+        "point": null,
+        "price": -500
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": 310
+       },
+       {
+        "name": "South Carolina Gamecocks",
+        "point": null,
+        "price": -450
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": 330
+       },
+       {
+        "name": "South Carolina Gamecocks",
+        "point": null,
+        "price": -460
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": 300
+       },
+       {
+        "name": "South Carolina Gamecocks",
+        "point": null,
+        "price": -425
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": 140
+       },
+       {
+        "name": "South Carolina Gamecocks",
+        "point": null,
+        "price": -182
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": 330
+       },
+       {
+        "name": "South Carolina Gamecocks",
+        "point": null,
+        "price": -480
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Oklahoma Sooners",
+        "point": null,
+        "price": 325
+       },
+       {
+        "name": "South Carolina Gamecocks",
+        "point": null,
+        "price": -500
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T20:20:33Z",
+   "home": "Oklahoma Sooners",
+   "home_raw": "Oklahoma Sooners",
+   "n_books": 7,
+   "odds_api_event_id": "096584989b4dd0a84650c37eb980a8b3"
+  },
+  {
+   "away": "Appalachian State Mountaineers",
+   "away_raw": "Appalachian State Mountaineers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 183
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -215
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 183
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -215
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 188
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 186
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -234
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 183
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 183
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -215
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Appalachian State Mountaineers",
+        "point": null,
+        "price": 175
+       },
+       {
+        "name": "Georgia Southern Eagles",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T22:30:00Z",
+   "home": "Georgia Southern Eagles",
+   "home_raw": "Georgia Southern Eagles",
+   "n_books": 11,
+   "odds_api_event_id": "e7510e4cb4351947263e33b6dc6a0812"
+  },
+  {
+   "away": "Clemson Tigers",
+   "away_raw": "Clemson Tigers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -215
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 175
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -215
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 163
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -205
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 175
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -210
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -210
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -210
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 184
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -232
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 182
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -210
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Clemson Tigers",
+        "point": null,
+        "price": 172
+       },
+       {
+        "name": "Florida State Seminoles",
+        "point": null,
+        "price": -205
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:00:00Z",
+   "home": "Florida State Seminoles",
+   "home_raw": "Florida State Seminoles",
+   "n_books": 11,
+   "odds_api_event_id": "6519cc9dfbff22ca11d607a9f246da2c"
+  },
+  {
+   "away": "Oklahoma State Cowboys",
+   "away_raw": "Oklahoma State Cowboys",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 275
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -345
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 290
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 280
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 295
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 299
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 299
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 290
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 295
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -391
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 280
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -360
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 290
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -360
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Iowa State Cyclones",
+        "point": null,
+        "price": 295
+       },
+       {
+        "name": "Oklahoma State Cowboys",
+        "point": null,
+        "price": -380
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:00:00Z",
+   "home": "Iowa State Cyclones",
+   "home_raw": "Iowa State Cyclones",
+   "n_books": 11,
+   "odds_api_event_id": "e4e95ca26b62e1c3ced6261cbb5c5f3a"
+  },
+  {
+   "away": "Washington State Cougars",
+   "away_raw": "Washington State Cougars",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -142
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 120
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -135
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 115
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -135
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 115
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -140
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 115
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -134
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 112
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -141
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 115
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -139
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 118
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -140
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 120
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -130
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 110
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -135
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 115
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "San Diego State Aztecs",
+        "point": null,
+        "price": -141
+       },
+       {
+        "name": "Washington State Cougars",
+        "point": null,
+        "price": 114
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:00:00Z",
+   "home": "San Diego State Aztecs",
+   "home_raw": "San Diego State Aztecs",
+   "n_books": 11,
+   "odds_api_event_id": "c1fd3e172f0617a0d8543b8fd67fc2ce"
+  },
+  {
+   "away": "Georgia Tech Yellow Jackets",
+   "away_raw": "Georgia Tech Yellow Jackets",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 240
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -300
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 250
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -310
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 280
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 240
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -300
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 245
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -305
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 252
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -310
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 252
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -310
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 240
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -310
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 245
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -310
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 250
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -300
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Georgia Tech Yellow Jackets",
+        "point": null,
+        "price": 255
+       },
+       {
+        "name": "Pittsburgh Panthers",
+        "point": null,
+        "price": -310
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:30:00Z",
+   "home": "Pittsburgh Panthers",
+   "home_raw": "Pittsburgh Panthers",
+   "n_books": 11,
+   "odds_api_event_id": "49aa48a7dbcd6563f389ae4232707d64"
+  },
+  {
+   "away": "Miami Hurricanes",
+   "away_raw": "Miami Hurricanes",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -600
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 440
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -650
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 470
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -600
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 440
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -630
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 464
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -630
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 464
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -715
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 475
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -600
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 450
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -625
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 430
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -625
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 450
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -630
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 465
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Miami Hurricanes",
+        "point": null,
+        "price": -585
+       },
+       {
+        "name": "North Carolina Tar Heels",
+        "point": null,
+        "price": 435
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:30:00Z",
+   "home": "North Carolina Tar Heels",
+   "home_raw": "North Carolina Tar Heels",
+   "n_books": 11,
+   "odds_api_event_id": "85b5947ccfe102a2fa2179d54c83ae31"
+  },
+  {
+   "away": "Mississippi State Bulldogs",
+   "away_raw": "Mississippi State Bulldogs",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 860
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1450
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 800
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1350
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 850
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1400
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 850
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1667
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 850
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1200
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 836
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1400
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 836
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1400
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 780
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1493
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 800
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1450
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 850
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1500
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Mississippi State Bulldogs",
+        "point": null,
+        "price": 750
+       },
+       {
+        "name": "Texas Longhorns",
+        "point": null,
+        "price": -1200
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:30:00Z",
+   "home": "Texas Longhorns",
+   "home_raw": "Texas Longhorns",
+   "n_books": 11,
+   "odds_api_event_id": "e2ffa742b36678caf388ca70fdd4878c"
+  },
+  {
+   "away": "Ohio State Buckeyes",
+   "away_raw": "Ohio State Buckeyes",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -245
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -240
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 198
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -245
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -265
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -240
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -240
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -235
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -244
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 193
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -245
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 200
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -240
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 203
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ohio State Buckeyes",
+        "point": null,
+        "price": -250
+       },
+       {
+        "name": "USC Trojans",
+        "point": null,
+        "price": 210
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:30:00Z",
+   "home": "USC Trojans",
+   "home_raw": "USC Trojans",
+   "n_books": 11,
+   "odds_api_event_id": "bd73558e7eb5bee08962bfb1f5ef6c9a"
+  },
+  {
+   "away": "Missouri Tigers",
+   "away_raw": "Missouri Tigers",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 310
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -385
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 300
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -380
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 310
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -435
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 310
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -400
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 300
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -375
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 303
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -380
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 303
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -380
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 309
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -420
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 300
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -390
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 305
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -380
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arkansas Razorbacks",
+        "point": null,
+        "price": 315
+       },
+       {
+        "name": "Missouri Tigers",
+        "point": null,
+        "price": -410
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-10-31T23:45:00Z",
+   "home": "Arkansas Razorbacks",
+   "home_raw": "Arkansas Razorbacks",
+   "n_books": 11,
+   "odds_api_event_id": "c6533cfcdfb0860d723a5fd9b9381098"
+  },
+  {
+   "away": "Army Black Knights",
+   "away_raw": "Army Black Knights",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 184
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 182
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -228
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 187
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -230
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -210
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Army Black Knights",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Memphis Tigers",
+        "point": null,
+        "price": -230
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-01T00:00:00Z",
+   "home": "Memphis Tigers",
+   "home_raw": "Memphis Tigers",
+   "n_books": 11,
+   "odds_api_event_id": "c2a32bff5ed94bef9a6a5847ff544783"
+  },
+  {
+   "away": "Washington Huskies",
+   "away_raw": "Washington Huskies",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -320
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 255
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -298
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 240
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -345
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 260
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -310
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 250
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -300
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 250
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -295
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 241
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -295
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 241
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -330
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 250
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -320
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 240
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -295
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 245
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Nebraska Cornhuskers",
+        "point": null,
+        "price": -320
+       },
+       {
+        "name": "Washington Huskies",
+        "point": null,
+        "price": 260
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-01T00:00:00Z",
+   "home": "Nebraska Cornhuskers",
+   "home_raw": "Nebraska Cornhuskers",
+   "n_books": 11,
+   "odds_api_event_id": "877d5834acad37b6142a835438c23001"
+  },
+  {
+   "away": "Texas State Bobcats",
+   "away_raw": "Texas State Bobcats",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -450
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 340
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -440
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 340
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -420
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 330
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -420
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 330
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -425
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 325
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -450
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 340
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -420
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 310
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -460
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 340
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -420
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 330
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -440
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 340
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Boise State Broncos",
+        "point": null,
+        "price": -420
+       },
+       {
+        "name": "Texas State Bobcats",
+        "point": null,
+        "price": 300
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-01T02:00:00Z",
+   "home": "Boise State Broncos",
+   "home_raw": "Boise State Broncos",
+   "n_books": 11,
+   "odds_api_event_id": "b02a5444929be961896a4db9742a01fa"
+  },
+  {
+   "away": "Northern Illinois Huskies",
+   "away_raw": "Northern Illinois Huskies",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1100
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2100
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1041
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1041
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1100
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1000
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 943
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2019
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1000
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1050
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1050
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -1800
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 1000
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2000
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Northern Illinois Huskies",
+        "point": null,
+        "price": 950
+       },
+       {
+        "name": "UNLV Rebels",
+        "point": null,
+        "price": -2500
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-01T02:30:00Z",
+   "home": "UNLV Rebels",
+   "home_raw": "UNLV Rebels",
+   "n_books": 11,
+   "odds_api_event_id": "1d5b8007f5249010b9c501138e25ac74"
+  },
+  {
+   "away": "Oregon State Beavers",
+   "away_raw": "Oregon State Beavers",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 188
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 190
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -235
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 190
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -230
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -240
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-10-31T21:37:10Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:10Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 192
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -230
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-10-31T21:36:29Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:29Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 192
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -230
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 190
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -235
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-10-31T21:36:28Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:28Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 183
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -230
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-10-31T21:37:12Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:12Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-10-31T21:37:14Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:37:14Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Fresno State Bulldogs",
+        "point": null,
+        "price": 200
+       },
+       {
+        "name": "Oregon State Beavers",
+        "point": null,
+        "price": -240
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-01T03:00:00Z",
+   "home": "Fresno State Bulldogs",
+   "home_raw": "Fresno State Bulldogs",
+   "n_books": 11,
+   "odds_api_event_id": "d0126c335a51772c70c76e17ca06afb3"
+  },
+  {
+   "away": "Ohio Bobcats",
+   "away_raw": "Ohio Bobcats",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Akron Zips",
+        "point": null,
+        "price": 375
+       },
+       {
+        "name": "Ohio Bobcats",
+        "point": null,
+        "price": -490
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Akron Zips",
+        "point": null,
+        "price": 375
+       },
+       {
+        "name": "Ohio Bobcats",
+        "point": null,
+        "price": -500
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-04T00:00:00Z",
+   "home": "Akron Zips",
+   "home_raw": "Akron Zips",
+   "n_books": 2,
+   "odds_api_event_id": "c0ddb68355a79fb70194e95b75c037ca"
+  },
+  {
+   "away": "Buffalo Bulls",
+   "away_raw": "Buffalo Bulls",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bulls",
+        "point": null,
+        "price": 184
+       },
+       {
+        "name": "Miami (OH) RedHawks",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bulls",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Miami (OH) RedHawks",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-04T01:00:00Z",
+   "home": "Miami (OH) RedHawks",
+   "home_raw": "Miami (OH) RedHawks",
+   "n_books": 2,
+   "odds_api_event_id": "657053f4734af94664beb750813257bb"
+  },
+  {
+   "away": "Ball State Cardinals",
+   "away_raw": "Ball State Cardinals",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ball State Cardinals",
+        "point": null,
+        "price": 140
+       },
+       {
+        "name": "UMass Minutemen",
+        "point": null,
+        "price": -170
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Ball State Cardinals",
+        "point": null,
+        "price": 140
+       },
+       {
+        "name": "UMass Minutemen",
+        "point": null,
+        "price": -170
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-05T00:00:00Z",
+   "home": "UMass Minutemen",
+   "home_raw": "UMass Minutemen",
+   "n_books": 2,
+   "odds_api_event_id": "6ee8ad6eb7454d13bebc0806a10cc861"
+  },
+  {
+   "away": "Central Michigan Chippewas",
+   "away_raw": "Central Michigan Chippewas",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Central Michigan Chippewas",
+        "point": null,
+        "price": 108
+       },
+       {
+        "name": "Eastern Michigan Eagles",
+        "point": null,
+        "price": -130
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Central Michigan Chippewas",
+        "point": null,
+        "price": 110
+       },
+       {
+        "name": "Eastern Michigan Eagles",
+        "point": null,
+        "price": -130
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-05T00:30:00Z",
+   "home": "Eastern Michigan Eagles",
+   "home_raw": "Eastern Michigan Eagles",
+   "n_books": 2,
+   "odds_api_event_id": "e5c8c0aaad6dc26e9ede547783d854d2"
+  },
+  {
+   "away": "Alabama Crimson Tide",
+   "away_raw": "Alabama Crimson Tide",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Alabama Crimson Tide",
+        "point": null,
+        "price": 145
+       },
+       {
+        "name": "LSU Tigers",
+        "point": null,
+        "price": -175
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Alabama Crimson Tide",
+        "point": null,
+        "price": 146
+       },
+       {
+        "name": "LSU Tigers",
+        "point": null,
+        "price": -178
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Alabama Crimson Tide",
+        "point": null,
+        "price": 150
+       },
+       {
+        "name": "LSU Tigers",
+        "point": null,
+        "price": -190
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Alabama Crimson Tide",
+        "point": null,
+        "price": 150
+       },
+       {
+        "name": "LSU Tigers",
+        "point": null,
+        "price": -180
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-07T20:30:00Z",
+   "home": "LSU Tigers",
+   "home_raw": "LSU Tigers",
+   "n_books": 4,
+   "odds_api_event_id": "00f194290bfcdfebb1d8456057b20614"
+  },
+  {
+   "away": "Kentucky Wildcats",
+   "away_raw": "Kentucky Wildcats",
+   "books": [
+    {
+     "book": "fanduel",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kentucky Wildcats",
+        "point": null,
+        "price": 190
+       },
+       {
+        "name": "Tennessee Volunteers",
+        "point": null,
+        "price": -235
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kentucky Wildcats",
+        "point": null,
+        "price": 170
+       },
+       {
+        "name": "Tennessee Volunteers",
+        "point": null,
+        "price": -215
+       }
+      ]
+     }
+    },
+    {
+     "book": "draftkings",
+     "last_update": "2026-10-31T21:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kentucky Wildcats",
+        "point": null,
+        "price": 164
+       },
+       {
+        "name": "Tennessee Volunteers",
+        "point": null,
+        "price": -198
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-10-31T21:36:05Z",
+     "market_last_update": {
+      "h2h": "2026-10-31T21:36:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Kentucky Wildcats",
+        "point": null,
+        "price": 170
+       },
+       {
+        "name": "Tennessee Volunteers",
+        "point": null,
+        "price": -205
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-07T23:15:00Z",
+   "home": "Tennessee Volunteers",
+   "home_raw": "Tennessee Volunteers",
+   "n_books": 4,
+   "odds_api_event_id": "72cab2217ae57cbb00928eab05eb244e"
+  }
+ ],
+ "identity": "verbatim",
+ "markets": "h2h",
+ "n_events": 41,
+ "regions": "us",
+ "sport_key": "americanfootball_ncaaf",
+ "tier": "A"
+}

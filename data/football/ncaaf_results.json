@@ -3026,20 +3026,20 @@
    "away": "Baylor Bears",
    "away_abbr": "BAY",
    "away_key": "baylorbears",
-   "away_score": null,
+   "away_score": 41,
    "espn_event_id": "401856844",
-   "final": false,
+   "final": true,
    "home": "UCF Knights",
    "home_abbr": "UCF",
    "home_key": "ucfknights",
-   "home_score": null,
+   "home_score": 9,
    "kickoff_utc": "2026-10-30T23:30:00Z",
-   "margin": null,
+   "margin": -32,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 50
   },
   "401856845": {
    "away": "Kansas Jayhawks",
@@ -8270,20 +8270,20 @@
    "away": "Tulane Green Wave",
    "away_abbr": "TULN",
    "away_key": "tulanegreenwave",
-   "away_score": null,
+   "away_score": 38,
    "espn_event_id": "401862813",
-   "final": false,
+   "final": true,
    "home": "Charlotte 49ers",
    "home_abbr": "CLT",
    "home_key": "charlotte49ers",
-   "home_score": null,
+   "home_score": 31,
    "kickoff_utc": "2026-10-30T23:00:00Z",
-   "margin": null,
+   "margin": -7,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 69
   },
   "401862814": {
    "away": "Army Black Knights",
@@ -10132,20 +10132,20 @@
    "away": "Kent State Golden Flashes",
    "away_abbr": "KENT",
    "away_key": "kentstategoldenflashes",
-   "away_score": null,
+   "away_score": 10,
    "espn_event_id": "401866451",
-   "final": false,
+   "final": true,
    "home": "Sacramento State Hornets",
    "home_abbr": "SAC",
    "home_key": "sacramentostatehornets",
-   "home_score": null,
+   "home_score": 31,
    "kickoff_utc": "2026-10-31T02:30:00Z",
-   "margin": null,
+   "margin": 21,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 41
   },
   "401866452": {
    "away": "Bowling Green Falcons",
@@ -11820,5 +11820,5 @@
    "total": null
   }
  },
- "updated_utc": "2026-10-30T16:55:26Z"
+ "updated_utc": "2026-10-31T15:56:15Z"
 }

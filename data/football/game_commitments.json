@@ -1072,6 +1072,40 @@
    "sha256": "16e5c0f0eb1614061f382216b9a189c33a8b412da5a79441f2607033bc75ef06",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Auburn Tigers @ Ole Miss Rebels|2026-10-31T16:55:00Z": {
+   "block": {
+    "away": "Auburn Tigers",
+    "best_book": "betmgm",
+    "best_price": 375,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.871,
+    "fair_away": 0.20833,
+    "fair_home": 0.79167,
+    "fair_side": 0.20833,
+    "home": "Ole Miss Rebels",
+    "kickoff_utc": "2026-10-31T16:55:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Auburn Tigers @ Ole Miss Rebels",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": null,
+    "raw_overround_pts": 4.348,
+    "relative_price_discount": -0.0105263158,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Auburn Tigers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261030T163728Z.json",
+    "t24_hours_before_kickoff": 24.29
+   },
+   "committed_utc": "2026-10-31T16:37:28Z",
+   "kickoff_utc": "2026-10-31T16:55:00Z",
+   "matchup": "Auburn Tigers @ Ole Miss Rebels",
+   "sha256": "cde74fa0aac4bf1363a7d521c562e9e4dcdd033d7e029aec49d6594709e30e68",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|BYU Cougars @ Colorado State Rams|2026-09-19T23:30:00Z": {
    "block": {
     "away": "BYU Cougars",

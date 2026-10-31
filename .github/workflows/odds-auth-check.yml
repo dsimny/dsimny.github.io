@@ -1,0 +1,25 @@
+name: Odds authentication check
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [codex/odds-auth-check]
+    paths:
+      - .github/workflows/odds-auth-check.yml
+      - scripts/check_odds_auth.py
+permissions:
+  contents: read
+jobs:
+  authentication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify website key without fetching odds or posting
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python scripts/check_odds_auth.py

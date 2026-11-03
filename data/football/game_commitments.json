@@ -1314,6 +1314,43 @@
    "sha256": "f13f29e0e4f890a6073a9a3c1dd7cb956a169b09a8717e788e831d78ca111813",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Ball State Cardinals @ UMass Minutemen|2026-11-05T00:00:00Z": {
+   "block": {
+    "away": "Ball State Cardinals",
+    "best_book": "fanatics",
+    "best_price": 135,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.338,
+    "fair_away": 0.41303,
+    "fair_home": 0.58697,
+    "fair_side": 0.41303,
+    "home": "UMass Minutemen",
+    "kickoff_utc": "2026-11-05T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Ball State Cardinals @ UMass Minutemen",
+    "move_pts": null,
+    "n_books": 10,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 138
+    },
+    "raw_overround_pts": 3.688,
+    "relative_price_discount": -0.0302577341,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Ball State Cardinals",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261103T182200Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-03T18:22:07Z",
+   "kickoff_utc": "2026-11-05T00:00:00Z",
+   "matchup": "Ball State Cardinals @ UMass Minutemen",
+   "sha256": "2e04f6b110b46021d987aa112723bab6de57b8806127def5206badca55f692b0",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Baylor Bears @ Kansas Jayhawks|2026-10-24T17:00:00Z": {
    "block": {
     "away": "Baylor Bears",
@@ -10503,6 +10540,40 @@
    ],
    "matchup": "Toledo Rockets @ Eastern Michigan Eagles",
    "sha256": "6335408a2c9132bf3358921253a9db0e8699e2bb505bf5afc30b09e5f19ccc6a",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Toledo Rockets @ Sacramento State Hornets|2026-11-05T00:00:00Z": {
+   "block": {
+    "away": "Toledo Rockets",
+    "best_book": "fanatics",
+    "best_price": 1400,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 2.821,
+    "fair_away": 0.93119,
+    "fair_home": 0.06881,
+    "fair_side": 0.06881,
+    "home": "Sacramento State Hornets",
+    "kickoff_utc": "2026-11-05T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Toledo Rockets @ Sacramento State Hornets",
+    "move_pts": null,
+    "n_books": 9,
+    "offshore_best": null,
+    "raw_overround_pts": 3.81,
+    "relative_price_discount": 0.0311111111,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Sacramento State Hornets",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261103T182200Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-03T18:22:07Z",
+   "kickoff_utc": "2026-11-05T00:00:00Z",
+   "matchup": "Toledo Rockets @ Sacramento State Hornets",
+   "sha256": "30a2e8f8bf74f07076891f1b1298f9aad9807ab019251efb492109f34033bd58",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Troy Trojans @ James Madison Dukes|2026-10-29T23:30:00Z": {

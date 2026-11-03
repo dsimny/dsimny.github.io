@@ -1347,6 +1347,9 @@
    },
    "committed_utc": "2026-11-03T18:22:07Z",
    "kickoff_utc": "2026-11-05T00:00:00Z",
+   "later_disagreements": [
+    "8114b11b404c4c9e2d8258c4a4080035bf7f24145610b5c846b653a82fd83180"
+   ],
    "matchup": "Ball State Cardinals @ UMass Minutemen",
    "sha256": "2e04f6b110b46021d987aa112723bab6de57b8806127def5206badca55f692b0",
    "sport": "ncaaf"
@@ -1905,6 +1908,40 @@
    "kickoff_utc": "2026-09-12T19:30:00Z",
    "matchup": "California Golden Bears @ Syracuse Orange",
    "sha256": "d28454afe4036ef6bf86def70029a80c444924eaff3cbc4a85a0554c05289d5b",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Central Michigan Chippewas @ Eastern Michigan Eagles|2026-11-05T00:30:00Z": {
+   "block": {
+    "away": "Central Michigan Chippewas",
+    "best_book": "williamhill_us",
+    "best_price": 102,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 2.993,
+    "fair_away": 0.48384,
+    "fair_home": 0.51616,
+    "fair_side": 0.48384,
+    "home": "Eastern Michigan Eagles",
+    "kickoff_utc": "2026-11-05T00:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Central Michigan Chippewas @ Eastern Michigan Eagles",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.867,
+    "relative_price_discount": -0.0231699219,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Central Michigan Chippewas",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261103T183720Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-03T18:37:24Z",
+   "kickoff_utc": "2026-11-05T00:30:00Z",
+   "matchup": "Central Michigan Chippewas @ Eastern Michigan Eagles",
+   "sha256": "15c51b519231b92c6ac86763130f1ddcd90c311d8bd379aed0ab98b42df33287",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Central Michigan Chippewas @ Ohio Bobcats|2026-10-10T19:30:00Z": {
@@ -10572,6 +10609,9 @@
    },
    "committed_utc": "2026-11-03T18:22:07Z",
    "kickoff_utc": "2026-11-05T00:00:00Z",
+   "later_disagreements": [
+    "910a87ffb8f3ef659ce47a78fa2003ef75e343a2e37674977344d3f795cbf67e"
+   ],
    "matchup": "Toledo Rockets @ Sacramento State Hornets",
    "sha256": "30a2e8f8bf74f07076891f1b1298f9aad9807ab019251efb492109f34033bd58",
    "sport": "ncaaf"

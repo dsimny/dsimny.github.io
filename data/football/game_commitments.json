@@ -1348,7 +1348,8 @@
    "committed_utc": "2026-11-03T18:22:07Z",
    "kickoff_utc": "2026-11-05T00:00:00Z",
    "later_disagreements": [
-    "8114b11b404c4c9e2d8258c4a4080035bf7f24145610b5c846b653a82fd83180"
+    "8114b11b404c4c9e2d8258c4a4080035bf7f24145610b5c846b653a82fd83180",
+    "ddb861b7c9e00d2884cfa0064140d0a49370b1ff36a094f9b3aa5636a7ffc041"
    ],
    "matchup": "Ball State Cardinals @ UMass Minutemen",
    "sha256": "2e04f6b110b46021d987aa112723bab6de57b8806127def5206badca55f692b0",
@@ -1940,6 +1941,9 @@
    },
    "committed_utc": "2026-11-03T18:37:24Z",
    "kickoff_utc": "2026-11-05T00:30:00Z",
+   "later_disagreements": [
+    "8ad78dea4c88f957a10bd72cb81c5d17c4f1225179d68a23ee07a3671f3ab4f1"
+   ],
    "matchup": "Central Michigan Chippewas @ Eastern Michigan Eagles",
    "sha256": "15c51b519231b92c6ac86763130f1ddcd90c311d8bd379aed0ab98b42df33287",
    "sport": "ncaaf"
@@ -10610,7 +10614,8 @@
    "committed_utc": "2026-11-03T18:22:07Z",
    "kickoff_utc": "2026-11-05T00:00:00Z",
    "later_disagreements": [
-    "910a87ffb8f3ef659ce47a78fa2003ef75e343a2e37674977344d3f795cbf67e"
+    "910a87ffb8f3ef659ce47a78fa2003ef75e343a2e37674977344d3f795cbf67e",
+    "5610c801a76e1f5f643f05f92055f0422055f58f1a35a99d535c4150cbbce2d2"
    ],
    "matchup": "Toledo Rockets @ Sacramento State Hornets",
    "sha256": "30a2e8f8bf74f07076891f1b1298f9aad9807ab019251efb492109f34033bd58",

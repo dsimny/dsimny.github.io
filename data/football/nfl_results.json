@@ -2285,20 +2285,20 @@
    "away": "CHI",
    "away_abbr": "CHI",
    "away_name": "Chicago Bears",
-   "away_score": null,
+   "away_score": 34,
    "espn_event_id": "401873036",
-   "final": false,
+   "final": true,
    "home": "SEA",
    "home_abbr": "SEA",
    "home_name": "Seattle Seahawks",
-   "home_score": null,
+   "home_score": 17,
    "kickoff_utc": "2026-11-03T01:15:00Z",
-   "margin": null,
+   "margin": -17,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 51
   },
   "401873272": {
    "away": "DET",
@@ -3213,5 +3213,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-02T20:37:00Z"
+ "updated_utc": "2026-11-03T18:12:57Z"
 }

@@ -11684,6 +11684,9 @@
    },
    "committed_utc": "2026-11-04T18:37:25Z",
    "kickoff_utc": "2026-11-06T00:30:00Z",
+   "later_disagreements": [
+    "5ed5def618a70d92833a3a5fae34623ab59e44babfed06d69d187ebff978b709"
+   ],
    "matchup": "UTSA Roadrunners @ Florida Atlantic Owls",
    "sha256": "1d49620f814c4079abf5c238a829de9cae115c0ccfe6300bb93b84286fcaf2d5",
    "sport": "ncaaf"
@@ -14104,6 +14107,43 @@
    ],
    "matchup": "IND @ PIT",
    "sha256": "8891b752815f9690fb063977aab14c5358569c57bef6b42f19a292294a1a12b6",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|JAX @ BAL|2026-11-06T01:15:00Z": {
+   "block": {
+    "away": "Jacksonville Jaguars",
+    "best_book": "draftkings",
+    "best_price": 410,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 2.941,
+    "fair_away": 0.80769,
+    "fair_home": 0.19231,
+    "fair_side": 0.19231,
+    "home": "Baltimore Ravens",
+    "kickoff_utc": "2026-11-06T01:15:00Z",
+    "league": "NFL",
+    "matchup": "JAX @ BAL",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betonlineag",
+     "price": 412
+    },
+    "raw_overround_pts": 4.0,
+    "relative_price_discount": -0.0196078431,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Baltimore Ravens",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261104T193725Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-04T19:37:28Z",
+   "kickoff_utc": "2026-11-06T01:15:00Z",
+   "matchup": "JAX @ BAL",
+   "sha256": "7afd4134a614536deb8b65cf446577e93fea89280d28db6fa20f0e0e69b0fc2b",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|JAX @ DEN|2026-09-20T20:05:00Z": {

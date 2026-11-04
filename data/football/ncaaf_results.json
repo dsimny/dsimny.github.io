@@ -8342,6 +8342,25 @@
    "status": "STATUS_FINAL",
    "total": 40
   },
+  "401862817": {
+   "away": "UTSA Roadrunners",
+   "away_abbr": "UTSA",
+   "away_key": "utsaroadrunners",
+   "away_score": null,
+   "espn_event_id": "401862817",
+   "final": false,
+   "home": "Florida Atlantic Owls",
+   "home_abbr": "FAU",
+   "home_key": "floridaatlanticowls",
+   "home_score": null,
+   "kickoff_utc": "2026-11-06T00:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401864424": {
    "away": "Merrimack Warriors",
    "away_abbr": "MRMK",
@@ -10170,39 +10189,39 @@
    "away": "Ohio Bobcats",
    "away_abbr": "OHIO",
    "away_key": "ohiobobcats",
-   "away_score": null,
+   "away_score": 28,
    "espn_event_id": "401866453",
-   "final": false,
+   "final": true,
    "home": "Akron Zips",
    "home_abbr": "AKR",
    "home_key": "akronzips",
-   "home_score": null,
+   "home_score": 20,
    "kickoff_utc": "2026-11-04T00:00:00Z",
-   "margin": null,
+   "margin": -8,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 48
   },
   "401866454": {
    "away": "Buffalo Bulls",
    "away_abbr": "BUFF",
    "away_key": "buffalobulls",
-   "away_score": null,
+   "away_score": 34,
    "espn_event_id": "401866454",
-   "final": false,
+   "final": true,
    "home": "Miami (OH) RedHawks",
    "home_abbr": "M-OH",
    "home_key": "miamiohredhawks",
-   "home_score": null,
+   "home_score": 31,
    "kickoff_utc": "2026-11-04T01:00:00Z",
-   "margin": null,
+   "margin": -3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 65
   },
   "401866455": {
    "away": "Ball State Cardinals",
@@ -11173,6 +11192,25 @@
    "status": "STATUS_FINAL",
    "total": 45
   },
+  "401869964": {
+   "away": "James Madison Dukes",
+   "away_abbr": "JMU",
+   "away_key": "jamesmadisondukes",
+   "away_score": null,
+   "espn_event_id": "401869964",
+   "final": false,
+   "home": "Southern Miss Golden Eagles",
+   "home_abbr": "USM",
+   "home_key": "southernmissgoldeneagles",
+   "home_score": null,
+   "kickoff_utc": "2026-11-06T01:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401869965": {
    "away": "Louisiana Ragin' Cajuns",
    "away_abbr": "UL",
@@ -11915,5 +11953,5 @@
    "total": 55
   }
  },
- "updated_utc": "2026-11-03T18:12:56Z"
+ "updated_utc": "2026-11-04T18:23:52Z"
 }

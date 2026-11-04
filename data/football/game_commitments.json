@@ -11654,6 +11654,40 @@
    "sha256": "f6b317e68390f374f05e5e8b093d5278df3344abe8a01f80aecbdfd038c64046",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|UTSA Roadrunners @ Florida Atlantic Owls|2026-11-06T00:30:00Z": {
+   "block": {
+    "away": "UTSA Roadrunners",
+    "best_book": "fanduel",
+    "best_price": -250,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.175,
+    "fair_away": 0.69466,
+    "fair_home": 0.30534,
+    "fair_side": 0.69466,
+    "home": "Florida Atlantic Owls",
+    "kickoff_utc": "2026-11-06T00:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "UTSA Roadrunners @ Florida Atlantic Owls",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.968,
+    "relative_price_discount": -0.0282574568,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "UTSA Roadrunners",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261104T183722Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-04T18:37:25Z",
+   "kickoff_utc": "2026-11-06T00:30:00Z",
+   "matchup": "UTSA Roadrunners @ Florida Atlantic Owls",
+   "sha256": "1d49620f814c4079abf5c238a829de9cae115c0ccfe6300bb93b84286fcaf2d5",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|UTSA Roadrunners @ Texas State Bobcats|2026-09-12T19:30:00Z": {
    "block": {
     "away": "UTSA Roadrunners",

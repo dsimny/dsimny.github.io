@@ -6689,6 +6689,9 @@
    },
    "committed_utc": "2026-11-05T19:37:27Z",
    "kickoff_utc": "2026-11-07T01:00:00Z",
+   "later_disagreements": [
+    "0b7c755bc33e222d0789fb33f70175dc2a5a0a43a597c635d543c365f12a65f2"
+   ],
    "matchup": "Nebraska Cornhuskers @ Illinois Fighting Illini",
    "sha256": "af3abd6418b3cb0eac8a5c483de7176500530238ea1c998878b627a5b3146cde",
    "sport": "ncaaf"
@@ -9640,7 +9643,8 @@
    "committed_utc": "2026-11-05T18:37:27Z",
    "kickoff_utc": "2026-11-07T00:30:00Z",
    "later_disagreements": [
-    "9dbca7b85ae357a5d9399936cdf5b465e35c5243dafc195cbf2693c84ba885f0"
+    "9dbca7b85ae357a5d9399936cdf5b465e35c5243dafc195cbf2693c84ba885f0",
+    "a8685466583dacccb786eed69b67e6e582d1f0d4a0eeaac43a97eef70af93249"
    ],
    "matchup": "South Florida Bulls @ East Carolina Pirates",
    "sha256": "fc6961328557f6cdc988ffdf040f43d2704b03df41105ce7e75bc022eb870775",

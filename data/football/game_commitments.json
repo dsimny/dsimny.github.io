@@ -6656,6 +6656,43 @@
    "sha256": "79c3fe953283024b8ab79a1589ea8a9a9488189edaa4d6981695d8dabf298914",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Nebraska Cornhuskers @ Illinois Fighting Illini|2026-11-07T01:00:00Z": {
+   "block": {
+    "away": "Nebraska Cornhuskers",
+    "best_book": "betrivers",
+    "best_price": 170,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.367,
+    "fair_away": 0.64029,
+    "fair_home": 0.35971,
+    "fair_side": 0.35971,
+    "home": "Illinois Fighting Illini",
+    "kickoff_utc": "2026-11-07T01:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Nebraska Cornhuskers @ Illinois Fighting Illini",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 172
+    },
+    "raw_overround_pts": 4.12,
+    "relative_price_discount": -0.0296296296,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Illinois Fighting Illini",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261105T193723Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-05T19:37:27Z",
+   "kickoff_utc": "2026-11-07T01:00:00Z",
+   "matchup": "Nebraska Cornhuskers @ Illinois Fighting Illini",
+   "sha256": "af3abd6418b3cb0eac8a5c483de7176500530238ea1c998878b627a5b3146cde",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Nebraska Cornhuskers @ Oregon Ducks|2026-10-17T16:00:00Z": {
    "block": {
     "away": "Nebraska Cornhuskers",
@@ -9602,6 +9639,9 @@
    },
    "committed_utc": "2026-11-05T18:37:27Z",
    "kickoff_utc": "2026-11-07T00:30:00Z",
+   "later_disagreements": [
+    "9dbca7b85ae357a5d9399936cdf5b465e35c5243dafc195cbf2693c84ba885f0"
+   ],
    "matchup": "South Florida Bulls @ East Carolina Pirates",
    "sha256": "fc6961328557f6cdc988ffdf040f43d2704b03df41105ce7e75bc022eb870775",
    "sport": "ncaaf"

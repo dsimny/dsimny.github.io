@@ -6690,7 +6690,8 @@
    "committed_utc": "2026-11-05T19:37:27Z",
    "kickoff_utc": "2026-11-07T01:00:00Z",
    "later_disagreements": [
-    "0b7c755bc33e222d0789fb33f70175dc2a5a0a43a597c635d543c365f12a65f2"
+    "0b7c755bc33e222d0789fb33f70175dc2a5a0a43a597c635d543c365f12a65f2",
+    "d917d8210fa89699b8b133b00fe870aa8f18f9402c08170671d90633a5d8fb60"
    ],
    "matchup": "Nebraska Cornhuskers @ Illinois Fighting Illini",
    "sha256": "af3abd6418b3cb0eac8a5c483de7176500530238ea1c998878b627a5b3146cde",
@@ -9644,7 +9645,8 @@
    "kickoff_utc": "2026-11-07T00:30:00Z",
    "later_disagreements": [
     "9dbca7b85ae357a5d9399936cdf5b465e35c5243dafc195cbf2693c84ba885f0",
-    "a8685466583dacccb786eed69b67e6e582d1f0d4a0eeaac43a97eef70af93249"
+    "a8685466583dacccb786eed69b67e6e582d1f0d4a0eeaac43a97eef70af93249",
+    "db776c08be71870381d46d98cb645760256503eba0feaa724dc111459d03ca79"
    ],
    "matchup": "South Florida Bulls @ East Carolina Pirates",
    "sha256": "fc6961328557f6cdc988ffdf040f43d2704b03df41105ce7e75bc022eb870775",
@@ -10026,6 +10028,43 @@
    ],
    "matchup": "Syracuse Orange @ Virginia Cavaliers",
    "sha256": "66ef14420b0c89e6be96366b61862f352b91876a1238eef1d56a8eb47faa485e",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|TCU Horned Frogs @ Arizona Wildcats|2026-11-07T03:15:00Z": {
+   "block": {
+    "away": "TCU Horned Frogs",
+    "best_book": "draftkings",
+    "best_price": 250,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.255,
+    "fair_away": 0.27875,
+    "fair_home": 0.72125,
+    "fair_side": 0.27875,
+    "home": "Arizona Wildcats",
+    "kickoff_utc": "2026-11-07T03:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "TCU Horned Frogs @ Arizona Wildcats",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 260
+    },
+    "raw_overround_pts": 3.986,
+    "relative_price_discount": -0.025,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "TCU Horned Frogs",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261105T213720Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-05T21:37:25Z",
+   "kickoff_utc": "2026-11-07T03:15:00Z",
+   "matchup": "TCU Horned Frogs @ Arizona Wildcats",
+   "sha256": "3799eae90169a113de8429080549331b617d99df9eedc4f790d25493868618fb",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|TCU Horned Frogs @ Baylor Bears|2026-10-17T23:00:00Z": {

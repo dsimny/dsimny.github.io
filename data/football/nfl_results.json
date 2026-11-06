@@ -2304,20 +2304,20 @@
    "away": "JAX",
    "away_abbr": "JAX",
    "away_name": "Jacksonville Jaguars",
-   "away_score": null,
+   "away_score": 33,
    "espn_event_id": "401873037",
-   "final": false,
+   "final": true,
    "home": "BAL",
    "home_abbr": "BAL",
    "home_name": "Baltimore Ravens",
-   "home_score": null,
+   "home_score": 10,
    "kickoff_utc": "2026-11-06T01:15:00Z",
-   "margin": null,
+   "margin": -23,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 43
   },
   "401873272": {
    "away": "DET",
@@ -3232,5 +3232,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-05T18:28:12Z"
+ "updated_utc": "2026-11-06T17:47:21Z"
 }

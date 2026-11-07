@@ -3060,6 +3060,40 @@
    "sha256": "aab8afaff12dbc1e769b86410eb38724b0cd712d488c311537244b7882600e56",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Duke Blue Devils @ NC State Wolfpack|2026-11-07T17:40:00Z": {
+   "block": {
+    "away": "Duke Blue Devils",
+    "best_book": "betrivers",
+    "best_price": -180,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.747,
+    "fair_away": 0.62925,
+    "fair_home": 0.37075,
+    "fair_side": 0.62925,
+    "home": "NC State Wolfpack",
+    "kickoff_utc": "2026-11-07T17:40:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Duke Blue Devils @ NC State Wolfpack",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.739,
+    "relative_price_discount": -0.0216273089,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Duke Blue Devils",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261106T173722Z.json",
+    "t24_hours_before_kickoff": 24.04
+   },
+   "committed_utc": "2026-11-07T17:37:27Z",
+   "kickoff_utc": "2026-11-07T17:40:00Z",
+   "matchup": "Duke Blue Devils @ NC State Wolfpack",
+   "sha256": "f93744bb36dad8818caa775f5e0532b32f1590856fcd05f4c79f7527e93ced2a",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Duke Blue Devils @ Virginia Cavaliers|2026-10-23T23:00:00Z": {
    "block": {
     "away": "Duke Blue Devils",

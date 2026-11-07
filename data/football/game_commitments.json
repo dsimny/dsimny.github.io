@@ -15579,6 +15579,40 @@
    "sha256": "4bf0067e615141b372fb6ade45d3c6a0caefe3d921994cf7e54748fad3d18678",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|CIN @ ATL|2026-11-08T14:30:00Z": {
+   "block": {
+    "away": "Cincinnati Bengals",
+    "best_book": "draftkings",
+    "best_price": 150,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.406,
+    "fair_away": 0.6067,
+    "fair_home": 0.3933,
+    "fair_side": 0.3933,
+    "home": "Atlanta Falcons",
+    "kickoff_utc": "2026-11-08T14:30:00Z",
+    "league": "NFL",
+    "matchup": "CIN @ ATL",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.779,
+    "relative_price_discount": -0.017037037,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Atlanta Falcons",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261107T083724Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-07T08:37:27Z",
+   "kickoff_utc": "2026-11-08T14:30:00Z",
+   "matchup": "CIN @ ATL",
+   "sha256": "93bd9335470c0dbaddf2c5c85a424258c8b4fd0ffbb138c374be92babf13b922",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|CIN @ BAL|2026-10-25T17:00:00Z": {
    "block": {
     "away": "Cincinnati Bengals",

@@ -280,7 +280,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-11-01T16:58:49Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-10-27|ncaaf|Temple Owls @ East Carolina Pirates|2026-10-31T19:00:00Z|research_free"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_free",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "ncaaf",
+   "slate_week": "2026-11-03",
+   "matchup": "Texas State Bobcats @ Oregon State Beavers",
+   "kickoff_utc": "2026-11-08T03:30:00Z",
+   "side": "Texas State Bobcats",
+   "best_price": 200,
+   "best_book": "williamhill_us",
+   "books_at_best": 2,
+   "eff_overround_pts": 1.587,
+   "fair_side": 0.32875,
+   "t24_capture": "ncaaf_20261106T213721Z.json",
+   "t24_hours_before_kickoff": 29.88,
+   "observed_utc": "2026-11-07T19:37:27Z",
+   "espn_event_id": "401860912",
+   "final": "42-21",
+   "result": "win",
+   "units": 0,
+   "pnl_per_unit": 2.0,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": 1.051,
+   "close_capture": "ncaaf_20261107T213720Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-11-08T16:53:57Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-11-03|ncaaf|Texas State Bobcats @ Oregon State Beavers|2026-11-08T03:30:00Z|research_free"
   }
  ],
- "updated_utc": "2026-11-01T16:58:49Z"
+ "updated_utc": "2026-11-08T16:53:57Z"
 }

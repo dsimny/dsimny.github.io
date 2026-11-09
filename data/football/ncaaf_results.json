@@ -11135,6 +11135,63 @@
    "status": "STATUS_FINAL",
    "total": 37
   },
+  "401866458": {
+   "away": "Western Michigan Broncos",
+   "away_abbr": "WMU",
+   "away_key": "westernmichiganbroncos",
+   "away_score": null,
+   "espn_event_id": "401866458",
+   "final": false,
+   "home": "Akron Zips",
+   "home_abbr": "AKR",
+   "home_key": "akronzips",
+   "home_score": null,
+   "kickoff_utc": "2026-11-11T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401866459": {
+   "away": "Kent State Golden Flashes",
+   "away_abbr": "KENT",
+   "away_key": "kentstategoldenflashes",
+   "away_score": null,
+   "espn_event_id": "401866459",
+   "final": false,
+   "home": "Bowling Green Falcons",
+   "home_abbr": "BGSU",
+   "home_key": "bowlinggreenfalcons",
+   "home_score": null,
+   "kickoff_utc": "2026-11-11T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401866460": {
+   "away": "Ohio Bobcats",
+   "away_abbr": "OHIO",
+   "away_key": "ohiobobcats",
+   "away_score": null,
+   "espn_event_id": "401866460",
+   "final": false,
+   "home": "Miami (OH) RedHawks",
+   "home_abbr": "M-OH",
+   "home_key": "miamiohredhawks",
+   "home_score": null,
+   "kickoff_utc": "2026-11-11T01:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401866476": {
    "away": "Miami (OH) RedHawks",
    "away_abbr": "M-OH",
@@ -13017,5 +13074,5 @@
    "total": 58
   }
  },
- "updated_utc": "2026-11-08T16:53:54Z"
+ "updated_utc": "2026-11-09T21:15:53Z"
 }

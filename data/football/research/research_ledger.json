@@ -311,7 +311,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-11-08T16:53:57Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-11-03|ncaaf|Texas State Bobcats @ Oregon State Beavers|2026-11-08T03:30:00Z|research_free"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_premium",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "nfl",
+   "slate_week": "2026-11-03",
+   "matchup": "DET @ MIA",
+   "kickoff_utc": "2026-11-08T18:00:00Z",
+   "side": "Miami Dolphins",
+   "best_price": 265,
+   "best_book": "fanduel",
+   "books_at_best": 2,
+   "eff_overround_pts": 1.423,
+   "fair_side": 0.28645,
+   "t24_capture": "nfl_20261107T123720Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "observed_utc": "2026-11-07T19:37:27Z",
+   "espn_event_id": "401873042",
+   "final": "19-9",
+   "result": "loss",
+   "units": 0,
+   "pnl_per_unit": -1.0,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": -0.405,
+   "close_capture": "nfl_20261108T153721Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-11-09T21:15:58Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-11-03|nfl|DET @ MIA|2026-11-08T18:00:00Z|research_premium"
   }
  ],
- "updated_utc": "2026-11-08T16:53:57Z"
+ "updated_utc": "2026-11-09T21:15:58Z"
 }

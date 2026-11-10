@@ -5787,6 +5787,40 @@
    "sha256": "ccdde25f7cb66a322ead7b78726225d0d6bdeed8e82f95402109b7d92979f33b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Kent State Golden Flashes @ Bowling Green Falcons|2026-11-11T00:00:00Z": {
+   "block": {
+    "away": "Kent State Golden Flashes",
+    "best_book": "fanduel",
+    "best_price": -210,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.83,
+    "fair_away": 0.33791,
+    "fair_home": 0.66209,
+    "fair_side": 0.66209,
+    "home": "Bowling Green Falcons",
+    "kickoff_utc": "2026-11-11T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Kent State Golden Flashes @ Bowling Green Falcons",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.838,
+    "relative_price_discount": -0.0231517209,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Bowling Green Falcons",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261109T193723Z.json",
+    "t24_hours_before_kickoff": 28.38
+   },
+   "committed_utc": "2026-11-10T00:37:26Z",
+   "kickoff_utc": "2026-11-11T00:00:00Z",
+   "matchup": "Kent State Golden Flashes @ Bowling Green Falcons",
+   "sha256": "21f1971345a8a4ba8564b136e205b0002e3a21d58dd53feb1ee67cd3955465e5",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Kent State Golden Flashes @ Sacramento State Hornets|2026-10-31T02:30:00Z": {
    "block": {
     "away": "Kent State Golden Flashes",
@@ -9133,6 +9167,43 @@
    "kickoff_utc": "2026-11-04T00:00:00Z",
    "matchup": "Ohio Bobcats @ Akron Zips",
    "sha256": "c33d54d04b8258d5b229f92d89be2a9978814ebccab77d205e17262f952827bd",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Ohio Bobcats @ Miami (OH) RedHawks|2026-11-11T01:00:00Z": {
+   "block": {
+    "away": "Ohio Bobcats",
+    "best_book": "williamhill_us",
+    "best_price": -113,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 3.547,
+    "fair_away": 0.51736,
+    "fair_home": 0.48264,
+    "fair_side": 0.51736,
+    "home": "Miami (OH) RedHawks",
+    "kickoff_utc": "2026-11-11T01:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Ohio Bobcats @ Miami (OH) RedHawks",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "bovada",
+     "price": -112
+    },
+    "raw_overround_pts": 4.623,
+    "relative_price_discount": -0.0254217592,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Ohio Bobcats",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261109T193723Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-10T00:37:26Z",
+   "kickoff_utc": "2026-11-11T01:00:00Z",
+   "matchup": "Ohio Bobcats @ Miami (OH) RedHawks",
+   "sha256": "91c67888ca3dedd7fd501d4e1f8857c9dbcbf89cde1837a8b6c70f4bfbbe3220",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Ohio Bobcats @ South Alabama Jaguars|2026-09-19T23:00:00Z": {
@@ -15348,6 +15419,43 @@
    "kickoff_utc": "2026-10-18T20:25:00Z",
    "matchup": "BUF @ LV",
    "sha256": "5cb761db1a4a8ab6fc180a5313db8d90310e054f8b20161458114e8e4e44ca8a",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|BUF @ MIN|2026-11-10T01:15:00Z": {
+   "block": {
+    "away": "Buffalo Bills",
+    "best_book": "fanatics",
+    "best_price": 150,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.37,
+    "fair_away": 0.61021,
+    "fair_home": 0.38979,
+    "fair_side": 0.38979,
+    "home": "Minnesota Vikings",
+    "kickoff_utc": "2026-11-10T01:15:00Z",
+    "league": "NFL",
+    "matchup": "BUF @ MIN",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betonlineag",
+     "price": 155
+    },
+    "raw_overround_pts": 4.287,
+    "relative_price_discount": -0.0261818182,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Minnesota Vikings",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261108T193724Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-10T00:37:26Z",
+   "kickoff_utc": "2026-11-10T01:15:00Z",
+   "matchup": "BUF @ MIN",
+   "sha256": "0df8d5ada3c6204ef67e13ced90d73e9e4505632101a530ed74856fb4f56ed09",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|CAR @ ATL|2026-09-20T17:00:00Z": {

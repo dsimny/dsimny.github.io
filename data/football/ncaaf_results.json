@@ -11192,6 +11192,63 @@
    "status": "STATUS_SCHEDULED",
    "total": null
   },
+  "401866461": {
+   "away": "Buffalo Bulls",
+   "away_abbr": "BUFF",
+   "away_key": "buffalobulls",
+   "away_score": null,
+   "espn_event_id": "401866461",
+   "final": false,
+   "home": "Ball State Cardinals",
+   "home_abbr": "BALL",
+   "home_key": "ballstatecardinals",
+   "home_score": null,
+   "kickoff_utc": "2026-11-12T00:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401866462": {
+   "away": "Sacramento State Hornets",
+   "away_abbr": "SAC",
+   "away_key": "sacramentostatehornets",
+   "away_score": null,
+   "espn_event_id": "401866462",
+   "final": false,
+   "home": "Central Michigan Chippewas",
+   "home_abbr": "CMU",
+   "home_key": "centralmichiganchippewas",
+   "home_score": null,
+   "kickoff_utc": "2026-11-12T00:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401866463": {
+   "away": "Massachusetts Minutemen",
+   "away_abbr": "MASS",
+   "away_key": "massachusettsminutemen",
+   "away_score": null,
+   "espn_event_id": "401866463",
+   "final": false,
+   "home": "Toledo Rockets",
+   "home_abbr": "TOL",
+   "home_key": "toledorockets",
+   "home_score": null,
+   "kickoff_utc": "2026-11-12T00:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401866476": {
    "away": "Miami (OH) RedHawks",
    "away_abbr": "M-OH",
@@ -13074,5 +13131,5 @@
    "total": 58
   }
  },
- "updated_utc": "2026-11-09T21:15:53Z"
+ "updated_utc": "2026-11-10T18:26:55Z"
 }

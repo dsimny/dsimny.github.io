@@ -2570,20 +2570,20 @@
    "away": "BUF",
    "away_abbr": "BUF",
    "away_name": "Buffalo Bills",
-   "away_score": null,
+   "away_score": 23,
    "espn_event_id": "401873051",
-   "final": false,
+   "final": true,
    "home": "MIN",
    "home_abbr": "MIN",
    "home_name": "Minnesota Vikings",
-   "home_score": null,
+   "home_score": 6,
    "kickoff_utc": "2026-11-10T01:15:00Z",
-   "margin": null,
+   "margin": -17,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 29
   },
   "401873272": {
    "away": "DET",
@@ -3498,5 +3498,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-09T21:15:54Z"
+ "updated_utc": "2026-11-10T18:26:57Z"
 }

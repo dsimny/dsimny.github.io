@@ -1969,6 +1969,9 @@
    },
    "committed_utc": "2026-11-10T18:37:29Z",
    "kickoff_utc": "2026-11-12T00:30:00Z",
+   "later_disagreements": [
+    "6b7248839f02ce15f033509efedac0e7a17a0351bda12136f63984b4179575a2"
+   ],
    "matchup": "Buffalo Bulls @ Ball State Cardinals",
    "sha256": "60f1ac7f11886206170d50595391f82b57448551f9e4617d07bff02fade91993",
    "sport": "ncaaf"
@@ -10699,6 +10702,9 @@
    },
    "committed_utc": "2026-11-10T18:37:29Z",
    "kickoff_utc": "2026-11-12T00:30:00Z",
+   "later_disagreements": [
+    "6be82391d427c93c70ffe27b839e3d8c81dcb8f922e286818336c9d08657730f"
+   ],
    "matchup": "Sacramento State Hornets @ Central Michigan Chippewas",
    "sha256": "fdc6589786b7465c6f2588e2144c48c975f4f2f4008f70bfaf7dd9e718802b4b",
    "sport": "ncaaf"
@@ -13536,6 +13542,9 @@
    },
    "committed_utc": "2026-11-10T18:37:29Z",
    "kickoff_utc": "2026-11-12T00:30:00Z",
+   "later_disagreements": [
+    "def7e0588b9586c2314242513717bbba2bf94ebfd1e261338f0949a0e922f548"
+   ],
    "matchup": "UMass Minutemen @ Toledo Rockets",
    "sha256": "39b4c71dd7b6b9214cb9926beeb69be477d11de75c1bb6fce9e794e1be59cafc",
    "sport": "ncaaf"

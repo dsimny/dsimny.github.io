@@ -6368,6 +6368,40 @@
    "sha256": "dc029fc6dcfe92ef279971fa2f10eb0e2d2226d44d580b9588e46f22fa430537",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Louisiana Ragin Cajuns @ UL Monroe Warhawks|2026-11-13T02:00:00Z": {
+   "block": {
+    "away": "Louisiana Ragin Cajuns",
+    "best_book": "betrivers",
+    "best_price": 340,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.525,
+    "fair_away": 0.77233,
+    "fair_home": 0.22767,
+    "fair_side": 0.22767,
+    "home": "UL Monroe Warhawks",
+    "kickoff_utc": "2026-11-13T02:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Louisiana Ragin Cajuns @ UL Monroe Warhawks",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.579,
+    "relative_price_discount": 0.0017482517,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "UL Monroe Warhawks",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261111T211534Z.json",
+    "t24_hours_before_kickoff": 28.74
+   },
+   "committed_utc": "2026-11-11T21:15:39Z",
+   "kickoff_utc": "2026-11-13T02:00:00Z",
+   "matchup": "Louisiana Ragin Cajuns @ UL Monroe Warhawks",
+   "sha256": "8335097b30013c23ce77963e5dcbb6ab0a4c6971fc771728077cb7c480ede74f",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Louisiana Ragin Cajuns @ USC Trojans|2026-09-13T03:00:00Z": {
    "block": {
     "away": "Louisiana Ragin Cajuns",
@@ -6874,6 +6908,9 @@
    },
    "committed_utc": "2026-11-11T19:37:28Z",
    "kickoff_utc": "2026-11-13T01:00:00Z",
+   "later_disagreements": [
+    "e740fdb613b60fdbec6fb9c3613511a60871f06907c4fdc9cc3e9139f339a956"
+   ],
    "matchup": "Memphis Tigers @ South Florida Bulls",
    "sha256": "7f90d491b6ebcfe51109c9c0a5c70d61f9dcba5a62240b22698848c24e372308",
    "sport": "ncaaf"

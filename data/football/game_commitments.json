@@ -3949,7 +3949,8 @@
    "committed_utc": "2026-11-12T18:37:26Z",
    "kickoff_utc": "2026-11-14T00:00:00Z",
    "later_disagreements": [
-    "49eaa723010d3398b7310a3b438dcb6ef24c28bd279146617bcd3264d3e731ed"
+    "49eaa723010d3398b7310a3b438dcb6ef24c28bd279146617bcd3264d3e731ed",
+    "b54a2cc171b8d01a9e2e4ac4e888d2fcb959de54f4c9e973f030708b37f13d48"
    ],
    "matchup": "Florida State Seminoles @ Pittsburgh Panthers",
    "sha256": "3574e0eca1733260e181c577746a2c5badb5c8fecf53b0e19e30a2abb83c41c3",
@@ -4968,6 +4969,40 @@
    ],
    "matchup": "Illinois Fighting Illini @ Michigan State Spartans",
    "sha256": "9ba5e68cb6a586cd4a72bf727a4259ba69d1c18622507ccf71157fe2b9b4eece",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Illinois Fighting Illini @ UCLA Bruins|2026-11-14T02:00:00Z": {
+   "block": {
+    "away": "Illinois Fighting Illini",
+    "best_book": "betrivers",
+    "best_price": 325,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 2.911,
+    "fair_away": 0.2341,
+    "fair_home": 0.7659,
+    "fair_side": 0.2341,
+    "home": "UCLA Bruins",
+    "kickoff_utc": "2026-11-14T02:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Illinois Fighting Illini @ UCLA Bruins",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.188,
+    "relative_price_discount": -0.0051099228,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Illinois Fighting Illini",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261112T203726Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-12T20:37:32Z",
+   "kickoff_utc": "2026-11-14T02:00:00Z",
+   "matchup": "Illinois Fighting Illini @ UCLA Bruins",
+   "sha256": "f952e9bcfee067e7157a25d3a1b30300bf717a7e705992f472c1c88a81167350",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Illinois State Redbirds @ Northern Illinois Huskies|2026-09-12T23:00:00Z": {

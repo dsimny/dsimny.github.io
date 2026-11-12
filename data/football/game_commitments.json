@@ -3918,6 +3918,40 @@
    "sha256": "64088f53f215a3fdb48d08087f44be56221de44898bc8c984fb5f5717a6663a2",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Florida State Seminoles @ Pittsburgh Panthers|2026-11-14T00:00:00Z": {
+   "block": {
+    "away": "Florida State Seminoles",
+    "best_book": "betrivers",
+    "best_price": -159,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.206,
+    "fair_away": 0.3933,
+    "fair_home": 0.6067,
+    "fair_side": 0.6067,
+    "home": "Pittsburgh Panthers",
+    "kickoff_utc": "2026-11-14T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida State Seminoles @ Pittsburgh Panthers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.779,
+    "relative_price_discount": -0.0118657502,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Pittsburgh Panthers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261112T183721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-12T18:37:26Z",
+   "kickoff_utc": "2026-11-14T00:00:00Z",
+   "matchup": "Florida State Seminoles @ Pittsburgh Panthers",
+   "sha256": "3574e0eca1733260e181c577746a2c5badb5c8fecf53b0e19e30a2abb83c41c3",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Fresno State Bulldogs @ San Diego State Aztecs|2026-10-18T02:30:00Z": {
    "block": {
     "away": "Fresno State Bulldogs",

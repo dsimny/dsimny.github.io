@@ -3950,7 +3950,8 @@
    "kickoff_utc": "2026-11-14T00:00:00Z",
    "later_disagreements": [
     "49eaa723010d3398b7310a3b438dcb6ef24c28bd279146617bcd3264d3e731ed",
-    "b54a2cc171b8d01a9e2e4ac4e888d2fcb959de54f4c9e973f030708b37f13d48"
+    "b54a2cc171b8d01a9e2e4ac4e888d2fcb959de54f4c9e973f030708b37f13d48",
+    "06170b0bffee2a10a8c450dfecf43acb63b2f91ea70faaac252bdd07d01d3bef"
    ],
    "matchup": "Florida State Seminoles @ Pittsburgh Panthers",
    "sha256": "3574e0eca1733260e181c577746a2c5badb5c8fecf53b0e19e30a2abb83c41c3",
@@ -4614,6 +4615,40 @@
    "sha256": "ed64a923f644c516bf9b9c49850ff9bde22ac9cb203be52361abc9d574f931d4",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Houston Cougars @ Colorado Buffaloes|2026-11-14T03:15:00Z": {
+   "block": {
+    "away": "Houston Cougars",
+    "best_book": "fanduel",
+    "best_price": 310,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.168,
+    "fair_away": 0.75431,
+    "fair_home": 0.24569,
+    "fair_side": 0.24569,
+    "home": "Colorado Buffaloes",
+    "kickoff_utc": "2026-11-14T03:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Houston Cougars @ Colorado Buffaloes",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.364,
+    "relative_price_discount": 0.007265179,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Colorado Buffaloes",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261112T213723Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-12T21:37:30Z",
+   "kickoff_utc": "2026-11-14T03:15:00Z",
+   "matchup": "Houston Cougars @ Colorado Buffaloes",
+   "sha256": "314678aea88bee6b7a48109c58226c8e6e78893d91c6a1ddf5292358edbcf0fc",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Houston Cougars @ Kansas State Wildcats|2026-10-10T19:30:00Z": {
    "block": {
     "away": "Houston Cougars",
@@ -5001,6 +5036,9 @@
    },
    "committed_utc": "2026-11-12T20:37:32Z",
    "kickoff_utc": "2026-11-14T02:00:00Z",
+   "later_disagreements": [
+    "8ae58b63b0c69918ead03cf018dcc3ff12c3c7450aab2496a08407f896dd52a5"
+   ],
    "matchup": "Illinois Fighting Illini @ UCLA Bruins",
    "sha256": "f952e9bcfee067e7157a25d3a1b30300bf717a7e705992f472c1c88a81167350",
    "sport": "ncaaf"

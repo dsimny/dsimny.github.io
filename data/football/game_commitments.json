@@ -3948,6 +3948,9 @@
    },
    "committed_utc": "2026-11-12T18:37:26Z",
    "kickoff_utc": "2026-11-14T00:00:00Z",
+   "later_disagreements": [
+    "49eaa723010d3398b7310a3b438dcb6ef24c28bd279146617bcd3264d3e731ed"
+   ],
    "matchup": "Florida State Seminoles @ Pittsburgh Panthers",
    "sha256": "3574e0eca1733260e181c577746a2c5badb5c8fecf53b0e19e30a2abb83c41c3",
    "sport": "ncaaf"

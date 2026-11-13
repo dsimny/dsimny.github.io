@@ -2589,20 +2589,20 @@
    "away": "WAS",
    "away_abbr": "WSH",
    "away_name": "Washington Commanders",
-   "away_score": null,
+   "away_score": 24,
    "espn_event_id": "401873052",
-   "final": false,
+   "final": true,
    "home": "NYG",
    "home_abbr": "NYG",
    "home_name": "New York Giants",
-   "home_score": null,
+   "home_score": 21,
    "kickoff_utc": "2026-11-13T01:15:00Z",
-   "margin": null,
+   "margin": -3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 45
   },
   "401873272": {
    "away": "DET",
@@ -3517,5 +3517,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-12T18:40:06Z"
+ "updated_utc": "2026-11-13T18:21:04Z"
 }

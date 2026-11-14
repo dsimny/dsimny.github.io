@@ -804,6 +804,40 @@
    "sha256": "497f9e7462095e05a1a06db3ad73130ae1c22680c5e6e6ac14b94b544056eb8e",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Arizona State Sun Devils @ UCF Knights|2026-11-14T22:30:00Z": {
+   "block": {
+    "away": "Arizona State Sun Devils",
+    "best_book": "fanduel",
+    "best_price": -150,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.553,
+    "fair_away": 0.41325,
+    "fair_home": 0.58675,
+    "fair_side": 0.58675,
+    "home": "UCF Knights",
+    "kickoff_utc": "2026-11-14T22:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Arizona State Sun Devils @ UCF Knights",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.856,
+    "relative_price_discount": -0.0225817101,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "UCF Knights",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261113T222946Z.json",
+    "t24_hours_before_kickoff": 24.0
+   },
+   "committed_utc": "2026-11-14T11:37:27Z",
+   "kickoff_utc": "2026-11-14T22:30:00Z",
+   "matchup": "Arizona State Sun Devils @ UCF Knights",
+   "sha256": "785a5c47cfa44dfa9fd7c9e7983b65cdcf22dcd46a4eb38be634bf2a1cc7b7ef",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Arizona Wildcats @ BYU Cougars|2026-09-12T19:30:00Z": {
    "block": {
     "away": "Arizona Wildcats",
@@ -1364,6 +1398,40 @@
    "sha256": "7cf38b7ed0bbe008bbf44661ef43d2b5c2b64b9257fb7ea6c4d5f33304265999",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Auburn Tigers @ Mississippi State Bulldogs|2026-11-14T21:15:00Z": {
+   "block": {
+    "away": "Auburn Tigers",
+    "best_book": "williamhill_us",
+    "best_price": 121,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.232,
+    "fair_away": 0.56092,
+    "fair_home": 0.43908,
+    "fair_side": 0.43908,
+    "home": "Mississippi State Bulldogs",
+    "kickoff_utc": "2026-11-14T21:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Auburn Tigers @ Mississippi State Bulldogs",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.995,
+    "relative_price_discount": -0.0305429864,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Mississippi State Bulldogs",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261113T213723Z.json",
+    "t24_hours_before_kickoff": 23.63
+   },
+   "committed_utc": "2026-11-14T11:37:27Z",
+   "kickoff_utc": "2026-11-14T21:15:00Z",
+   "matchup": "Auburn Tigers @ Mississippi State Bulldogs",
+   "sha256": "76133a7eaecacd911ad4db7c81b1d0dc55505cb02c806f8aabd5bfb67b0a1be9",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Auburn Tigers @ Ole Miss Rebels|2026-10-31T16:45:00Z": {
    "block": {
     "away": "Auburn Tigers",
@@ -1864,6 +1932,43 @@
    ],
    "matchup": "Baylor Bears @ BYU Cougars",
    "sha256": "d96b3483de288896167db4a370e436830f7f99e9ad2af148966c91ce8cb3ad61",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Baylor Bears @ BYU Cougars|2026-11-15T00:00:00Z": {
+   "block": {
+    "away": "Baylor Bears",
+    "best_book": "fanatics",
+    "best_price": 240,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 2.745,
+    "fair_away": 0.28953,
+    "fair_home": 0.71047,
+    "fair_side": 0.28953,
+    "home": "BYU Cougars",
+    "kickoff_utc": "2026-11-15T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Baylor Bears @ BYU Cougars",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 245
+    },
+    "raw_overround_pts": 4.662,
+    "relative_price_discount": -0.0158371041,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Baylor Bears",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261113T222946Z.json",
+    "t24_hours_before_kickoff": 25.5
+   },
+   "committed_utc": "2026-11-14T11:37:27Z",
+   "kickoff_utc": "2026-11-15T00:00:00Z",
+   "matchup": "Baylor Bears @ BYU Cougars",
+   "sha256": "d8247004819b4cb121a6d18c7b9ee3a9fb011dcf9fb2e75666e064c6de22afd3",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Baylor Bears @ Kansas Jayhawks|2026-10-24T17:00:00Z": {
@@ -4150,6 +4255,43 @@
    ],
    "matchup": "Florida Atlantic Owls @ Tulsa Golden Hurricane",
    "sha256": "8db58ee5ecfef8ac836d6f689a5d1df118039efad4cc503080518219167af34f",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Florida Atlantic Owls @ Tulsa Golden Hurricane|2026-11-15T00:15:00Z": {
+   "block": {
+    "away": "Florida Atlantic Owls",
+    "best_book": "fanduel",
+    "best_price": 184,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.765,
+    "fair_away": 0.34188,
+    "fair_home": 0.65812,
+    "fair_side": 0.34188,
+    "home": "Tulsa Golden Hurricane",
+    "kickoff_utc": "2026-11-15T00:15:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida Atlantic Owls @ Tulsa Golden Hurricane",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 185
+    },
+    "raw_overround_pts": 4.464,
+    "relative_price_discount": -0.0299295775,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Florida Atlantic Owls",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261113T222946Z.json",
+    "t24_hours_before_kickoff": 25.75
+   },
+   "committed_utc": "2026-11-14T11:37:27Z",
+   "kickoff_utc": "2026-11-15T00:15:00Z",
+   "matchup": "Florida Atlantic Owls @ Tulsa Golden Hurricane",
+   "sha256": "a8e1fcad80fe460ad7f4872b7220d942f4c7fa83e538647c1f8ea99c0a66ac00",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Florida Gators @ Georgia Bulldogs|2026-10-31T16:00:00Z": {
@@ -15305,6 +15447,40 @@
    "sha256": "2db8903122a33506686f8935eeb24705a04a5eb32f56d57a138a50c0ae5cdf1b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Tulane Green Wave @ Rice Owls|2026-11-14T21:30:00Z": {
+   "block": {
+    "away": "Tulane Green Wave",
+    "best_book": "draftkings",
+    "best_price": 120,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 3.26,
+    "fair_away": 0.44134,
+    "fair_home": 0.55866,
+    "fair_side": 0.44134,
+    "home": "Rice Owls",
+    "kickoff_utc": "2026-11-14T21:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Tulane Green Wave @ Rice Owls",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.416,
+    "relative_price_discount": -0.0299242424,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Tulane Green Wave",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261113T213723Z.json",
+    "t24_hours_before_kickoff": 23.88
+   },
+   "committed_utc": "2026-11-14T11:37:27Z",
+   "kickoff_utc": "2026-11-14T21:30:00Z",
+   "matchup": "Tulane Green Wave @ Rice Owls",
+   "sha256": "81dbf40ccdd82a1a8f1565f2d47cd020023bb6572ff66247a90a0f5740982682",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Tulsa Golden Hurricane @ Navy Midshipmen|2026-10-10T19:30:00Z": {
    "block": {
     "away": "Tulsa Golden Hurricane",
@@ -16779,6 +16955,43 @@
    ],
    "matchup": "Utah Utes @ Arizona Wildcats",
    "sha256": "f795aadfe564e2e6a4ebd2b959fcc31ff15931f7cb78365e9b9c091fb4081fc6",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Utah Utes @ Arizona Wildcats|2026-11-15T03:30:00Z": {
+   "block": {
+    "away": "Utah Utes",
+    "best_book": "williamhill_us",
+    "best_price": 116,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.561,
+    "fair_away": 0.55259,
+    "fair_home": 0.44741,
+    "fair_side": 0.44741,
+    "home": "Arizona Wildcats",
+    "kickoff_utc": "2026-11-15T03:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Utah Utes @ Arizona Wildcats",
+    "move_pts": null,
+    "n_books": 9,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 117
+    },
+    "raw_overround_pts": 3.958,
+    "relative_price_discount": -0.0347714736,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Arizona Wildcats",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261113T222946Z.json",
+    "t24_hours_before_kickoff": 29.0
+   },
+   "committed_utc": "2026-11-14T11:37:27Z",
+   "kickoff_utc": "2026-11-15T03:30:00Z",
+   "matchup": "Utah Utes @ Arizona Wildcats",
+   "sha256": "b55c13f4ac5112d600d9bb83470f9db66a16e9c8d4ddf72f428347cd1e7534ad",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Utah Utes @ Cincinnati Bearcats|2026-10-31T19:45:00Z": {

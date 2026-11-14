@@ -5522,6 +5522,40 @@
    "sha256": "d37f9b021c156887d2fd1dfeafff10a31bb26defbbc1e694f426892bffd5199c",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Georgia Tech Yellow Jackets @ Clemson Tigers|2026-11-14T17:39:00Z": {
+   "block": {
+    "away": "Georgia Tech Yellow Jackets",
+    "best_book": "fanduel",
+    "best_price": 460,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.706,
+    "fair_away": 0.18105,
+    "fair_home": 0.81895,
+    "fair_side": 0.18105,
+    "home": "Clemson Tigers",
+    "kickoff_utc": "2026-11-14T17:39:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Georgia Tech Yellow Jackets @ Clemson Tigers",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.018,
+    "relative_price_discount": 0.0136904762,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Georgia Tech Yellow Jackets",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261113T173720Z.json",
+    "t24_hours_before_kickoff": 24.03
+   },
+   "committed_utc": "2026-11-14T17:37:30Z",
+   "kickoff_utc": "2026-11-14T17:39:00Z",
+   "matchup": "Georgia Tech Yellow Jackets @ Clemson Tigers",
+   "sha256": "70465eae1c7f8c29d4a5c30d676ee83cbc6868f1f11627a29adbc7c0dc1ee87b",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Georgia Tech Yellow Jackets @ Virginia Tech Hokies|2026-10-17T19:30:00Z": {
    "block": {
     "away": "Georgia Tech Yellow Jackets",
@@ -11969,7 +12003,8 @@
     "b1ead303c4866021768471a942a0d5322efb1fd1b67f17f550923e3b6ab680a6",
     "ae6d3c49401e96c9b4ff3755d4b4a29fb7072a0cd37904a4babc974163591c13",
     "04cc1923f31156d84e57f76111d9902301a99a28c4ddd9f1bc3bdf0b14953805",
-    "c299babcb29961543e976aa379f90d7c4eede2777802def1fb27841933952501"
+    "c299babcb29961543e976aa379f90d7c4eede2777802def1fb27841933952501",
+    "045741dac467910c67570b2917802072245a9b548de5eca2b494babb9094352b"
    ],
    "matchup": "Ole Miss Rebels @ Oklahoma Sooners",
    "sha256": "39522f71eec17db2a9fe6b7686c0b0d872e2d146e2d8ae02ca2125191e9598cb",

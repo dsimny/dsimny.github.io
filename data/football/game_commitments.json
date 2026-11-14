@@ -11966,7 +11966,8 @@
    "committed_utc": "2026-11-14T12:37:27Z",
    "kickoff_utc": "2026-11-15T18:00:00Z",
    "later_disagreements": [
-    "b1ead303c4866021768471a942a0d5322efb1fd1b67f17f550923e3b6ab680a6"
+    "b1ead303c4866021768471a942a0d5322efb1fd1b67f17f550923e3b6ab680a6",
+    "ae6d3c49401e96c9b4ff3755d4b4a29fb7072a0cd37904a4babc974163591c13"
    ],
    "matchup": "Ole Miss Rebels @ Oklahoma Sooners",
    "sha256": "39522f71eec17db2a9fe6b7686c0b0d872e2d146e2d8ae02ca2125191e9598cb",

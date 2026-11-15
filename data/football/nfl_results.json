@@ -2620,7 +2620,7 @@
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
+   "status": "STATUS_IN_PROGRESS",
    "total": null
   },
   "401873054": {
@@ -2825,6 +2825,25 @@
    "home_name": "Cincinnati Bengals",
    "home_score": null,
    "kickoff_utc": "2026-11-16T01:20:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401873065": {
+   "away": "LAC",
+   "away_abbr": "LAC",
+   "away_name": "Los Angeles Chargers",
+   "away_score": null,
+   "espn_event_id": "401873065",
+   "final": false,
+   "home": "BAL",
+   "home_abbr": "BAL",
+   "home_name": "Baltimore Ravens",
+   "home_score": null,
+   "kickoff_utc": "2026-11-17T01:15:00Z",
    "margin": null,
    "season_slug": "regular-season",
    "season_type": 2,
@@ -3745,5 +3764,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-14T16:49:23Z"
+ "updated_utc": "2026-11-15T17:31:53Z"
 }

@@ -342,7 +342,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-11-09T21:15:58Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-11-03|nfl|DET @ MIA|2026-11-08T18:00:00Z|research_premium"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_premium",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "ncaaf",
+   "slate_week": "2026-11-10",
+   "matchup": "Florida International Panthers @ Delaware Blue Hens",
+   "kickoff_utc": "2026-11-14T20:00:00Z",
+   "side": "Delaware Blue Hens",
+   "best_price": -188,
+   "best_book": "fanduel",
+   "books_at_best": 2,
+   "eff_overround_pts": 1.774,
+   "fair_side": 0.64286,
+   "t24_capture": "ncaaf_20261113T143722Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "observed_utc": "2026-11-14T19:37:30Z",
+   "espn_event_id": "401871060",
+   "final": "16-24",
+   "result": "win",
+   "units": 0,
+   "pnl_per_unit": 0.5319,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": -3.029,
+   "close_capture": "ncaaf_20261114T184725Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-11-15T17:31:56Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-11-10|ncaaf|Florida International Panthers @ Delaware Blue Hens|2026-11-14T20:00:00Z|research_premium"
   }
  ],
- "updated_utc": "2026-11-09T21:15:58Z"
+ "updated_utc": "2026-11-15T17:31:56Z"
 }

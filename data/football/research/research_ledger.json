@@ -373,7 +373,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-11-15T17:31:56Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-11-10|ncaaf|Florida International Panthers @ Delaware Blue Hens|2026-11-14T20:00:00Z|research_premium"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_free",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "ncaaf",
+   "slate_week": "2026-11-10",
+   "matchup": "Ole Miss Rebels @ Oklahoma Sooners",
+   "kickoff_utc": "2026-11-15T18:00:00Z",
+   "side": "Oklahoma Sooners",
+   "best_price": -130,
+   "best_book": "fanduel",
+   "books_at_best": 2,
+   "eff_overround_pts": 1.976,
+   "fair_side": 0.55943,
+   "t24_capture": "ncaaf_20261114T123722Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "observed_utc": "2026-11-14T19:37:30Z",
+   "espn_event_id": "401856887",
+   "final": "17-24",
+   "result": "win",
+   "units": 0,
+   "pnl_per_unit": 0.7692,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": -0.281,
+   "close_capture": "ncaaf_20261115T123721Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-11-16T20:47:02Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-11-10|ncaaf|Ole Miss Rebels @ Oklahoma Sooners|2026-11-15T18:00:00Z|research_free"
   }
  ],
- "updated_utc": "2026-11-15T17:31:56Z"
+ "updated_utc": "2026-11-16T20:47:02Z"
 }

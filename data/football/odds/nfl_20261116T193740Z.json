@@ -1,0 +1,3140 @@
+{
+ "_capture_role_note": "scheduled: written by the capture job into the model's evidence trail; grade_football.py may book the record against it. research: a deliberate ad-hoc pull (e.g. the D.J. Mercer Spotlight). No model reads it.",
+ "_identity_note": "canonical: away/home are teams.py franchise keys, verified, unresolvable names aborted the run. verbatim: away/home are the API's own strings and NO canonical key is claimed - sufficient for price capture and the selection rule, NOT sufficient for grading, which needs a results join.",
+ "_tier_note": "Tier A: first-party pull, stamped with the UTC moment WE received it. Eligible for CLV precisely because that timestamp exists.",
+ "capture_role": "scheduled",
+ "captured_utc": "2026-11-16T19:37:40Z",
+ "credits": {
+  "http_status": 200,
+  "last_call_cost": 1,
+  "markets": "h2h",
+  "read_utc": "2026-11-16T19:37:40Z",
+  "regions": "us",
+  "remaining": 19877,
+  "source": "football_fetch_odds:nfl",
+  "used": 123
+ },
+ "events": [
+  {
+   "away": "LAC",
+   "away_raw": "Los Angeles Chargers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -230
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 190
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:03Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -225
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 185
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -225
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 190
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -225
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 188
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -216
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 184
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -216
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 184
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -245
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 195
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -225
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 185
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -225
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 185
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -224
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 187
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": -225
+       },
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": 185
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-17T01:15:00Z",
+   "home": "BAL",
+   "home_raw": "Baltimore Ravens",
+   "n_books": 11,
+   "odds_api_event_id": "35e3bdff558b5d1506251e814986f164"
+  },
+  {
+   "away": "IND",
+   "away_raw": "Indianapolis Colts",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -650
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 470
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:03Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -625
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 450
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -650
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 480
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -700
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 500
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -685
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 497
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -685
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 497
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -670
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 475
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -676
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 460
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -700
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 500
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -650
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 500
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Houston Texans",
+        "point": null,
+        "price": -700
+       },
+       {
+        "name": "Indianapolis Colts",
+        "point": null,
+        "price": 500
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-20T01:15:00Z",
+   "home": "HOU",
+   "home_raw": "Houston Texans",
+   "n_books": 11,
+   "odds_api_event_id": "66f9e83cf025d58acee12bce18661fb3"
+  },
+  {
+   "away": "ARI",
+   "away_raw": "Arizona Cardinals",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 900
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1600
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 900
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1600
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 850
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1450
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 870
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1400
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 910
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1600
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 910
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1600
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 875
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1667
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 880
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1786
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 950
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1400
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 800
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1400
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Arizona Cardinals",
+        "point": null,
+        "price": 850
+       },
+       {
+        "name": "Kansas City Chiefs",
+        "point": null,
+        "price": -1400
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T18:00:00Z",
+   "home": "KC",
+   "home_raw": "Kansas City Chiefs",
+   "n_books": 11,
+   "odds_api_event_id": "403a88701352da05b0710a9e883b803e"
+  },
+  {
+   "away": "BAL",
+   "away_raw": "Baltimore Ravens",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": 114
+       },
+       {
+        "name": "Carolina Panthers",
+        "point": null,
+        "price": -135
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": 112
+       },
+       {
+        "name": "Carolina Panthers",
+        "point": null,
+        "price": -132
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": 110
+       },
+       {
+        "name": "Carolina Panthers",
+        "point": null,
+        "price": -130
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": 110
+       },
+       {
+        "name": "Carolina Panthers",
+        "point": null,
+        "price": -136
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": 112
+       },
+       {
+        "name": "Carolina Panthers",
+        "point": null,
+        "price": -137
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": 110
+       },
+       {
+        "name": "Carolina Panthers",
+        "point": null,
+        "price": -135
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Baltimore Ravens",
+        "point": null,
+        "price": 110
+       },
+       {
+        "name": "Carolina Panthers",
+        "point": null,
+        "price": -130
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T18:00:00Z",
+   "home": "CAR",
+   "home_raw": "Carolina Panthers",
+   "n_books": 7,
+   "odds_api_event_id": "4527f57f5bc32742d8194af1ccf7da7e"
+  },
+  {
+   "away": "MIA",
+   "away_raw": "Miami Dolphins",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1450
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 850
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1450
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 850
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1600
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 900
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1500
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 850
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1500
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 874
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1500
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 874
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1667
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 800
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1695
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 840
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1400
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 950
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1500
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 850
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Buffalo Bills",
+        "point": null,
+        "price": -1500
+       },
+       {
+        "name": "Miami Dolphins",
+        "point": null,
+        "price": 900
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T18:00:00Z",
+   "home": "BUF",
+   "home_raw": "Buffalo Bills",
+   "n_books": 11,
+   "odds_api_event_id": "4c5b1c0843a260278e95eb93e7787576"
+  },
+  {
+   "away": "NO",
+   "away_raw": "New Orleans Saints",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -675
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 490
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -625
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 450
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -800
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 560
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -680
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 490
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -585
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 437
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -585
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 437
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -770
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 510
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -725
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 490
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -700
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 550
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -585
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 435
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Chicago Bears",
+        "point": null,
+        "price": -650
+       },
+       {
+        "name": "New Orleans Saints",
+        "point": null,
+        "price": 460
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T18:00:00Z",
+   "home": "CHI",
+   "home_raw": "Chicago Bears",
+   "n_books": 11,
+   "odds_api_event_id": "3ea90704fb576633bd1e2fa5aafd9ea3"
+  },
+  {
+   "away": "TEN",
+   "away_raw": "Tennessee Titans",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -470
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 360
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -420
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 320
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -450
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 350
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -400
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 320
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -400
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 316
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -400
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 316
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -530
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 370
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -391
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 295
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -450
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 350
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -400
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 310
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Dallas Cowboys",
+        "point": null,
+        "price": -400
+       },
+       {
+        "name": "Tennessee Titans",
+        "point": null,
+        "price": 310
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T18:00:00Z",
+   "home": "DAL",
+   "home_raw": "Dallas Cowboys",
+   "n_books": 11,
+   "odds_api_event_id": "5e63079b678f8c13419adc169fff02d3"
+  },
+  {
+   "away": "TB",
+   "away_raw": "Tampa Bay Buccaneers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -285
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -290
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -260
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 215
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -285
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 238
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -285
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 234
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -285
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 234
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -295
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -285
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 224
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -275
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 225
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -290
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 240
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:05Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Detroit Lions",
+        "point": null,
+        "price": -285
+       },
+       {
+        "name": "Tampa Bay Buccaneers",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T18:00:00Z",
+   "home": "DET",
+   "home_raw": "Detroit Lions",
+   "n_books": 11,
+   "odds_api_event_id": "41e2dd69bddd65d7e823d9ed61cc2afc"
+  },
+  {
+   "away": "PIT",
+   "away_raw": "Pittsburgh Steelers",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 170
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -205
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:03Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 171
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -205
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 183
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -215
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 168
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -200
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 186
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 186
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 170
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 174
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -218
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 175
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -210
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 185
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -225
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanatics",
+     "last_update": "2026-11-16T19:37:06Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:06Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Philadelphia Eagles",
+        "point": null,
+        "price": 180
+       },
+       {
+        "name": "Pittsburgh Steelers",
+        "point": null,
+        "price": -220
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T18:00:00Z",
+   "home": "PHI",
+   "home_raw": "Philadelphia Eagles",
+   "n_books": 11,
+   "odds_api_event_id": "cbe45bafcc2615fc1d96cbc12840377a"
+  },
+  {
+   "away": "NYJ",
+   "away_raw": "New York Jets",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": -180
+       },
+       {
+        "name": "New York Jets",
+        "point": null,
+        "price": 150
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": -179
+       },
+       {
+        "name": "New York Jets",
+        "point": null,
+        "price": 151
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": -180
+       },
+       {
+        "name": "New York Jets",
+        "point": null,
+        "price": 152
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": -195
+       },
+       {
+        "name": "New York Jets",
+        "point": null,
+        "price": 155
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": -181
+       },
+       {
+        "name": "New York Jets",
+        "point": null,
+        "price": 147
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Los Angeles Chargers",
+        "point": null,
+        "price": -175
+       },
+       {
+        "name": "New York Jets",
+        "point": null,
+        "price": 150
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T21:05:00Z",
+   "home": "LAC",
+   "home_raw": "Los Angeles Chargers",
+   "n_books": 6,
+   "odds_api_event_id": "4b20b742b6168aaca4f25d87f11b1526"
+  },
+  {
+   "away": "LV",
+   "away_raw": "Las Vegas Raiders",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -575
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 425
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -560
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 400
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -550
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 410
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -535
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 415
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -535
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 406
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -535
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 406
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -500
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 360
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -599
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 420
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -525
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 400
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Denver Broncos",
+        "point": null,
+        "price": -540
+       },
+       {
+        "name": "Las Vegas Raiders",
+        "point": null,
+        "price": 400
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T21:25:00Z",
+   "home": "DEN",
+   "home_raw": "Denver Broncos",
+   "n_books": 10,
+   "odds_api_event_id": "1940706a79cbcbafacdcbf231069716b"
+  },
+  {
+   "away": "JAX",
+   "away_raw": "Jacksonville Jaguars",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -278
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 225
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -280
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 225
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -270
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 220
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -275
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -275
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 226
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -275
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 226
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -278
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 220
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -272
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 210
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -275
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 225
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Jacksonville Jaguars",
+        "point": null,
+        "price": -280
+       },
+       {
+        "name": "New York Giants",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-22T21:25:00Z",
+   "home": "NYG",
+   "home_raw": "New York Giants",
+   "n_books": 10,
+   "odds_api_event_id": "8ba112fabf4e87639338a5f437c5abfe"
+  },
+  {
+   "away": "MIN",
+   "away_raw": "Minnesota Vikings",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 136
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -162
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 134
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -159
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 142
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -168
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 135
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -160
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 134
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -155
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 133
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -164
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 135
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -155
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 135
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -155
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 135
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -165
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Minnesota Vikings",
+        "point": null,
+        "price": 138
+       },
+       {
+        "name": "San Francisco 49ers",
+        "point": null,
+        "price": -163
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-23T01:20:00Z",
+   "home": "SF",
+   "home_raw": "San Francisco 49ers",
+   "n_books": 10,
+   "odds_api_event_id": "60e1d27b083a335b722c2c852ea85612"
+  },
+  {
+   "away": "CIN",
+   "away_raw": "Cincinnati Bengals",
+   "books": [
+    {
+     "book": "draftkings",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -305
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 245
+       }
+      ]
+     }
+    },
+    {
+     "book": "williamhill_us",
+     "last_update": "2026-11-16T19:37:04Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:04Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -290
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "betus",
+     "last_update": "2026-11-16T19:36:48Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:48Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -280
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 235
+       }
+      ]
+     }
+    },
+    {
+     "book": "fanduel",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -295
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 240
+       }
+      ]
+     }
+    },
+    {
+     "book": "betonlineag",
+     "last_update": "2026-11-16T19:36:50Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:50Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -280
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "lowvig",
+     "last_update": "2026-11-16T19:37:34Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:34Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -280
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 230
+       }
+      ]
+     }
+    },
+    {
+     "book": "betrivers",
+     "last_update": "2026-11-16T19:37:35Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:35Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -286
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 220
+       }
+      ]
+     }
+    },
+    {
+     "book": "mybookieag",
+     "last_update": "2026-11-16T19:36:19Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:36:19Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -280
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 221
+       }
+      ]
+     }
+    },
+    {
+     "book": "betmgm",
+     "last_update": "2026-11-16T19:37:33Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:37:33Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -295
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 240
+       }
+      ]
+     }
+    },
+    {
+     "book": "bovada",
+     "last_update": "2026-11-16T19:31:47Z",
+     "market_last_update": {
+      "h2h": "2026-11-16T19:31:47Z"
+     },
+     "markets": {
+      "h2h": [
+       {
+        "name": "Cincinnati Bengals",
+        "point": null,
+        "price": -285
+       },
+       {
+        "name": "Washington Commanders",
+        "point": null,
+        "price": 235
+       }
+      ]
+     }
+    }
+   ],
+   "commence_time": "2026-11-24T01:15:00Z",
+   "home": "WAS",
+   "home_raw": "Washington Commanders",
+   "n_books": 10,
+   "odds_api_event_id": "3a60ed1d20004aa4d4772b2c1a2272e7"
+  }
+ ],
+ "identity": "canonical",
+ "markets": "h2h",
+ "n_events": 14,
+ "regions": "us",
+ "sport_key": "americanfootball_nfl",
+ "tier": "A"
+}

@@ -1801,6 +1801,43 @@
    "sha256": "f13f29e0e4f890a6073a9a3c1dd7cb956a169b09a8717e788e831d78ca111813",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Ball State Cardinals @ Ohio Bobcats|2026-11-18T00:00:00Z": {
+   "block": {
+    "away": "Ball State Cardinals",
+    "best_book": "fanduel",
+    "best_price": 360,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.557,
+    "fair_away": 0.21359,
+    "fair_home": 0.78641,
+    "fair_side": 0.21359,
+    "home": "Ohio Bobcats",
+    "kickoff_utc": "2026-11-18T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Ball State Cardinals @ Ohio Bobcats",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 370
+    },
+    "raw_overround_pts": 4.04,
+    "relative_price_discount": -0.0177865613,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Ball State Cardinals",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261116T183723Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-17T00:37:38Z",
+   "kickoff_utc": "2026-11-18T00:00:00Z",
+   "matchup": "Ball State Cardinals @ Ohio Bobcats",
+   "sha256": "9f31751219dbd423ee20e29f8b516f99c9ed63ce94ebe14148419af3cc30bff5",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Ball State Cardinals @ UMass Minutemen|2026-11-05T00:00:00Z": {
    "block": {
     "away": "Ball State Cardinals",
@@ -4093,6 +4130,80 @@
    ],
    "matchup": "Eastern Michigan Eagles @ Ohio Bobcats",
    "sha256": "fabccd9534d9f5377da68767e9d8d4c1d1ba7c4fe6c92cc2311eab521052b40d",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Eastern Michigan Eagles @ Western Michigan Broncos|2026-11-17T23:00:00Z": {
+   "block": {
+    "away": "Eastern Michigan Eagles",
+    "best_book": "fanduel",
+    "best_price": 500,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.333,
+    "fair_away": 0.16477,
+    "fair_home": 0.83523,
+    "fair_side": 0.16477,
+    "home": "Western Michigan Broncos",
+    "kickoff_utc": "2026-11-17T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Eastern Michigan Eagles @ Western Michigan Broncos",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 540
+    },
+    "raw_overround_pts": 4.279,
+    "relative_price_discount": -0.0115053763,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Eastern Michigan Eagles",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261116T183723Z.json",
+    "t24_hours_before_kickoff": 28.38
+   },
+   "committed_utc": "2026-11-17T00:37:38Z",
+   "kickoff_utc": "2026-11-17T23:00:00Z",
+   "matchup": "Eastern Michigan Eagles @ Western Michigan Broncos",
+   "sha256": "25147ba73ca30432338d67491a32fab74b323bf61a0d44d7b80d094a156eff9c",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Eastern Michigan Eagles @ Western Michigan Broncos|2026-11-18T00:00:00Z": {
+   "block": {
+    "away": "Eastern Michigan Eagles",
+    "best_book": "fanduel",
+    "best_price": 500,
+    "books_at_best": 6,
+    "clv_pts": null,
+    "eff_overround_pts": 3.333,
+    "fair_away": 0.16477,
+    "fair_home": 0.83523,
+    "fair_side": 0.16477,
+    "home": "Western Michigan Broncos",
+    "kickoff_utc": "2026-11-18T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Eastern Michigan Eagles @ Western Michigan Broncos",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 540
+    },
+    "raw_overround_pts": 4.279,
+    "relative_price_discount": -0.0115053763,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Eastern Michigan Eagles",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261116T183723Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-17T00:37:38Z",
+   "kickoff_utc": "2026-11-18T00:00:00Z",
+   "matchup": "Eastern Michigan Eagles @ Western Michigan Broncos",
+   "sha256": "ebb9e42bee79ef9070927282263497f82d45b92ea0b6c12309227e5c608e84ab",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Eastern Michigan Eagles @ Wisconsin Badgers|2026-09-19T16:30:00Z": {
@@ -20281,6 +20392,43 @@
    ],
    "matchup": "LA @ WAS",
    "sha256": "5932a221243094b44d877f2420349af7c450f3f8c69a7a63327953b5577d37b1",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|LAC @ BAL|2026-11-17T01:15:00Z": {
+   "block": {
+    "away": "Los Angeles Chargers",
+    "best_book": "fanduel",
+    "best_price": 190,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.714,
+    "fair_away": 0.33635,
+    "fair_home": 0.66365,
+    "fair_side": 0.33635,
+    "home": "Baltimore Ravens",
+    "kickoff_utc": "2026-11-17T01:15:00Z",
+    "league": "NFL",
+    "matchup": "LAC @ BAL",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "betus",
+     "price": 190
+    },
+    "raw_overround_pts": 4.318,
+    "relative_price_discount": -0.025198939,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Los Angeles Chargers",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261115T193730Z.json",
+    "t24_hours_before_kickoff": 29.62
+   },
+   "committed_utc": "2026-11-17T00:37:38Z",
+   "kickoff_utc": "2026-11-17T01:15:00Z",
+   "matchup": "LAC @ BAL",
+   "sha256": "7b7bcf5ff280f63fdd54550656932fdeb241fd4f8bf9b416f9e5bd7e9f3353ac",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|LAC @ LA|2026-11-01T21:05:00Z": {

@@ -12256,6 +12256,44 @@
    "status": "STATUS_SCHEDULED",
    "total": null
   },
+  "401866467": {
+   "away": "Akron Zips",
+   "away_abbr": "AKR",
+   "away_key": "akronzips",
+   "away_score": null,
+   "espn_event_id": "401866467",
+   "final": false,
+   "home": "Massachusetts Minutemen",
+   "home_abbr": "MASS",
+   "home_key": "massachusettsminutemen",
+   "home_score": null,
+   "kickoff_utc": "2026-11-19T00:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401866469": {
+   "away": "Central Michigan Chippewas",
+   "away_abbr": "CMU",
+   "away_key": "centralmichiganchippewas",
+   "away_score": null,
+   "espn_event_id": "401866469",
+   "final": false,
+   "home": "Buffalo Bulls",
+   "home_abbr": "BUFF",
+   "home_key": "buffalobulls",
+   "home_score": null,
+   "kickoff_utc": "2026-11-19T00:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401866476": {
    "away": "Miami (OH) RedHawks",
    "away_abbr": "M-OH",
@@ -14347,5 +14385,5 @@
    "total": 41
   }
  },
- "updated_utc": "2026-11-16T20:46:58Z"
+ "updated_utc": "2026-11-17T19:33:25Z"
 }

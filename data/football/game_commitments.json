@@ -20169,6 +20169,40 @@
    "sha256": "13de6c0004294ec7bcfea3fc2ef9ae3591aa1d886b3384bd575ca6d9a5a44230",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|IND @ HOU|2026-11-20T01:15:00Z": {
+   "block": {
+    "away": "Indianapolis Colts",
+    "best_book": "fanduel",
+    "best_price": 590,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 1.993,
+    "fair_away": 0.1535,
+    "fair_home": 0.8465,
+    "fair_side": 0.1535,
+    "home": "Houston Texans",
+    "kickoff_utc": "2026-11-20T01:15:00Z",
+    "league": "NFL",
+    "matchup": "IND @ HOU",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.235,
+    "relative_price_discount": 0.0558397272,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Indianapolis Colts",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261118T193721Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-18T19:37:24Z",
+   "kickoff_utc": "2026-11-20T01:15:00Z",
+   "matchup": "IND @ HOU",
+   "sha256": "722cd414a60d000db13f43939463af651c81eca85b6c3e7c8ced02ae2f852c67",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|IND @ MIN|2026-10-25T17:00:00Z": {
    "block": {
     "away": "Indianapolis Colts",

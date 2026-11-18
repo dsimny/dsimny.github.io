@@ -2851,6 +2851,25 @@
    "status": "STATUS_FINAL",
    "total": 43
   },
+  "401873066": {
+   "away": "IND",
+   "away_abbr": "IND",
+   "away_name": "Indianapolis Colts",
+   "away_score": null,
+   "espn_event_id": "401873066",
+   "final": false,
+   "home": "HOU",
+   "home_abbr": "HOU",
+   "home_name": "Houston Texans",
+   "home_score": null,
+   "kickoff_utc": "2026-11-20T01:15:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873272": {
    "away": "DET",
    "away_abbr": "DET",
@@ -3764,5 +3783,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-17T19:33:26Z"
+ "updated_utc": "2026-11-18T19:13:52Z"
 }

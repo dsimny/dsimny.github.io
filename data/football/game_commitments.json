@@ -12806,6 +12806,40 @@
    "sha256": "5425274f90b29ee596ceb6dbcabb803543bffc6fad30436f26d162da791a4fb3",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Rice Owls @ Temple Owls|2026-11-20T00:30:00Z": {
+   "block": {
+    "away": "Rice Owls",
+    "best_book": "fanduel",
+    "best_price": -142,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.156,
+    "fair_away": 0.42445,
+    "fair_home": 0.57555,
+    "fair_side": 0.57555,
+    "home": "Temple Owls",
+    "kickoff_utc": "2026-11-20T00:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Rice Owls @ Temple Owls",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.248,
+    "relative_price_discount": -0.0195031571,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Temple Owls",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261118T183720Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-18T18:37:24Z",
+   "kickoff_utc": "2026-11-20T00:30:00Z",
+   "matchup": "Rice Owls @ Temple Owls",
+   "sha256": "c3d8e1a214cea86778ce4e7ab691b5e0751775eaa65d017663757c228adb36be",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Rutgers Scarlet Knights @ Maryland Terrapins|2026-10-17T16:30:00Z": {
    "block": {
     "away": "Rutgers Scarlet Knights",

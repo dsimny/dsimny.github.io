@@ -2440,6 +2440,9 @@
    },
    "committed_utc": "2026-11-19T18:37:33Z",
    "kickoff_utc": "2026-11-21T00:30:00Z",
+   "later_disagreements": [
+    "25729872caf276f77dc20639e0942a415f9e4d12f205221d6e0dd848db5029cd"
+   ],
    "matchup": "Bowling Green Falcons @ Toledo Rockets",
    "sha256": "31527b9a703e81f395a6bb6e34b0604ed15920695236b611b503df4336d4ebc4",
    "sport": "ncaaf"
@@ -3145,6 +3148,9 @@
    },
    "committed_utc": "2026-11-19T18:37:33Z",
    "kickoff_utc": "2026-11-21T00:30:00Z",
+   "later_disagreements": [
+    "ee7068be56e511f394704157c0be4fcaf50258b3519ced2cff0bdcd744d223e9"
+   ],
    "matchup": "Clemson Tigers @ Duke Blue Devils",
    "sha256": "8e4f9bfe8932cba6cfb071b22a0aa923070691db37235913feefaa9c88975c61",
    "sport": "ncaaf"
@@ -6886,7 +6892,8 @@
    "committed_utc": "2026-11-19T17:37:25Z",
    "kickoff_utc": "2026-11-20T23:00:00Z",
    "later_disagreements": [
-    "e7361144f26924025513b9b08620d5813f0c9c210496d335131297b0888669ef"
+    "e7361144f26924025513b9b08620d5813f0c9c210496d335131297b0888669ef",
+    "67e3642ea15188ae368b8cc3266076974d813e5d6f541d221f566930b6fa199d"
    ],
    "matchup": "Iowa State Cyclones @ UCF Knights",
    "sha256": "39d1493eb5e0250bf92d23497dd99ba44c161b0ed87fe4c7924314d7dda50fc4",
@@ -12425,6 +12432,40 @@
    "sha256": "62f4b15f4ecbb667d6d4051af0e9df631fd7a7fe38fa5f1ef4a402a81f62893f",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Oregon Ducks @ Michigan State Spartans|2026-11-21T01:00:00Z": {
+   "block": {
+    "away": "Oregon Ducks",
+    "best_book": "circasports",
+    "best_price": 675,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.377,
+    "fair_away": 0.86493,
+    "fair_home": 0.13507,
+    "fair_side": 0.13507,
+    "home": "Michigan State Spartans",
+    "kickoff_utc": "2026-11-21T01:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Oregon Ducks @ Michigan State Spartans",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.055,
+    "relative_price_discount": 0.0447096774,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Michigan State Spartans",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261119T193725Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-19T19:37:30Z",
+   "kickoff_utc": "2026-11-21T01:00:00Z",
+   "matchup": "Oregon Ducks @ Michigan State Spartans",
+   "sha256": "2bedb1fb3d1e22746a6ca865ca786cb446566d53cd4ac4db8ca481f8bd4468f5",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Oregon Ducks @ Oklahoma State Cowboys|2026-09-12T16:00:00Z": {
    "block": {
     "away": "Oregon Ducks",
@@ -17000,6 +17041,40 @@
    ],
    "matchup": "USC Trojans @ Wisconsin Badgers",
    "sha256": "90ddee2c8ce0a2b9fb773c87b86f186c0ed78b16fda54537a95f10cf8953bc1e",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|UTEP Miners @ Air Force Falcons|2026-11-21T01:00:00Z": {
+   "block": {
+    "away": "UTEP Miners",
+    "best_book": "betrivers",
+    "best_price": 1200,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 2.429,
+    "fair_away": 0.08455,
+    "fair_home": 0.91545,
+    "fair_side": 0.08455,
+    "home": "Air Force Falcons",
+    "kickoff_utc": "2026-11-21T01:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "UTEP Miners @ Air Force Falcons",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 3.972,
+    "relative_price_discount": 0.0902455978,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "UTEP Miners",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261119T193725Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-19T19:37:30Z",
+   "kickoff_utc": "2026-11-21T01:00:00Z",
+   "matchup": "UTEP Miners @ Air Force Falcons",
+   "sha256": "888775bd84f664c631f7a4c4d085ac499e21f1c118e0014b7494080090891151",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|UTEP Miners @ North Dakota State Bison|2026-10-31T19:30:00Z": {

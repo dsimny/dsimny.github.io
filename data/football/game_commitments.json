@@ -6787,6 +6787,40 @@
    "sha256": "189f93503941d0f58ac7e6dd5babce197aaf8c415de47068e03c9c9ecb54a08b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Iowa State Cyclones @ UCF Knights|2026-11-20T23:00:00Z": {
+   "block": {
+    "away": "Iowa State Cyclones",
+    "best_book": "circasports",
+    "best_price": 105,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.326,
+    "fair_away": 0.47826,
+    "fair_home": 0.52174,
+    "fair_side": 0.47826,
+    "home": "UCF Knights",
+    "kickoff_utc": "2026-11-20T23:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Iowa State Cyclones @ UCF Knights",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.545,
+    "relative_price_discount": -0.0199556541,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Iowa State Cyclones",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261119T173721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-19T17:37:25Z",
+   "kickoff_utc": "2026-11-20T23:00:00Z",
+   "matchup": "Iowa State Cyclones @ UCF Knights",
+   "sha256": "39d1493eb5e0250bf92d23497dd99ba44c161b0ed87fe4c7924314d7dda50fc4",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Jacksonville State Gamecocks @ Kennesaw State Owls|2026-10-07T23:00:00Z": {
    "block": {
     "away": "Jacksonville State Gamecocks",

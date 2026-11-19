@@ -2441,7 +2441,8 @@
    "committed_utc": "2026-11-19T18:37:33Z",
    "kickoff_utc": "2026-11-21T00:30:00Z",
    "later_disagreements": [
-    "25729872caf276f77dc20639e0942a415f9e4d12f205221d6e0dd848db5029cd"
+    "25729872caf276f77dc20639e0942a415f9e4d12f205221d6e0dd848db5029cd",
+    "f44c596ac4a187a666adb697d4aae320e4b7209c24ffa4ef895cb4c3d0694024"
    ],
    "matchup": "Bowling Green Falcons @ Toledo Rockets",
    "sha256": "31527b9a703e81f395a6bb6e34b0604ed15920695236b611b503df4336d4ebc4",
@@ -3149,7 +3150,8 @@
    "committed_utc": "2026-11-19T18:37:33Z",
    "kickoff_utc": "2026-11-21T00:30:00Z",
    "later_disagreements": [
-    "ee7068be56e511f394704157c0be4fcaf50258b3519ced2cff0bdcd744d223e9"
+    "ee7068be56e511f394704157c0be4fcaf50258b3519ced2cff0bdcd744d223e9",
+    "c09ff7cbcd56c1b7599b7789ffbb5f14b849ad3bea24c9e09cd2cdb6d37a7f25"
    ],
    "matchup": "Clemson Tigers @ Duke Blue Devils",
    "sha256": "8e4f9bfe8932cba6cfb071b22a0aa923070691db37235913feefaa9c88975c61",
@@ -6893,7 +6895,8 @@
    "kickoff_utc": "2026-11-20T23:00:00Z",
    "later_disagreements": [
     "e7361144f26924025513b9b08620d5813f0c9c210496d335131297b0888669ef",
-    "67e3642ea15188ae368b8cc3266076974d813e5d6f541d221f566930b6fa199d"
+    "67e3642ea15188ae368b8cc3266076974d813e5d6f541d221f566930b6fa199d",
+    "b94e9f048d317ebe9660b520bcc53852694b93d1517109213452f8f4b4235e35"
    ],
    "matchup": "Iowa State Cyclones @ UCF Knights",
    "sha256": "39d1493eb5e0250bf92d23497dd99ba44c161b0ed87fe4c7924314d7dda50fc4",
@@ -10515,6 +10518,40 @@
    "sha256": "863cb1b7ef75de5aac58c25ba4c2ac38ef45198a643e8c1ddd0f5dc3641cfcea",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|New Mexico Lobos @ Wyoming Cowboys|2026-11-21T02:00:00Z": {
+   "block": {
+    "away": "New Mexico Lobos",
+    "best_book": "fanduel",
+    "best_price": 255,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.528,
+    "fair_away": 0.72125,
+    "fair_home": 0.27875,
+    "fair_side": 0.27875,
+    "home": "Wyoming Cowboys",
+    "kickoff_utc": "2026-11-21T02:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "New Mexico Lobos @ Wyoming Cowboys",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.986,
+    "relative_price_discount": -0.0105633803,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Wyoming Cowboys",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261119T203726Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-19T20:37:30Z",
+   "kickoff_utc": "2026-11-21T02:00:00Z",
+   "matchup": "New Mexico Lobos @ Wyoming Cowboys",
+   "sha256": "5cc61e5f5ebe1a9b95e3be8f59ecb052e27393d1ea113ae05904213dcad42b95",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|New Mexico State Aggies @ Florida International Panthers|2026-10-07T23:30:00Z": {
    "block": {
     "away": "New Mexico State Aggies",
@@ -12462,6 +12499,9 @@
    },
    "committed_utc": "2026-11-19T19:37:30Z",
    "kickoff_utc": "2026-11-21T01:00:00Z",
+   "later_disagreements": [
+    "d258932dd5d2a56dfeb4f52a9d79e5fc46eb342c90e3e6d16812ca6af6c7e0a2"
+   ],
    "matchup": "Oregon Ducks @ Michigan State Spartans",
    "sha256": "2bedb1fb3d1e22746a6ca865ca786cb446566d53cd4ac4db8ca481f8bd4468f5",
    "sport": "ncaaf"
@@ -17073,6 +17113,9 @@
    },
    "committed_utc": "2026-11-19T19:37:30Z",
    "kickoff_utc": "2026-11-21T01:00:00Z",
+   "later_disagreements": [
+    "24a66156eaa4b7e385f9edeb487bf59f4fb8af77a951eab48ec1847e2fc53a66"
+   ],
    "matchup": "UTEP Miners @ Air Force Falcons",
    "sha256": "888775bd84f664c631f7a4c4d085ac499e21f1c118e0014b7494080090891151",
    "sport": "ncaaf"

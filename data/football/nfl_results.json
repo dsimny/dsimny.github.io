@@ -2855,20 +2855,20 @@
    "away": "IND",
    "away_abbr": "IND",
    "away_name": "Indianapolis Colts",
-   "away_score": null,
+   "away_score": 3,
    "espn_event_id": "401873066",
-   "final": false,
+   "final": true,
    "home": "HOU",
    "home_abbr": "HOU",
    "home_name": "Houston Texans",
-   "home_score": null,
+   "home_score": 26,
    "kickoff_utc": "2026-11-20T01:15:00Z",
-   "margin": null,
+   "margin": 23,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 29
   },
   "401873272": {
    "away": "DET",
@@ -3783,5 +3783,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-19T19:19:01Z"
+ "updated_utc": "2026-11-20T18:56:37Z"
 }

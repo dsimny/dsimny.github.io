@@ -404,7 +404,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-11-16T20:47:02Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-11-10|ncaaf|Ole Miss Rebels @ Oklahoma Sooners|2026-11-15T18:00:00Z|research_free"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_premium",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "ncaaf",
+   "slate_week": "2026-11-17",
+   "matchup": "Florida International Panthers @ Kennesaw State Owls",
+   "kickoff_utc": "2026-11-21T20:00:00Z",
+   "side": "Kennesaw State Owls",
+   "best_price": -135,
+   "best_book": "draftkings",
+   "books_at_best": 2,
+   "eff_overround_pts": 0.925,
+   "fair_side": 0.57118,
+   "t24_capture": "ncaaf_20261120T143721Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "observed_utc": "2026-11-21T19:37:28Z",
+   "espn_event_id": "401871078",
+   "final": "24-35",
+   "result": "win",
+   "units": 0,
+   "pnl_per_unit": 0.7407,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": -3.844,
+   "close_capture": "ncaaf_20261121T193720Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-11-22T18:11:45Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-11-17|ncaaf|Florida International Panthers @ Kennesaw State Owls|2026-11-21T20:00:00Z|research_premium"
   }
  ],
- "updated_utc": "2026-11-16T20:47:02Z"
+ "updated_utc": "2026-11-22T18:11:45Z"
 }

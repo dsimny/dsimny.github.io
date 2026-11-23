@@ -42,6 +42,18 @@ class Params:
 
 
 @dataclass
+class PriorTable:
+    """An explicit per-team prior (Phase 3). Means are on the centred scale
+    (0 = average D1); `lam_*` are prior strengths in games-equivalent, one per
+    team, so a team with a less certain preseason estimate is shrunk less.
+    Teams missing from the table fall back to the new-D1 / non-D1 defaults."""
+    mean: dict            # team_id -> (off, dfn, tempo)
+    lam: dict             # team_id -> (lam_off, lam_dfn, lam_tempo)
+    mu: float
+    tmu: float
+
+
+@dataclass
 class Ratings:
     teams: np.ndarray
     off: np.ndarray
@@ -91,7 +103,7 @@ def _ridge(X_rows, X_cols, X_vals, y, w, ncol, prior, lam):
     return np.linalg.solve(A, b)
 
 
-def fit(games: pd.DataFrame, asof, season: int, prior: "Ratings | None", p: Params,
+def fit(games: pd.DataFrame, asof, season: int, prior: "Ratings | PriorTable | None", p: Params,
         teams: np.ndarray | None = None, d1: set | None = None) -> Ratings:
     """Fit ratings for `season` from that season's games strictly before `asof`.
 
@@ -118,7 +130,17 @@ def fit(games: pd.DataFrame, asof, season: int, prior: "Ratings | None", p: Para
     pd_ = np.where(isd1, p.newd1_dfn if prior is not None else 0.0, p.nond1_dfn)
     pt = np.zeros(n)
     mu0, tmu0 = 103.0, 69.5
-    if prior is not None:
+    lam_o = np.full(n, p.prior_games)
+    lam_d = np.full(n, p.prior_games)
+    lam_t = np.full(n, p.tempo_prior_games)
+    if isinstance(prior, PriorTable):
+        mu0, tmu0 = prior.mu, prior.tmu
+        for t, i in ti.items():
+            mv = prior.mean.get(t)
+            if mv is not None:
+                po[i], pd_[i], pt[i] = mv
+                lam_o[i], lam_d[i], lam_t[i] = prior.lam[t]
+    elif prior is not None:
         mu0, tmu0 = prior.mu, prior.tmu
         for t, i in ti.items():
             r = prior.get(t)
@@ -155,7 +177,7 @@ def fit(games: pd.DataFrame, asof, season: int, prior: "Ratings | None", p: Para
     rows = np.concatenate([r, r, r, r])
     cols = np.concatenate([off_col, def_col, mu_col, h_col])
     vals = np.concatenate([np.ones(2 * m), np.ones(2 * m), np.ones(2 * m), np.concatenate([loc, -loc])])
-    lam = np.concatenate([np.full(2 * n, p.prior_games), [1.0, p.hca_lambda]])
+    lam = np.concatenate([lam_o, lam_d, [1.0, p.hca_lambda]])
     pri = np.concatenate([po, pd_, [mu0, h0]])
     beta = _ridge(rows, cols, vals, y, w, 2 * n + 2, pri, lam)
     off, dfn, mu, h = beta[:n], beta[n:2 * n], beta[2 * n], beta[2 * n + 1]
@@ -171,9 +193,9 @@ def fit(games: pd.DataFrame, asof, season: int, prior: "Ratings | None", p: Para
     rows_t = np.concatenate([rt, rt, rt])
     cols_t = np.concatenate([hi, ai, np.full(m, n)])
     vals_t = np.ones(3 * m)
-    lam_t = np.concatenate([np.full(n, p.tempo_prior_games), [5.0]])
+    lam_tt = np.concatenate([lam_t, [5.0]])
     pri_t = np.concatenate([pt, [tmu0]])
-    bt = _ridge(rows_t, cols_t, vals_t, yt, wg, n + 1, pri_t, lam_t)
+    bt = _ridge(rows_t, cols_t, vals_t, yt, wg, n + 1, pri_t, lam_tt)
     tempo, tmu = bt[:n], bt[n]
     ct = tempo[isd1].mean()
     tempo, tmu = tempo - ct, tmu + 2 * ct

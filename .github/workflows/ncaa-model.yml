@@ -1,7 +1,8 @@
-# NCAA basketball model (ncaa-model/): tests, plus the CBBD betting-line
-# check, which needs the CBBD_API_KEY secret. Read-only: commits nothing,
-# posts nothing. Raw CBBD rows never leave the runner (public repo, and the
-# feed is not ours to redistribute); only the aggregate report is uploaded.
+# NCAA basketball model (ncaa-model/): tests, plus the CBBD steps, which need
+# the CBBD_API_KEY secret. Posts nothing. Raw CBBD rows never leave the runner
+# (public repo, and the feed is not ours to redistribute). The only write is
+# one derived team-level table committed to the PR branch (see that step);
+# reports carry aggregates only.
 name: NCAA model
 
 on:
@@ -17,6 +18,8 @@ permissions:
 jobs:
   test-and-cbbd:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # only used to commit data/derived/team_priors.csv to the PR branch
     timeout-minutes: 40
     defaults:
       run:
@@ -34,20 +37,44 @@ jobs:
         run: python -m pytest -q tests
       - name: Download box scores and schedules
         run: python -m ncaa.ingest
-      - name: Walk-forward predictions (model unchanged)
-        run: python -m ncaa.evaluate predictions
-      - name: CBBD lines report
+      - name: CBBD roster/transfer/recruiting team aggregates
+        run: python -m ncaa.cbbd_roster features --seasons 2016-2027
+      # Both reports are written once and committed; a run with the report
+      # already on the branch skips the step and spends no CBBD calls.
+      # Delete a report to regenerate it.
+      - name: Phase 3 validation vs named-book closing lines (holdout excluded)
         run: |
-          if [ -z "$CBBD_API_KEY" ]; then
-            echo "::error::CBBD_API_KEY secret is not set"
-            exit 1
-          fi
-          python -m ncaa.cbbd --seasons 2016-2027
-          cat reports/cbbd_lines.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload report (aggregates only)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cbbd-lines-report
-          path: ncaa-model/reports/cbbd_lines.md
-          if-no-files-found: ignore
+          if [ -f reports/phase3_validation.md ]; then echo "report committed; skipping"; exit 0; fi
+          python -m ncaa.phase3 final --lines
+          cat reports/phase3_validation.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Holdout 2025-26, single run per model version
+        run: |
+          if [ -f reports/holdout_ae-0.2.md ]; then echo "holdout already run for ae-0.2; skipping"; exit 0; fi
+          python -m ncaa.phase3 holdout
+          cat reports/holdout_ae-0.2.md >> "$GITHUB_STEP_SUMMARY"
+      # The one derived table (team-level aggregates, no player rows) is
+      # committed back to the PR branch so the backtest reproduces without a
+      # key and later runs spend no CBBD calls. Raw CBBD JSON stays here.
+      - name: Commit derived team aggregates and the validation report to the PR branch
+        if: github.event_name == 'pull_request'
+        working-directory: .
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          f=ncaa-model/data/derived/team_priors.csv
+          r=ncaa-model/reports/phase3_validation.md
+          h=ncaa-model/reports/holdout_ae-0.2.md
+          [ -f "$f" ] && cp "$f" "$RUNNER_TEMP/team_priors.csv"
+          [ -f "$r" ] && cp "$r" "$RUNNER_TEMP/phase3_validation.md"
+          [ -f "$h" ] && cp "$h" "$RUNNER_TEMP/holdout_ae-0.2.md"
+          git fetch origin "$HEAD_REF"
+          git checkout -f -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p ncaa-model/data/derived ncaa-model/reports
+          [ -f "$RUNNER_TEMP/team_priors.csv" ] && cp "$RUNNER_TEMP/team_priors.csv" "$f"
+          [ -f "$RUNNER_TEMP/phase3_validation.md" ] && cp "$RUNNER_TEMP/phase3_validation.md" "$r"
+          [ -f "$RUNNER_TEMP/holdout_ae-0.2.md" ] && cp "$RUNNER_TEMP/holdout_ae-0.2.md" "$h"
+          for x in "$f" "$r" "$h"; do if [ -f "$x" ]; then git add "$x"; fi; done
+          if git diff --cached --quiet; then echo "unchanged"; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "ncaa-model: CI output (derived team priors / phase 3 reports)"
+          git push origin "HEAD:$HEAD_REF"

@@ -8,3 +8,5 @@ data/*.parquet
 __pycache__/
 .pytest_cache/
 data/cbbd_cache/
+data/phase3/
+data/fourfactors/

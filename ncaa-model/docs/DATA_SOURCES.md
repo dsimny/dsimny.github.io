@@ -63,3 +63,36 @@ succeeded. It does NOT mean the source is unreachable for you at home.
 - **Lines, live:** The Odds API (existing key, free tier) captured at fixed
   times each day, stored append-only with timestamps. That's the only way to
   get honest CLV going forward.
+
+## Phase 3 additions (2026-11-23)
+
+CBBD endpoints verified from the workflow (key structure only was logged):
+
+| endpoint | used for | notes |
+|---|---|---|
+| `/teams/roster?season=` | who is on each team's roster for season s | carries `teamSourceId` = ESPN team id, so no name matching is needed. Rosters have no capture date (see caveat below) |
+| `/stats/player/season?season=` | last season's minutes, PORPAG, win shares per player | ~9,800 rows a season, not capped |
+| `/recruiting/players?year=` | top-~300 recruiting class, `committedTo` team, national ranking | class year Y enrols for season Y+1 |
+| `/recruiting/portal?year=` | transfer portal entries | not used: transfers are derived exactly from roster(s) × stats(s−1), which also covers pre-portal seasons |
+| `/coaches` | — | **404: does not exist.** No free source for coaching changes was found, so that prior is not built |
+
+Only one derived, team-level table leaves the runner:
+`data/derived/team_priors.csv` (one row per season × ESPN team: returning
+share of last season's minutes / win shares / PORPAG, incoming-transfer
+minutes and the minutes-weighted rating of the teams they came from, and
+recruit counts and rank points). No player names or ids. The workflow
+commits it to the PR branch and reuses it, so later runs spend no calls.
+
+**Roster caveat.** A CBBD season roster is not timestamped. A player who
+joined mid-season can appear, and one who left mid-season may not. Minutes
+and production always come from the previous season, so no current-season
+result enters a feature, but roster membership itself is "as published",
+not "as of opening day". For the current season (2026-27) the roster is
+genuinely preseason.
+
+**Drift to watch.** Average returning-minutes share fell from 0.60 (2016)
+to 0.26 (2027) and incoming-transfer minutes rose from 0.05 to 0.37 of a
+team's previous-season total. The preseason model is refit every season on
+the seasons before it, so its coefficients follow the transfer era, but the
+current season sits at the edge of the data it was trained on.
+

@@ -4,6 +4,27 @@ Every version, every result, including the rejected ones. Newest first.
 Full tables: `reports/backtest_ae-0.1.md` (tune + validation),
 `reports/holdout_ae-0.1.md` (holdout + current season), `reports/tuning_grid.csv`.
 
+## ae-0.1 addendum — CBBD lines (2026-11-23)
+
+Same model, no re-tuning. CollegeBasketballData lines were pulled inside the
+read-only `NCAA model` workflow (key in the CBBD_API_KEY secret). Full table:
+`reports/cbbd_lines.md`.
+
+- **The 2023-24 / 2024-25 gap is filled, and the answer is unchanged.**
+  Against ESPN BET lines the line wins both seasons: RMSE 11.51 vs the model's
+  11.76 (2024), 11.44 vs 11.85 (2025). Simulated ATS was −0.9% and −5.4%. A blend
+  fit on 2024 and scored on 2025 improved RMSE by 0.008 (11.436 → 11.428),
+  which is too small to matter.
+- **The stale-line finding holds up on an independent source.** Using CBBD's own
+  copy of each provider, `consensus` gives c = 0.35–0.53 in every season
+  but one. Named books are near zero: ESPN BET 0.03–0.19, DraftKings
+  0.01 (2026) and −0.11 (2027). `teamrankings` and `numberfire` sit
+  in between (they aren't books). Bovada 2026 (0.28) also looks like an early
+  or stale capture.
+- **Rule from here on:** a market test only counts against a named regulated
+  book's close (DraftKings, ESPN BET, Caesars). Everything else is
+  reported, never used to claim an edge.
+
 ## ae-0.1 — opponent-adjusted efficiency + tempo (2026-11-23)
 
 **Model.** Per-possession offence/defence ratings and an additive tempo

@@ -34,7 +34,7 @@ succeeded. It does NOT mean the source is unreachable for you at home.
 
 | source | status from this environment | cost / terms (as published; verify before buying) | what it would add |
 |---|---|---|---|
-| **CollegeBasketballData.com** (CBBD, sister of CollegeFootballData) | API host blocked here | free key with a monthly call cap; higher caps via Patreon tiers ([tiers](https://collegefootballdata.com/api-tiers), [terms](https://collegefootballdata.com/terms), [Python client](https://pypi.org/project/cbbd/1.20.2/)) | its own game/team stats, adjusted ratings, **historical lines incl. 2023-24/2024-25** (would fill the gap), player data for returning-production priors. **Best next step: Dan creates a free key** |
+| **CollegeBasketballData.com** (CBBD, sister of CollegeFootballData) | **in use since 2026-11-23** through the `NCAA model` GitHub workflow (secret `CBBD_API_KEY`); host still blocked from the build container. ~70 calls per run (the /lines endpoint caps at 3,000 rows, so seasons are fetched by month) | free key with a monthly call cap; higher caps via Patreon tiers ([tiers](https://collegefootballdata.com/api-tiers), [terms](https://collegefootballdata.com/terms), [Python client](https://pypi.org/project/cbbd/1.20.2/)) | its own game/team stats, adjusted ratings, **historical lines incl. 2023-24/2024-25** (would fill the gap), player data for returning-production priors. **Best next step: Dan creates a free key** |
 | **The Odds API** | blocked here | free tier 500 credits/month, live odds only; **historical snapshots are paid-plan only** ([historical](https://the-odds-api.com/historical-odds-data/), [NCAAB](https://the-odds-api.com/sports/ncaab-odds.html)). The Open Ledger account already has a key | multi-book live prices for the daily board, timestamped captures → real CLV going forward. Free tier is enough for ~1 pull/day of NCAAB spreads+totals if the MLB budget allows |
 | **KenPom** | blocked here | paid subscription; API access listed at $95/year ([register-api](https://kenpom.com/register-api.php)) | benchmark ratings to compare against. Not needed: the model rebuilds the same type of metric from box scores |
 | **Bart Torvik** (barttorvik.com) | blocked here | free website; no formal API or published data licence. Community wrappers exist (toRvik, [cbbdata](https://github.com/andreweatherman/cbbdata/)) | T-Rank and game-level four factors. Since there's no licence, use it only as a benchmark, not as an ingested feed |
@@ -48,7 +48,7 @@ succeeded. It does NOT mean the source is unreachable for you at home.
 2. **No timestamped historical market snapshots** → line-movement models and
    true CLV can't be tested historically. The DraftKings open/close pair is the
    only movement signal.
-3. **No 2023-24 / 2024-25 lines** in the open source.
+3. **No 2023-24 / 2024-25 lines** in the ESPN source. These are now filled by CBBD (ESPN BET), which has no spread prices, so -110 is assumed.
 4. **No roster continuity / transfer / injury data** yet. Player box scores
    exist in the same sportsdataverse release (returning-minutes priors are
    feasible in Phase 3); injuries are not verifiable from any free source

@@ -34,5 +34,5 @@ jobs:
         run: python -m pytest -q tests
       - name: Download box scores and schedules
         run: python -m ncaa.ingest
-      - name: CBBD roster/transfer/recruiting probe (key structure only)
-        run: python -m ncaa.cbbd_roster probe
+      - name: CBBD roster/transfer/recruiting team aggregates
+        run: python -m ncaa.cbbd_roster features --seasons 2016-2027

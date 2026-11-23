@@ -123,7 +123,7 @@ def run(seasons, label, variants=None, ks=None):
     return out
 
 
-if __name__ == "__main__":
+def experiments():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["run"])
     ap.add_argument("--seasons", default="tune")
@@ -135,3 +135,201 @@ if __name__ == "__main__":
     vs = [v for v in VARIANTS if not a.variants or v.name.split()[0] in a.variants.split(",")]
     ks = [float(x) for x in a.k.split(",")] if a.k else None
     print(run(seasons, a.seasons, vs, ks).round(4).to_string())
+
+
+
+
+# ====================================================================== final
+# Frozen after the tune-season experiments above (reports/phase3_tune.md):
+FINAL_SPEC = PriorSpec("ae-0.2 prior", ("last", "l2", "conf", "ret", "transfer", "recruit"), k=0.5, hetero=True)
+FF_ALPHA = 100.0
+FF_TRAIN = list(range(2018, 2023))       # tune seasons with a fitted preseason model
+EVAL = list(range(2018, 2026)) + [C.CURRENT_SEASON]   # 2026 (holdout) excluded
+
+
+def final_predictions(seasons=EVAL, include_holdout=False) -> pd.DataFrame:
+    """Walk-forward predictions for ae-0.1, +priors, +priors+four-factors."""
+    from .fourfactors import EVAL_SEASONS, build as ff_build, design, ridge_fit, ridge_pred
+    OUT.mkdir(parents=True, exist_ok=True)
+    seasons = list(seasons) + ([2026] if include_holdout else [])
+    p, j = load_params()
+    games = load_games()
+    sr = season_ratings(games, p)
+    feat = feature_table(sr, conferences(games), load_team_priors())
+    a = attach(games, walk_forward(games, seasons, p))
+    b, coefs = walk_forward_prior(games, seasons, p, FINAL_SPEC, feat, sr)
+    m = a.merge(b[["game_id", "pred_margin", "pred_total", "h_gp", "a_gp"]].rename(
+        columns={"pred_margin": "pm_prior", "pred_total": "pt_prior", "h_gp": "h_gp2", "a_gp": "a_gp2"}),
+        on="game_id")
+    m = m.rename(columns={"pred_margin": "pm_ae01", "pred_total": "pt_ae01"})
+    fff = C.DATA / "fourfactors" / "ff_pregame.parquet"
+    if fff.exists() and not include_holdout:
+        ff = pd.read_parquet(fff)
+    else:
+        ff = ff_build(games, sorted(set(EVAL_SEASONS) | set(seasons)))
+        fff.parent.mkdir(parents=True, exist_ok=True)
+        ff.to_parquet(fff, index=False)
+    m = m.merge(ff, on="game_id", how="left")
+    X = design(m).fillna(0.0)
+    X["loc"] = np.where(m.neutral_site, 0.0, 1.0)
+    tr = (m.season.isin(FF_TRAIN) & m.d1_game).values
+    mcols = [c for c in X.columns if not c.startswith("s_") and c != "loc"]
+    tcols = [c for c in X.columns if c.startswith("s_")] + ["loc"]
+    rm = ridge_fit(X.loc[tr, mcols], (m.margin - m.pm_prior).values[tr], FF_ALPHA)
+    rt = ridge_fit(X.loc[tr, tcols], (m.total_pts - m.pt_prior).values[tr], FF_ALPHA)
+    has = m.x_efg_h.notna().values
+    m["pm_ff"] = m.pm_prior + np.where(has, ridge_pred(rm, X[mcols]), 0.0)
+    m["pt_ff"] = m.pt_prior + np.where(has, ridge_pred(rt, X[tcols]), 0.0)
+    # sigma by games played, refit on the FF training seasons only
+    gp = np.minimum(m.h_gp, m.a_gp)
+    m["gp_bucket"] = np.select([gp <= 2, gp <= 5, gp <= 10], ["0-2", "3-5", "6-10"], "11+")
+    for k in ("ae01", "prior", "ff"):
+        sig = (m[tr].assign(e=m.margin - m[f"pm_{k}"]).groupby("gp_bucket").e.std())
+        m[f"sig_{k}"] = m.gp_bucket.map(sig)
+        m[f"p_{k}"] = norm.cdf(m[f"pm_{k}"] / m[f"sig_{k}"])
+    meta = dict(prior_coefs=coefs, ff_margin={c: round(float(v), 4) for c, v in zip(mcols, rm["b"])},
+                ff_total={c: round(float(v), 4) for c, v in zip(tcols, rt["b"])})
+    keep = [c for c in m.columns if not c.startswith(("x_", "efg_", "tov_", "orb_", "ftr_", "tpar_", "tp_",
+                                                       "twop_", "ft_"))]
+    m[keep].to_parquet(OUT / ("final_holdout.parquet" if include_holdout else "final.parquet"), index=False)
+    (OUT / "final_meta.json").write_text(json.dumps(meta, default=float, indent=1))
+    return m[keep]
+
+
+MODELS = [("ae01", "ae-0.1 (Phase 1)"), ("prior", "+ roster/transfer/recruit priors"),
+          ("ff", "+ priors + four-factor matchup layer")]
+
+
+def metric_rows(d: pd.DataFrame, label: str) -> list[dict]:
+    out = []
+    y = d.home_win.values
+    for k, name in MODELS:
+        e = d.margin - d[f"pm_{k}"]
+        out.append(dict(split=label, model=name, n=len(d), margin_rmse=float(np.sqrt((e ** 2).mean())),
+                        margin_mae=float(e.abs().mean()), su_acc=float(((d[f"pm_{k}"] > 0) == (y == 1)).mean()),
+                        brier=M.brier(d[f"p_{k}"], y), log_loss=M.log_loss(d[f"p_{k}"], y),
+                        total_mae=float((d.total_pts - d[f"pt_{k}"]).abs().mean())))
+    return out
+
+
+def market_rows(x: pd.DataFrame, label: str) -> list[dict]:
+    """x: games with a named-book closing spread (`spread`, home line)."""
+    from .evaluate import ats_sim
+    out = []
+    mk = -x.spread
+    for k, name in MODELS:
+        d = x.assign(mkt_margin=mk, pred_margin=x[f"pm_{k}"], sigma_m=x[f"sig_{k}"])
+        X = np.c_[np.ones(len(d)), d.mkt_margin, d.pred_margin - d.mkt_margin]
+        beta, *_ = np.linalg.lstsq(X, d.margin.values, rcond=None)
+        res = d.margin.values - X @ beta
+        se = np.sqrt(np.diag(np.linalg.inv(X.T @ X)) * res.var(ddof=3))
+        a = ats_sim(d.assign(home_spread_odds=np.nan, away_spread_odds=np.nan))
+        out.append(dict(split=label, model=name, n=len(d),
+                        line_rmse=float(np.sqrt(((d.margin - d.mkt_margin) ** 2).mean())),
+                        model_rmse=float(np.sqrt(((d.margin - d.pred_margin) ** 2).mean())),
+                        c=float(beta[2]), c_se=float(se[2]),
+                        ats=f"{a['wins']}-{a['losses']}-{a['pushes']}", ats_pct=a["win_pct"], roi=a["roi"],
+                        roi_ci=f"{a['roi_95ci'][0]:+.1%} to {a['roi_95ci'][1]:+.1%}"))
+    return out
+
+
+def blend_oos(train: pd.DataFrame, test: pd.DataFrame) -> list[dict]:
+    """margin = a + b*line + c*(model - line), fit on train, RMSE on test."""
+    out = []
+    for k, name in MODELS:
+        def X(d):
+            return np.c_[np.ones(len(d)), -d.spread, d[f"pm_{k}"] + d.spread]
+        beta, *_ = np.linalg.lstsq(X(train), train.margin.values, rcond=None)
+        out.append(dict(model=name, c_train=float(beta[2]),
+                        rmse_line=float(np.sqrt(((test.margin + test.spread) ** 2).mean())),
+                        rmse_blend=float(np.sqrt(((test.margin - X(test) @ beta) ** 2).mean()))))
+    return out
+
+
+def report(with_lines: bool) -> str:
+    from .evaluate import md
+    f = OUT / "final.parquet"
+    m = pd.read_parquet(f) if f.exists() else final_predictions()
+    m = m[m.d1_game]
+    L = ["# Phase 3: preseason priors + four-factor matchup layer", "",
+         "Walk-forward. Every prediction for date d uses only games before d; the preseason model for "
+         "season s is fitted on seasons before s. Prior shrinkage k and the feature blocks were chosen on "
+         "tune seasons 2018–22; the four-factor layer is fitted on 2018–22 residuals. Validation 2023–25 "
+         "and the current season were not used for any choice. The 2026 holdout is not in this report.", "",
+         "## Accuracy (D1 vs D1)", ""]
+    rows = []
+    rows += metric_rows(m[m.season.isin(FF_TRAIN)], "tune 2018–22 (in-sample for the FF layer)")
+    rows += metric_rows(m[m.season.isin(C.VALIDATION_SEASONS)], "validation 2023–25")
+    rows += metric_rows(m[m.season == C.CURRENT_SEASON], f"current {C.CURRENT_SEASON} to date")
+    L += [md(pd.DataFrame(rows)), ""]
+    v = m[m.season.isin(C.VALIDATION_SEASONS)].copy()
+    v["when"] = np.select([np.minimum(v.h_gp, v.a_gp) <= 2, np.minimum(v.h_gp, v.a_gp) <= 5,
+                           v.game_date.dt.month.isin([11, 12])],
+                          ["a: 0–2 games played", "b: 3–5 games played", "c: rest of Nov–Dec"], "d: Jan–Apr")
+    t = []
+    for w, x in v.groupby("when"):
+        r = dict(when=w[3:], n=len(x))
+        for k, name in MODELS:
+            r[f"RMSE {k}"] = float(np.sqrt(((x.margin - x[f"pm_{k}"]) ** 2).mean()))
+        t.append(r)
+    L += ["## Validation 2023–25 by point in the season (margin RMSE)", "", md(pd.DataFrame(t)), ""]
+    by = []
+    for s, x in v.groupby("season"):
+        r = dict(season=s, n=len(x))
+        for k, name in MODELS:
+            r[f"RMSE {k}"] = float(np.sqrt(((x.margin - x[f"pm_{k}"]) ** 2).mean()))
+        by.append(r)
+    L += ["### By season", "", md(pd.DataFrame(by)), ""]
+    L += ["### Calibration, validation, full model", "", md(M.calibration_table(v.p_ff, v.home_win)), ""]
+    if with_lines:
+        from .cbbd import _key, fetch_lines, join_to_espn
+        key = _key()
+        games = load_games()
+        allx = []
+        for s in C.VALIDATION_SEASONS + [C.CURRENT_SEASON]:
+            ln = fetch_lines(s, key)
+            if ln.empty:
+                continue
+            j_, _ = join_to_espn(ln, games[games.season == s])
+            allx.append(j_)
+        x = pd.concat(allx, ignore_index=True)
+        x = x[x.provider.isin(["ESPN BET", "Draft Kings", "DraftKings"]) & x.spread.notna()]
+        x = x.drop_duplicates(["game_id", "provider"])[["game_id", "provider", "spread"]]
+        x = m.merge(x, on="game_id")
+        L += ["## Against named-book closing lines (CBBD; simulated, no wagers)", "",
+              "`c` = weight on (model − line) in margin = a + b·line + c·(model − line), fit on that cell. "
+              "c ≈ 0 means no information beyond the line. ATS assumes −110 (CBBD carries no spread prices) "
+              "and bets the side with positive EV on every game.", ""]
+        mr = []
+        for (s, pv), g in x.groupby(["season", "provider"]):
+            if len(g) >= 300:
+                mr += market_rows(g, f"{s} {pv}")
+        eb = x[(x.provider == "ESPN BET") & x.season.isin(C.VALIDATION_SEASONS)]
+        mr += market_rows(eb, "2023–25 ESPN BET pooled")
+        L += [md(pd.DataFrame(mr)), ""]
+        tr_, te_ = eb[eb.season.isin([2023, 2024])], eb[eb.season == 2025]
+        if len(tr_) and len(te_):
+            L += ["### Blend fit on 2023–24 ESPN BET, scored on 2025", "", md(pd.DataFrame(blend_oos(tr_, te_)), 4), ""]
+        early = eb[np.minimum(eb.h_gp, eb.a_gp) <= 5]
+        if len(early) > 300:
+            L += ["### Early season only (≤5 games played), 2023–25 ESPN BET", "",
+                  md(pd.DataFrame(market_rows(early, "early 2023–25"))), ""]
+    return "\n".join(L)
+
+
+def cli():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("cmd", choices=["final", "report"])
+    ap.add_argument("--lines", action="store_true")
+    a = ap.parse_args()
+    if a.cmd == "final":
+        final_predictions()
+    txt = report(a.lines)
+    C.REPORTS.mkdir(exist_ok=True)
+    (C.REPORTS / "phase3_validation.md").write_text(txt + "\n")
+    print(txt)
+
+
+if __name__ == "__main__":
+    import sys
+    experiments() if sys.argv[1:2] == ["run"] else cli()

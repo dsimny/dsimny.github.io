@@ -39,24 +39,30 @@ jobs:
         run: python -m ncaa.ingest
       - name: CBBD roster/transfer/recruiting team aggregates
         run: python -m ncaa.cbbd_roster features --seasons 2016-2027
+      - name: Phase 3 validation vs named-book closing lines (holdout excluded)
+        run: |
+          python -m ncaa.phase3 final --lines
+          cat reports/phase3_validation.md >> "$GITHUB_STEP_SUMMARY"
       # The one derived table (team-level aggregates, no player rows) is
       # committed back to the PR branch so the backtest reproduces without a
       # key and later runs spend no CBBD calls. Raw CBBD JSON stays here.
-      - name: Commit derived team aggregates to the PR branch
+      - name: Commit derived team aggregates and the validation report to the PR branch
         if: github.event_name == 'pull_request'
         working-directory: .
         env:
           HEAD_REF: ${{ github.head_ref }}
         run: |
           f=ncaa-model/data/derived/team_priors.csv
-          [ -f "$f" ] || { echo "no derived table"; exit 0; }
-          cp "$f" "$RUNNER_TEMP/team_priors.csv"
+          r=ncaa-model/reports/phase3_validation.md
+          [ -f "$f" ] && cp "$f" "$RUNNER_TEMP/team_priors.csv"
+          [ -f "$r" ] && cp "$r" "$RUNNER_TEMP/phase3_validation.md"
           git fetch origin "$HEAD_REF"
           git checkout -f -B "$HEAD_REF" "origin/$HEAD_REF"
-          mkdir -p ncaa-model/data/derived
-          cp "$RUNNER_TEMP/team_priors.csv" "$f"
-          git add "$f"
+          mkdir -p ncaa-model/data/derived ncaa-model/reports
+          [ -f "$RUNNER_TEMP/team_priors.csv" ] && cp "$RUNNER_TEMP/team_priors.csv" "$f"
+          [ -f "$RUNNER_TEMP/phase3_validation.md" ] && cp "$RUNNER_TEMP/phase3_validation.md" "$r"
+          for x in "$f" "$r"; do [ -f "$x" ] && git add "$x"; done
           if git diff --cached --quiet; then echo "unchanged"; exit 0; fi
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-            commit -m "ncaa-model: derived team priors from CBBD (team-level aggregates)"
+            commit -m "ncaa-model: CI output (derived team priors / phase 3 validation report)"
           git push origin "HEAD:$HEAD_REF"

@@ -1,7 +1,8 @@
-# NCAA basketball model (ncaa-model/): tests, plus the CBBD betting-line
-# check, which needs the CBBD_API_KEY secret. Read-only: commits nothing,
-# posts nothing. Raw CBBD rows never leave the runner (public repo, and the
-# feed is not ours to redistribute); only the aggregate report is uploaded.
+# NCAA basketball model (ncaa-model/): tests, plus the CBBD steps, which need
+# the CBBD_API_KEY secret. Posts nothing. Raw CBBD rows never leave the runner
+# (public repo, and the feed is not ours to redistribute). The only write is
+# one derived team-level table committed to the PR branch (see that step);
+# reports carry aggregates only.
 name: NCAA model
 
 on:
@@ -17,6 +18,8 @@ permissions:
 jobs:
   test-and-cbbd:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # only used to commit data/derived/team_priors.csv to the PR branch
     timeout-minutes: 40
     defaults:
       run:
@@ -36,3 +39,24 @@ jobs:
         run: python -m ncaa.ingest
       - name: CBBD roster/transfer/recruiting team aggregates
         run: python -m ncaa.cbbd_roster features --seasons 2016-2027
+      # The one derived table (team-level aggregates, no player rows) is
+      # committed back to the PR branch so the backtest reproduces without a
+      # key and later runs spend no CBBD calls. Raw CBBD JSON stays here.
+      - name: Commit derived team aggregates to the PR branch
+        if: github.event_name == 'pull_request'
+        working-directory: .
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          f=ncaa-model/data/derived/team_priors.csv
+          [ -f "$f" ] || { echo "no derived table"; exit 0; }
+          cp "$f" "$RUNNER_TEMP/team_priors.csv"
+          git fetch origin "$HEAD_REF"
+          git checkout -f -B "$HEAD_REF" "origin/$HEAD_REF"
+          mkdir -p ncaa-model/data/derived
+          cp "$RUNNER_TEMP/team_priors.csv" "$f"
+          git add "$f"
+          if git diff --cached --quiet; then echo "unchanged"; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "ncaa-model: derived team priors from CBBD (team-level aggregates)"
+          git push origin "HEAD:$HEAD_REF"

@@ -44,6 +44,7 @@ TEAM_PRIORS_CSV = DERIVED / "team_priors.csv"
 # reads as "what did this block add on top of the previous one".
 BLOCKS = {
     "last": ["off_l1", "dfn_l1"],                    # last season (refit slope; ae-0.1 uses 1.0)
+    "form": ["off_l1r", "dfn_l1r"],                  # last season's END form (60-day recency weighting)
     "l2": ["off_l2", "dfn_l2"],                      # two seasons back (programme strength)
     "conf": ["conf_off_l1", "conf_dfn_l1"],          # partial pooling toward this season's conference
     "ret": ["ret_min", "off_l1_x_ret", "dfn_l1_x_ret"],  # returning minutes, and how much of last season carries
@@ -67,14 +68,20 @@ def season_ratings(games: pd.DataFrame, p: Params, seasons=None) -> pd.DataFrame
     """Data-only end-of-season ratings for D1 teams, one row per (season, team)."""
     pw = replace(p, prior_games=0.3, tempo_prior_games=0.3, half_life_days=np.inf)
     seasons = seasons or range(C.FIRST_SEASON, C.CURRENT_SEASON + 1)
+    pr_ = replace(pw, half_life_days=60.0)
     rows = []
     for s in seasons:
         r = fit(games, None, s, None, pw)
+        last = games.loc[games.season == s, "game_date"].max()
+        rr = fit(games, last + pd.Timedelta(days=1), s, None, pr_) if pd.notna(last) else r
         d1 = d1_teams(s)
         for i, t in enumerate(r.teams):
             if t in d1:
-                rows.append((s, int(t), r.off[i], r.dfn[i], r.tempo[i], r.n_games[i], r.mu, r.tmu))
-    return pd.DataFrame(rows, columns=["season", "team_id", "off", "dfn", "tempo", "n", "mu", "tmu"])
+                j = rr.idx[int(t)]
+                rows.append((s, int(t), r.off[i], r.dfn[i], r.tempo[i], r.n_games[i], r.mu, r.tmu,
+                             rr.off[j], rr.dfn[j], rr.tempo[j]))
+    return pd.DataFrame(rows, columns=["season", "team_id", "off", "dfn", "tempo", "n", "mu", "tmu",
+                                       "off_r", "dfn_r", "tempo_r"])
 
 
 def conferences(games: pd.DataFrame) -> pd.DataFrame:
@@ -97,8 +104,8 @@ def feature_table(sr: pd.DataFrame, conf: pd.DataFrame, tp: pd.DataFrame | None)
     """One row per (season s, D1 team) with targets (season s data-only
     ratings) and features known before season s."""
     base = sr[["season", "team_id", "off", "dfn", "tempo", "n"]]
-    l1 = sr[["season", "team_id", "off", "dfn", "tempo"]].assign(season=sr.season + 1)
-    l1.columns = ["season", "team_id", "off_l1", "dfn_l1", "tempo_l1"]
+    l1 = sr[["season", "team_id", "off", "dfn", "tempo", "off_r", "dfn_r"]].assign(season=sr.season + 1)
+    l1.columns = ["season", "team_id", "off_l1", "dfn_l1", "tempo_l1", "off_l1r", "dfn_l1r"]
     l2 = sr[["season", "team_id", "off", "dfn", "tempo"]].assign(season=sr.season + 2)
     l2.columns = ["season", "team_id", "off_l2", "dfn_l2", "tempo_l2"]
     # every D1 team of every season that has a schedule, even with no games yet
@@ -111,6 +118,8 @@ def feature_table(sr: pd.DataFrame, conf: pd.DataFrame, tp: pd.DataFrame | None)
         # no previous D1 season: the ae-0.1 new-programme defaults
         x[f"{c}_l1"] = x[f"{c}_l1"].fillna({"off": -4.0, "dfn": 4.0, "tempo": 0.0}[c])
         x[f"{c}_l2"] = x[f"{c}_l2"].fillna(x[f"{c}_l1"])
+    x["off_l1r"] = x.off_l1r.fillna(x.off_l1)
+    x["dfn_l1r"] = x.dfn_l1r.fillna(x.dfn_l1)
     x = x.merge(conf, on=["season", "team_id"], how="left")
     # conference mean of last season's ratings, excluding the team itself
     for c in ("off", "dfn", "tempo"):
@@ -193,7 +202,7 @@ def predict_preseason(model: dict, x: pd.DataFrame, spec: PriorSpec):
 # Single-observation noise variance (points per 100 possessions for off/dfn,
 # possessions for tempo), measured on TUNE seasons by `measure_obs_noise` and
 # frozen here so the prior strengths are reproducible.
-SIGMA2_OBS = {"off": 120.0, "dfn": 120.0, "tempo": 30.0}
+SIGMA2_OBS = {"off": 148.1, "dfn": 148.1, "tempo": 21.4}  # measure_obs_noise, tune 2016-22, n=36,848
 
 
 def measure_obs_noise(games: pd.DataFrame, sr: pd.DataFrame) -> dict:

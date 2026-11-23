@@ -11,9 +11,10 @@ What leaves the runner is ONE derived table, one row per (season, ESPN team):
 `data/derived/team_priors.csv` - returning-minutes share, incoming-transfer
 minutes and the quality of the teams they came from, and recruit-class
 strength. These are team-level aggregates computed here (like the
-returning-minutes figures sites publish), not CBBD's feed. The table is
-printed to the job log as gzip+base64 so it can be committed and the whole
-backtest re-run without a key.
+returning-minutes figures sites publish), not CBBD's feed: no player names
+or ids. The workflow commits that one file to the PR branch so the whole
+backtest can be re-run without a key, and later runs reuse it instead of
+spending API calls (`--refresh` rebuilds it).
 
 Every feature for season s uses only information published before season s
 starts: last season's player minutes, this season's roster, and the
@@ -23,9 +24,6 @@ caveat (roster snapshots are not timestamped).
 from __future__ import annotations
 
 import argparse
-import base64
-import gzip
-import io
 import json
 import sys
 
@@ -211,21 +209,18 @@ def features(key, seasons):
                                     tr_in_min=("tr_in_min", "mean"), tr_in_n=("tr_in_n", "mean"),
                                     rec_n=("rec_n", "sum"), roster_n=("roster_n", "mean"))
     print(summ.round(3).to_string())
-    buf = io.BytesIO()
-    with gzip.GzipFile(fileobj=buf, mode="wb", mtime=0) as gz:
-        gz.write(TEAM_PRIORS_CSV.read_bytes())
-    b = base64.b64encode(buf.getvalue()).decode()
-    print(f"TEAM_PRIORS_B64 lines={-(-len(b) // 900)} bytes={len(b)}")
-    for i in range(0, len(b), 900):
-        print(f"TP|{i // 900:04d}|{b[i:i + 900]}")
-    print("TEAM_PRIORS_B64 end")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["probe", "features"])
     ap.add_argument("--seasons", default="2016-2027")
+    ap.add_argument("--refresh", action="store_true")
     a = ap.parse_args()
+    from .priors import TEAM_PRIORS_CSV
+    if a.cmd == "features" and TEAM_PRIORS_CSV.exists() and not a.refresh:
+        print(f"{TEAM_PRIORS_CSV.name} is committed; reusing it (no CBBD calls). Pass --refresh to rebuild.")
+        return
     key = _key()
     if a.cmd == "probe":
         probe(key)

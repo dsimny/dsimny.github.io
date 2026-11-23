@@ -34,20 +34,5 @@ jobs:
         run: python -m pytest -q tests
       - name: Download box scores and schedules
         run: python -m ncaa.ingest
-      - name: Walk-forward predictions (model unchanged)
-        run: python -m ncaa.evaluate predictions
-      - name: CBBD lines report
-        run: |
-          if [ -z "$CBBD_API_KEY" ]; then
-            echo "::error::CBBD_API_KEY secret is not set"
-            exit 1
-          fi
-          python -m ncaa.cbbd --seasons 2016-2027
-          cat reports/cbbd_lines.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload report (aggregates only)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cbbd-lines-report
-          path: ncaa-model/reports/cbbd_lines.md
-          if-no-files-found: ignore
+      - name: CBBD roster/transfer/recruiting probe (key structure only)
+        run: python -m ncaa.cbbd_roster probe

@@ -1,0 +1,45 @@
+{
+  "model_version": "ae-0.1",
+  "params": {
+    "prior_games": 3.0,
+    "prior_regress": 1.0,
+    "tempo_prior_games": 3.0,
+    "tempo_regress": 0.9,
+    "half_life_days": 60.0,
+    "hca_lambda": 10000.0,
+    "nond1_off": -12.0,
+    "nond1_dfn": 10.0,
+    "newd1_off": -4.0,
+    "newd1_dfn": 4.0
+  },
+  "sigma": {
+    "margin": {
+      "0-2": 12.741135872930386,
+      "3-5": 11.961577957029421,
+      "6-10": 11.653670568706797,
+      "11+": 11.025995778106928
+    },
+    "total": {
+      "0-2": 18.575377191600463,
+      "3-5": 17.702808384044367,
+      "6-10": 17.03561133747698,
+      "11+": 16.975390941249238
+    }
+  },
+  "elo": {
+    "k": 25,
+    "carry": 0.85,
+    "pts_per_elo": 0.03945204221441037,
+    "margin_sigma": 11.907742941842438
+  },
+  "tuned_on": [
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "tuning_note": "27-config grid (reports/tuning_grid.csv) best at prior_regress=0.8 (grid edge); extended on TUNE seasons only: 0.9/3g RMSE 11.420, 1.0/3g 11.415, 0.9/2g 11.464 -> adopted 1.0/3g."
+}

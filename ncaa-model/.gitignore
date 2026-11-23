@@ -1,0 +1,9 @@
+# Raw downloads and the built database are re-fetchable (python -m ncaa.ingest)
+# and too large for a Pages repo. Only small, derived, auditable outputs are
+# committed: reports/ and boards/.
+data/raw/
+data/odds_cache/
+data/*.duckdb
+data/*.parquet
+__pycache__/
+.pytest_cache/

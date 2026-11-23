@@ -156,7 +156,13 @@ def final_predictions(seasons=EVAL, include_holdout=False) -> pd.DataFrame:
     games = load_games()
     sr = season_ratings(games, p)
     feat = feature_table(sr, conferences(games), load_team_priors())
-    a = attach(games, walk_forward(games, seasons, p))
+    # ae-0.1 chains each season's final rating into the next season's prior,
+    # so its walk-forward must run through every season up to the last one
+    # asked for. Rows for seasons not asked for (e.g. the 2026 holdout) are
+    # dropped unseen.
+    chain = list(range(min(seasons), max(seasons) + 1))
+    a = attach(games, walk_forward(games, chain, p))
+    a = a[a.season.isin(seasons)]
     b, coefs = walk_forward_prior(games, seasons, p, FINAL_SPEC, feat, sr)
     m = a.merge(b[["game_id", "pred_margin", "pred_total", "h_gp", "a_gp"]].rename(
         columns={"pred_margin": "pm_prior", "pred_total": "pt_prior", "h_gp": "h_gp2", "a_gp": "a_gp2"}),
@@ -224,7 +230,14 @@ def market_rows(x: pd.DataFrame, label: str) -> list[dict]:
         res = d.margin.values - X @ beta
         se = np.sqrt(np.diag(np.linalg.inv(X.T @ X)) * res.var(ddof=3))
         a = ats_sim(d.assign(home_spread_odds=np.nan, away_spread_odds=np.nan))
-        out.append(dict(split=label, model=name, n=len(d),
+        clv = np.nan
+        if "spread_open" in d and d.spread_open.notna().mean() > 0.5:
+            o = d[d.spread_open.notna()]
+            ph, pp, pa = M.cover_probs(o.pred_margin, o.spread_open, o.sigma_m)
+            side_home = ph > pa
+            # + = the line moved toward the model's side between open and close
+            clv = float(np.mean(np.where(side_home, o.spread_open - o.spread, o.spread - o.spread_open)))
+        out.append(dict(split=label, model=name, n=len(d), clv_vs_open=clv,
                         line_rmse=float(np.sqrt(((d.margin - d.mkt_margin) ** 2).mean())),
                         model_rmse=float(np.sqrt(((d.margin - d.pred_margin) ** 2).mean())),
                         c=float(beta[2]), c_se=float(se[2]),
@@ -294,7 +307,7 @@ def report(with_lines: bool) -> str:
             allx.append(j_)
         x = pd.concat(allx, ignore_index=True)
         x = x[x.provider.isin(["ESPN BET", "Draft Kings", "DraftKings"]) & x.spread.notna()]
-        x = x.drop_duplicates(["game_id", "provider"])[["game_id", "provider", "spread"]]
+        x = x.drop_duplicates(["game_id", "provider"])[["game_id", "provider", "spread", "spread_open"]]
         x = m.merge(x, on="game_id")
         L += ["## Against named-book closing lines (CBBD; simulated, no wagers)", "",
               "`c` = weight on (model − line) in margin = a + b·line + c·(model − line), fit on that cell. "
@@ -317,11 +330,41 @@ def report(with_lines: bool) -> str:
     return "\n".join(L)
 
 
+def holdout_report() -> str:
+    """ONE run on the 2026 holdout for the frozen ae-0.2 candidate."""
+    from .cbbd import _key, fetch_lines, join_to_espn
+    from .evaluate import md
+    m = final_predictions(seasons=FF_TRAIN, include_holdout=True)
+    m = m[m.d1_game & (m.season == 2026)]
+    L = ["# Holdout 2025–26 — ae-0.2 candidate (single run)", "",
+         "Frozen before this run: prior blocks, k = 0.5, four-factor layer (alpha 100, fit on 2018–22). "
+         "Nothing below was used to choose anything. All betting figures simulated; no wagers.", "",
+         md(pd.DataFrame(metric_rows(m, "holdout 2026"))), ""]
+    m = m.copy()
+    m["early"] = np.minimum(m.h_gp, m.a_gp) <= 5
+    L += ["Early season (≤5 games played):", "", md(pd.DataFrame(metric_rows(m[m.early], "holdout 2026, early"))), ""]
+    ln = fetch_lines(2026, _key())
+    j_, _ = join_to_espn(ln, load_games().query("season == 2026"))
+    x = j_[j_.provider.isin(["Draft Kings", "DraftKings"]) & j_.spread.notna()].drop_duplicates("game_id")
+    x = m.merge(x[["game_id", "spread", "spread_open"]], on="game_id")
+    L += ["## Against the DraftKings close (CBBD)", "", md(pd.DataFrame(market_rows(x, "2026 DraftKings"))), "",
+          md(pd.DataFrame(market_rows(x[x.early], "2026 DraftKings, early"))), ""]
+    return "\n".join(L)
+
+
 def cli():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["final", "report"])
+    ap.add_argument("cmd", choices=["final", "report", "holdout"])
     ap.add_argument("--lines", action="store_true")
     a = ap.parse_args()
+    if a.cmd == "holdout":
+        out = C.REPORTS / "holdout_ae-0.2.md"
+        if out.exists():
+            raise SystemExit(f"{out} exists: the holdout has been run for ae-0.2. Bump the version.")
+        txt = holdout_report()
+        out.write_text(txt + "\n")
+        print(txt)
+        return
     if a.cmd == "final":
         final_predictions()
     txt = report(a.lines)

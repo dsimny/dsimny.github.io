@@ -44,8 +44,13 @@ def _key() -> str:
 
 def _get(path, params, key):
     for i in range(4):
-        r = requests.get(BASE + path, params=params, timeout=120,
-                         headers={"Authorization": f"Bearer {key}", "Accept": "application/json"})
+        try:
+            r = requests.get(BASE + path, params=params, timeout=180,
+                             headers={"Authorization": f"Bearer {key}", "Accept": "application/json"})
+        except requests.RequestException as e:  # dropped/truncated connection: retry
+            print(f"  {path} {params}: {type(e).__name__}, retrying", flush=True)
+            time.sleep(5 * (i + 1))
+            continue
         if r.status_code == 200:
             return r.json()
         if r.status_code in (401, 403):

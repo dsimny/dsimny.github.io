@@ -7,3 +7,4 @@ data/*.duckdb
 data/*.parquet
 __pycache__/
 .pytest_cache/
+data/cbbd_cache/

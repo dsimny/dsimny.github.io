@@ -368,8 +368,9 @@ def cli():
     if a.cmd == "final":
         final_predictions()
     txt = report(a.lines)
-    C.REPORTS.mkdir(exist_ok=True)
-    (C.REPORTS / "phase3_validation.md").write_text(txt + "\n")
+    if a.lines:  # the committed report always carries the market section
+        C.REPORTS.mkdir(exist_ok=True)
+        (C.REPORTS / "phase3_validation.md").write_text(txt + "\n")
     print(txt)
 
 

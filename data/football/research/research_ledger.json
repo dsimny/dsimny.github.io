@@ -435,7 +435,38 @@
    "clv_status": "measured",
    "graded_utc": "2026-11-22T18:11:45Z",
    "entry_key": "fp-v0.4-market-observation-v1|2026-11-17|ncaaf|Florida International Panthers @ Kennesaw State Owls|2026-11-21T20:00:00Z|research_premium"
+  },
+  {
+   "research_version_id": "fp-v0.4-market-observation-v1",
+   "research_authority": "research_only_no_selection_delivery_or_holdout",
+   "tier": "research_free",
+   "record_cohort": "fp-v0.4-market-observation-v1",
+   "is_official": false,
+   "sport": "nfl",
+   "slate_week": "2026-11-17",
+   "matchup": "TEN @ DAL",
+   "kickoff_utc": "2026-11-22T18:00:00Z",
+   "side": "Tennessee Titans",
+   "best_price": 330,
+   "best_book": "fanduel",
+   "books_at_best": 4,
+   "eff_overround_pts": 1.517,
+   "fair_side": 0.23234,
+   "t24_capture": "nfl_20261121T123724Z.json",
+   "t24_hours_before_kickoff": 29.38,
+   "observed_utc": "2026-11-21T19:37:28Z",
+   "espn_event_id": "401873073",
+   "final": "30-51",
+   "result": "loss",
+   "units": 0,
+   "pnl_per_unit": -1.0,
+   "_pnl_note": "Hypothetical research analysis only. pnl_per_unit shows what one unit would have returned. No stake was placed or recorded.",
+   "clv_pts": 0.2,
+   "close_capture": "nfl_20261122T153727Z.json",
+   "clv_status": "measured",
+   "graded_utc": "2026-11-23T22:25:34Z",
+   "entry_key": "fp-v0.4-market-observation-v1|2026-11-17|nfl|TEN @ DAL|2026-11-22T18:00:00Z|research_free"
   }
  ],
- "updated_utc": "2026-11-22T18:11:45Z"
+ "updated_utc": "2026-11-23T22:25:34Z"
 }

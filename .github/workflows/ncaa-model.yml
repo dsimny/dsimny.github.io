@@ -1,0 +1,53 @@
+# NCAA basketball model (ncaa-model/): tests, plus the CBBD betting-line
+# check, which needs the CBBD_API_KEY secret. Read-only: commits nothing,
+# posts nothing. Raw CBBD rows never leave the runner (public repo, and the
+# feed is not ours to redistribute); only the aggregate report is uploaded.
+name: NCAA model
+
+on:
+  pull_request:
+    paths:
+      - "ncaa-model/**"
+      - ".github/workflows/ncaa-model.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-cbbd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: ncaa-model
+    env:
+      CBBD_API_KEY: ${{ secrets.CBBD_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Unit tests
+        run: python -m pytest -q tests
+      - name: Download box scores and schedules
+        run: python -m ncaa.ingest
+      - name: Walk-forward predictions (model unchanged)
+        run: python -m ncaa.evaluate predictions
+      - name: CBBD lines report
+        run: |
+          if [ -z "$CBBD_API_KEY" ]; then
+            echo "::error::CBBD_API_KEY secret is not set"
+            exit 1
+          fi
+          python -m ncaa.cbbd --seasons 2016-2027
+          cat reports/cbbd_lines.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload report (aggregates only)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbbd-lines-report
+          path: ncaa-model/reports/cbbd_lines.md
+          if-no-files-found: ignore

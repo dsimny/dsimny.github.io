@@ -22690,6 +22690,40 @@
    "sha256": "20edc59a88cac841f59d7c07a46d762c852e61802537acdfc62bd0bd543499bf",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|GB @ LA|2026-11-26T01:00:00Z": {
+   "block": {
+    "away": "Green Bay Packers",
+    "best_book": "fanduel",
+    "best_price": 120,
+    "books_at_best": 3,
+    "clv_pts": null,
+    "eff_overround_pts": 2.901,
+    "fair_away": 0.44663,
+    "fair_home": 0.55337,
+    "fair_side": 0.44663,
+    "home": "Los Angeles Rams",
+    "kickoff_utc": "2026-11-26T01:00:00Z",
+    "league": "NFL",
+    "matchup": "GB @ LA",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.139,
+    "relative_price_discount": -0.0177195686,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Green Bay Packers",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261124T193731Z.json",
+    "t24_hours_before_kickoff": 29.37
+   },
+   "committed_utc": "2026-11-24T19:37:34Z",
+   "kickoff_utc": "2026-11-26T01:00:00Z",
+   "matchup": "GB @ LA",
+   "sha256": "00bbdf7079fb72693c6bdeca4bb17bb713aa565dd0886d8f0154b1f35c87ebd9",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|GB @ MIN|2026-09-13T20:25:00Z": {
    "block": {
     "away": "Green Bay Packers",

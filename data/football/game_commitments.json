@@ -8389,6 +8389,43 @@
    "sha256": "21f1971345a8a4ba8564b136e205b0002e3a21d58dd53feb1ee67cd3955465e5",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Kent State Golden Flashes @ Eastern Michigan Eagles|2026-11-25T00:00:00Z": {
+   "block": {
+    "away": "Kent State Golden Flashes",
+    "best_book": "circasports",
+    "best_price": 195,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 1.111,
+    "fair_away": 0.33949,
+    "fair_home": 0.66051,
+    "fair_side": 0.33949,
+    "home": "Eastern Michigan Eagles",
+    "kickoff_utc": "2026-11-25T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Kent State Golden Flashes @ Eastern Michigan Eagles",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 195
+    },
+    "raw_overround_pts": 4.086,
+    "relative_price_discount": 0.0014830508,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Kent State Golden Flashes",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261123T183721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-24T00:37:23Z",
+   "kickoff_utc": "2026-11-25T00:00:00Z",
+   "matchup": "Kent State Golden Flashes @ Eastern Michigan Eagles",
+   "sha256": "f62b49d3b1085c5cf7fedd2dd829e3f610f0e91664735d6d4eda786386fe7f95",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Kent State Golden Flashes @ Sacramento State Hornets|2026-10-31T02:30:00Z": {
    "block": {
     "away": "Kent State Golden Flashes",
@@ -9849,6 +9886,40 @@
    ],
    "matchup": "Miami (OH) RedHawks @ UMass Minutemen",
    "sha256": "58191336b9b135420e49a836c20701cd4b958b1002795072cd260b613d3af292",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Miami (OH) RedHawks @ Western Michigan Broncos|2026-11-25T00:00:00Z": {
+   "block": {
+    "away": "Miami (OH) RedHawks",
+    "best_book": "circasports",
+    "best_price": 230,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 1.318,
+    "fair_away": 0.29984,
+    "fair_home": 0.70016,
+    "fair_side": 0.29984,
+    "home": "Western Michigan Broncos",
+    "kickoff_utc": "2026-11-25T00:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Miami (OH) RedHawks @ Western Michigan Broncos",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.223,
+    "relative_price_discount": -0.0106470106,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Miami (OH) RedHawks",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261123T183721Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-24T00:37:23Z",
+   "kickoff_utc": "2026-11-25T00:00:00Z",
+   "matchup": "Miami (OH) RedHawks @ Western Michigan Broncos",
+   "sha256": "3fd8c93dbcb6dcaac5eac607cae42a3d7af22844dc2d2bcf9366fc7f543a33c7",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Miami Hurricanes @ North Carolina Tar Heels|2026-10-31T23:30:00Z": {
@@ -22110,6 +22181,43 @@
    ],
    "matchup": "CIN @ MIA",
    "sha256": "ba9c8a7a2d4bce3964897230690cbd92a95404c90f79382e7439cdd55911cb77",
+   "sport": "nfl"
+  },
+  "fp-v0.4|nfl|CIN @ WAS|2026-11-24T01:15:00Z": {
+   "block": {
+    "away": "Cincinnati Bengals",
+    "best_book": "circasports",
+    "best_price": -285,
+    "books_at_best": 7,
+    "clv_pts": null,
+    "eff_overround_pts": 3.351,
+    "fair_away": 0.71633,
+    "fair_home": 0.28367,
+    "fair_side": 0.71633,
+    "home": "Washington Commanders",
+    "kickoff_utc": "2026-11-24T01:15:00Z",
+    "league": "NFL",
+    "matchup": "CIN @ WAS",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": {
+     "book": "betus",
+     "price": -285
+    },
+    "raw_overround_pts": 3.988,
+    "relative_price_discount": -0.0334082211,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Cincinnati Bengals",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261122T193723Z.json",
+    "t24_hours_before_kickoff": 29.63
+   },
+   "committed_utc": "2026-11-24T00:37:23Z",
+   "kickoff_utc": "2026-11-24T01:15:00Z",
+   "matchup": "CIN @ WAS",
+   "sha256": "ffa232d5cf9d9f3c97952e38986e19e05f96d06b204858b2778793fa42eaca63",
    "sport": "nfl"
   },
   "fp-v0.4|nfl|CLE @ JAX|2026-09-13T17:00:00Z": {

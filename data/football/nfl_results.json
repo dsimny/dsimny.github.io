@@ -3083,14 +3083,33 @@
    "away": "CIN",
    "away_abbr": "CIN",
    "away_name": "Cincinnati Bengals",
-   "away_score": null,
+   "away_score": 20,
    "espn_event_id": "401873078",
-   "final": false,
+   "final": true,
    "home": "WAS",
    "home_abbr": "WSH",
    "home_name": "Washington Commanders",
-   "home_score": null,
+   "home_score": 22,
    "kickoff_utc": "2026-11-24T01:15:00Z",
+   "margin": 2,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_FINAL",
+   "total": 42
+  },
+  "401873079": {
+   "away": "GB",
+   "away_abbr": "GB",
+   "away_name": "Green Bay Packers",
+   "away_score": null,
+   "espn_event_id": "401873079",
+   "final": false,
+   "home": "LA",
+   "home_abbr": "LAR",
+   "home_name": "Los Angeles Rams",
+   "home_score": null,
+   "kickoff_utc": "2026-11-26T01:00:00Z",
    "margin": null,
    "season_slug": "regular-season",
    "season_type": 2,
@@ -4011,5 +4030,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-23T22:25:31Z"
+ "updated_utc": "2026-11-24T20:58:20Z"
 }

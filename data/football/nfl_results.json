@@ -3117,6 +3117,63 @@
    "status": "STATUS_SCHEDULED",
    "total": null
   },
+  "401873080": {
+   "away": "PHI",
+   "away_abbr": "PHI",
+   "away_name": "Philadelphia Eagles",
+   "away_score": null,
+   "espn_event_id": "401873080",
+   "final": false,
+   "home": "DAL",
+   "home_abbr": "DAL",
+   "home_name": "Dallas Cowboys",
+   "home_score": null,
+   "kickoff_utc": "2026-11-26T21:30:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401873081": {
+   "away": "CHI",
+   "away_abbr": "CHI",
+   "away_name": "Chicago Bears",
+   "away_score": null,
+   "espn_event_id": "401873081",
+   "final": false,
+   "home": "DET",
+   "home_abbr": "DET",
+   "home_name": "Detroit Lions",
+   "home_score": null,
+   "kickoff_utc": "2026-11-26T18:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
+  "401873082": {
+   "away": "KC",
+   "away_abbr": "KC",
+   "away_name": "Kansas City Chiefs",
+   "away_score": null,
+   "espn_event_id": "401873082",
+   "final": false,
+   "home": "BUF",
+   "home_abbr": "BUF",
+   "home_name": "Buffalo Bills",
+   "home_score": null,
+   "kickoff_utc": "2026-11-27T01:20:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401873272": {
    "away": "DET",
    "away_abbr": "DET",
@@ -4030,5 +4087,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-24T20:58:20Z"
+ "updated_utc": "2026-11-25T20:20:42Z"
 }

@@ -3915,6 +3915,25 @@
    "status": "STATUS_FINAL",
    "total": 55
   },
+  "401856879": {
+   "away": "TCU Horned Frogs",
+   "away_abbr": "TCU",
+   "away_key": "tcuhornedfrogs",
+   "away_score": null,
+   "espn_event_id": "401856879",
+   "final": false,
+   "home": "Texas Tech Red Raiders",
+   "home_abbr": "TTU",
+   "home_key": "texastechredraiders",
+   "home_score": null,
+   "kickoff_utc": "2026-11-27T01:00:00Z",
+   "margin": null,
+   "season_slug": "regular-season",
+   "season_type": 2,
+   "season_year": 2026,
+   "status": "STATUS_SCHEDULED",
+   "total": null
+  },
   "401856881": {
    "away": "Oklahoma State Cowboys",
    "away_abbr": "OKST",
@@ -13324,39 +13343,39 @@
    "away": "Kent State Golden Flashes",
    "away_abbr": "KENT",
    "away_key": "kentstategoldenflashes",
-   "away_score": null,
+   "away_score": 12,
    "espn_event_id": "401866470",
-   "final": false,
+   "final": true,
    "home": "Eastern Michigan Eagles",
    "home_abbr": "EMU",
    "home_key": "easternmichiganeagles",
-   "home_score": null,
+   "home_score": 17,
    "kickoff_utc": "2026-11-25T00:00:00Z",
-   "margin": null,
+   "margin": 5,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 29
   },
   "401866471": {
    "away": "Miami (OH) RedHawks",
    "away_abbr": "M-OH",
    "away_key": "miamiohredhawks",
-   "away_score": null,
+   "away_score": 28,
    "espn_event_id": "401866471",
-   "final": false,
+   "final": true,
    "home": "Western Michigan Broncos",
    "home_abbr": "WMU",
    "home_key": "westernmichiganbroncos",
-   "home_score": null,
+   "home_score": 24,
    "kickoff_utc": "2026-11-25T00:00:00Z",
-   "margin": null,
+   "margin": -4,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 52
   },
   "401866476": {
    "away": "Miami (OH) RedHawks",
@@ -15658,5 +15677,5 @@
    "total": 75
   }
  },
- "updated_utc": "2026-11-24T20:58:19Z"
+ "updated_utc": "2026-11-25T20:20:40Z"
 }

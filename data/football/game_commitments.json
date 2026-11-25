@@ -21953,7 +21953,8 @@
    "committed_utc": "2026-11-25T12:35:34Z",
    "kickoff_utc": "2026-11-26T18:00:00Z",
    "later_disagreements": [
-    "964e28878f9bdc035e3a59dc2bc4db4a313dadd9eb3cfaef937f3e3496a5f80d"
+    "964e28878f9bdc035e3a59dc2bc4db4a313dadd9eb3cfaef937f3e3496a5f80d",
+    "a036ae4e44ebad2d2de15f4175c4fa28682a3491dfc0c125bcf37a1444a8bc47"
    ],
    "matchup": "CHI @ DET",
    "sha256": "955c2b5a537586795611434f320c9b9006103e2c8f5fed08c875c1e5b182f562",
@@ -23311,6 +23312,43 @@
    "sha256": "c816abce56ae579c0800b4a63367c0451a5f758cfcded2da33ca4d581a144f06",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|KC @ BUF|2026-11-27T01:20:00Z": {
+   "block": {
+    "away": "Kansas City Chiefs",
+    "best_book": "draftkings",
+    "best_price": -148,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.156,
+    "fair_away": 0.41794,
+    "fair_home": 0.58206,
+    "fair_side": 0.58206,
+    "home": "Buffalo Bills",
+    "kickoff_utc": "2026-11-27T01:20:00Z",
+    "league": "NFL",
+    "matchup": "KC @ BUF",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": {
+     "book": "bovada",
+     "price": -147
+    },
+    "raw_overround_pts": 4.031,
+    "relative_price_discount": -0.0252751369,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Buffalo Bills",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261125T193723Z.json",
+    "t24_hours_before_kickoff": 29.71
+   },
+   "committed_utc": "2026-11-25T19:37:26Z",
+   "kickoff_utc": "2026-11-27T01:20:00Z",
+   "matchup": "KC @ BUF",
+   "sha256": "b1cecc96fdb58174a967a6bde62fcd38a98a47c3fa09c0af91611a4d14025685",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|KC @ DEN|2026-11-01T21:25:00Z": {
    "block": {
     "away": "Kansas City Chiefs",
@@ -24442,6 +24480,9 @@
    },
    "committed_utc": "2026-11-25T15:37:26Z",
    "kickoff_utc": "2026-11-26T20:30:00Z",
+   "later_disagreements": [
+    "f31db87fca648e1ec5a626ebfd9a53d45729ae36a89791ac40e2169efc4d3fe0"
+   ],
    "matchup": "PHI @ DAL",
    "sha256": "60efcbe3e49e5acb7142132807bc1ab6bd1b2d9c0637b4fdcd40d10e1763c878",
    "sport": "nfl"
@@ -24476,6 +24517,9 @@
    },
    "committed_utc": "2026-11-25T15:37:26Z",
    "kickoff_utc": "2026-11-26T21:30:00Z",
+   "later_disagreements": [
+    "f4cda491f75d55bc0b9804711d449b7f381a75ec7d9b0c9110ac5ed2143c6ff4"
+   ],
    "matchup": "PHI @ DAL",
    "sha256": "201c891eecb1067df61f8fd279d60c9eb8c410eacc8fa973af7c974192e3f059",
    "sport": "nfl"

@@ -21922,6 +21922,40 @@
    "sha256": "6fe5fafa54544e61125058364cda070169222707aac61f130b9871d47a5cbd1b",
    "sport": "nfl"
   },
+  "fp-v0.4|nfl|CHI @ DET|2026-11-26T18:00:00Z": {
+   "block": {
+    "away": "Chicago Bears",
+    "best_book": "betrivers",
+    "best_price": 110,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 1.747,
+    "fair_away": 0.52174,
+    "fair_home": 0.47826,
+    "fair_side": 0.47826,
+    "home": "Detroit Lions",
+    "kickoff_utc": "2026-11-26T18:00:00Z",
+    "league": "NFL",
+    "matchup": "CHI @ DET",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 4.545,
+    "relative_price_discount": 0.0043290043,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Detroit Lions",
+    "sport": "nfl",
+    "t24_capture": "nfl_20261125T123531Z.json",
+    "t24_hours_before_kickoff": 29.41
+   },
+   "committed_utc": "2026-11-25T12:35:34Z",
+   "kickoff_utc": "2026-11-26T18:00:00Z",
+   "matchup": "CHI @ DET",
+   "sha256": "955c2b5a537586795611434f320c9b9006103e2c8f5fed08c875c1e5b182f562",
+   "sport": "nfl"
+  },
   "fp-v0.4|nfl|CHI @ GB|2026-10-11T17:00:00Z": {
    "block": {
     "away": "Chicago Bears",

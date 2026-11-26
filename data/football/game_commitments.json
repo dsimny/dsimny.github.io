@@ -10633,6 +10633,40 @@
    "sha256": "9c42785acc250acf60ecfa716b312e58759b5c2f8ac8697e933972588305694b",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Mississippi State Bulldogs @ Ole Miss Rebels|2026-11-27T17:00:00Z": {
+   "block": {
+    "away": "Mississippi State Bulldogs",
+    "best_book": "fanduel",
+    "best_price": 760,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.537,
+    "fair_away": 0.12429,
+    "fair_home": 0.87571,
+    "fair_side": 0.12429,
+    "home": "Ole Miss Rebels",
+    "kickoff_utc": "2026-11-27T17:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Mississippi State Bulldogs @ Ole Miss Rebels",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.812,
+    "relative_price_discount": 0.0644820296,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Mississippi State Bulldogs",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T113732Z.json",
+    "t24_hours_before_kickoff": 29.37
+   },
+   "committed_utc": "2026-11-26T11:37:38Z",
+   "kickoff_utc": "2026-11-27T17:00:00Z",
+   "matchup": "Mississippi State Bulldogs @ Ole Miss Rebels",
+   "sha256": "dd119c8ae058ef95198b9041f430cced27024be71903a5b77431ab869feacd16",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Mississippi State Bulldogs @ South Carolina Gamecocks|2026-09-19T20:15:00Z": {
    "block": {
     "away": "Mississippi State Bulldogs",
@@ -11255,6 +11289,43 @@
    ],
    "matchup": "Nebraska Cornhuskers @ Illinois Fighting Illini",
    "sha256": "af3abd6418b3cb0eac8a5c483de7176500530238ea1c998878b627a5b3146cde",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Nebraska Cornhuskers @ Iowa Hawkeyes|2026-11-27T17:00:00Z": {
+   "block": {
+    "away": "Nebraska Cornhuskers",
+    "best_book": "circasports",
+    "best_price": 175,
+    "books_at_best": 7,
+    "clv_pts": null,
+    "eff_overround_pts": 3.03,
+    "fair_away": 0.35527,
+    "fair_home": 0.64473,
+    "fair_side": 0.35527,
+    "home": "Iowa Hawkeyes",
+    "kickoff_utc": "2026-11-27T17:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Nebraska Cornhuskers @ Iowa Hawkeyes",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 185
+    },
+    "raw_overround_pts": 4.25,
+    "relative_price_discount": -0.0235469449,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Nebraska Cornhuskers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T113732Z.json",
+    "t24_hours_before_kickoff": 29.37
+   },
+   "committed_utc": "2026-11-26T11:37:38Z",
+   "kickoff_utc": "2026-11-27T17:00:00Z",
+   "matchup": "Nebraska Cornhuskers @ Iowa Hawkeyes",
+   "sha256": "7b1ddf76718025487549784b257e8aa5ea0d13c394b9938e334280620f51e81d",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Nebraska Cornhuskers @ Oregon Ducks|2026-10-17T16:00:00Z": {
@@ -17389,6 +17460,43 @@
    "sha256": "6335408a2c9132bf3358921253a9db0e8699e2bb505bf5afc30b09e5f19ccc6a",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Toledo Rockets @ Ohio Bobcats|2026-11-27T17:00:00Z": {
+   "block": {
+    "away": "Toledo Rockets",
+    "best_book": "fanduel",
+    "best_price": -152,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.608,
+    "fair_away": 0.58299,
+    "fair_home": 0.41701,
+    "fair_side": 0.58299,
+    "home": "Ohio Bobcats",
+    "kickoff_utc": "2026-11-27T17:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Toledo Rockets @ Ohio Bobcats",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "lowvig",
+     "price": -150
+    },
+    "raw_overround_pts": 4.263,
+    "relative_price_discount": -0.0346178677,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Toledo Rockets",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T113732Z.json",
+    "t24_hours_before_kickoff": 29.37
+   },
+   "committed_utc": "2026-11-26T11:37:38Z",
+   "kickoff_utc": "2026-11-27T17:00:00Z",
+   "matchup": "Toledo Rockets @ Ohio Bobcats",
+   "sha256": "439dec3deb55ed29e6e36903e24b34fd78e095fbeb7c02ce311d25230deda082",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Toledo Rockets @ Sacramento State Hornets|2026-11-05T00:00:00Z": {
    "block": {
     "away": "Toledo Rockets",
@@ -17899,6 +18007,40 @@
    ],
    "matchup": "Tulsa Golden Hurricane @ Tulane Green Wave",
    "sha256": "43a1cff68ae09bf948a92ab53f6e230184955e748da696f554016ce5d47edd9d",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Tulsa Golden Hurricane @ UTSA Roadrunners|2026-11-27T17:00:00Z": {
+   "block": {
+    "away": "Tulsa Golden Hurricane",
+    "best_book": "fanduel",
+    "best_price": -110,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.6,
+    "fair_away": 0.49346,
+    "fair_home": 0.50654,
+    "fair_side": 0.50654,
+    "home": "UTSA Roadrunners",
+    "kickoff_utc": "2026-11-27T17:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Tulsa Golden Hurricane @ UTSA Roadrunners",
+    "move_pts": null,
+    "n_books": 8,
+    "offshore_best": null,
+    "raw_overround_pts": 4.515,
+    "relative_price_discount": -0.0340904723,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "UTSA Roadrunners",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T113732Z.json",
+    "t24_hours_before_kickoff": 29.37
+   },
+   "committed_utc": "2026-11-26T11:37:38Z",
+   "kickoff_utc": "2026-11-27T17:00:00Z",
+   "matchup": "Tulsa Golden Hurricane @ UTSA Roadrunners",
+   "sha256": "b6bcd0bf0d6f67f0dfb79966de094fda05861a353995a5de6c952586ae389f7a",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|UAB Blazers @ Louisiana Ragin Cajuns|2026-09-20T00:00:00Z": {

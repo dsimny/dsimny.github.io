@@ -679,6 +679,40 @@
    "sha256": "5977c6ee9691bad6077a204ddb2f6f784dd683915a3541ddb7a1304b8562430e",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Appalachian State Mountaineers @ South Alabama Jaguars|2026-11-27T20:00:00Z": {
+   "block": {
+    "away": "Appalachian State Mountaineers",
+    "best_book": "circasports",
+    "best_price": 145,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.355,
+    "fair_away": 0.40431,
+    "fair_home": 0.59569,
+    "fair_side": 0.40431,
+    "home": "South Alabama Jaguars",
+    "kickoff_utc": "2026-11-27T20:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Appalachian State Mountaineers @ South Alabama Jaguars",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 3.922,
+    "relative_price_discount": -0.0095238095,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Appalachian State Mountaineers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T143723Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-26T14:37:28Z",
+   "kickoff_utc": "2026-11-27T20:00:00Z",
+   "matchup": "Appalachian State Mountaineers @ South Alabama Jaguars",
+   "sha256": "884a75291ccf32e1e5ad7e1afacce26b525683b91650fbf6f904fdf64b880a7e",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Arizona State Sun Devils @ BYU Cougars|2026-10-31T19:30:00Z": {
    "block": {
     "away": "Arizona State Sun Devils",
@@ -5003,6 +5037,40 @@
    "kickoff_utc": "2026-11-15T00:15:00Z",
    "matchup": "Florida Atlantic Owls @ Tulsa Golden Hurricane",
    "sha256": "a8e1fcad80fe460ad7f4872b7220d942f4c7fa83e538647c1f8ea99c0a66ac00",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Florida Gators @ Florida State Seminoles|2026-11-27T20:30:00Z": {
+   "block": {
+    "away": "Florida Gators",
+    "best_book": "circasports",
+    "best_price": 205,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.018,
+    "fair_away": 0.67742,
+    "fair_home": 0.32258,
+    "fair_side": 0.32258,
+    "home": "Florida State Seminoles",
+    "kickoff_utc": "2026-11-27T20:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Florida Gators @ Florida State Seminoles",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.202,
+    "relative_price_discount": -0.0163934426,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Florida State Seminoles",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T143723Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-26T14:37:28Z",
+   "kickoff_utc": "2026-11-27T20:30:00Z",
+   "matchup": "Florida Gators @ Florida State Seminoles",
+   "sha256": "ded0b20c7eb2813383ddf37fa7dd8386368e17ce7663692bb71c8bc46122d2b2",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Florida Gators @ Georgia Bulldogs|2026-10-31T16:00:00Z": {
@@ -10663,6 +10731,9 @@
    },
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
+   "later_disagreements": [
+    "9c6c15a1e04d48c2824297d1b09620f719f7fc76a4bd26044183657b6a041f6d"
+   ],
    "matchup": "Mississippi State Bulldogs @ Ole Miss Rebels",
    "sha256": "dd119c8ae058ef95198b9041f430cced27024be71903a5b77431ab869feacd16",
    "sport": "ncaaf"
@@ -11324,6 +11395,9 @@
    },
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
+   "later_disagreements": [
+    "dbfb7bfd5f482f6fcc21119863250f88e6f587c27bb35d6a81fced91ee26645d"
+   ],
    "matchup": "Nebraska Cornhuskers @ Iowa Hawkeyes",
    "sha256": "7b1ddf76718025487549784b257e8aa5ea0d13c394b9938e334280620f51e81d",
    "sport": "ncaaf"
@@ -12268,6 +12342,40 @@
    "kickoff_utc": "2026-11-15T04:00:00Z",
    "matchup": "North Dakota State Bison @ Hawaii Rainbow Warriors",
    "sha256": "94fe5a48d224e1f58917903930283e3c0026163e4ab5c07c89fe4542af30239b",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|North Dakota State Bison @ San Jose State Spartans|2026-11-27T20:30:00Z": {
+   "block": {
+    "away": "North Dakota State Bison",
+    "best_book": "williamhill_us",
+    "best_price": 280,
+    "books_at_best": 7,
+    "clv_pts": null,
+    "eff_overround_pts": 3.06,
+    "fair_away": 0.74407,
+    "fair_home": 0.25593,
+    "fair_side": 0.25593,
+    "home": "San Jose State Spartans",
+    "kickoff_utc": "2026-11-27T20:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "North Dakota State Bison @ San Jose State Spartans",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.195,
+    "relative_price_discount": -0.0282377292,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "San Jose State Spartans",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T143723Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-26T14:37:28Z",
+   "kickoff_utc": "2026-11-27T20:30:00Z",
+   "matchup": "North Dakota State Bison @ San Jose State Spartans",
+   "sha256": "eddd3eb6166565d3f428b58ffc9fcaa1b2a12906965457c26616dc7921e10dab",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|North Dakota State Bison @ UNLV Rebels|2026-10-10T23:00:00Z": {
@@ -16366,6 +16474,40 @@
    "sha256": "338c519af824d7bb284b8f5848ae96e1df567d4f13c0384d515606284db590a9",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Temple Owls @ Memphis Tigers|2026-11-27T20:30:00Z": {
+   "block": {
+    "away": "Temple Owls",
+    "best_book": "circasports",
+    "best_price": 725,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 2.597,
+    "fair_away": 0.12086,
+    "fair_home": 0.87914,
+    "fair_side": 0.12086,
+    "home": "Memphis Tigers",
+    "kickoff_utc": "2026-11-27T20:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Temple Owls @ Memphis Tigers",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.269,
+    "relative_price_discount": -0.0028787879,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Temple Owls",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T143723Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-26T14:37:28Z",
+   "kickoff_utc": "2026-11-27T20:30:00Z",
+   "matchup": "Temple Owls @ Memphis Tigers",
+   "sha256": "d43616030942212ad4f03b74e13747e599f5c27216d3173f78537464f042cba5",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Temple Owls @ Toledo Rockets|2026-09-19T19:00:00Z": {
    "block": {
     "away": "Temple Owls",
@@ -17493,6 +17635,9 @@
    },
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
+   "later_disagreements": [
+    "1e001c8e767ca045580b13418f911b61e55aa01a476faffdc09cd7f7b0725fac"
+   ],
    "matchup": "Toledo Rockets @ Ohio Bobcats",
    "sha256": "439dec3deb55ed29e6e36903e24b34fd78e095fbeb7c02ce311d25230deda082",
    "sport": "ncaaf"
@@ -18039,6 +18184,9 @@
    },
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
+   "later_disagreements": [
+    "8bfa0fc604ca1b9c4b9e66040758756735bb42d9a91ce625a531515e9086f0fe"
+   ],
    "matchup": "Tulsa Golden Hurricane @ UTSA Roadrunners",
    "sha256": "b6bcd0bf0d6f67f0dfb79966de094fda05861a353995a5de6c952586ae389f7a",
    "sport": "ncaaf"

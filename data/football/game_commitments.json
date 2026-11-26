@@ -35,7 +35,8 @@
    "committed_utc": "2026-11-26T15:37:33Z",
    "kickoff_utc": "2026-11-27T21:30:00Z",
    "later_disagreements": [
-    "a35806b51ee08f792d3f0f4cf0d4e687ed299a96636cdfc35c658089f6bfa368"
+    "a35806b51ee08f792d3f0f4cf0d4e687ed299a96636cdfc35c658089f6bfa368",
+    "8d35b6bd6dc60c244bd69b8edd21a3ab486cb762c690c8898c3773d752aadb61"
    ],
    "matchup": "Air Force Falcons @ New Mexico Lobos",
    "sha256": "c5b83449786aeb6e459306970c8fbb206bcb21419c691da00bd1b6600e83c10c",
@@ -751,7 +752,8 @@
    "kickoff_utc": "2026-11-27T20:00:00Z",
    "later_disagreements": [
     "c1ef8bf4c2c3e539b703a3b552e55296532c7ddaae9c457aad18085c70b222ca",
-    "e92cd9ef3bb60ec51e723f580f778c44d7d866eb248dc7a2843adb75eeee924a"
+    "e92cd9ef3bb60ec51e723f580f778c44d7d866eb248dc7a2843adb75eeee924a",
+    "60e59e99fa7fe739cb59a4ef26c973aa677ad26462a4810bf2198a9d39e30a9c"
    ],
    "matchup": "Appalachian State Mountaineers @ South Alabama Jaguars",
    "sha256": "884a75291ccf32e1e5ad7e1afacce26b525683b91650fbf6f904fdf64b880a7e",
@@ -5152,7 +5154,8 @@
    "kickoff_utc": "2026-11-27T20:30:00Z",
    "later_disagreements": [
     "752f29a056646a2bda41341db4725ad4f8d6e17ff8af99c597c706555c8d3968",
-    "af8997f8ceb301b4b92f4c3456c204877c2046ba227014427f1b01837e5c5760"
+    "af8997f8ceb301b4b92f4c3456c204877c2046ba227014427f1b01837e5c5760",
+    "65e9eccdcb2042df6ca5a7bcadc3e4102eb6fc5104aa5db2ca97cc3d314abbfa"
    ],
    "matchup": "Florida Gators @ Florida State Seminoles",
    "sha256": "ded0b20c7eb2813383ddf37fa7dd8386368e17ce7663692bb71c8bc46122d2b2",
@@ -12463,7 +12466,8 @@
    "kickoff_utc": "2026-11-27T20:30:00Z",
    "later_disagreements": [
     "a56724d964e934340126d5e989ef55e1539d91a3d8f88e3e09bc5e3bd796c97b",
-    "17e08bf45b08e1912efbb9c45891b2e97d5000a7f0dcc610761e4cd01718faa5"
+    "17e08bf45b08e1912efbb9c45891b2e97d5000a7f0dcc610761e4cd01718faa5",
+    "20e6896f275a85bf9f681e7fd815d7e63139e86406964a72672f0a420b24e533"
    ],
    "matchup": "North Dakota State Bison @ San Jose State Spartans",
    "sha256": "eddd3eb6166565d3f428b58ffc9fcaa1b2a12906965457c26616dc7921e10dab",
@@ -16597,7 +16601,8 @@
    "kickoff_utc": "2026-11-27T20:30:00Z",
    "later_disagreements": [
     "ced47225637b213cbc3ab4817c1a40af560e38a21fe380b4cd054b3b01238807",
-    "0250a6411b295561a9835ca752abca94c794ee00ed980680e9be6990e127bb88"
+    "0250a6411b295561a9835ca752abca94c794ee00ed980680e9be6990e127bb88",
+    "0708ebf1435741f7127ff5be6914a241b8db62849e71c5368dc3bca6aada9b6d"
    ],
    "matchup": "Temple Owls @ Memphis Tigers",
    "sha256": "d43616030942212ad4f03b74e13747e599f5c27216d3173f78537464f042cba5",

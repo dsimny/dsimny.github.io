@@ -36,7 +36,8 @@
    "kickoff_utc": "2026-11-27T21:30:00Z",
    "later_disagreements": [
     "a35806b51ee08f792d3f0f4cf0d4e687ed299a96636cdfc35c658089f6bfa368",
-    "8d35b6bd6dc60c244bd69b8edd21a3ab486cb762c690c8898c3773d752aadb61"
+    "8d35b6bd6dc60c244bd69b8edd21a3ab486cb762c690c8898c3773d752aadb61",
+    "78a8861b5b2eb6474546db9c46629be25343bd8fa465dcf0d08236714efb0262"
    ],
    "matchup": "Air Force Falcons @ New Mexico Lobos",
    "sha256": "c5b83449786aeb6e459306970c8fbb206bcb21419c691da00bd1b6600e83c10c",
@@ -5155,7 +5156,8 @@
    "later_disagreements": [
     "752f29a056646a2bda41341db4725ad4f8d6e17ff8af99c597c706555c8d3968",
     "af8997f8ceb301b4b92f4c3456c204877c2046ba227014427f1b01837e5c5760",
-    "65e9eccdcb2042df6ca5a7bcadc3e4102eb6fc5104aa5db2ca97cc3d314abbfa"
+    "65e9eccdcb2042df6ca5a7bcadc3e4102eb6fc5104aa5db2ca97cc3d314abbfa",
+    "06f92dbaaa6e1055bef2b72ba6225d526d9b6f496e9ee7e7099975db27d1abc2"
    ],
    "matchup": "Florida Gators @ Florida State Seminoles",
    "sha256": "ded0b20c7eb2813383ddf37fa7dd8386368e17ce7663692bb71c8bc46122d2b2",
@@ -12467,7 +12469,8 @@
    "later_disagreements": [
     "a56724d964e934340126d5e989ef55e1539d91a3d8f88e3e09bc5e3bd796c97b",
     "17e08bf45b08e1912efbb9c45891b2e97d5000a7f0dcc610761e4cd01718faa5",
-    "20e6896f275a85bf9f681e7fd815d7e63139e86406964a72672f0a420b24e533"
+    "20e6896f275a85bf9f681e7fd815d7e63139e86406964a72672f0a420b24e533",
+    "7c3aac54b81db431ade605c97b74798e36161624262e6710aa2e16943229395b"
    ],
    "matchup": "North Dakota State Bison @ San Jose State Spartans",
    "sha256": "eddd3eb6166565d3f428b58ffc9fcaa1b2a12906965457c26616dc7921e10dab",
@@ -16602,7 +16605,8 @@
    "later_disagreements": [
     "ced47225637b213cbc3ab4817c1a40af560e38a21fe380b4cd054b3b01238807",
     "0250a6411b295561a9835ca752abca94c794ee00ed980680e9be6990e127bb88",
-    "0708ebf1435741f7127ff5be6914a241b8db62849e71c5368dc3bca6aada9b6d"
+    "0708ebf1435741f7127ff5be6914a241b8db62849e71c5368dc3bca6aada9b6d",
+    "ce96e38f338207640a7a3079282529b26b8c066bef524dba2b5c15490ca9a28d"
    ],
    "matchup": "Temple Owls @ Memphis Tigers",
    "sha256": "d43616030942212ad4f03b74e13747e599f5c27216d3173f78537464f042cba5",
@@ -17309,6 +17313,40 @@
    ],
    "matchup": "Texas Longhorns @ Oklahoma Sooners",
    "sha256": "348879ce0f4e1b9e0dee2cbd96725a76ac8a4c73803df3f430cf3e89792052d1",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Texas Longhorns @ Texas A&M Aggies|2026-11-28T00:30:00Z": {
+   "block": {
+    "away": "Texas Longhorns",
+    "best_book": "circasports",
+    "best_price": -440,
+    "books_at_best": 4,
+    "clv_pts": null,
+    "eff_overround_pts": 3.221,
+    "fair_away": 0.79105,
+    "fair_home": 0.20895,
+    "fair_side": 0.79105,
+    "home": "Texas A&M Aggies",
+    "kickoff_utc": "2026-11-28T00:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Texas Longhorns @ Texas A&M Aggies",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.04,
+    "relative_price_discount": -0.0300417294,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Texas Longhorns",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T203720Z.json",
+    "t24_hours_before_kickoff": 27.88
+   },
+   "committed_utc": "2026-11-26T20:37:25Z",
+   "kickoff_utc": "2026-11-28T00:30:00Z",
+   "matchup": "Texas Longhorns @ Texas A&M Aggies",
+   "sha256": "51994273f7080b303c3a523b4ec286644daa264ba2842d784b492a49666830e2",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Texas Southern Tigers @ UTEP Miners|2026-09-13T01:00:00Z": {
@@ -21062,6 +21100,40 @@
    ],
    "matchup": "West Virginia Mountaineers @ Texas Tech Red Raiders",
    "sha256": "8b8690d34e62cf7813cb2bffecf2e4c094546bb62d2e27446bc8c1b07c9d919e",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|West Virginia Mountaineers @ Utah Utes|2026-11-28T02:00:00Z": {
+   "block": {
+    "away": "West Virginia Mountaineers",
+    "best_book": "circasports",
+    "best_price": 1600,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.036,
+    "fair_away": 0.06874,
+    "fair_home": 0.93126,
+    "fair_side": 0.06874,
+    "home": "Utah Utes",
+    "kickoff_utc": "2026-11-28T02:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "West Virginia Mountaineers @ Utah Utes",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": null,
+    "raw_overround_pts": 3.917,
+    "relative_price_discount": 0.1442125237,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "West Virginia Mountaineers",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T203720Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-26T20:37:25Z",
+   "kickoff_utc": "2026-11-28T02:00:00Z",
+   "matchup": "West Virginia Mountaineers @ Utah Utes",
+   "sha256": "633d6521c42ea4d41432c4ae5c3e451398da724c724d6c5edddccd075439b85f",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Western Kentucky Hilltoppers @ Middle Tennessee Blue Raiders|2026-11-07T20:30:00Z": {

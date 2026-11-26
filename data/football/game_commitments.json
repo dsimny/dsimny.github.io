@@ -1,6 +1,43 @@
 {
  "_note": "Per-game commitments, append-only (spec s.4 step 0b). Each game's layer-1 block is fingerprinted the first time it becomes evaluable at its own T-24, and NEVER revised - a later capture does not get to change an evaluation that has already been published. This is what makes the weekly play a commitment rather than a running opinion.",
  "games": {
+  "fp-v0.4|ncaaf|Air Force Falcons @ New Mexico Lobos|2026-11-27T21:30:00Z": {
+   "block": {
+    "away": "Air Force Falcons",
+    "best_book": "betrivers",
+    "best_price": 215,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 3.175,
+    "fair_away": 0.30991,
+    "fair_home": 0.69009,
+    "fair_side": 0.30991,
+    "home": "New Mexico Lobos",
+    "kickoff_utc": "2026-11-27T21:30:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Air Force Falcons @ New Mexico Lobos",
+    "move_pts": null,
+    "n_books": 11,
+    "offshore_best": {
+     "book": "mybookieag",
+     "price": 224
+    },
+    "raw_overround_pts": 4.089,
+    "relative_price_discount": -0.0243684328,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Air Force Falcons",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T153727Z.json",
+    "t24_hours_before_kickoff": 29.88
+   },
+   "committed_utc": "2026-11-26T15:37:33Z",
+   "kickoff_utc": "2026-11-27T21:30:00Z",
+   "matchup": "Air Force Falcons @ New Mexico Lobos",
+   "sha256": "c5b83449786aeb6e459306970c8fbb206bcb21419c691da00bd1b6600e83c10c",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Air Force Falcons @ Northern Illinois Huskies|2026-10-10T23:30:00Z": {
    "block": {
     "away": "Air Force Falcons",
@@ -709,6 +746,9 @@
    },
    "committed_utc": "2026-11-26T14:37:28Z",
    "kickoff_utc": "2026-11-27T20:00:00Z",
+   "later_disagreements": [
+    "c1ef8bf4c2c3e539b703a3b552e55296532c7ddaae9c457aad18085c70b222ca"
+   ],
    "matchup": "Appalachian State Mountaineers @ South Alabama Jaguars",
    "sha256": "884a75291ccf32e1e5ad7e1afacce26b525683b91650fbf6f904fdf64b880a7e",
    "sport": "ncaaf"
@@ -2731,6 +2771,43 @@
    ],
    "matchup": "Bowling Green Falcons @ Western Michigan Broncos",
    "sha256": "f81d6ebe8b374a9688ab5f35bebdc9bf13c83b001a42f4b2cddd762fb8b33a62",
+   "sport": "ncaaf"
+  },
+  "fp-v0.4|ncaaf|Buffalo Bulls @ Akron Zips|2026-11-27T17:00:00Z": {
+   "block": {
+    "away": "Buffalo Bulls",
+    "best_book": "circasports",
+    "best_price": 250,
+    "books_at_best": 5,
+    "clv_pts": null,
+    "eff_overround_pts": 1.905,
+    "fair_away": 0.71831,
+    "fair_home": 0.28169,
+    "fair_side": 0.28169,
+    "home": "Akron Zips",
+    "kickoff_utc": "2026-11-27T17:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Buffalo Bulls @ Akron Zips",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": {
+     "book": "bovada",
+     "price": 255
+    },
+    "raw_overround_pts": 4.412,
+    "relative_price_discount": -0.0142857143,
+    "selection_eligible": true,
+    "selection_reason": "eligible",
+    "selection_version": "fp-v0.4",
+    "side": "Akron Zips",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261126T153727Z.json",
+    "t24_hours_before_kickoff": 25.38
+   },
+   "committed_utc": "2026-11-26T15:37:33Z",
+   "kickoff_utc": "2026-11-27T17:00:00Z",
+   "matchup": "Buffalo Bulls @ Akron Zips",
+   "sha256": "ef4bed1353e4d3ba2e76f8ef07028c25785e6393ac2c5dce132bb110773fd82d",
    "sport": "ncaaf"
   },
   "fp-v0.4|ncaaf|Buffalo Bulls @ Ball State Cardinals|2026-11-12T00:30:00Z": {
@@ -5069,6 +5146,9 @@
    },
    "committed_utc": "2026-11-26T14:37:28Z",
    "kickoff_utc": "2026-11-27T20:30:00Z",
+   "later_disagreements": [
+    "752f29a056646a2bda41341db4725ad4f8d6e17ff8af99c597c706555c8d3968"
+   ],
    "matchup": "Florida Gators @ Florida State Seminoles",
    "sha256": "ded0b20c7eb2813383ddf37fa7dd8386368e17ce7663692bb71c8bc46122d2b2",
    "sport": "ncaaf"
@@ -10732,7 +10812,8 @@
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
    "later_disagreements": [
-    "9c6c15a1e04d48c2824297d1b09620f719f7fc76a4bd26044183657b6a041f6d"
+    "9c6c15a1e04d48c2824297d1b09620f719f7fc76a4bd26044183657b6a041f6d",
+    "b1f09061176ceba73ea1006663405252bbd20cf4f075cce3369ad627c86d5941"
    ],
    "matchup": "Mississippi State Bulldogs @ Ole Miss Rebels",
    "sha256": "dd119c8ae058ef95198b9041f430cced27024be71903a5b77431ab869feacd16",
@@ -11396,7 +11477,8 @@
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
    "later_disagreements": [
-    "dbfb7bfd5f482f6fcc21119863250f88e6f587c27bb35d6a81fced91ee26645d"
+    "dbfb7bfd5f482f6fcc21119863250f88e6f587c27bb35d6a81fced91ee26645d",
+    "2138a80582c713f9e05f398e90178e2e9e4290d7f63b1c601a5186fdcceb79ae"
    ],
    "matchup": "Nebraska Cornhuskers @ Iowa Hawkeyes",
    "sha256": "7b1ddf76718025487549784b257e8aa5ea0d13c394b9938e334280620f51e81d",
@@ -12374,6 +12456,9 @@
    },
    "committed_utc": "2026-11-26T14:37:28Z",
    "kickoff_utc": "2026-11-27T20:30:00Z",
+   "later_disagreements": [
+    "a56724d964e934340126d5e989ef55e1539d91a3d8f88e3e09bc5e3bd796c97b"
+   ],
    "matchup": "North Dakota State Bison @ San Jose State Spartans",
    "sha256": "eddd3eb6166565d3f428b58ffc9fcaa1b2a12906965457c26616dc7921e10dab",
    "sport": "ncaaf"
@@ -16504,6 +16589,9 @@
    },
    "committed_utc": "2026-11-26T14:37:28Z",
    "kickoff_utc": "2026-11-27T20:30:00Z",
+   "later_disagreements": [
+    "ced47225637b213cbc3ab4817c1a40af560e38a21fe380b4cd054b3b01238807"
+   ],
    "matchup": "Temple Owls @ Memphis Tigers",
    "sha256": "d43616030942212ad4f03b74e13747e599f5c27216d3173f78537464f042cba5",
    "sport": "ncaaf"
@@ -17636,7 +17724,8 @@
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
    "later_disagreements": [
-    "1e001c8e767ca045580b13418f911b61e55aa01a476faffdc09cd7f7b0725fac"
+    "1e001c8e767ca045580b13418f911b61e55aa01a476faffdc09cd7f7b0725fac",
+    "2af51117992dfdde2cade8b140e339b70ce843c6c9a698251972fc477953030f"
    ],
    "matchup": "Toledo Rockets @ Ohio Bobcats",
    "sha256": "439dec3deb55ed29e6e36903e24b34fd78e095fbeb7c02ce311d25230deda082",
@@ -18185,7 +18274,8 @@
    "committed_utc": "2026-11-26T11:37:38Z",
    "kickoff_utc": "2026-11-27T17:00:00Z",
    "later_disagreements": [
-    "8bfa0fc604ca1b9c4b9e66040758756735bb42d9a91ce625a531515e9086f0fe"
+    "8bfa0fc604ca1b9c4b9e66040758756735bb42d9a91ce625a531515e9086f0fe",
+    "eee2e246a66a6c33720325494e6bebd7d0120382cd1d48839f1574d2ae0218cb"
    ],
    "matchup": "Tulsa Golden Hurricane @ UTSA Roadrunners",
    "sha256": "b6bcd0bf0d6f67f0dfb79966de094fda05861a353995a5de6c952586ae389f7a",

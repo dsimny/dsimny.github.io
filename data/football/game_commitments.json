@@ -1718,7 +1718,8 @@
    "kickoff_utc": "2026-11-29T00:30:00Z",
    "later_disagreements": [
     "4540cae936b4166a6507d0dc510d0b2e3083be0ac019565e53eaa3fb4920f524",
-    "a8cf4d1b78b86e0f244210e0509dc24d6bef5f39935b46c43d87a665258b2b44"
+    "a8cf4d1b78b86e0f244210e0509dc24d6bef5f39935b46c43d87a665258b2b44",
+    "21eeb49f4a6beea2faae463b88b8aad09d8df3a761297fbd5547bb50bff32b40"
    ],
    "matchup": "Auburn Tigers @ Alabama Crimson Tide",
    "sha256": "1e19468479d7bfa7ceedd096f5eb0e2a111c9ea8a1751126659578acbe89bdfc",
@@ -2523,7 +2524,8 @@
    "committed_utc": "2026-11-27T20:37:25Z",
    "kickoff_utc": "2026-11-29T02:30:00Z",
    "later_disagreements": [
-    "0dc050b10abbdcf0918c6821569856959244872aa4a80c4569dc376cdc0befc7"
+    "0dc050b10abbdcf0918c6821569856959244872aa4a80c4569dc376cdc0befc7",
+    "491f4f7b9addc33c3e185c7d9e8b2c4af36b4940f1e28c1f83b575ec4bff30d5"
    ],
    "matchup": "Baylor Bears @ Houston Cougars",
    "sha256": "272da30a581eeea74508a27ae156ff11eb41df5e18d82ad1d92307236af916cf",
@@ -2644,7 +2646,8 @@
     "dc88d7b374338cc5cb292a419409dc044085920ab991c5f3024ee5b705de67fa",
     "559c3fd9d3e0c27f7c1997e05e39e24270d5e659076f7411bdfb1f9e67b5fbdd",
     "39f9b3018e7e337cfa9c8ec83d517f533c8440a9ae9fea91a6adc63e4af67038",
-    "77e07a55fd7648f80d170bcb07680477fd39dafcbd2e3b55e8ad342c9b10a6d8"
+    "77e07a55fd7648f80d170bcb07680477fd39dafcbd2e3b55e8ad342c9b10a6d8",
+    "048920d8f223f1095c649690bf43641ae6aa8b74aa9aad91d0995931226b05f1"
    ],
    "matchup": "Boise State Broncos @ Colorado State Rams",
    "sha256": "c80f62a544f49d9dd2911a749477ec3d2c2948f7c25467dfc43e8c2e741beca6",
@@ -8984,7 +8987,8 @@
     "fadb60bf13c3a2cb08c7199d1d869928743040a18475ed00b60adb7c139d38e0",
     "42a5a63f63f3744753d47233343e3b875afe6176308eb5847c0bcb730778172e",
     "804b45458e585ef18cfa8e3f25ad62f116b8fed05561f250ee6fba10f83dfb44",
-    "e501e8532b92b0ca6e8a603d5f3533b8707a43704b8dc0672bc5682f1f59f141"
+    "e501e8532b92b0ca6e8a603d5f3533b8707a43704b8dc0672bc5682f1f59f141",
+    "ae4757c437803094efba526e34cf5b12dd96d69530d993f40d5de84cfed1d7b6"
    ],
    "matchup": "Kansas Jayhawks @ Oklahoma State Cowboys",
    "sha256": "ad6a586bb19f971f1da88bd1ffda1cb38832b53903af6e2e0ac2a1a75f72da3a",
@@ -12947,7 +12951,8 @@
    "committed_utc": "2026-11-27T20:37:25Z",
    "kickoff_utc": "2026-11-29T02:00:00Z",
    "later_disagreements": [
-    "f3a5866a901b1561926da399cee02ba24d8fe4dabf5a2020a3ade072118314be"
+    "f3a5866a901b1561926da399cee02ba24d8fe4dabf5a2020a3ade072118314be",
+    "b7f8ccddaf796dcd7306535600fecbe40071791d17dceee49627344a45436478"
    ],
    "matchup": "Nevada Wolf Pack @ UNLV Rebels",
    "sha256": "b11c168d0193bf0229bce43270cb8956de9b413fda729f4c5704f66c9ac142e3",
@@ -15648,6 +15653,9 @@
    },
    "committed_utc": "2026-11-27T21:37:26Z",
    "kickoff_utc": "2026-11-29T03:00:00Z",
+   "later_disagreements": [
+    "bf7b15704c71d1f0f8215abb11a973019eda6899e9cf586ebeaa54b95797883b"
+   ],
    "matchup": "Oregon State Beavers @ Fresno State Bulldogs",
    "sha256": "c4d234f34d677769ee3b9491d008437a031ab435dcee05e60c1939bba436f32b",
    "sport": "ncaaf"
@@ -15808,7 +15816,8 @@
    "kickoff_utc": "2026-11-29T00:30:00Z",
    "later_disagreements": [
     "dd2f56e1577f7fa099d5b141d798ddc31e8a52557392c473d46356de3b0ed1f2",
-    "725d83b21b18a24e98f484ea052b08198261a4aee3e5ccc036bdaae1667cc04f"
+    "725d83b21b18a24e98f484ea052b08198261a4aee3e5ccc036bdaae1667cc04f",
+    "9f68a447cbf53cf105ea4ec6928ac3143cd06de1ea7aa7677bc1bcb1398d7f4d"
    ],
    "matchup": "Pittsburgh Panthers @ California Golden Bears",
    "sha256": "7f55a7cc29643dd37a55653e859b0a0159befaf315b61406ec4142924e2e1f51",
@@ -15926,7 +15935,8 @@
    "later_disagreements": [
     "af6e828efbb889e90184f4d4190ec918ea10b751aa108b5267c473f90e442d70",
     "249697263dda687948a3023e283870a8ef9fa8f3adfe88e643d7b77a41ced3c5",
-    "8071084dd08219ea920b859e466ef34bd6ffcbbcc2ba7890c499c8738a3eff7c"
+    "8071084dd08219ea920b859e466ef34bd6ffcbbcc2ba7890c499c8738a3eff7c",
+    "f75330cb762e24eccd0ea3b45602c26300866193e3931a56d83d8b549f49ac21"
    ],
    "matchup": "Purdue Boilermakers @ Indiana Hoosiers",
    "sha256": "883013c982b4edbaee964444aed25f33ebd05e93627325e9881bbb7520adf97a",
@@ -16668,6 +16678,40 @@
    "sha256": "fa73177b6459635092465b041a1c85c6b15889cd611c967b46ab08218638f2bc",
    "sport": "ncaaf"
   },
+  "fp-v0.4|ncaaf|Sacramento State Hornets @ Hawaii Rainbow Warriors|2026-11-29T04:00:00Z": {
+   "block": {
+    "away": "Sacramento State Hornets",
+    "best_book": "betrivers",
+    "best_price": 475,
+    "books_at_best": 2,
+    "clv_pts": null,
+    "eff_overround_pts": 2.007,
+    "fair_away": 0.18105,
+    "fair_home": 0.81895,
+    "fair_side": 0.18105,
+    "home": "Hawaii Rainbow Warriors",
+    "kickoff_utc": "2026-11-29T04:00:00Z",
+    "league": "NCAA FBS",
+    "matchup": "Sacramento State Hornets @ Hawaii Rainbow Warriors",
+    "move_pts": null,
+    "n_books": 12,
+    "offshore_best": null,
+    "raw_overround_pts": 4.018,
+    "relative_price_discount": 0.0394202899,
+    "selection_eligible": false,
+    "selection_reason": "PASS: outside launch moneyline range (20%-80% fair, max +400)",
+    "selection_version": "fp-v0.4",
+    "side": "Sacramento State Hornets",
+    "sport": "ncaaf",
+    "t24_capture": "ncaaf_20261127T223723Z.json",
+    "t24_hours_before_kickoff": 29.38
+   },
+   "committed_utc": "2026-11-27T22:37:27Z",
+   "kickoff_utc": "2026-11-29T04:00:00Z",
+   "matchup": "Sacramento State Hornets @ Hawaii Rainbow Warriors",
+   "sha256": "22d3ef908a4feaa2d0c280f5a617e15c70596bd32b31c3819bb1da9320dc9c1b",
+   "sport": "ncaaf"
+  },
   "fp-v0.4|ncaaf|Sam Houston State Bearkats @ Florida International Panthers|2026-11-28T19:00:00Z": {
    "block": {
     "away": "Sam Houston State Bearkats",
@@ -17006,7 +17050,8 @@
     "4235a0c483dc213bd5c695cd8e01733a086cd05605dfc7bdcbc5f2930400d200",
     "394475b40cece32f9a25a766314adca99c3e3c1014fb7e41e23c014a36e05c9e",
     "8223da90547226ee647c41ca69ef0d0d8094e04c87d6222ebac534234d1ffd89",
-    "a483fd440e6935f1fd60cc35ac1ee454505c7b4ccb32d8aca920a02576488726"
+    "a483fd440e6935f1fd60cc35ac1ee454505c7b4ccb32d8aca920a02576488726",
+    "d6577019ae177f5676f0e40bf0aae61845342f72985b742a636d32821986a46b"
    ],
    "matchup": "San Diego State Aztecs @ Washington State Cougars",
    "sha256": "51b771f665031147f89a951e6485cba4f7cb185700debe5bf8197dc072662587",
@@ -18599,7 +18644,8 @@
    "later_disagreements": [
     "7dc1aefe2e68267f6d27027dc353dddb7fc131d5375d3eff4f99e61de808b5c0",
     "7da78569744920371b6217119f6b3f65fa9d2383c6a860ef3c550dd97ed07db0",
-    "67272f2d8a79cfd0f3d04489e5e624410d9a0dd32e5df1ac24aeb512007d99f6"
+    "67272f2d8a79cfd0f3d04489e5e624410d9a0dd32e5df1ac24aeb512007d99f6",
+    "d63037da64d0d525099c9e1cab6d8b9c5bdff57e120acd53d74158ad02a94a11"
    ],
    "matchup": "Tennessee Volunteers @ Vanderbilt Commodores",
    "sha256": "af85e7c4ee0256fb58a4c8c0db88e6e71b9fc641e5df55321be46f7f3ccf3486",
@@ -19316,7 +19362,8 @@
    "committed_utc": "2026-11-27T20:37:25Z",
    "kickoff_utc": "2026-11-29T02:30:00Z",
    "later_disagreements": [
-    "c94dfb4ee4dd1fb592158d7381d3fa2eba84e71c1b41e5747f98f1a4234fdf7a"
+    "c94dfb4ee4dd1fb592158d7381d3fa2eba84e71c1b41e5747f98f1a4234fdf7a",
+    "73fb58ecb1506f51fcf6fd8583f2c9949cb2e99a548bd1a236942cef0422b141"
    ],
    "matchup": "Texas State Bobcats @ Utah State Aggies",
    "sha256": "3909f4953d28fd9bed600e5cbec17423361e074531391bcd187d3f1a81024f2b",
@@ -23169,7 +23216,8 @@
    "kickoff_utc": "2026-11-29T00:30:00Z",
    "later_disagreements": [
     "c918210f256d328d0c7656df3f907ee04d6e6ad2a47d6752c2142dfde161b58c",
-    "c6d39c10d09036b87f3657996afacae77592eb377cc0b0699ec0c7f245cff8ff"
+    "c6d39c10d09036b87f3657996afacae77592eb377cc0b0699ec0c7f245cff8ff",
+    "6707977020084a68cf2720f33052448a6bbfdbf49d0263e820071d83a6a74429"
    ],
    "matchup": "Washington Huskies @ Oregon Ducks",
    "sha256": "9bfa21bd2dba476f32fa62ba223c7c0c7e0fee7a7a516fd353e7d9f50fb6e5b5",

@@ -3121,58 +3121,58 @@
    "away": "PHI",
    "away_abbr": "PHI",
    "away_name": "Philadelphia Eagles",
-   "away_score": null,
+   "away_score": 39,
    "espn_event_id": "401873080",
-   "final": false,
+   "final": true,
    "home": "DAL",
    "home_abbr": "DAL",
    "home_name": "Dallas Cowboys",
-   "home_score": null,
+   "home_score": 38,
    "kickoff_utc": "2026-11-26T21:30:00Z",
-   "margin": null,
+   "margin": -1,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 77
   },
   "401873081": {
    "away": "CHI",
    "away_abbr": "CHI",
    "away_name": "Chicago Bears",
-   "away_score": null,
+   "away_score": 39,
    "espn_event_id": "401873081",
-   "final": false,
+   "final": true,
    "home": "DET",
    "home_abbr": "DET",
    "home_name": "Detroit Lions",
-   "home_score": null,
+   "home_score": 35,
    "kickoff_utc": "2026-11-26T18:00:00Z",
-   "margin": null,
+   "margin": -4,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_HALFTIME",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 74
   },
   "401873082": {
    "away": "KC",
    "away_abbr": "KC",
    "away_name": "Kansas City Chiefs",
-   "away_score": null,
+   "away_score": 10,
    "espn_event_id": "401873082",
-   "final": false,
+   "final": true,
    "home": "BUF",
    "home_abbr": "BUF",
    "home_name": "Buffalo Bills",
-   "home_score": null,
+   "home_score": 13,
    "kickoff_utc": "2026-11-27T01:20:00Z",
-   "margin": null,
+   "margin": 3,
    "season_slug": "regular-season",
    "season_type": 2,
    "season_year": 2026,
-   "status": "STATUS_SCHEDULED",
-   "total": null
+   "status": "STATUS_FINAL",
+   "total": 23
   },
   "401873083": {
    "away": "DEN",
@@ -4106,5 +4106,5 @@
    "total": 39
   }
  },
- "updated_utc": "2026-11-26T19:57:22Z"
+ "updated_utc": "2026-11-27T19:46:32Z"
 }
